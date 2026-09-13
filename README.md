@@ -1,2 +1,0 @@
-# game-tank
-AI game
