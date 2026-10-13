@@ -49,7 +49,7 @@ function renderFrame() {
     }
 
     // NỀN SÀN ĐẤU (vẽ trong world-space để rung màn hình đồng bộ)
-    ctx.drawImage(getArenaFloor(), 0, 0);
+    ctx.drawImage(getArenaFloor(), 0, 0, canvas.width, canvas.height);
 
     // VẼ TRỜI MƯA NẾU CÓ STORM FULL EVO
     if (isRaining) drawRain();
@@ -232,24 +232,14 @@ function renderFrame() {
 
     ctx.restore(); // Restore from Screen Shake & Camera Jump & Guest Viewport Inversion
 
-    // In-game Canvas Coin HUD (Drawn in unrotated Screen Space)
-    ctx.fillStyle = '#ffcc00'; ctx.font = 'bold 12px "Orbitron", Arial, monospace'; ctx.textAlign = 'left';
-    if (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'guest') {
-        ctx.fillText(`🔵 ĐỐI THỦ (P1) 💰 $${gameState.p1Coins}`, 10, 48);
-        ctx.fillText(`🔴 BẠN (P2) 💰 $${gameState.p2Coins}`, 10, canvas.height - 24);
-    } else if (typeof onlineManager !== 'undefined' && onlineManager.isOnline) {
-        ctx.fillText(`🔴 ĐỐI THỦ (P2) 💰 $${gameState.p2Coins}`, 10, 48);
-        ctx.fillText(`🔵 BẠN (P1) 💰 $${gameState.p1Coins}`, 10, canvas.height - 24);
-    } else {
-        ctx.fillText(`P2 💰 $${gameState.p2Coins}`, 10, 48);
-        ctx.fillText(`P1 💰 $${gameState.p1Coins}`, 10, canvas.height - 24);
-    }
+    // Tiền hiển thị trong bảng điểm (HTML) – không vẽ lên canvas để khỏi đè lên xe ở làn dưới
 
     // Update Header Coin Counters
     let p1CoinEl = document.getElementById('p1-coin-val');
     let p2CoinEl = document.getElementById('p2-coin-val');
-    if (p1CoinEl) p1CoinEl.innerText = gameState.p1Coins;
-    if (p2CoinEl) p2CoinEl.innerText = gameState.p2Coins;
+    // Chỉ ghi DOM khi giá trị đổi (tránh tính lại layout mỗi khung hình trên điện thoại)
+    if (p1CoinEl && p1CoinEl.textContent !== String(gameState.p1Coins)) p1CoinEl.textContent = gameState.p1Coins;
+    if (p2CoinEl && p2CoinEl.textContent !== String(gameState.p2Coins)) p2CoinEl.textContent = gameState.p2Coins;
 
     // Fatal Cinematic Victory Sequence
     if (fatalCinematic.active) {

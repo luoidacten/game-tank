@@ -1956,3 +1956,155 @@ body.online-active .ready-badge {
 .ping-hud-badge.ping-bad {
     color: #ff6b6b;
 }
+
+/* ============================================================================
+   TỐI ƯU ĐIỆN THOẠI
+   ============================================================================ */
+
+/* Cho phép vuốt cuộn ở menu / shop / bảng hướng dẫn; chỉ khoá cử chỉ ở sân đấu & nút điều khiển */
+* {
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+}
+canvas,
+.controls-area,
+.controls-area * {
+    touch-action: none;
+}
+
+/* Menu & các bảng phủ toàn màn hình, cuộn được khi màn hình thấp */
+.menu-overlay,
+.modal-overlay,
+#endScreen {
+    position: fixed;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding-top: max(16px, env(safe-area-inset-top));
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+.menu-overlay,
+.modal-overlay {
+    align-items: flex-start;
+}
+.menu-container,
+.modal-card {
+    margin: auto 0;
+}
+.modal-card {
+    max-height: none;
+}
+.modal-body {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Tai thỏ / thanh Home (iPhone) */
+#p1-controls {
+    height: calc(108px + env(safe-area-inset-bottom));
+    padding-bottom: calc(6px + env(safe-area-inset-bottom));
+}
+#p2-controls {
+    /* Thanh P2 xoay 180°: phần "đáy" của nó nằm ở mép trên màn hình */
+    height: calc(108px + env(safe-area-inset-top));
+    padding-bottom: calc(6px + env(safe-area-inset-top));
+}
+
+/* Banner đầu hiệp: đặt giữa sân để không che xe P2 */
+.round-intro-banner {
+    top: 50%;
+    transform: translate(-50%, calc(-50% - 10px));
+}
+.round-intro-banner.show {
+    transform: translate(-50%, -50%);
+}
+
+/* Màn cảm ứng: ẩn gợi ý phím bàn phím, nút bấm phản hồi rõ hơn */
+@media (hover: none) and (pointer: coarse) {
+    .key-hint { display: none; }
+    .btn.pressed { filter: brightness(1.35); transform: scale(0.94); }
+    .card:hover { transform: none; }
+}
+
+/* Thẻ chọn body / shop to hơn trên điện thoại để đọc được mô tả */
+@media (max-width: 520px) {
+    .card {
+        width: clamp(88px, 28vw, 120px);
+        height: min(100%, 168px);
+    }
+    .card p { font-size: 10.5px; }
+    .player-column { gap: 8px; padding: 8px 10px; }
+    .upgrade-container { height: 42%; padding: 0 6px; }
+    .round-title { font-size: 12px; padding: 6px 16px; }
+}
+
+/* Màn hình thấp (iPhone SE, Android nhỏ): thu gọn thanh điều khiển để sân đấu rộng hơn */
+@media (max-height: 740px) {
+    #p1-controls { height: calc(88px + env(safe-area-inset-bottom)); }
+    #p2-controls { height: calc(88px + env(safe-area-inset-top)); }
+    .controls-area { padding-top: 4px; }
+    .btn { width: 68px; height: 58px; }
+    .control-label { font-size: 10px; margin-bottom: 2px; }
+}
+@media (max-height: 640px) {
+    #p1-controls { height: calc(76px + env(safe-area-inset-bottom)); }
+    #p2-controls { height: calc(76px + env(safe-area-inset-top)); }
+    .btn { width: 62px; height: 50px; }
+    .control-label { display: none; }
+}
+
+/* Điện thoại xoay ngang: game thiết kế cho màn dọc -> nhắc xoay máy */
+#rotateHint {
+    display: none;
+}
+@media (orientation: landscape) and (max-height: 520px) and (pointer: coarse) {
+    #rotateHint {
+        display: flex;
+        position: fixed;
+        inset: 0;
+        z-index: 2000;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        background: radial-gradient(circle at center, #101828 0%, #04060b 100%);
+        color: #e2e8f0;
+        font-family: 'Orbitron', monospace;
+        font-size: 14px;
+        letter-spacing: 1px;
+        text-align: center;
+        padding: 20px;
+    }
+    #rotateHint .rotate-icon {
+        font-size: 54px;
+        animation: rotateHintSpin 1.8s ease-in-out infinite;
+    }
+}
+@keyframes rotateHintSpin {
+    0%, 20% { transform: rotate(-90deg); }
+    60%, 100% { transform: rotate(0deg); }
+}
+
+/* Chất lượng thấp (tự bật khi máy yếu): bỏ hiệu ứng nặng của giao diện */
+body.low-quality .player-column,
+body.low-quality .round-pill,
+body.low-quality .map-pill,
+body.low-quality .modal-overlay {
+    backdrop-filter: none;
+}
+
+/* Tiền trong bảng điểm */
+.side-coin {
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    font-weight: 800;
+    color: var(--gold);
+    text-shadow: 0 0 6px rgba(255, 215, 0, 0.55);
+    letter-spacing: 0.3px;
+}
+/* Guest online nhìn sân xoay 180°: đảo bảng điểm để phe mình (P2) nằm dưới */
+body.online-active.role-guest .score-dots-wrapper {
+    flex-direction: column-reverse;
+}
+body.online-active.role-guest .score-side {
+    flex-direction: column-reverse;
+}

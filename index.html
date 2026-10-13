@@ -63,6 +63,7 @@
             <div id="score-board">
                 <div class="score-dots-wrapper">
                     <div class="score-side p2-side" title="Điểm Player 2">
+                        <span class="side-coin" title="Tiền P2">$<span id="p2-coin-val">0</span></span>
                         <span class="side-tag">P2</span>
                         <div class="score-row" id="p2-score-row">
                             <div id="p2-s1" class="score-dot"></div>
@@ -78,6 +79,7 @@
                             <div id="p1-s3" class="score-dot"></div>
                         </div>
                         <span class="side-tag">P1</span>
+                        <span class="side-coin" title="Tiền P1">$<span id="p1-coin-val">0</span></span>
                     </div>
                 </div>
             </div>
@@ -409,6 +411,12 @@
     </div>
 
     <script src="peerjs.min.js"></script>
+    <!-- Nhắc xoay dọc khi điện thoại nằm ngang -->
+    <div id="rotateHint">
+        <div class="rotate-icon">📱</div>
+        <div>XOAY DỌC ĐIỆN THOẠI ĐỂ CHƠI</div>
+    </div>
+
     <!-- Thứ tự nạp quan trọng: core -> data -> entities -> player -> characters -> game/render -> ai -> online -> main -->
     <script src="js/core/audio.js" charset="utf-8"></script>
     <script src="js/core/effects.js" charset="utf-8"></script>

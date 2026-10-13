@@ -177,22 +177,77 @@ function setupControls() {
         if (p === 'p2') inputs.p2[action === 'left' ? 'l' : (action === 'right' ? 'r' : 's')] = pressed;
     }
 
+    // --- CẢM ỨNG ĐA ĐIỂM ---
+    // Theo dõi từng ngón tay: nút nào đang nằm dưới ngón tay thì được giữ.
+    // Hỗ trợ trượt ngón từ Trái sang Phải không cần nhấc tay, 2 người chơi cùng lúc,
+    // và tự nhả nút khi hệ thống huỷ chạm (cuộc gọi, thông báo...) để không bị kẹt phím.
     let lastTouchActionTimestamp = 0;
-    document.querySelectorAll('.btn').forEach(btn => {
-        const p = btn.dataset.p; const a = btn.dataset.a;
-        btn.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            lastTouchActionTimestamp = Date.now();
+    const allBtns = [...document.querySelectorAll('.btn')];
+    const touchOwner = new Map(); // touch.identifier -> btn
+    const heldCount = new Map();  // btn -> số ngón đang giữ
+    const pressBtn = (btn) => {
+        const n = (heldCount.get(btn) || 0) + 1;
+        heldCount.set(btn, n);
+        if (n === 1) {
             btn.classList.add('pressed');
-            if (navigator.vibrate) { try { navigator.vibrate(12); } catch(err) {} }
-            handleInput(p, a, true);
-        }, { passive: false });
-        btn.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            lastTouchActionTimestamp = Date.now();
+            if (navigator.vibrate) { try { navigator.vibrate(12); } catch (err) {} }
+            handleInput(btn.dataset.p, btn.dataset.a, true);
+        }
+    };
+    const releaseBtn = (btn) => {
+        const n = (heldCount.get(btn) || 0) - 1;
+        if (n <= 0) {
+            heldCount.delete(btn);
             btn.classList.remove('pressed');
-            handleInput(p, a, false);
-        });
+            handleInput(btn.dataset.p, btn.dataset.a, false);
+        } else heldCount.set(btn, n);
+    };
+    const btnAt = (x, y) => {
+        const el = document.elementFromPoint(x, y);
+        const btn = el && el.closest ? el.closest('.btn') : null;
+        return (btn && allBtns.includes(btn) && btn.offsetParent !== null) ? btn : null;
+    };
+    const onTouch = (e) => {
+        let handled = false;
+        for (const t of e.changedTouches) {
+            const prev = touchOwner.get(t.identifier) || null;
+            const ended = (e.type === 'touchend' || e.type === 'touchcancel');
+            const now = ended ? null : btnAt(t.clientX, t.clientY);
+            if (e.type === 'touchstart' && !now) continue; // chạm ngoài nút: để trình duyệt xử lý (cuộn menu...)
+            if (prev || now) handled = true;
+            if (prev === now) continue;
+            if (prev) releaseBtn(prev);
+            if (now) { pressBtn(now); touchOwner.set(t.identifier, now); }
+            else touchOwner.delete(t.identifier);
+        }
+        if (handled) { lastTouchActionTimestamp = Date.now(); if (e.cancelable) e.preventDefault(); }
+    };
+    ['touchstart', 'touchmove', 'touchend', 'touchcancel'].forEach(type =>
+        document.addEventListener(type, onTouch, { passive: false }));
+    // Mất focus (chuyển app / khoá màn hình): nhả hết phím
+    const releaseAll = () => {
+        touchOwner.clear();
+        [...heldCount.keys()].forEach(btn => { heldCount.set(btn, 1); releaseBtn(btn); });
+        ['p1', 'p2'].forEach(pp => { if (typeof botAI !== 'undefined' && botAI.enabled && pp === 'p2') return; inputs[pp].l = inputs[pp].r = inputs[pp].s = false; });
+    };
+    // Tự tạm dừng (chơi local) khi rời app / khoá màn hình / xoay ngang điện thoại
+    const autoPause = () => {
+        if (gameState.phase !== 'playing' || gameState.isPaused) return;
+        if (typeof onlineManager !== 'undefined' && onlineManager.isOnline) return;
+        gameState.isPaused = true;
+        const pm = document.getElementById('pauseMenuModal');
+        if (pm) pm.style.display = 'flex';
+    };
+    window.addEventListener('blur', releaseAll);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) { releaseAll(); autoPause(); } });
+    const landscapeMq = window.matchMedia('(orientation: landscape) and (max-height: 520px) and (pointer: coarse)');
+    const onOrient = () => { if (landscapeMq.matches) { releaseAll(); autoPause(); } };
+    if (landscapeMq.addEventListener) landscapeMq.addEventListener('change', onOrient); else if (landscapeMq.addListener) landscapeMq.addListener(onOrient);
+    // Chặn menu chuột phải / giữ lâu trên nút điều khiển
+    allBtns.forEach(btn => btn.addEventListener('contextmenu', e => e.preventDefault()));
+
+    allBtns.forEach(btn => {
+        const p = btn.dataset.p; const a = btn.dataset.a;
         btn.addEventListener('mousedown', () => {
             if (Date.now() - lastTouchActionTimestamp < 500) return; // Chống double input do touch sinh ra mousedown
             btn.classList.add('pressed');
@@ -218,8 +273,13 @@ function setupControls() {
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
-        const clickX = (e.clientX - rect.left) * scaleX;
-        const clickY = (e.clientY - rect.top) * scaleY;
+        let clickX = (e.clientX - rect.left) * scaleX;
+        let clickY = (e.clientY - rect.top) * scaleY;
+        // Guest online nhìn sân xoay 180 độ
+        if (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'guest') {
+            clickX = canvas.width - clickX;
+            clickY = canvas.height - clickY;
+        }
 
         let myPlayer = (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'guest') ? p2 : p1;
         if (myPlayer && myPlayer.weapon === 'genius' && myPlayer.isPilotingMecha) {

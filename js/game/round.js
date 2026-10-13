@@ -16,6 +16,8 @@ function startRound() {
     explosions = []; beams = []; radiationZones = []; iceZones = [];
     gameState.lastObstacleSpawn = Date.now();
     gameState.roundStartTime = Date.now();
+    gameState.pauseStartedAt = 0;
+    gameState.isPaused = false;
     lastCrateSpawn = Date.now();
     talismans = [];
     spellZones = [];

@@ -4,8 +4,47 @@
 
 
 
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
+// --- CANVAS SẮC NÉT TRÊN MÀN HÌNH HiDPI (điện thoại 2x-3x) ---
+// Toàn bộ game dùng canvas.width / canvas.height làm KÍCH THƯỚC LOGIC của sân.
+// `canvas` là lớp bọc: đặt width/height logic -> tự nhân devicePixelRatio cho bộ đệm thật
+// và scale ctx tương ứng, nên mọi toạ độ trong game giữ nguyên.
+const canvasEl = document.getElementById('gameCanvas');
+const ctx = canvasEl.getContext('2d');
+const Display = {
+    maxDpr: 2,      // giới hạn để không quá nặng trên điện thoại 3x
+    lowQuality: false,
+    get dpr() { return Math.max(1, Math.min(this.maxDpr, window.devicePixelRatio || 1)); },
+};
+const canvas = {
+    el: canvasEl,
+    _w: canvasEl.width,
+    _h: canvasEl.height,
+    get width() { return this._w; },
+    set width(v) { this._w = v; this.applySize(); },
+    get height() { return this._h; },
+    set height(v) { this._h = v; this.applySize(); },
+    applySize() {
+        if (!this._w || !this._h) return;
+        // Kích thước hiển thị (CSS px): local = kích thước logic; online = co giãn vừa khung, giữ tỉ lệ 420x700
+        let cssW = this._w, cssH = this._h;
+        if (document.body.classList.contains('online-active')) {
+            const box = document.getElementById('gameContainer');
+            const bw0 = box ? box.clientWidth : this._w, bh0 = box ? box.clientHeight : this._h;
+            const k = Math.min(bw0 / this._w, bh0 / this._h) || 1;
+            cssW = Math.floor(this._w * k); cssH = Math.floor(this._h * k);
+        }
+        const dpr = Display.dpr;
+        const bw = Math.max(1, Math.round(cssW * dpr)), bh = Math.max(1, Math.round(cssH * dpr));
+        if (canvasEl.width !== bw) canvasEl.width = bw;
+        if (canvasEl.height !== bh) canvasEl.height = bh;
+        canvasEl.style.width = cssW + 'px';
+        canvasEl.style.height = cssH + 'px';
+        ctx.setTransform(bw / this._w, 0, 0, bh / this._h, 0, 0);
+    },
+    getContext() { return ctx; },
+    getBoundingClientRect() { return canvasEl.getBoundingClientRect(); },
+    addEventListener(...a) { return canvasEl.addEventListener(...a); },
+};
 
 // --- CẤU HÌNH SÀN ĐẤU CHUẨN ONLINE MOBILE ---
 const ONLINE_ARENA_WIDTH = 420;

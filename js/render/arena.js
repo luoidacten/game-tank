@@ -10,10 +10,13 @@
 let arenaFloorCache = null;
 function getArenaFloor() {
     let w = canvas.width, h = canvas.height;
-    if (arenaFloorCache && arenaFloorCache.width === w && arenaFloorCache.height === h) return arenaFloorCache;
+    let dpr = Display.dpr;
+    if (arenaFloorCache && arenaFloorCache.lw === w && arenaFloorCache.lh === h && arenaFloorCache.dpr === dpr) return arenaFloorCache;
     let off = document.createElement('canvas');
-    off.width = w; off.height = h;
+    off.width = Math.round(w * dpr); off.height = Math.round(h * dpr);
+    off.lw = w; off.lh = h; off.dpr = dpr;
     let g = off.getContext('2d');
+    g.scale(dpr, dpr);
 
     // Nền tối dạng vignette
     let bg = g.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.1, w / 2, h / 2, Math.max(w, h) * 0.75);

@@ -38,6 +38,27 @@ function gameLoop(timestamp) {
     let dt = timestamp - lastFixedLoopTime;
     lastFixedLoopTime = timestamp;
 
+    // [FIX] Tạm dừng thật sự (trước đây isPaused không được kiểm tra nên game vẫn chạy sau menu).
+    // Online thì không dừng được vì đối thủ vẫn đang chơi.
+    const isOnlineMatch = (typeof onlineManager !== 'undefined' && onlineManager.isOnline);
+    if (gameState.isPaused && !isOnlineMatch) {
+        if (!gameState.pauseStartedAt) gameState.pauseStartedAt = Date.now();
+        fixedPhysicsAccumulator = 0;
+        renderFrame();
+        animationId = requestAnimationFrame(gameLoop);
+        return;
+    }
+    if (gameState.pauseStartedAt) {
+        // Dời các mốc thời gian của hiệp để thời gian tạm dừng không bị tính
+        const paused = Date.now() - gameState.pauseStartedAt;
+        gameState.roundStartTime += paused;
+        gameState.lastObstacleSpawn += paused;
+        lastCrateSpawn += paused;
+        gameState.pauseStartedAt = 0;
+    }
+
+    PerfMonitor.sample(dt);
+
     // Giới hạn dt tối đa 250ms tránh dồn tích lũy quá lớn khi drop FPS hoặc đổi tab
     if (dt > 250) dt = 250;
     if (dt < 0) dt = 0;
@@ -58,3 +79,32 @@ function gameLoop(timestamp) {
         animationId = requestAnimationFrame(gameLoop);
     }
 }
+
+// ==========================================
+// Tự giảm chất lượng hình ảnh khi máy yếu (điện thoại cũ)
+// ==========================================
+const PerfMonitor = {
+    avg: 16.7,
+    slowTime: 0,
+    sample(dt) {
+        if (Display.lowQuality || dt <= 0 || dt > 120) return; // bỏ qua khung bị gián đoạn (đổi tab...)
+        this.avg = this.avg * 0.95 + dt * 0.05;
+        // Trung bình < ~40 FPS liên tục 3 giây -> bật chế độ nhẹ
+        if (this.avg > 25) this.slowTime += dt; else this.slowTime = Math.max(0, this.slowTime - dt);
+        if (this.slowTime > 3000) enableLowQuality();
+    },
+};
+
+function enableLowQuality() {
+    if (Display.lowQuality) return;
+    Display.lowQuality = true;
+    Display.maxDpr = 1;
+    // Tắt hiệu ứng phát sáng (shadowBlur) – tốn GPU nhất trên điện thoại
+    ctx.shadowBlur = 0;
+    try { Object.defineProperty(ctx, 'shadowBlur', { get() { return 0; }, set() {}, configurable: true }); } catch (e) {}
+    document.body.classList.add('low-quality');
+    canvas.applySize();
+    arenaFloorCache = null;
+    if (typeof addFloatingText === 'function') addFloatingText(canvas.width / 2, canvas.height / 2, 'CHẾ ĐỘ ĐỒ HOẠ NHẸ ⚡', '#94a3b8', 12);
+}
+
