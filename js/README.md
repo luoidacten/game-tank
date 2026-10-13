@@ -38,3 +38,5 @@ Method có ghi chú "trả về currentSpeed mới" được gọi kiểu `curre
 
 Thêm file mới thì nhớ thêm thẻ `<script>` vào `index.html`, đặt **sau** `player/*.js`
 nếu file đó gắn method vào `Player.prototype`.
+
+Xem thông tin chi tiết các body (chỉ số, tiến hoá, vật triệu hồi): [docs/BODIES.md](../docs/BODIES.md).
