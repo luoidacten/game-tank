@@ -4,6 +4,10 @@
 
 
 
+// Số lần mua tối đa cho mỗi module chân
+const FEET_MAX = { speed: 3, armor: 5, damage: 3, interest: 3 };
+function feetOwnedCount(player, id) { return (player.upgrades || []).filter(u => u === id).length; }
+
 function showUpgradeScreen() {
     gameState.phase = 'upgrade';
     const upgScreen = document.getElementById('upgradeScreen');
@@ -185,7 +189,8 @@ function renderShop(playerId, keepItems = false) {
 
     // Smart Shop: Caching & Cơ chế Bảo Hiểm (Pity System)
     if (!keepItems || !player.currentShopItems) {
-        let poolFeet = [...MODULES.FEET];
+        // [FIX] Giới hạn số lần mua module chân (trước đây mua vô hạn)
+        let poolFeet = MODULES.FEET.filter(f => feetOwnedCount(player, f.id) < (FEET_MAX[f.id] || 3));
         let availableEvos = [];
         const weaponEvos = EVOLUTIONS[player.weapon];
         if (weaponEvos) {
@@ -207,23 +212,26 @@ function renderShop(playerId, keepItems = false) {
         }
 
         player.currentShopItems = shopItems;
-        if (!player.boughtShopItems) player.boughtShopItems = [];
+        player.boughtShopItems = []; // "ĐÃ MUA" chỉ tính trong lượt hàng hiện tại; giới hạn tổng do FEET_MAX
     }
 
     player.currentShopItems.forEach(item => {
         const price = item.cost || 10;
         const card = document.createElement('div');
 
-        if (player.boughtShopItems && player.boughtShopItems.includes(item.id)) {
+        const feetMaxed = item.type === 'feet' && feetOwnedCount(player, item.id) >= (FEET_MAX[item.id] || 3);
+        if ((player.boughtShopItems && player.boughtShopItems.includes(item.id)) || feetMaxed) {
             card.className = 'card sold';
-            card.innerHTML = `<h4>${item.name}</h4><p>ĐÃ MUA</p>`;
+            card.innerHTML = `<h4>${item.name}</h4><p>${feetMaxed ? 'TỐI ĐA' : 'ĐÃ MUA'}</p>`;
         } else {
             if (item.type === 'evo') card.className = 'card evo-card';
             else card.className = 'card';
 
-            card.innerHTML = `<h4>${item.name}</h4><p>${item.desc}</p><p style="color:#f1c40f; font-weight:bold">$${price}</p>`;
+            const lvlTxt = item.type === 'feet' ? ` <span style="color:#94a3b8">(${feetOwnedCount(player, item.id)}/${FEET_MAX[item.id] || 3})</span>` : '';
+            card.innerHTML = `<h4>${item.name}${lvlTxt}</h4><p>${item.desc}</p><p style="color:#f1c40f; font-weight:bold">$${price}</p>`;
 
             card.onclick = () => {
+                if (item.type === 'feet' && feetOwnedCount(player, item.id) >= (FEET_MAX[item.id] || 3)) return;
                 const currentCoin = (playerId === 'p1') ? gameState.p1Coins : gameState.p2Coins;
                 if (currentCoin >= price) {
                     if (playerId === 'p1') gameState.p1Coins -= price; else gameState.p2Coins -= price;

@@ -54,25 +54,13 @@ Object.assign(Player.prototype, {
         let isFullEvo = this.hasUpgrade('evo_gen_1') && this.hasUpgrade('evo_gen_2');
         if (!isFullEvo) return;
 
-        let detonateX = this.x + this.w / 2;
-        let detonateY = (this.id === 1) ? 120 : canvas.height - 120;
-        let radius = 150;
-        let dmg = 5.0;
-
+        // [ĐỔI CƠ CHẾ] Ném Robot: lao thẳng về phía trước, chạm tường mới phát nổ
+        const throwX = this.x + this.w / 2, throwY = this.y + this.h / 2;
         this.ejectMecha(true);
-        // Genius leaps back safely: strictly horizontal shift
+        bodyEffects.push(new ThrownMecha(this, throwX, throwY, 5.0, 150));
+        addFloatingText(throwX, this.y - 16, 'NÉM ROBOT! 🤖💨', '#ff9800', 14);
+        // Genius lùi sang bên an toàn
         this.x = Math.max(10, Math.min(canvas.width - this.w - 10, this.x + (Math.random() > 0.5 ? 40 : -40)));
-
-        setTimeout(() => {
-            explosions.push(new Explosion(detonateX, detonateY, radius, '#ff1744', dmg, this));
-            const enemy = (this.id === 1) ? p2 : p1;
-            if (enemy && enemy.hp > 0 && Math.hypot((enemy.x + enemy.w / 2) - detonateX, (enemy.y + enemy.h / 2) - detonateY) <= radius) {
-                enemy.takeDamage(dmg, this);
-            }
-            triggerScreenShake(8, 14);
-            if (soundSystem && !soundSystem.muted) soundSystem.playExplosion();
-            if (typeof addFloatingText === 'function') addFloatingText(detonateX, detonateY, "TỰ HỦY MECHA KHỔNG LỒ! 💥💣", "#ff1744", 16);
-        }, 300);
     },
 
     fireMechaStandardShot() {

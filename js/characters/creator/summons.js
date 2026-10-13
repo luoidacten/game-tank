@@ -332,7 +332,7 @@ class CreatorRobot {
         this.maxHp = 10;
         this.hp = 10;
         this.dmg = 0.5;
-        this.speed = 1.2;
+        this.speed = 0.75; // [ĐỔI] đi chậm hơn (1.2 -> 0.75)
         this.energy = 100;
         this.maxEnergy = 100;
         this.active = true;
@@ -358,7 +358,8 @@ class CreatorRobot {
     }
 
     getHomeY() {
-        return (this.owner.id === 1) ? canvas.height * 0.6 : canvas.height * 0.4 - this.h;
+        // [ĐỔI] Đứng gần sân nhà hơn (trước 60% -> nay 75% chiều sâu sân)
+        return (this.owner.id === 1) ? canvas.height * 0.75 - this.h / 2 : canvas.height * 0.25 - this.h / 2;
     }
 
     update() {
@@ -415,8 +416,8 @@ class CreatorRobot {
         if (Math.abs(this.y - homeY) > 1) this.y += (homeY - this.y) * 0.08;
         else this.y = homeY;
 
-        // 2. AI Di chuyển gây áp lực
-        if (enemy && enemy.hp > 0) {
+        // 2. AI Di chuyển gây áp lực (đứng yên khi đang ngắm Laser)
+        if (enemy && enemy.hp > 0 && !(this.laserTelegraph > 0)) {
             let targetX = enemy.x + enemy.w / 2 - this.w / 2;
             if (this.x < targetX - 5) this.x += this.speed;
             else if (this.x > targetX + 5) this.x -= this.speed;
@@ -430,13 +431,16 @@ class CreatorRobot {
             for (let i = 0; i < 8; i++) {
                 setTimeout(() => {
                     if (!this.active) return;
-                    let spreadVx = (Math.random() - 0.5) * 2.2;
+                    // Đạn bay ra từ nòng Robot, ngắm về phía đối thủ (có tản nhẹ)
+                    const tgt = (this.owner.id === 1) ? p2 : p1;
+                    let a = (tgt && tgt.hp > 0) ? aimVelocity(this.x + this.w / 2, this.y + this.h / 2, tgt, 9) : { vx: 0, vy: dirY * 9 };
+                    if (a.vy * dirY <= 0.5) a = { vx: 0, vy: dirY * 9 };
                     this.owner.bullets.push({
                         x: this.x + this.w / 2 - 2,
                         y: this.y + (dirY === -1 ? -4 : this.h + 2),
                         w: 5, h: 5,
-                        vx: spreadVx,
-                        vy: dirY * 9,
+                        vx: a.vx + (Math.random() - 0.5) * 1.2,
+                        vy: a.vy,
                         dmg: 0.25,
                         owner: this.owner,
                         color: "#ffb74d",
@@ -510,21 +514,24 @@ class CreatorRobot {
             // 7. Laser Thủy Lực - CD: 14s (840 ticks)
             if (this.cdLaser <= 0 && enemy && enemy.hp > 0) {
                 this.cdLaser = 840;
-                this.laserTelegraph = 30; // 0.5s tia cảnh báo
+                this.laserTelegraph = 50; // ~0.8s cảnh báo, khoá vị trí bắn
+                this.laserX = this.x + this.w / 2;
+                if (typeof addFloatingText === 'function') addFloatingText(this.laserX, this.y - 12, "⚠️ NẠP LASER", "#ff0055", 12);
             }
 
             if (this.laserTelegraph > 0) {
                 this.laserTelegraph--;
                 if (this.laserTelegraph <= 0) {
-                    let beamX = this.x + this.w / 2;
-                    let beamY = 0;
-                    let beamH = canvas.height;
+                    // [ĐỔI] Tia phát ra từ Robot về phía đối thủ (trước đây phủ cả màn hình)
+                    let beamX = this.laserX || (this.x + this.w / 2);
+                    let beamY = this.owner.id === 1 ? 0 : this.y + this.h;
+                    let beamH = this.owner.id === 1 ? this.y : canvas.height - (this.y + this.h);
                     beams.push(new Beam(beamX - 10, beamY, 20, beamH, this.owner.id, true));
-                    if (enemy && enemy.hp > 0 && Math.abs(enemy.x + enemy.w / 2 - beamX) <= 24) {
+                    if (enemy && enemy.hp > 0 && Math.abs(enemy.x + enemy.w / 2 - beamX) <= 10 + enemy.w / 2) {
                         enemy.takeDamage(3.0, this.owner);
                     }
                     crates.forEach(c => {
-                        if (c.active && Math.abs(c.x + c.w / 2 - beamX) <= 24) {
+                        if (c.active && Math.abs(c.x + c.w / 2 - beamX) <= 10 + c.w / 2 && (this.owner.id === 1 ? c.y < this.y : c.y > this.y)) {
                             c.active = false;
                             this.owner.onCollectAmmoCrate(c);
                         }
@@ -593,13 +600,22 @@ class CreatorRobot {
             ctx.setLineDash([]);
         }
 
-        // Tia đỏ cảnh báo Laser Thủy Lực
+        // Vùng cảnh báo Laser Thủy Lực: đúng bề rộng tia, từ Robot về phía đối thủ, nhấp nháy nhanh dần
         if (this.laserTelegraph > 0) {
-            ctx.strokeStyle = "rgba(255, 0, 0, 0.75)";
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(cx, 0); ctx.lineTo(cx, canvas.height);
-            ctx.stroke();
+            const lx = this.laserX || cx;
+            const y0 = this.owner.id === 1 ? 0 : this.y + this.h;
+            const hgt = this.owner.id === 1 ? this.y : canvas.height - (this.y + this.h);
+            const k = 1 - this.laserTelegraph / 50;
+            const blink = Math.floor(this.laserTelegraph / Math.max(2, 8 - k * 6)) % 2 === 0;
+            ctx.fillStyle = `rgba(255, 0, 60, ${0.08 + 0.18 * k})`;
+            ctx.fillRect(lx - 10, y0, 20, hgt);
+            ctx.strokeStyle = blink ? "rgba(255, 40, 80, 0.95)" : "rgba(255, 40, 80, 0.35)";
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([6, 4]);
+            ctx.strokeRect(lx - 10, y0, 20, hgt);
+            ctx.setLineDash([]);
+            ctx.fillStyle = "#ff0055";
+            ctx.beginPath(); ctx.arc(lx, this.owner.id === 1 ? this.y : this.y + this.h, 4 + 3 * k, 0, Math.PI * 2); ctx.fill();
         }
 
         ctx.restore();

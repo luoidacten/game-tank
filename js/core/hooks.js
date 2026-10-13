@@ -48,8 +48,22 @@ const BulletHooks = {
 // -> không phụ thuộc thứ tự cập nhật p1/p2.
 function addStatusSlow(p, mult) { if (p) p._nextSpeedMult = Math.min(p._nextSpeedMult === undefined ? 1 : p._nextSpeedMult, mult); }
 function addStatusVuln(p, v) { if (p) p._nextVuln = Math.max(p._nextVuln || 0, v); }
+// Vận tốc để bắn trúng mục tiêu, có đón đầu theo hướng di chuyển (target._vx đo mỗi tick)
+function aimVelocity(sx, sy, target, speed, lead = true) {
+    let tx = target.x + target.w / 2, ty = target.y + target.h / 2;
+    if (lead) {
+        const t = Math.hypot(tx - sx, ty - sy) / Math.max(0.1, speed);
+        tx = Math.max(target.w / 2, Math.min(canvas.width - target.w / 2, tx + (target._vx || 0) * t * 0.85));
+    }
+    const dx = tx - sx, dy = ty - sy;
+    const L = Math.hypot(dx, dy) || 1;
+    return { vx: dx / L * speed, vy: dy / L * speed, angle: Math.atan2(dy, dx) };
+}
+
 function commitStatuses(p) {
     if (!p) return;
+    p._vx = (typeof p._lastX === 'number') ? Math.max(-12, Math.min(12, p.x - p._lastX)) : 0;
+    p._lastX = p.x;
     p.statusSpeedMult = (p._nextSpeedMult === undefined) ? 1 : p._nextSpeedMult;
     p.statusVuln = p._nextVuln || 0;
     p._nextSpeedMult = 1;

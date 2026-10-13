@@ -56,8 +56,9 @@ class NecroMinion {
             this.y += dirY * this.speed;
 
             if (enemy && enemy.hp > 0) {
-                let edx = (enemy.x + enemy.w / 2) - (this.x + this.w / 2);
-                this.x += Math.sign(edx) * Math.min(Math.abs(edx), 1.8);
+                // [FIX] Bám theo vị trí dự đoán của địch (trước đây chỉ trượt ngang 1.8px/tick, chậm hơn xe nên không bao giờ tới)
+                const a = aimVelocity(this.x + this.w / 2, this.y + this.h / 2, enemy, this.speed);
+                this.x += Math.max(-3.4, Math.min(3.4, a.vx));
             }
 
             // Check collision with enemy
@@ -96,12 +97,18 @@ class NecroMinion {
                 let dirY = (this.owner.id === 1) ? -1 : 1;
                 let isPiercing = !!(this.owner.hasUpgrade && this.owner.hasUpgrade('evo_necro_2'));
                 let bSpeed = C.bulletSpeed * 1.1;
+                // [FIX] Xạ Thủ ngắm (có đón đầu) thay vì bắn thẳng
+                let svx = 0, svy = dirY * bSpeed;
+                if (enemy && enemy.hp > 0) {
+                    const a = aimVelocity(this.x + this.w / 2, this.y + this.h / 2, enemy, bSpeed);
+                    if (a.vy * dirY > 0.5) { svx = a.vx; svy = a.vy; }
+                }
                 this.owner.bullets.push({
                     x: this.x + this.w / 2 - 3,
                     y: (dirY === -1) ? this.y - 6 : this.y + this.h + 2,
                     w: 6, h: 6,
-                    vx: 0,
-                    vy: dirY * bSpeed,
+                    vx: svx,
+                    vy: svy,
                     dmg: this.dmg,
                     owner: this.owner,
                     isPiercing: isPiercing,
@@ -112,27 +119,38 @@ class NecroMinion {
                 if (soundSystem && !soundSystem.muted) soundSystem.playShoot();
             }
         } else if (this.type === 'elite') {
+            // [ĐỔI CƠ CHẾ] Lính Cao Cấp đứng giữ vị trí phía sân nhà, canh thẳng hàng rồi LAO HÚC như TANK,
+            // trúng 1 lần rồi quay về chỗ cũ (trước đây bò tới ngồi đè lên đối thủ).
+            if (this.homeY === undefined) this.homeY = this.y;
             if (this.attackCd > 0) this.attackCd--;
-            if (enemy && enemy.hp > 0) {
-                let dx = (enemy.x + enemy.w / 2) - (this.x + this.w / 2);
-                let dy = (enemy.y + enemy.h / 2) - (this.y + this.h / 2);
-                let dist = Math.hypot(dx, dy);
-
-                if (dist > 40) {
-                    this.x += (dx / dist) * this.speed;
-                    this.y += (dy / dist) * this.speed;
+            const dirY = (this.owner.id === 1) ? -1 : 1;
+            if (!this.dashState) this.dashState = 'hold';
+            if (this.dashState === 'hold') {
+                if (enemy && enemy.hp > 0) {
+                    const ex = enemy.x + enemy.w / 2 + (enemy._vx || 0) * 18 - this.w / 2;
+                    const dx = ex - this.x;
+                    this.x += Math.sign(dx) * Math.min(Math.abs(dx), this.speed);
+                    if (Math.abs(dx) < 14 && this.attackCd <= 0) { this.dashState = 'dash'; this.hitDone = false; }
                 }
-
-                // Attack when in range
-                if (dist <= 48 && this.attackCd <= 0) {
-                    this.attackCd = 120; // 2s CD
+                this.y += (this.homeY - this.y) * 0.2;
+            } else if (this.dashState === 'dash') {
+                this.y += dirY * 13;
+                if (!this.hitDone && enemy && enemy.hp > 0 && rectIntersect(this.x, this.y, this.w, this.h, enemy.x, enemy.y, enemy.w, enemy.h)) {
+                    this.hitDone = true;
                     enemy.takeDamage(this.dmg, this.owner);
-                    enemy.kbX = Math.sign(dx || 1) * 35; // STRICT HORIZONTAL ONLY!
-                    enemy.freezeTimer = 18; // 0.3s stun
+                    enemy.kbX = Math.sign((enemy.x + enemy.w / 2) - (this.x + this.w / 2) || 1) * 30;
+                    enemy.freezeTimer = Math.max(enemy.freezeTimer || 0, 18);
                     explosions.push(new Explosion(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, 45, '#00e676', 0, this.owner));
                     triggerScreenShake(4, 6);
                     if (soundSystem && !soundSystem.muted) soundSystem.playHit();
                     if (typeof addFloatingText === 'function') addFloatingText(enemy.x + enemy.w / 2, enemy.y - 15, "ĐÒN HÚC VONG LINH! 💀⚡", "#00e676", 14);
+                    this.dashState = 'return';
+                }
+                if (this.y < 12 || this.y + this.h > canvas.height - 12) this.dashState = 'return';
+            } else if (this.dashState === 'return') {
+                this.y -= dirY * 7;
+                if ((dirY < 0 && this.y >= this.homeY) || (dirY > 0 && this.y <= this.homeY)) {
+                    this.y = this.homeY; this.dashState = 'hold'; this.attackCd = 120;
                 }
             }
             this.x = Math.max(10, Math.min(canvas.width - this.w - 10, this.x));

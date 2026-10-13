@@ -50,7 +50,8 @@ Object.assign(Player.prototype, {
     // [handleShooting] Lazer Xuyên Phá — trả về true nếu cần dừng handleShooting()
     shootLazerCharge(inp, now) {
         if (this.weapon === 'lazer_charge') {
-            if (this.ammo === this.maxAmmo) {
+            // [CÂN BẰNG] Tụ tia khi ngừng bắn 1s (trước đây phải đầy đúng 20/20 đạn -> gần như không bao giờ dùng được)
+            if (now - this.lastShot > 1000 && this.ammo >= 5) {
                 if (!this.startChargeTime) this.startChargeTime = now;
                 const chargeDuration = 2000;
                 const progress = Math.min(now - this.startChargeTime, chargeDuration);
@@ -58,8 +59,8 @@ Object.assign(Player.prototype, {
             } else { this.chargeLevel = 0; this.startChargeTime = null; }
 
             if (inp.s) {
-                if (this.chargeLevel >= 6.9) { this.fireBeam(); this.ammo = 0; }
-                else if (this.ammo > 0) { this.fireBullet(0.25); this.ammo--; }
+                if (this.chargeLevel >= 6.9) { this.fireBeam(); this.ammo = Math.max(0, this.ammo - 5); }
+                else if (this.ammo > 0) { this.fireBullet(1); this.ammo--; }
                 this.lastShot = now; this.chargeLevel = 0; this.startChargeTime = null; inp.s = false;
             }
             return true;

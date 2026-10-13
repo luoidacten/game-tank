@@ -8,7 +8,9 @@ Object.assign(Player.prototype, {
         const enemy = (this.id === 1) ? p2 : p1;
 
         // 1. Va chạm Người chơi (Địch)
-        if (rectIntersect(this.x, this.y, this.w, this.h, enemy.x, enemy.y, enemy.w, enemy.h)) {
+        // [CÂN BẰNG] Mỗi cú lao chỉ trúng địch 1 lần (trước đây trúng mỗi tick khi đi xuyên qua)
+        if (!this.tankDashHitEnemy && rectIntersect(this.x, this.y, this.w, this.h, enemy.x, enemy.y, enemy.w, enemy.h)) {
+            this.tankDashHitEnemy = true;
             let dmg = this.damage * 3;
             if (this.hasUpgrade('evo_tank_1')) dmg *= 1.5;
 
@@ -215,6 +217,7 @@ Object.assign(Player.prototype, {
     // [update] Xe TANK — trả về true nếu cần dừng update()
     updateTank() {
         if (this.weapon === 'tank') {
+            if ((this.tankDashCooldown || 0) > 0 && this.dashState === 0) this.tankDashCooldown--;
             this.passiveShieldTimer++;
             let shieldLimit = (this.hasUpgrade('evo_tank_1') && this.hasUpgrade('evo_tank_2')) ? 120 : (this.hasUpgrade('evo_tank_2') ? 240 : 360);
             if (this.passiveShieldTimer >= shieldLimit) {
@@ -250,6 +253,7 @@ Object.assign(Player.prototype, {
                 if ((this.id === 1 && this.y >= this.dashStartY) || (this.id === 2 && this.y <= this.dashStartY)) {
                     this.y = this.dashStartY;
                     this.dashState = 0;
+                    this.tankDashCooldown = 90; // [CÂN BẰNG] hồi chiêu 1.5s (hòm đạn reset ngay)
                 }
                 return true;
             }
@@ -259,7 +263,8 @@ Object.assign(Player.prototype, {
     // [handleShooting] Xe TANK — trả về true nếu cần dừng handleShooting()
     shootTank(inp) {
         if (this.weapon === 'tank') {
-            if (inp.s && this.dashState === 0) {
+            if (inp.s && this.dashState === 0 && (this.tankDashCooldown || 0) <= 0) {
+                this.tankDashHitEnemy = false;
                 this.dashState = 1;
                 this.dashStartY = this.y;
                 inp.s = false;

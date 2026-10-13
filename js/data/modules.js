@@ -8,25 +8,25 @@
 const MODULES = {
     BODY: [
         { id: 'basic', name: 'Cơ Bản', desc: 'HP:8 | Dame:1 | Đạn:8', type: 'body', size: { w: 30, h: 30 }, stats: { hp: 8, dmg: 1, ammo: 8 } },
-        { id: 'money_tank', name: 'Xe Tiền', desc: 'HP:1 | Dame:1 | Đạn:2 (Evo: Nâng cấp toàn diện)', type: 'body', size: { w: 28, h: 28 }, stats: { hp: 1, dmg: 1, ammo: 2 } },
-        { id: 'tank', name: 'Xe TANK', desc: 'HP:10 (+5 máu xe lớn) | Dame:3 | Tốc: Chậm (Lao húc)', type: 'body', size: { w: 38, h: 38 }, stats: { hp: 10, dmg: 3, ammo: 0 } },
+        { id: 'money_tank', name: 'Xe Tiền', desc: 'HP:1 | Dame:1 | Đạn:2 (Evo: Nâng cấp toàn diện)', type: 'body', size: { w: 28, h: 28 }, stats: { hp: 3, dmg: 1.2, ammo: 2 } },
+        { id: 'tank', name: 'Xe TANK', desc: 'HP:10 (+5 máu xe lớn) | Dame:3 | Tốc: Chậm (Lao húc)', type: 'body', size: { w: 38, h: 38 }, stats: { hp: 7, dmg: 2.5, ammo: 0 } },
         { id: 'ice', name: 'Pháo Băng', desc: 'HP:5 | Dame:1 | Đạn:5 (Làm chậm)', type: 'body', size: { w: 30, h: 30 }, stats: { hp: 5, dmg: 1, ammo: 5 } },
         { id: 'big_bullet', name: 'Đạn Lớn', desc: 'HP:5 | Dame:2 | Đạn:2. Nảy tường phình to & tăng dame.', type: 'body', size: { w: 30, h: 30 }, stats: { hp: 5, dmg: 2, ammo: 2 } },
-        { id: 'shotgun', name: 'Shotgun', desc: 'HP:3.5 | Dame:0.5 | Đạn:2 (3 tia)', type: 'body', size: { w: 26, h: 26 }, stats: { hp: 3.5, dmg: 0.5, ammo: 2 } },
-        { id: 'overload', name: 'Cuộn Quá Tải', desc: 'HP:5 | Dame:1.2-12 (Tự tụ) | Đạn:6. Đạn sạc nổ xung kích điện.', type: 'body', size: { w: 30, h: 30 }, stats: { hp: 5, dmg: 1.2, ammo: 6 } },
-        { id: 'smg', name: 'Tiểu Liên', desc: 'HP:4 | Dame:0.75 | Đạn:12 (Lắc)', type: 'body', size: { w: 24, h: 24 }, stats: { hp: 4, dmg: 0.5, ammo: 12 } },
-        { id: 'lazer_charge', name: 'Lazer Xuyên Phá', desc: 'HP:2 | Dame:8 (Tụ full)', type: 'body', size: { w: 30, h: 30 }, stats: { hp: 2, dmg: 0.25, ammo: 20 } },
-        { id: 'lazer_auto', name: 'Lazer Pháo', desc: 'HP:4 | Dame:1 | Đạn:6 (Xuyên)', type: 'body', size: { w: 30, h: 30 }, stats: { hp: 4, dmg: 1, ammo: 6 } },
-        { id: 'rocket', name: 'Pháo Tên Lửa', desc: 'HP:5 | Dame:2 (Nổ lan) | Đạn:3', type: 'body', size: { w: 30, h: 30 }, stats: { hp: 5, dmg: 2, ammo: 3 } },
+        { id: 'shotgun', name: 'Shotgun', desc: 'HP:3.5 | Dame:0.5 | Đạn:2 (3 tia)', type: 'body', size: { w: 26, h: 26 }, stats: { hp: 4.5, dmg: 0.6, ammo: 2 } },
+        { id: 'overload', name: 'Cuộn Quá Tải', desc: 'HP:5 | Dame:1.2-12 (Tự tụ) | Đạn:6. Đạn sạc nổ xung kích điện.', type: 'body', size: { w: 30, h: 30 }, stats: { hp: 4.5, dmg: 1.0, ammo: 6 } },
+        { id: 'smg', name: 'Tiểu Liên', desc: 'HP:4 | Dame:0.75 | Đạn:12 (Lắc)', type: 'body', size: { w: 24, h: 24 }, stats: { hp: 5, dmg: 0.6, ammo: 12 } },
+        { id: 'lazer_charge', name: 'Lazer Xuyên Phá', desc: 'HP:2 | Dame:8 (Tụ full)', type: 'body', size: { w: 30, h: 30 }, stats: { hp: 4, dmg: 0.4, ammo: 20 } },
+        { id: 'lazer_auto', name: 'Lazer Pháo', desc: 'HP:4 | Dame:1 | Đạn:6 (Xuyên)', type: 'body', size: { w: 30, h: 30 }, stats: { hp: 5, dmg: 1, ammo: 6 } },
+        { id: 'rocket', name: 'Pháo Tên Lửa', desc: 'HP:5 | Dame:2 (Nổ lan) | Đạn:3', type: 'body', size: { w: 30, h: 30 }, stats: { hp: 5, dmg: 1.7, ammo: 3 } },
         { id: 'portal', name: 'Cổng Không Gian', desc: 'HP:5 | Dame:1 | Đạn:7 (Dịch chuyển)', type: 'body', size: { w: 30, h: 30 }, stats: { hp: 5, dmg: 1, ammo: 7 } },
         { id: 'wind_slash', name: 'Phong Trảm', desc: 'HP:4 | Tụ lực bắn Kiếm Khí (Phá đạn)', type: 'body', size: { w: 30, h: 30 }, stats: { hp: 4, dmg: 1, ammo: 1 } },
         { id: 'storm', name: 'Cuồng Phong', desc: 'HP:3.5 | Tự tụ lực 14s -> Lao & Chém Tròn (Phản đạn)', type: 'body', size: { w: 30, h: 30 }, stats: { hp: 3.5, dmg: 2, ammo: 0 } },
         { id: 'acid', name: 'Axit Hóa', desc: 'HP:4 | Dame:0.5 | Đạn:1. Ăn mòn Max HP (Max HP<=1 nhận 4 Dame). Đạn tạo vùng', type: 'body', size: { w: 30, h: 30 }, stats: { hp: 4, dmg: 0.5, ammo: 1 } },
         { id: 'engineer', name: 'Kỹ Sư', desc: 'HP:3 (+2 máu xe lớn) | Dame:0.5 | Đạn:2. Tự tạo Ụ Thường. Giữ 1s đặt Ụ Thông Minh.', type: 'body', size: { w: 34, h: 34 }, stats: { hp: 3, dmg: 0.5, ammo: 2 } },
         { id: 'ghost', name: 'Ghost', desc: 'HP:2.5 | Tốc: Rất Nhanh | Đạn:4. Vô Ảnh 2s (CD 3s). Tàn Ảnh phân thân.', type: 'body', size: { w: 24, h: 24 }, stats: { hp: 2.5, dmg: 1.75, ammo: 4 } },
-        { id: 'aaa', name: 'Pháo Cao Xạ', desc: 'HP:5 (+4 máu xe lớn) | Tốc: Chậm | Dame:2. Pháo Kích (1.5s nổ) + Xả nhanh khi có đạn.', type: 'body', size: { w: 37, h: 37 }, stats: { hp: 5, dmg: 2, ammo: 1 } },
-        { id: 'blade_god', name: 'Kiếm Tôn', desc: 'HP:5 | Dame:1.5 | Đạn:4. Luân phiên: Anh Minh (Hitscan), Hư Vô (Nổ+Câm lặng). Nhát thứ 10: Phá Thiên Kiếm.', type: 'body', size: { w: 30, h: 30 }, stats: { hp: 5, dmg: 1.5, ammo: 4 } },
-        { id: 'van_kiem', name: 'Kiếm Trận', desc: 'HP:3.5 | Dame:0.25 | Đạn: Vô Hạn. Tự gọi kiếm. Giữ bắn để vào Kiếm Thế.', type: 'body', size: { w: 26, h: 26 }, stats: { hp: 3.5, dmg: 0.25, ammo: 999 } },
+        { id: 'aaa', name: 'Pháo Cao Xạ', desc: 'HP:5 (+4 máu xe lớn) | Tốc: Chậm | Dame:2. Pháo Kích (1.5s nổ) + Xả nhanh khi có đạn.', type: 'body', size: { w: 37, h: 37 }, stats: { hp: 3.5, dmg: 1.7, ammo: 1 } },
+        { id: 'blade_god', name: 'Kiếm Tôn', desc: 'HP:5 | Dame:1.5 | Đạn:4. Luân phiên: Anh Minh (Hitscan), Hư Vô (Nổ+Câm lặng). Nhát thứ 10: Phá Thiên Kiếm.', type: 'body', size: { w: 30, h: 30 }, stats: { hp: 5, dmg: 1.3, ammo: 4 } },
+        { id: 'van_kiem', name: 'Kiếm Trận', desc: 'HP:3.5 | Dame:0.25 | Đạn: Vô Hạn. Tự gọi kiếm. Giữ bắn để vào Kiếm Thế.', type: 'body', size: { w: 26, h: 26 }, stats: { hp: 4.5, dmg: 0.32, ammo: 999 } },
         { id: 'water_gun', name: 'Súng Nước', desc: 'HP:4 (+2 máu xe lớn) | Dame:1.5. Đạn: Nội năng (100%). Bấm: Tia nước. Giữ 1s: Laser nước.', type: 'body', size: { w: 34, h: 34 }, stats: { hp: 4, dmg: 1.5, ammo: 0 } },
         { id: 'furnace', name: 'Lò Nung', desc: 'HP:6 (+3 máu xe lớn) | Chậm | Dame:0.25. Đạn: Nội năng. Gây Đốt. 5 stack Đốt -> Nổ 5 dame.', type: 'body', size: { w: 36, h: 36 }, stats: { hp: 6, dmg: 0.25, ammo: 0 } },
         { id: 'am_duong_su', name: 'Âm Dương Sư', desc: 'HP:5 | Dame:0.5 | Đạn:4. Luân phiên Âm/Dương chú. Bùa kích nổ nhanh.', type: 'body', size: { w: 30, h: 30 }, stats: { hp: 5, dmg: 0.5, ammo: 4 } },
@@ -47,7 +47,7 @@ const MODULES = {
             desc: 'HP:4 | Dame:1 | Đạn:6. Tạo bản sao đối xứng bắn cùng lúc (50% dame). Giữ bắn 1s để hoán đổi vị trí.',
             type: 'body',
             size: { w: 30, h: 30 },
-            stats: { hp: 4, dmg: 1, ammo: 6 }
+            stats: { hp: 5.5, dmg: 1.3, ammo: 6 }
         },
         {
             id: 'sukuna',
@@ -55,7 +55,7 @@ const MODULES = {
             desc: 'HP:7 (+3 máu xe lớn) | Chú Lực tấn công. Giữ bắn Phản Chuyển (+1.25 HP). Bị trúng đòn ngắt niệm Lãnh Địa.',
             type: 'body',
             size: { w: 36, h: 36 },
-            stats: { hp: 7, dmg: 3, ammo: 999 }
+            stats: { hp: 5, dmg: 2.4, ammo: 999 }
         },
         {
             id: 'paradox',
@@ -63,7 +63,7 @@ const MODULES = {
             desc: 'HP:5 | Dame:1 | Đạn:5. Có bóng đi sau 3s. Giữ ngắn (0.33s) tua ngược & tự xả đạn lặp lại (CD: 12s/7s).',
             type: 'body',
             size: { w: 30, h: 30 },
-            stats: { hp: 5, dmg: 1, ammo: 5 }
+            stats: { hp: 6, dmg: 1, ammo: 5 }
         },
         {
             id: 'magician',
@@ -71,7 +71,7 @@ const MODULES = {
             desc: 'HP:3.5 | Dame:1.5 | Rất Nhanh | Đạn:7. Giữ bắn+Đi: Lướt, Khiên, Tàng hình. Giữ bắn+Đứng: Khiên & Vô địch. Giữ 1s: Hoán đổi & Khiên.',
             type: 'body',
             size: { w: 26, h: 26 },
-            stats: { hp: 3.5, dmg: 1.5, ammo: 7, speedMult: 1.35 }
+            stats: { hp: 3.5, dmg: 1.3, ammo: 7, speedMult: 1.35 }
         },
         {
             id: 'inventor',
@@ -79,7 +79,7 @@ const MODULES = {
             desc: 'HP:2 | Tốc: 0.8x | Dame: 0.5 | Đạn: 4. Dùng Linh Kiện (LK) nâng cấp. Sở hữu Drone Không Kích.',
             type: 'body',
             size: { w: 30, h: 30 },
-            stats: { hp: 2, dmg: 0.5, ammo: 4, speedMult: 0.8 }
+            stats: { hp: 3.5, dmg: 0.7, ammo: 4, speedMult: 0.8 }
         },
         {
             id: 'shadow_hunter',
@@ -95,7 +95,7 @@ const MODULES = {
             desc: 'HP:5 | Dame:2 | Đạn:2. Quét 180px -> Lao áp sát (cách 40px) -> Nón bộc phá 0.5s. Nhấp đúp: x2 đạn & x2 dame. Phá hủy hồi 1 đạn.',
             type: 'body',
             size: { w: 34, h: 34 },
-            stats: { hp: 5, dmg: 2, ammo: 2, speedMult: 1.25 }
+            stats: { hp: 4, dmg: 1.6, ammo: 2, speedMult: 1.25 }
         },
         {
             id: 'thunder',
@@ -119,7 +119,7 @@ const MODULES = {
             desc: 'HP:1 | Dame:1 | Đạn:1 (Thuần Farm). Ăn/Phá Rương cộng vĩnh viễn chỉ số. Rương Giả Mạo (Mimic). Late game bất khả chiến bại.',
             type: 'body',
             size: { w: 30, h: 30 },
-            stats: { hp: 1, dmg: 1, ammo: 1, speedMult: 1.0 }
+            stats: { hp: 2.5, dmg: 1, ammo: 1, speedMult: 1.0 }
         },
         {
             id: 'death_lock',
@@ -127,7 +127,7 @@ const MODULES = {
             desc: 'HP:5 (+2 máu xe lớn) | Dame:0.5 | Đạn:3 | Tốc: 0.8x. Nội tại Ràng Buộc: 4 tầng ấn. Đạn Cấm Chế: Lồng Xích hút & giam giữ.',
             type: 'body',
             size: { w: 34, h: 34 },
-            stats: { hp: 5, dmg: 0.5, ammo: 3, speedMult: 0.8 }
+            stats: { hp: 5, dmg: 0.7, ammo: 3, speedMult: 0.8 }
         },
         {
             id: 'creator',
@@ -135,7 +135,7 @@ const MODULES = {
             desc: 'HP:1 | Dame:0.25 | Đạn:1 | Tốc: 1.0x. Bản Thiết Kế Toàn Năng: Ụ Súng Tự Ngắm (max 2), Khiên Thép Chắn Đạn (5 HP), Drone Không Kích.',
             type: 'body',
             size: { w: 24, h: 24 },
-            stats: { hp: 1, dmg: 0.25, ammo: 1, speedMult: 1.0 }
+            stats: { hp: 2, dmg: 0.25, ammo: 1, speedMult: 1.0 }
         },
         {
             id: 'necromancer',
@@ -151,7 +151,7 @@ const MODULES = {
             desc: 'HP:1 | Dame:1 | Đạn:1 | Tốc: 1.3x. Thu thập Bánh Răng & Linh Kiện. Mở Chợ Đen nâng cấp Robot. Đủ Bánh Răng nhấn giữ để trực tiếp Lái Mecha!',
             type: 'body',
             size: { w: 24, h: 24 },
-            stats: { hp: 1, dmg: 1, ammo: 1, speedMult: 1.3 }
+            stats: { hp: 2.5, dmg: 1, ammo: 1, speedMult: 1.3 }
         },
         {
             id: 'kiem_khach',
@@ -159,7 +159,7 @@ const MODULES = {
             desc: 'HP:2 | Dame:1 | Đạn:3. Bắn phi kiếm. Mất khiên -> Tập Trung 3s (né mọi đòn). Mỗi hiệp nhận Bài Tập Luyện Kiếm để tăng sức mạnh vĩnh viễn.',
             type: 'body',
             size: { w: 30, h: 30 },
-            stats: { hp: 2, dmg: 1, ammo: 3, speedMult: 1.0 }
+            stats: { hp: 3, dmg: 1, ammo: 3, speedMult: 1.0 }
         },
         {
             id: 'sprayer',
@@ -175,7 +175,7 @@ const MODULES = {
             desc: 'HP:3 | Dame:1 | Đạn:1. Xe lắp ghép: mỗi hiệp nhận Điểm Tùy Chỉnh để lắp Lối Bắn, Dạng Đạn, Tính Chất Đạn, Kích Thước. Thua liên tiếp nhận thêm điểm.',
             type: 'body',
             size: { w: 30, h: 30 },
-            stats: { hp: 3, dmg: 1, ammo: 1, speedMult: 1.0 }
+            stats: { hp: 4, dmg: 1.2, ammo: 1, speedMult: 1.0 }
         },
         {
             id: 'kiem_su',

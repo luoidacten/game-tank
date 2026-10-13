@@ -80,7 +80,9 @@ function checkHits(attacker, victim) {
                 if (attacker.hasUpgrade('evo_blade_1') && typeof target.hp !== 'undefined') {
                     target.huVoStack = (target.huVoStack || 0) + 1;
                     if (target.huVoStack >= 3) {
-                        target.takeDamage(999, attacker, { ignoreInvincible: true });
+                        // [FIX] Vật cản (ụ súng, tường, xe tiền) không có takeDamage -> trước đây gây lỗi
+                        if (typeof target.takeDamage === 'function') target.takeDamage(999, attacker, { ignoreInvincible: true });
+                        else { target.hp = 0; target.active = false; }
                         target.huVoStack = 0;
                         explosions.push(new Explosion(target.x, target.y, 150, 'black', 0, attacker));
                     }

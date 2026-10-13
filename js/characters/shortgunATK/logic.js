@@ -6,8 +6,9 @@ Object.assign(Player.prototype, {
     fireShortgunBurst(isFullEvo, hasEvo1, hasEvo2) {
         let dirY = (this.id === 1) ? -1 : 1;
         let isDouble = this.shortgunDoubleTap;
-        let dmgMultiplier = isDouble ? 2 : 1;
-        let pelletCount = isDouble ? 8 : 5;
+        // [CÂN BẰNG] Bắn sát mặt nên gần như mọi viên đều trúng: 0.45x mỗi viên (trước 1x), Double Tap 7 viên x1.5 (trước 8 viên x2)
+        let dmgMultiplier = (isDouble ? 1.5 : 1) * 0.45;
+        let pelletCount = isDouble ? 7 : 5;
         let coneSpread = 0.45;
         let startX = this.x + this.w / 2;
         let startY = (this.id === 1) ? this.y - 6 : this.y + this.h + 6;
@@ -151,7 +152,7 @@ Object.assign(Player.prototype, {
                     return true;
                 }
 
-                if (this.ammo > 0 && now - this.lastShot > 400 && this.shortgunDashState !== 2) {
+                if (this.ammo > 0 && now - this.lastShot > 900 && this.shortgunDashState !== 2) {
                     this.ammo--;
                     this.lastShot = now;
                     this.triggerShortgunAttack();

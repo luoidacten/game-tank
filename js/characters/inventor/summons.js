@@ -118,14 +118,10 @@ class InventorDrone {
         let vx = 0;
         let vy = baseDirY * bulletSpd;
 
-        if (upg['inv_ngam'] && enemy) {
-            let dx = (enemy.x + enemy.w / 2) - (this.x + this.w / 2);
-            let dy = (enemy.y + enemy.h / 2) - (this.y + this.h / 2);
-            let angle = Math.atan2(dy, dx);
-            // Giới hạn góc ngắm để đạn luôn hướng về phía địch, không bị bẻ ngang đâm tường
-            let desiredVx = Math.cos(angle) * bulletSpd;
-            vx = Math.max(-1.8, Math.min(1.8, desiredVx));
-            vy = baseDirY * Math.sqrt(Math.max(16, bulletSpd * bulletSpd - vx * vx));
+        if (upg['inv_ngam'] && enemy && enemy.hp > 0) {
+            // [FIX] Ngắm thật (có đón đầu). Trước đây vx bị kẹp ±1.8 nên địch lệch xa là bắn trượt.
+            const a = aimVelocity(this.x + this.w / 2, this.y + this.h / 2, enemy, bulletSpd);
+            if (a.vy * baseDirY > 0.5) { vx = a.vx; vy = a.vy; this.aimAngle = a.angle; }
         }
 
         let isPiercing = !!upg['inv_lazer'];
@@ -196,9 +192,9 @@ class InventorDrone {
         let baseDirY = (this.owner.id === 1) ? -1 : 1;
         let vy = baseDirY * 4.5;
         let vx = 0;
-        if (upg['inv_ngam'] && enemy) {
-            let dx = (enemy.x + enemy.w / 2) - (this.x + this.w / 2);
-            vx = Math.max(-1.5, Math.min(1.5, dx * 0.012));
+        if (upg['inv_ngam'] && enemy && enemy.hp > 0) {
+            const a = aimVelocity(this.x + this.w / 2, this.y + this.h / 2, enemy, 4.5);
+            if (a.vy * baseDirY > 0.5) { vx = a.vx; vy = a.vy; }
         }
         this.owner.bullets.push({
             x: this.x + this.w / 2 - 5,
@@ -263,7 +259,16 @@ class InventorDrone {
 
         // Nòng súng Drone
         ctx.fillStyle = "#111";
-        ctx.fillRect(this.x + 6, this.y + (this.owner.id === 1 ? -6 : this.h), 14, 6);
+        if (typeof this.aimAngle === 'number' && this.owner.invUpgrades && this.owner.invUpgrades['inv_ngam']) {
+            // Thiết Bị Ngắm: nòng xoay theo hướng bắn
+            ctx.save();
+            ctx.translate(this.x + this.w / 2, this.y + this.h / 2);
+            ctx.rotate(this.aimAngle);
+            ctx.fillRect(0, -3, this.w / 2 + 8, 6);
+            ctx.restore();
+        } else {
+            ctx.fillRect(this.x + 6, this.y + (this.owner.id === 1 ? -6 : this.h), 14, 6);
+        }
 
         // Động cơ bay
         ctx.fillStyle = "#00f0ff";

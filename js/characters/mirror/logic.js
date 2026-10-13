@@ -69,7 +69,11 @@ Object.assign(Player.prototype, {
                     explosions.push(new Explosion(this.x + this.w / 2, this.y + this.h / 2, 50, 'white', 0, this));
                 }
             } else {
-                if (!effectiveInp.s) this.mirrorCharge = 0;
+                if (!effectiveInp.s) {
+                    // [FIX] Ghi lại thời gian giữ trước khi reset để hàm bắn biết đây là nhấp ngắn
+                    if (this.mirrorCharge > 0) this.mirrorReleasedCharge = this.mirrorCharge;
+                    this.mirrorCharge = 0;
+                }
             }
         }
     },
@@ -90,8 +94,10 @@ Object.assign(Player.prototype, {
                 // Đang giữ phím -> Không làm gì cả, để cho update() đếm charge
             } else {
                 // KHI NHẢ PHÍM: Nếu thời gian giữ ngắn (chưa đủ để Swap) -> Bắn đạn
-                if (this.mirrorCharge > 0 && this.mirrorCharge < 60) {
-                    if (this.ammo > 0 && now - this.lastShot > this.reloadTime) {
+                const held = this.mirrorReleasedCharge || 0;
+                this.mirrorReleasedCharge = 0;
+                if (held > 0 && held < 60) {
+                    if (this.ammo > 0 && now - this.lastShot > 350) {
                         this.fireBullet(1);
                         this.ammo--;
                         this.lastShot = now;

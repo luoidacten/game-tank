@@ -77,6 +77,7 @@ Object.assign(Player.prototype, {
                     }
                     ctx.fillRect(ammoX, ammoY, ammoW - 1, 3);
                 }
+                ctx.restore(); // [FIX] thiếu restore -> độ mờ 0.2 lan ra toàn bản đồ & rò save() mỗi khung hình
             }
 
             // Vẽ Đạn Giả & Đạn Hù Dọa

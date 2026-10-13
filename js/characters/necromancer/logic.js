@@ -10,7 +10,7 @@ Object.assign(Player.prototype, {
             this.hp = 1;
             let armorBonus = (this.upgrades || []).filter(u => u === 'armor').length;
             let evo2Bonus = (this.hasUpgrade && this.hasUpgrade('evo_necro_2')) ? 4 : 0;
-            this.maxSouls = 6 + armorBonus + evo2Bonus;
+            this.maxSouls = 5 + armorBonus + evo2Bonus; // cân bằng: 6 -> 5
             this.currentSouls = this.maxSouls;
             this.lockedSouls = 0;
             this.necroRegenTimer = 0;
