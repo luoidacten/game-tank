@@ -127,7 +127,7 @@ class InventorDrone {
         let isPiercing = !!upg['inv_lazer'];
         let numBullets = 1 + (upg['inv_dan'] || 0);
         let isFullEvo = this.owner.isFullEvoInventor || (this.owner.hasUpgrade('evo_inv_1') && this.owner.hasUpgrade('evo_inv_2') && upg['inv_full_evo']);
-        let dmgMultiplier = 0.5;
+        let dmgMultiplier = 1.0; // [CÂN BẰNG] 0.5 -> 1.0
         if (isFullEvo) dmgMultiplier = 2.0; // 200% chỉ số từ chủ thể
         else if (this.owner.hasUpgrade('evo_inv_1')) dmgMultiplier = 0.75;
 

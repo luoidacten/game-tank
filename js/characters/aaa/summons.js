@@ -11,7 +11,7 @@ class MortarMarker {
 
         // --- NERF: PHẠM VI NỔ ---
         // Giảm từ 80 xuống 65 (giảm nhẹ khoảng 20%)
-        this.maxR = 65;
+        this.maxR = 55; // [CÂN BẰNG] 65 -> 55
 
         this.spawnTime = Date.now();
         let hasEvo1 = this.owner.hasUpgrade('evo_aaa_1');
@@ -50,7 +50,7 @@ class MortarMarker {
 
     explode() {
         // Dame to (x2 dame gốc)
-        let damage = (this.owner.damage + this.owner.dmgBuff) * 2;
+        let damage = (this.owner.damage + this.owner.dmgBuff) * 1.5; // [CÂN BẰNG] 2x -> 1.5x
 
         // Kích hoạt nổ với tham số hasFalloff = true (giảm dame theo rìa)
         explosions.push(new Explosion(this.x, this.y, this.maxR, 'rgba(255, 69, 0,', damage, this.owner, true));

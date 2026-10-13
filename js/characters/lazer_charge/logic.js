@@ -13,7 +13,7 @@ Object.assign(Player.prototype, {
         const bRw = beamW; const bRh = (this.id === 1 ? this.y : canvas.height - (this.y + this.h));
 
         const enemy = (this.id === 1) ? p2 : p1;
-        if (rectIntersect(bRx, bRy, bRw, bRh, enemy.x, enemy.y, enemy.w, enemy.h)) { enemy.takeDamage(6, this); }
+        if (rectIntersect(bRx, bRy, bRw, bRh, enemy.x, enemy.y, enemy.w, enemy.h)) { enemy.takeDamage(3, this); } // [CÂN BẰNG] 6 -> 3
 
         crates.forEach(c => {
             if (c.active && rectIntersect(bRx, bRy, bRw, bRh, c.x, c.y, c.w, c.h)) {
@@ -50,18 +50,15 @@ Object.assign(Player.prototype, {
     // [handleShooting] Lazer Xuyên Phá — trả về true nếu cần dừng handleShooting()
     shootLazerCharge(inp, now) {
         if (this.weapon === 'lazer_charge') {
-            // [CÂN BẰNG] Tụ tia khi ngừng bắn 1s (trước đây phải đầy đúng 20/20 đạn -> gần như không bao giờ dùng được)
-            if (now - this.lastShot > 1000 && this.ammo >= 5) {
-                if (!this.startChargeTime) this.startChargeTime = now;
-                const chargeDuration = 2000;
-                const progress = Math.min(now - this.startChargeTime, chargeDuration);
-                this.chargeLevel = (progress / chargeDuration) * 7;
-            } else { this.chargeLevel = 0; this.startChargeTime = null; }
-
+            // [ĐỔI CƠ CHẾ] Giữ nút để tụ tia (1.2s), nhả ra phóng tia Xuyên Phá. Nhấp nhanh = đạn thường.
             if (inp.s) {
-                if (this.chargeLevel >= 6.9) { this.fireBeam(); this.ammo = Math.max(0, this.ammo - 5); }
-                else if (this.ammo > 0) { this.fireBullet(1); this.ammo--; }
-                this.lastShot = now; this.chargeLevel = 0; this.startChargeTime = null; inp.s = false;
+                this.lcHold = (this.lcHold || 0) + 1;
+                this.chargeLevel = Math.min(7, (this.lcHold / 90) * 7);
+            } else if (this.lcHold > 0) {
+                const held = this.lcHold;
+                this.lcHold = 0; this.chargeLevel = 0;
+                if (held >= 90 && this.ammo >= 6) { this.fireBeam(); this.ammo -= 6; this.lastShot = now; }
+                else if (held < 90 && this.ammo > 0 && now - this.lastShot > 220) { this.fireBullet(1); this.ammo--; this.lastShot = now; }
             }
             return true;
         }

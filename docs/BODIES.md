@@ -1,71 +1,107 @@
 # 📘 Cẩm nang Body — CYBER TANK 1v1
 
-> File này được tạo tự động từ dữ liệu trong game (`js/data/modules.js`, `js/data/evolutions.js`, `js/data/shops.js`).
-> Khi sửa chỉ số trong code, hãy cập nhật lại file này cho khớp.
+> Tạo tự động từ dữ liệu trong game (`js/data/*.js`) và đo chỉ số thực bằng cách chạy `setupForNewRound()`.
+> Khi sửa chỉ số trong code, chạy lại công cụ tạo tài liệu cho khớp.
 
 ## Luật chung
 
-- Mỗi người chọn **1 Body** ở Hiệp 1. Các hiệp sau mua Module / Tiến hoá (Evo) trong shop bằng tiền thắng trận.
-- Thông số gốc: kích thước xe 30×30, tốc độ 3.5, tốc đạn 4.8, nạp đạn 1.5s. Sau 60s bắt đầu **Đột Tử**: vùng an toàn thu hẹp hai bên.
-- **Xe to được cộng máu**: rộng 31–33 → +1, 34–35 → +2, 36 → +3, 37 → +4, ≥38 → +5 HP.
-- Các bảng dưới ghi **chỉ số thực đầu hiệp** (đo bằng cách chạy `setupForNewRound()` trong game, map Cổ Điển, chưa mua gì): đã gồm máu cộng do kích thước và điều chỉnh tốc độ riêng của từng body. Tốc độ cơ bản là 3.5.
-- Mỗi Body có 2 Evo. Sở hữu **cả 2 Evo = FULL EVO**, mở khoá sức mạnh tối thượng của Body đó.
-- Map *Overdrive*: tốc độ ×1.35, thời gian nạp đạn ×0.5.
+- Hiệp 1 chọn **1 Body**. Các hiệp sau mua Module / Tiến hoá (Evo) trong shop bằng tiền.
+- Gốc: xe 30×30, tốc độ 3.5, tốc đạn 4.8, nạp đạn 1.5s. Sau 60s **Đột Tử**: vùng an toàn thu hẹp.
+- Xe to được cộng máu: rộng 31–33 → +1, 34–35 → +2, 36 → +3, 37 → +4, ≥38 → +5 HP.
+- Mỗi Body có 2 Evo. Có **cả 2 = FULL EVO**.
+- Module chân có giới hạn mua: Động Cơ tối đa 3, Giáp Thép tối đa 5, Bánh Xích tối đa 3, Lợi Tức tối đa 3.
 
 ## Bảng tổng hợp
 
-| # | Body | ID | HP | Sát thương | Đạn | Tốc độ | Kích thước | Vật triệu hồi |
-|---|------|----|---:|-----------:|----:|-------:|:----------:|:-------------:|
-| 1 | **Cơ Bản** | `basic` | 8 | 1 | 8 | 3.5 | 30×30 |  |
-| 2 | **Xe Tiền** | `money_tank` | 1 | 1 | 2 | 3.5 | 28×28 |  |
-| 3 | **Xe TANK** | `tank` | 15 | 3 | — (năng lượng riêng) | 2.45 | 38×38 |  |
-| 4 | **Pháo Băng** | `ice` | 5 | 1 | 5 | 3.5 | 30×30 |  |
-| 5 | **Đạn Lớn** | `big_bullet` | 5 | 2 | 2 | 3.5 | 30×30 |  |
-| 6 | **Shotgun** | `shotgun` | 3.5 | 0.5 | 2 | 3.5 | 26×26 |  |
-| 7 | **Cuộn Quá Tải** | `overload` | 5 | 1.2 | 6 | 3.5 | 30×30 |  |
-| 8 | **Tiểu Liên** | `smg` | 4 | 0.5 | 12 | 3.5 | 24×24 |  |
-| 9 | **Lazer Xuyên Phá** | `lazer_charge` | 2 | 0.25 | 20 | 3.5 | 30×30 |  |
-| 10 | **Lazer Pháo** | `lazer_auto` | 4 | 1 | 6 | 3.5 | 30×30 |  |
-| 11 | **Pháo Tên Lửa** | `rocket` | 5 | 2 | 3 | 3.5 | 30×30 |  |
-| 12 | **Cổng Không Gian** | `portal` | 5 | 1 | 7 | 5 | 30×30 |  |
-| 13 | **Phong Trảm** | `wind_slash` | 4 | 1 | 1 | 3.5 | 30×30 | ✅ |
-| 14 | **Cuồng Phong** | `storm` | 3.5 | 2 | — (năng lượng riêng) | 5 | 30×30 | ✅ |
-| 15 | **Axit Hóa** | `acid` | 4 | 0.5 | 1 | 3.5 | 30×30 | ✅ |
-| 16 | **Kỹ Sư** | `engineer` | 5 | 0.5 | 2 | 3.5 | 34×34 | ✅ |
-| 17 | **Ghost** | `ghost` | 2.5 | 1.75 | 4 | 5.5 | 24×24 | ✅ |
-| 18 | **Pháo Cao Xạ** | `aaa` | 9 | 2 | 1 | 2.1 | 37×37 | ✅ |
-| 19 | **Kiếm Tôn** | `blade_god` | 5 | 1.5 | 4 | 3.5 | 30×30 |  |
-| 20 | **Kiếm Trận** | `van_kiem` | 3.5 | 0.25 | ∞ | 5.5 | 26×26 |  |
-| 21 | **Súng Nước** | `water_gun` | 6 | 1.5 | — (năng lượng riêng) | 3.5 | 34×34 |  |
-| 22 | **Lò Nung** | `furnace` | 9 | 0.25 | — (năng lượng riêng) | 3.5 | 36×36 |  |
-| 23 | **Âm Dương Sư** | `am_duong_su` | 5 | 0.5 | 4 | 3.5 | 30×30 | ✅ |
-| 24 | **6 Nòng** | `six_barrel` | 9 | 0.4 | ∞ | 3.5 | 36×36 |  |
-| 25 | **Kẻ Mạnh Nhất** | `the_strongest` | 1 | 2 | — (năng lượng riêng) | 3.5 | 30×30 |  |
-| 26 | **Sniper** | `sniper` | 3 | 2 | 5 | 2.62 | 24×24 | ✅ |
-| 27 | **Bow** | `cung` | 3 | 0.5 | 3 | 4.38 | 24×24 | ✅ |
-| 28 | **Mirror** | `mirror` | 4 | 1 | 6 | 3.5 | 30×30 |  |
-| 29 | **Vua Đầu Bếp** | `sukuna` | 10 | 3 | ∞ | 3.5 | 36×36 |  |
-| 30 | **Paradox** | `paradox` | 5 | 1 | 5 | 3.5 | 30×30 |  |
-| 31 | **Nhà Ảo Thuật** | `magician` | 3.5 | 1.5 | 7 | 4.73 | 26×26 | ✅ |
-| 32 | **Nhà Phát Minh** | `inventor` | 2 | 0.5 | 4 | 2.24 | 30×30 | ✅ |
-| 33 | **Shadow Hunter** | `shadow_hunter` | 2 | 1 | 6 | 5.92 | 24×24 | ✅ |
-| 34 | **Shortgun** | `shortgunATK` | 7 | 2 | 2 | 5.47 | 34×34 | ✅ |
-| 35 | **Sấm Chớp** | `thunder` | 2 | 1 | — (năng lượng riêng) | 5.92 | 26×26 | ✅ |
-| 36 | **Nam Châm** | `magnet` | 7 | 0.5 | 6 | 3.5 | 34×34 | ✅ |
-| 37 | **Tiến Hóa** | `evolution` | 1 | 1 | 1 | 3.5 | 30×30 |  |
-| 38 | **Trối Chết (DeathLock)** | `death_lock` | 7 | 0.5 | 3 | 2.8 | 34×34 | ✅ |
-| 39 | **Kẻ Sáng Tạo** | `creator` | 1 | 0.25 | 1 | 3.5 | 24×24 | ✅ |
-| 40 | **Chiêu Hồn Sư** | `necromancer` | 1 (+6 Linh Hồn) | 1 | 1 | 2.8 | 32×32 | ✅ |
-| 41 | **Thiên Tài** | `genius` | 1 | 1 | 1 | 4.55 | 24×24 | ✅ |
+| # | Body | ID | HP | Sát thương | Đạn | Tốc độ | Kích thước | Triệu hồi | Tỉ lệ thắng mô phỏng |
+|---|------|----|---:|---:|---:|---:|:---:|:---:|---:|
+| 1 | **Cơ Bản** | `basic` | 8 | 1 | 8 | 3.5 | 30×30 |  | 60% |
+| 2 | **Xe Tiền** | `money_tank` | 7 | 1.5 | 2 | 3.5 | 28×28 |  | 24% |
+| 3 | **Xe TANK** | `tank` | 9.5 | 2.5 | — (năng lượng riêng) | 2.45 | 38×38 |  | 84% |
+| 4 | **Pháo Băng** | `ice` | 5 | 1 | 5 | 3.5 | 30×30 |  | 43% |
+| 5 | **Đạn Lớn** | `big_bullet` | 5 | 2 | 2 | 3.5 | 30×30 |  | 53% |
+| 6 | **Shotgun** | `shotgun` | 5.5 | 0.9 | 2 | 3.5 | 26×26 |  | 36% |
+| 7 | **Cuộn Quá Tải** | `overload` | 4.5 | 0.7 | 6 | 3.5 | 30×30 |  | 83% |
+| 8 | **Tiểu Liên** | `smg` | 5 | 0.9 | 12 | 3.5 | 24×24 |  | 29% |
+| 9 | **Lazer Xuyên Phá** | `lazer_charge` | 4 | 0.5 | 20 | 3.5 | 30×30 |  | 66% |
+| 10 | **Lazer Pháo** | `lazer_auto` | 5 | 1 | 6 | 3.5 | 30×30 |  | 32% |
+| 11 | **Pháo Tên Lửa** | `rocket` | 5 | 1.15 | 3 | 3.5 | 30×30 |  | 80% |
+| 12 | **Cổng Không Gian** | `portal` | 5 | 1 | 7 | 5 | 30×30 |  | 40% |
+| 13 | **Phong Trảm** | `wind_slash` | 4 | 0.9 | 1 | 3.5 | 30×30 | ✅ | 64% |
+| 14 | **Cuồng Phong** | `storm` | 3.5 | 2 | — (năng lượng riêng) | 5 | 30×30 | ✅ | 38% |
+| 15 | **Axit Hóa** | `acid` | 4 | 0.5 | 1 | 3.5 | 30×30 | ✅ | 46% |
+| 16 | **Kỹ Sư** | `engineer` | 5 | 0.5 | 2 | 3.5 | 34×34 | ✅ | 59% |
+| 17 | **Ghost** | `ghost` | 2.5 | 1.75 | 4 | 5.5 | 24×24 | ✅ | 38% |
+| 18 | **Pháo Cao Xạ** | `aaa` | 7.5 | 1.15 | 1 | 2.1 | 37×37 | ✅ | 82% |
+| 19 | **Kiếm Tôn** | `blade_god` | 5 | 1.05 | 4 | 3.5 | 30×30 |  | 70% |
+| 20 | **Kiếm Trận** | `van_kiem` | 4.5 | 0.6 | ∞ | 5.5 | 26×26 |  | 32% |
+| 21 | **Súng Nước** | `water_gun` | 6 | 1.5 | — (năng lượng riêng) | 3.5 | 34×34 |  | 63% |
+| 22 | **Lò Nung** | `furnace` | 9 | 0.25 | — (năng lượng riêng) | 3.5 | 36×36 |  | 55% |
+| 23 | **Âm Dương Sư** | `am_duong_su` | 5 | 0.5 | 4 | 3.5 | 30×30 | ✅ | 50% |
+| 24 | **6 Nòng** | `six_barrel` | 9 | 0.4 | ∞ | 3.5 | 36×36 |  | 38% |
+| 25 | **Kẻ Mạnh Nhất** | `the_strongest` | 1 | 2 | — (năng lượng riêng) | 3.5 | 30×30 |  | 32% |
+| 26 | **Sniper** | `sniper` | 3 | 2 | 5 | 2.62 | 24×24 | ✅ | 40% |
+| 27 | **Bow** | `cung` | 3 | 0.5 | 3 | 4.38 | 24×24 | ✅ | 35% |
+| 28 | **Mirror** | `mirror` | 5.5 | 1.3 | 6 | 3.5 | 30×30 |  | 32% |
+| 29 | **Vua Đầu Bếp** | `sukuna` | 7.5 | 2 | ∞ | 3.5 | 36×36 |  | 83% |
+| 30 | **Paradox** | `paradox` | 6 | 1.2 | 5 | 3.5 | 30×30 |  | 33% |
+| 31 | **Nhà Ảo Thuật** | `magician` | 3 | 1 | 7 | 4.73 | 26×26 | ✅ | 75% |
+| 32 | **Nhà Phát Minh** | `inventor` | 5.5 | 0.7 | 4 | 2.24 | 30×30 | ✅ | 24% |
+| 33 | **Shadow Hunter** | `shadow_hunter` | 2 | 1 | 6 | 5.92 | 24×24 | ✅ | 42% |
+| 34 | **Shortgun** | `shortgunATK` | 5.5 | 1.3 | 2 | 5.47 | 34×34 | ✅ | 87% |
+| 35 | **Sấm Chớp** | `thunder` | 2 | 1 | — (năng lượng riêng) | 5.92 | 26×26 | ✅ | 46% |
+| 36 | **Nam Châm** | `magnet` | 6.5 | 0.5 | 6 | 3.5 | 34×34 | ✅ | 68% |
+| 37 | **Tiến Hóa** | `evolution` | 5.5 | 1 | 1 | 3.5 | 30×30 |  | 33% |
+| 38 | **Trối Chết (DeathLock)** | `death_lock` | 8 | 0.8 | 3 | 2.8 | 34×34 | ✅ | 35% |
+| 39 | **Kẻ Sáng Tạo** | `creator` | 3 | 0.25 | 1 | 3.5 | 24×24 | ✅ | 42% |
+| 40 | **Chiêu Hồn Sư** | `necromancer` | 1 (+5 Linh Hồn) | 1 | 1 | 2.8 | 32×32 | ✅ | 68% |
+| 41 | **Thiên Tài** | `genius` | 2.5 | 1 | 1 | 4.55 | 24×24 | ✅ | 37% |
+| 42 | **Kiếm Khách** 🆕 | `kiem_khach` | 3 | 1.2 | 3 | 3.5 | 30×30 | ✅ | 35% |
+| 43 | **Bình Phun** 🆕 | `sprayer` | 7 | 0 | — (năng lượng riêng) | 2.89 | 34×34 | ✅ | 56% |
+| 44 | **Tùy Biến** 🆕 | `customize` | 6 | 1.5 | 4 | 3.5 | 30×30 | ✅ | 33% |
+| 45 | **Kiếm Sư** 🆕 | `kiem_su` | 4 | 1 | 5 | 3.85 | 28×28 | ✅ | 46% |
+
+> *Tỉ lệ thắng mô phỏng*: trung bình của 2 mức (chỉ có body / có Full Evo + 2 module), mỗi body đấu vòng tròn với mọi body khác, hai bên cùng một AI tự động. AI không biết chơi kinh tế hay combo phức tạp nên con số chỉ mang tính tham khảo cho độ mạnh tương đối.
+
+## Nhật ký cân bằng
+
+| Body | Thay đổi |
+|---|---|
+| Xe TANK | Cú lao chỉ trúng 1 lần/cú (trước trúng mỗi tick khi đi xuyên), hồi chiêu 2s, sát thương lao 3x → 1.1x, HP 10 → 4.5 (+5 xe lớn) |
+| Shortgun | Mỗi viên 1x → 0.35x (bắn sát mặt nên viên nào cũng trúng), Double Tap 8 viên x2 → 7 viên x1.5, hồi chiêu 0.4s → 0.9s, HP 5 → 3.5, Dame 2 → 1.3. Sửa lỗi sập game khi hạ gục (Evo 2) |
+| Vua Đầu Bếp | Nhát chém 1 → 0.5 dmg, hồi 0.3s → 0.45s, HP 7 → 4.5, Dame 3 → 2 |
+| Pháo Cao Xạ | Pháo cối 2x → 1.5x dame, bán kính nổ 65 → 55, HP 5 → 3.5, Dame 2 → 1.15 |
+| Cuộn Quá Tải | HP 5 → 4.5, Dame 1.2 → 0.7 |
+| Pháo Tên Lửa | Dame 2 → 1.15 |
+| Nhà Ảo Thuật | Dame 1.5 → 1, HP 3.5 → 3. Sửa lỗi phân bóng làm mờ cả bản đồ |
+| Kiếm Tôn | Dame 1.5 → 1.05. Sửa lỗi Hư Vô gây lỗi khi trúng vật cản |
+| Chiêu Hồn Sư | Linh Hồn khởi đầu 6 → 5. Lính Xạ Thủ/Cảm Tử biết ngắm; Lính Cao Cấp lao húc kiểu TANK rồi về chỗ |
+| Nam Châm | HP 5 → 4.5 |
+| Phong Trảm | Dame 1 → 0.9 |
+| Lazer Xuyên Phá | Đổi cơ chế: giữ 1.5s để tụ Tia Xuyên Phá (3 dmg, tốn 6 đạn), nhấp = đạn thường 1x (trước 0.25x và phải đầy đúng 20/20 đạn mới tụ được). HP 2 → 4, Dame 0.25 → 0.5 |
+| Xe Tiền | HP 1 → 7, Dame 1 → 1.5 |
+| Mirror | Sửa lỗi không bắn được, hồi bắn 1.5s → 0.35s, HP 4 → 5.5, Dame 1 → 1.3 |
+| Nhà Phát Minh | HP 2 → 5.5, Dame 0.5 → 0.7, sát thương Drone 50% → 100% chỉ số chủ. Drone ngắm chính xác (có đón đầu) |
+| Thiên Tài | HP 1 → 2.5, mỗi hiệp có sẵn 6 Bánh Răng. Tự Hủy: ném Robot lao tới, chạm tường mới nổ |
+| Kẻ Sáng Tạo | HP 1 → 3. Robot đứng gần sân nhà, đi chậm hơn, Laser có cảnh báo & bắn ra từ Robot |
+| Tiến Hóa | HP 1 → 5.5 |
+| Tùy Biến | HP 3 → 6 (thiết kế gốc 1), Dame 1 → 1.5 |
+| Kiếm Trận | HP 3.5 → 4.5, Dame 0.25 → 0.6 |
+| Shotgun | HP 3.5 → 5.5, Dame 0.5 → 0.9 |
+| Tiểu Liên | HP 4 → 5, Dame 0.5 → 0.9 |
+| Trối Chết (DeathLock) | HP 5 → 6, Dame 0.5 → 0.8 |
+| Paradox | HP 5 → 6, Dame 1 → 1.2 |
+| Lazer Pháo | HP 4 → 5 |
+| Kiếm Khách | HP 2 → 3, Dame 1 → 1.2 (so với bản thiết kế) |
 
 ## Module chân (FEET)
 
-| Module | ID | Giá | Hiệu ứng |
-|---|---|---:|---|
-| Động Cơ | `speed` | $30 | Tăng tốc độ di chuyển. |
-| Giáp Thép | `armor` | $15 | +1 Máu tối đa. |
-| Bánh Xích | `damage` | $20 | x1.25 Sát thương. |
-| Lợi Tức | `interest` | $10 | Sau mỗi round: +30$ (Xe Tiền +60$). Cộng dồn. |
+| Module | ID | Giá | Tối đa | Hiệu ứng |
+|---|---|---:|---:|---|
+| Động Cơ | `speed` | $30 | 3 | Tăng tốc độ di chuyển. |
+| Giáp Thép | `armor` | $15 | 5 | +1 Máu tối đa. |
+| Bánh Xích | `damage` | $20 | 3 | x1.25 Sát thương. |
+| Lợi Tức | `interest` | $10 | 3 | Sau mỗi round: +30$ (Xe Tiền +60$). Cộng dồn. |
 
 ## Chi tiết từng Body
 
@@ -85,9 +121,9 @@ HP:8 | Dame:1 | Đạn:8
 
 ### 2. Xe Tiền (`money_tank`)
 
-HP:1 | Dame:1 | Đạn:2 (Evo: Nâng cấp toàn diện)
+HP:7 | Dame:1.5 | Đạn:2 (Evo: Nâng cấp toàn diện)
 
-- **Chỉ số thực đầu hiệp:** HP 1 · Sát thương 1 · Đạn 2 · Tốc độ 3.5 · Kích thước 28×28
+- **Chỉ số thực đầu hiệp:** HP 7 · Sát thương 1.5 · Đạn 2 · Tốc độ 3.5 · Kích thước 28×28
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -98,9 +134,9 @@ HP:1 | Dame:1 | Đạn:2 (Evo: Nâng cấp toàn diện)
 
 ### 3. Xe TANK (`tank`)
 
-HP:10 (+5 máu xe lớn) | Dame:3 | Tốc: Chậm (Lao húc)
+HP:4.5 (+5 máu xe lớn) | Dame:2.5 | Tốc: Chậm. Nhấn Bắn: Lao húc (1.1x dame, hồi chiêu 2s, tự hồi khiên).
 
-- **Chỉ số thực đầu hiệp:** HP 15 · Sát thương 3 · Đạn — (năng lượng riêng) · Tốc độ 2.45 · Kích thước 38×38
+- **Chỉ số thực đầu hiệp:** HP 9.5 · Sát thương 2.5 · Đạn — (năng lượng riêng) · Tốc độ 2.45 · Kích thước 38×38
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -138,9 +174,9 @@ HP:5 | Dame:2 | Đạn:2. Nảy tường phình to & tăng dame.
 
 ### 6. Shotgun (`shotgun`)
 
-HP:3.5 | Dame:0.5 | Đạn:2 (3 tia)
+HP:5.5 | Dame:0.9 | Đạn:2 (3 tia)
 
-- **Chỉ số thực đầu hiệp:** HP 3.5 · Sát thương 0.5 · Đạn 2 · Tốc độ 3.5 · Kích thước 26×26
+- **Chỉ số thực đầu hiệp:** HP 5.5 · Sát thương 0.9 · Đạn 2 · Tốc độ 3.5 · Kích thước 26×26
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -150,9 +186,9 @@ HP:3.5 | Dame:0.5 | Đạn:2 (3 tia)
 
 ### 7. Cuộn Quá Tải (`overload`)
 
-HP:5 | Dame:1.2-12 (Tự tụ) | Đạn:6. Đạn sạc nổ xung kích điện.
+HP:4.5 | Dame:0.7-12 (Tự tụ) | Đạn:6. Đạn sạc nổ xung kích điện.
 
-- **Chỉ số thực đầu hiệp:** HP 5 · Sát thương 1.2 · Đạn 6 · Tốc độ 3.5 · Kích thước 30×30
+- **Chỉ số thực đầu hiệp:** HP 4.5 · Sát thương 0.7 · Đạn 6 · Tốc độ 3.5 · Kích thước 30×30
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -164,9 +200,9 @@ HP:5 | Dame:1.2-12 (Tự tụ) | Đạn:6. Đạn sạc nổ xung kích điện.
 
 ### 8. Tiểu Liên (`smg`)
 
-HP:4 | Dame:0.75 | Đạn:12 (Lắc)
+HP:5 | Dame:0.9 | Đạn:12 (Lắc)
 
-- **Chỉ số thực đầu hiệp:** HP 4 · Sát thương 0.5 · Đạn 12 · Tốc độ 3.5 · Kích thước 24×24
+- **Chỉ số thực đầu hiệp:** HP 5 · Sát thương 0.9 · Đạn 12 · Tốc độ 3.5 · Kích thước 24×24
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -178,9 +214,9 @@ HP:4 | Dame:0.75 | Đạn:12 (Lắc)
 
 ### 9. Lazer Xuyên Phá (`lazer_charge`)
 
-HP:2 | Dame:8 (Tụ full)
+HP:4 | Dame:0.5 | Đạn:20. Nhấp: đạn thường. Giữ 1.5s rồi nhả: Tia Xuyên Phá 3 dmg (tốn 6 đạn).
 
-- **Chỉ số thực đầu hiệp:** HP 2 · Sát thương 0.25 · Đạn 20 · Tốc độ 3.5 · Kích thước 30×30
+- **Chỉ số thực đầu hiệp:** HP 4 · Sát thương 0.5 · Đạn 20 · Tốc độ 3.5 · Kích thước 30×30
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -192,9 +228,9 @@ HP:2 | Dame:8 (Tụ full)
 
 ### 10. Lazer Pháo (`lazer_auto`)
 
-HP:4 | Dame:1 | Đạn:6 (Xuyên)
+HP:5 | Dame:1 | Đạn:6 (Xuyên)
 
-- **Chỉ số thực đầu hiệp:** HP 4 · Sát thương 1 · Đạn 6 · Tốc độ 3.5 · Kích thước 30×30
+- **Chỉ số thực đầu hiệp:** HP 5 · Sát thương 1 · Đạn 6 · Tốc độ 3.5 · Kích thước 30×30
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -204,9 +240,9 @@ HP:4 | Dame:1 | Đạn:6 (Xuyên)
 
 ### 11. Pháo Tên Lửa (`rocket`)
 
-HP:5 | Dame:2 (Nổ lan) | Đạn:3
+HP:5 | Dame:1.15 (Nổ lan) | Đạn:3
 
-- **Chỉ số thực đầu hiệp:** HP 5 · Sát thương 2 · Đạn 3 · Tốc độ 3.5 · Kích thước 30×30
+- **Chỉ số thực đầu hiệp:** HP 5 · Sát thương 1.15 · Đạn 3 · Tốc độ 3.5 · Kích thước 30×30
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -234,8 +270,8 @@ HP:5 | Dame:1 | Đạn:7 (Dịch chuyển)
 
 HP:4 | Tụ lực bắn Kiếm Khí (Phá đạn)
 
-- **Chỉ số thực đầu hiệp:** HP 4 · Sát thương 1 · Đạn 1 · Tốc độ 3.5 · Kích thước 30×30
-- **Vật triệu hồi:** Tường Gió (WindWall)
+- **Chỉ số thực đầu hiệp:** HP 4 · Sát thương 0.9 · Đạn 1 · Tốc độ 3.5 · Kích thước 30×30
+- **Vật triệu hồi / hiệu ứng:** Tường Gió
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -250,7 +286,7 @@ HP:4 | Tụ lực bắn Kiếm Khí (Phá đạn)
 HP:3.5 | Tự tụ lực 14s -> Lao & Chém Tròn (Phản đạn)
 
 - **Chỉ số thực đầu hiệp:** HP 3.5 · Sát thương 2 · Đạn — (năng lượng riêng) · Tốc độ 5 · Kích thước 30×30
-- **Vật triệu hồi:** Lốc Xoáy Chém (StormSlash)
+- **Vật triệu hồi / hiệu ứng:** Lốc Xoáy Chém
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -265,7 +301,7 @@ HP:3.5 | Tự tụ lực 14s -> Lao & Chém Tròn (Phản đạn)
 HP:4 | Dame:0.5 | Đạn:1. Ăn mòn Max HP (Max HP<=1 nhận 4 Dame). Đạn tạo vùng
 
 - **Chỉ số thực đầu hiệp:** HP 4 · Sát thương 0.5 · Đạn 1 · Tốc độ 3.5 · Kích thước 30×30
-- **Vật triệu hồi:** Vùng Axit (AcidZone)
+- **Vật triệu hồi / hiệu ứng:** Vùng Axit
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -280,7 +316,7 @@ HP:4 | Dame:0.5 | Đạn:1. Ăn mòn Max HP (Max HP<=1 nhận 4 Dame). Đạn t�
 HP:3 (+2 máu xe lớn) | Dame:0.5 | Đạn:2. Tự tạo Ụ Thường. Giữ 1s đặt Ụ Thông Minh.
 
 - **Chỉ số thực đầu hiệp:** HP 5 · Sát thương 0.5 · Đạn 2 · Tốc độ 3.5 · Kích thước 34×34
-- **Vật triệu hồi:** Ụ Súng thường & Ụ Súng thông minh
+- **Vật triệu hồi / hiệu ứng:** Ụ Súng thường & thông minh
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -295,7 +331,7 @@ HP:3 (+2 máu xe lớn) | Dame:0.5 | Đạn:2. Tự tạo Ụ Thường. Giữ 1
 HP:2.5 | Tốc: Rất Nhanh | Đạn:4. Vô Ảnh 2s (CD 3s). Tàn Ảnh phân thân.
 
 - **Chỉ số thực đầu hiệp:** HP 2.5 · Sát thương 1.75 · Đạn 4 · Tốc độ 5.5 · Kích thước 24×24
-- **Vật triệu hồi:** Tàn Ảnh (GhostDecoy)
+- **Vật triệu hồi / hiệu ứng:** Tàn Ảnh
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -307,10 +343,10 @@ HP:2.5 | Tốc: Rất Nhanh | Đạn:4. Vô Ảnh 2s (CD 3s). Tàn Ảnh phân t
 
 ### 18. Pháo Cao Xạ (`aaa`)
 
-HP:5 (+4 máu xe lớn) | Tốc: Chậm | Dame:2. Pháo Kích (1.5s nổ) + Xả nhanh khi có đạn.
+HP:3.5 (+4 máu xe lớn) | Tốc: Chậm | Dame:1.15 Pháo Kích (1.5s nổ) + Xả nhanh khi có đạn.
 
-- **Chỉ số thực đầu hiệp:** HP 9 · Sát thương 2 · Đạn 1 · Tốc độ 2.1 · Kích thước 37×37
-- **Vật triệu hồi:** Pháo cối đánh dấu (MortarMarker)
+- **Chỉ số thực đầu hiệp:** HP 7.5 · Sát thương 1.15 · Đạn 1 · Tốc độ 2.1 · Kích thước 37×37
+- **Vật triệu hồi / hiệu ứng:** Pháo cối đánh dấu
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -322,9 +358,9 @@ HP:5 (+4 máu xe lớn) | Tốc: Chậm | Dame:2. Pháo Kích (1.5s nổ) + Xả
 
 ### 19. Kiếm Tôn (`blade_god`)
 
-HP:5 | Dame:1.5 | Đạn:4. Luân phiên: Anh Minh (Hitscan), Hư Vô (Nổ+Câm lặng). Nhát thứ 10: Phá Thiên Kiếm.
+HP:5 | Dame:1.05 | Đạn:4. Luân phiên: Anh Minh (Hitscan), Hư Vô (Nổ+Câm lặng). Nhát thứ 10: Phá Thiên Kiếm.
 
-- **Chỉ số thực đầu hiệp:** HP 5 · Sát thương 1.5 · Đạn 4 · Tốc độ 3.5 · Kích thước 30×30
+- **Chỉ số thực đầu hiệp:** HP 5 · Sát thương 1.05 · Đạn 4 · Tốc độ 3.5 · Kích thước 30×30
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -336,9 +372,9 @@ HP:5 | Dame:1.5 | Đạn:4. Luân phiên: Anh Minh (Hitscan), Hư Vô (Nổ+Câm
 
 ### 20. Kiếm Trận (`van_kiem`)
 
-HP:3.5 | Dame:0.25 | Đạn: Vô Hạn. Tự gọi kiếm. Giữ bắn để vào Kiếm Thế.
+HP:4.5 | Dame:0.6 | Đạn: Vô Hạn. Tự gọi kiếm. Giữ bắn để vào Kiếm Thế.
 
-- **Chỉ số thực đầu hiệp:** HP 3.5 · Sát thương 0.25 · Đạn ∞ · Tốc độ 5.5 · Kích thước 26×26
+- **Chỉ số thực đầu hiệp:** HP 4.5 · Sát thương 0.6 · Đạn ∞ · Tốc độ 5.5 · Kích thước 26×26
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -350,7 +386,7 @@ HP:3.5 | Dame:0.25 | Đạn: Vô Hạn. Tự gọi kiếm. Giữ bắn để và
 
 ### 21. Súng Nước (`water_gun`)
 
-HP:4 (+2 máu xe lớn) | Dame:1.5. Đạn: Nội năng (100%). Bấm: Tia nước. Giữ 1s: Laser nước.
+HP:4 (+2 máu xe lớn) | Dame:1.5 Đạn: Nội năng (100%). Bấm: Tia nước. Giữ 1s: Laser nước.
 
 - **Chỉ số thực đầu hiệp:** HP 6 · Sát thương 1.5 · Đạn — (năng lượng riêng) · Tốc độ 3.5 · Kích thước 34×34
 - **Tiến hoá:**
@@ -364,7 +400,7 @@ HP:4 (+2 máu xe lớn) | Dame:1.5. Đạn: Nội năng (100%). Bấm: Tia nư�
 
 ### 22. Lò Nung (`furnace`)
 
-HP:6 (+3 máu xe lớn) | Chậm | Dame:0.25. Đạn: Nội năng. Gây Đốt. 5 stack Đốt -> Nổ 5 dame.
+HP:6 (+3 máu xe lớn) | Chậm | Dame:0.25 Đạn: Nội năng. Gây Đốt. 5 stack Đốt -> Nổ 5 dame.
 
 - **Chỉ số thực đầu hiệp:** HP 9 · Sát thương 0.25 · Đạn — (năng lượng riêng) · Tốc độ 3.5 · Kích thước 36×36
 - **Tiến hoá:**
@@ -381,7 +417,7 @@ HP:6 (+3 máu xe lớn) | Chậm | Dame:0.25. Đạn: Nội năng. Gây Đốt. 
 HP:5 | Dame:0.5 | Đạn:4. Luân phiên Âm/Dương chú. Bùa kích nổ nhanh.
 
 - **Chỉ số thực đầu hiệp:** HP 5 · Sát thương 0.5 · Đạn 4 · Tốc độ 3.5 · Kích thước 30×30
-- **Vật triệu hồi:** Bùa chú, Pháp trận, Vùng hư vô, Vùng phóng xạ
+- **Vật triệu hồi / hiệu ứng:** Bùa chú, Pháp trận, Vùng hư vô, Vùng phóng xạ
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -424,7 +460,7 @@ HP 1. Dùng Chú Lực vô hiệu sát thương. Nhấp: Lướt (Thương). Gi�
 HP:3 | Dame:2 | Đạn:5. Tốc chậm. Giữ bắn tạo tường. Xuyên giảm dame. Nạp cả băng.
 
 - **Chỉ số thực đầu hiệp:** HP 3 · Sát thương 2 · Đạn 5 · Tốc độ 2.62 · Kích thước 24×24
-- **Vật triệu hồi:** Tường Sniper (SniperWall)
+- **Vật triệu hồi / hiệu ứng:** Tường Sniper
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -439,7 +475,7 @@ HP:3 | Dame:2 | Đạn:5. Tốc chậm. Giữ bắn tạo tường. Xuyên giả
 HP:3 | Dame:0.5 | Đạn:3 | Tốc: Nhanh. Tụ lực: Tăng sát thương/Tốc đạn. Nội tại Nhạy Bén: Tự né 1 lần đạn mỗi 8s (Full Evo 5s).
 
 - **Chỉ số thực đầu hiệp:** HP 3 · Sát thương 0.5 · Đạn 3 · Tốc độ 4.38 · Kích thước 24×24
-- **Vật triệu hồi:** Mưa Tên (ArrowRain)
+- **Vật triệu hồi / hiệu ứng:** Mưa Tên
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -451,9 +487,9 @@ HP:3 | Dame:0.5 | Đạn:3 | Tốc: Nhanh. Tụ lực: Tăng sát thương/Tốc
 
 ### 28. Mirror (`mirror`)
 
-HP:4 | Dame:1 | Đạn:6. Tạo bản sao đối xứng bắn cùng lúc (50% dame). Giữ bắn 1s để hoán đổi vị trí.
+HP:5.5 | Dame:1.3 | Đạn:6. Tạo bản sao đối xứng bắn cùng lúc (50% dame). Giữ bắn 1s để hoán đổi vị trí.
 
-- **Chỉ số thực đầu hiệp:** HP 4 · Sát thương 1 · Đạn 6 · Tốc độ 3.5 · Kích thước 30×30
+- **Chỉ số thực đầu hiệp:** HP 5.5 · Sát thương 1.3 · Đạn 6 · Tốc độ 3.5 · Kích thước 30×30
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -465,9 +501,9 @@ HP:4 | Dame:1 | Đạn:6. Tạo bản sao đối xứng bắn cùng lúc (50% da
 
 ### 29. Vua Đầu Bếp (`sukuna`)
 
-HP:7 (+3 máu xe lớn) | Chú Lực tấn công. Giữ bắn Phản Chuyển (+1.25 HP). Bị trúng đòn ngắt niệm Lãnh Địa.
+HP:4.5 (+3 máu xe lớn) | Chú Lực tấn công. Giữ bắn Phản Chuyển (+1.25 HP). Bị trúng đòn ngắt niệm Lãnh Địa.
 
-- **Chỉ số thực đầu hiệp:** HP 10 · Sát thương 3 · Đạn ∞ · Tốc độ 3.5 · Kích thước 36×36
+- **Chỉ số thực đầu hiệp:** HP 7.5 · Sát thương 2 · Đạn ∞ · Tốc độ 3.5 · Kích thước 36×36
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -479,9 +515,9 @@ HP:7 (+3 máu xe lớn) | Chú Lực tấn công. Giữ bắn Phản Chuyển (+
 
 ### 30. Paradox (`paradox`)
 
-HP:5 | Dame:1 | Đạn:5. Có bóng đi sau 3s. Giữ ngắn (0.33s) tua ngược & tự xả đạn lặp lại (CD: 12s/7s).
+HP:6 | Dame:1.2 | Đạn:5. Có bóng đi sau 3s. Giữ ngắn (0.33s) tua ngược & tự xả đạn lặp lại (CD: 12s/7s).
 
-- **Chỉ số thực đầu hiệp:** HP 5 · Sát thương 1 · Đạn 5 · Tốc độ 3.5 · Kích thước 30×30
+- **Chỉ số thực đầu hiệp:** HP 6 · Sát thương 1.2 · Đạn 5 · Tốc độ 3.5 · Kích thước 30×30
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -493,10 +529,10 @@ HP:5 | Dame:1 | Đạn:5. Có bóng đi sau 3s. Giữ ngắn (0.33s) tua ngượ
 
 ### 31. Nhà Ảo Thuật (`magician`)
 
-HP:3.5 | Dame:1.5 | Rất Nhanh | Đạn:7. Giữ bắn+Đi: Lướt, Khiên, Tàng hình. Giữ bắn+Đứng: Khiên & Vô địch. Giữ 1s: Hoán đổi & Khiên.
+HP:3 | Dame:1 | Rất Nhanh | Đạn:7. Giữ bắn+Đi: Lướt, Khiên, Tàng hình. Giữ bắn+Đứng: Khiên & Vô địch. Giữ 1s: Hoán đổi & Khiên.
 
-- **Chỉ số thực đầu hiệp:** HP 3.5 · Sát thương 1.5 · Đạn 7 · Tốc độ 4.73 · Kích thước 26×26
-- **Vật triệu hồi:** Phân Ảnh (illusions), Hòm ảo
+- **Chỉ số thực đầu hiệp:** HP 3 · Sát thương 1 · Đạn 7 · Tốc độ 4.73 · Kích thước 26×26
+- **Vật triệu hồi / hiệu ứng:** Phân Ảnh, Hòm ảo
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -508,10 +544,10 @@ HP:3.5 | Dame:1.5 | Rất Nhanh | Đạn:7. Giữ bắn+Đi: Lướt, Khiên, T�
 
 ### 32. Nhà Phát Minh (`inventor`)
 
-HP:2 | Tốc: 0.8x | Dame: 0.5 | Đạn: 4. Dùng Linh Kiện (LK) nâng cấp. Sở hữu Drone Không Kích.
+HP:5.5 | Tốc: 0.8x | Dame:0.7 | Đạn: 4. Dùng Linh Kiện (LK) nâng cấp. Sở hữu Drone Không Kích.
 
-- **Chỉ số thực đầu hiệp:** HP 2 · Sát thương 0.5 · Đạn 4 · Tốc độ 2.24 · Kích thước 30×30
-- **Vật triệu hồi:** Drone Không Kích (1/2/4 chiếc)
+- **Chỉ số thực đầu hiệp:** HP 5.5 · Sát thương 0.7 · Đạn 4 · Tốc độ 2.24 · Kích thước 30×30
+- **Vật triệu hồi / hiệu ứng:** Drone Không Kích (1/2/4 chiếc)
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -526,7 +562,7 @@ HP:2 | Tốc: 0.8x | Dame: 0.5 | Đạn: 4. Dùng Linh Kiện (LK) nâng cấp. 
 HP:2 | Dame:1 | Đạn:6. Vô Hình (Nhấn Bắn: +40% Tốc, +50% Dame, Đòn Cường Hóa). Chảy máu & Chậm.
 
 - **Chỉ số thực đầu hiệp:** HP 2 · Sát thương 1 · Đạn 6 · Tốc độ 5.92 · Kích thước 24×24
-- **Vật triệu hồi:** Bẫy Bóng Tối (ShadowTrap)
+- **Vật triệu hồi / hiệu ứng:** Bẫy Bóng Tối
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -538,10 +574,10 @@ HP:2 | Dame:1 | Đạn:6. Vô Hình (Nhấn Bắn: +40% Tốc, +50% Dame, Đòn 
 
 ### 34. Shortgun (`shortgunATK`)
 
-HP:5 | Dame:2 | Đạn:2. Quét 180px -> Lao áp sát (cách 40px) -> Nón bộc phá 0.5s. Nhấp đúp: x2 đạn & x2 dame. Phá hủy hồi 1 đạn.
+HP:3.5 | Dame:1.3 | Đạn:2. Quét 180px -> Lao áp sát (cách 40px) -> Nón bộc phá 0.5s. Nhấp đúp: x2 đạn & x2 dame. Phá hủy hồi 1 đạn.
 
-- **Chỉ số thực đầu hiệp:** HP 7 · Sát thương 2 · Đạn 2 · Tốc độ 5.47 · Kích thước 34×34
-- **Vật triệu hồi:** Biển Lửa
+- **Chỉ số thực đầu hiệp:** HP 5.5 · Sát thương 1.3 · Đạn 2 · Tốc độ 5.47 · Kích thước 34×34
+- **Vật triệu hồi / hiệu ứng:** Biển Lửa
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -556,7 +592,7 @@ HP:5 | Dame:2 | Đạn:2. Quét 180px -> Lao áp sát (cách 40px) -> Nón bộc
 HP:2 | Dame:1 | Đạn:0 (3 Lôi Phong Thương). Nhấp: Phóng thương cắm tường nổ AoE. Giữ 0.5-1s: Thu thương. Giữ >1s: Trảm Lôi. Lôi Minh: Raycast toàn map.
 
 - **Chỉ số thực đầu hiệp:** HP 2 · Sát thương 1 · Đạn — (năng lượng riêng) · Tốc độ 5.92 · Kích thước 26×26
-- **Vật triệu hồi:** Lôi Phong Thương cắm đất
+- **Vật triệu hồi / hiệu ứng:** Lôi Phong Thương cắm đất
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -568,10 +604,10 @@ HP:2 | Dame:1 | Đạn:0 (3 Lôi Phong Thương). Nhấp: Phóng thương cắm 
 
 ### 36. Nam Châm (`magnet`)
 
-HP:5 | Dame:0.5 | Đạn:6. Đổi Cực Âm/Dương (+/-). Bắn cắm Cột Từ Trường. Hút/Đẩy kẻ địch nhiễm từ. Lướt Cực Tính đâm cột.
+HP:4.5 | Dame:0.5 | Đạn:6. Đổi Cực Âm/Dương (+/-). Bắn cắm Cột Từ Trường. Hút/Đẩy kẻ địch nhiễm từ. Lướt Cực Tính đâm cột.
 
-- **Chỉ số thực đầu hiệp:** HP 7 · Sát thương 0.5 · Đạn 6 · Tốc độ 3.5 · Kích thước 34×34
-- **Vật triệu hồi:** Nút Từ Trường (magnet nodes)
+- **Chỉ số thực đầu hiệp:** HP 6.5 · Sát thương 0.5 · Đạn 6 · Tốc độ 3.5 · Kích thước 34×34
+- **Vật triệu hồi / hiệu ứng:** Nút Từ Trường
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -583,9 +619,9 @@ HP:5 | Dame:0.5 | Đạn:6. Đổi Cực Âm/Dương (+/-). Bắn cắm Cột T�
 
 ### 37. Tiến Hóa (`evolution`)
 
-HP:1 | Dame:1 | Đạn:1 (Thuần Farm). Ăn/Phá Rương cộng vĩnh viễn chỉ số. Rương Giả Mạo (Mimic). Late game bất khả chiến bại.
+HP:5.5 | Dame:1 | Đạn:1 (Thuần Farm). Ăn/Phá Rương cộng vĩnh viễn chỉ số. Rương Giả Mạo (Mimic). Late game bất khả chiến bại.
 
-- **Chỉ số thực đầu hiệp:** HP 1 · Sát thương 1 · Đạn 1 · Tốc độ 3.5 · Kích thước 30×30
+- **Chỉ số thực đầu hiệp:** HP 5.5 · Sát thương 1 · Đạn 1 · Tốc độ 3.5 · Kích thước 30×30
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -597,10 +633,10 @@ HP:1 | Dame:1 | Đạn:1 (Thuần Farm). Ăn/Phá Rương cộng vĩnh viễn ch
 
 ### 38. Trối Chết (DeathLock) (`death_lock`)
 
-HP:5 (+2 máu xe lớn) | Dame:0.5 | Đạn:3 | Tốc: 0.8x. Nội tại Ràng Buộc: 4 tầng ấn. Đạn Cấm Chế: Lồng Xích hút & giam giữ.
+HP:6 (+2 máu xe lớn) | Dame:0.8 | Đạn:3 | Tốc: 0.8x. Nội tại Ràng Buộc: 4 tầng ấn. Đạn Cấm Chế: Lồng Xích hút & giam giữ.
 
-- **Chỉ số thực đầu hiệp:** HP 7 · Sát thương 0.5 · Đạn 3 · Tốc độ 2.8 · Kích thước 34×34
-- **Vật triệu hồi:** Lồng Cấm Chế (ConfinementCage)
+- **Chỉ số thực đầu hiệp:** HP 8 · Sát thương 0.8 · Đạn 3 · Tốc độ 2.8 · Kích thước 34×34
+- **Vật triệu hồi / hiệu ứng:** Lồng Cấm Chế
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -612,10 +648,10 @@ HP:5 (+2 máu xe lớn) | Dame:0.5 | Đạn:3 | Tốc: 0.8x. Nội tại Ràng B
 
 ### 39. Kẻ Sáng Tạo (`creator`)
 
-HP:1 | Dame:0.25 | Đạn:1 | Tốc: 1.0x. Bản Thiết Kế Toàn Năng: Ụ Súng Tự Ngắm (max 2), Khiên Thép Chắn Đạn (5 HP), Drone Không Kích.
+HP:3 | Dame:0.25 | Đạn:1 | Tốc: 1.0x. Bản Thiết Kế Toàn Năng: Ụ Súng Tự Ngắm (max 2), Khiên Thép Chắn Đạn (5 HP), Drone Không Kích.
 
-- **Chỉ số thực đầu hiệp:** HP 1 · Sát thương 0.25 · Đạn 1 · Tốc độ 3.5 · Kích thước 24×24
-- **Vật triệu hồi:** Ụ Súng Tự Ngắm, Khiên Thép, Drone Không Kích, Robot Chiến Đấu (Evo 2)
+- **Chỉ số thực đầu hiệp:** HP 3 · Sát thương 0.25 · Đạn 1 · Tốc độ 3.5 · Kích thước 24×24
+- **Vật triệu hồi / hiệu ứng:** Ụ Súng Tự Ngắm, Khiên Thép, Drone, Robot Chiến Đấu (Evo 2)
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -629,8 +665,8 @@ HP:1 | Dame:0.25 | Đạn:1 | Tốc: 1.0x. Bản Thiết Kế Toàn Năng: Ụ S
 
 HP:1 | Dame:1 | Đạn:1 | Tốc: 0.8x. Linh Minh Hộ Thể: Khởi đầu 6 Linh Hồn (Linh Giáp đỡ đòn). Tụ lực phím Bắn triệu hồi 3 mốc Vong Linh.
 
-- **Chỉ số thực đầu hiệp:** HP 1 + 6 Linh Hồn · Sát thương 1 · Đạn 1 · Tốc độ 2.8 · Kích thước 32×32
-- **Vật triệu hồi:** Vong Linh: Cảm Tử / Xạ Thủ / Cao Cấp
+- **Chỉ số thực đầu hiệp:** HP 1 + 5 Linh Hồn · Sát thương 1 · Đạn 1 · Tốc độ 2.8 · Kích thước 32×32
+- **Vật triệu hồi / hiệu ứng:** Vong Linh: Cảm Tử / Xạ Thủ / Cao Cấp (lao húc)
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -642,10 +678,10 @@ HP:1 | Dame:1 | Đạn:1 | Tốc: 0.8x. Linh Minh Hộ Thể: Khởi đầu 6 Li
 
 ### 41. Thiên Tài (`genius`)
 
-HP:1 | Dame:1 | Đạn:1 | Tốc: 1.3x. Thu thập Bánh Răng & Linh Kiện. Mở Chợ Đen nâng cấp Robot. Đủ Bánh Răng nhấn giữ để trực tiếp Lái Mecha!
+HP:2.5 | Dame:1 | Đạn:1 | Tốc: 1.3x. Thu thập Bánh Răng & Linh Kiện. Mở Chợ Đen nâng cấp Robot. Đủ Bánh Răng nhấn giữ để trực tiếp Lái Mecha!
 
-- **Chỉ số thực đầu hiệp:** HP 1 · Sát thương 1 · Đạn 1 · Tốc độ 4.55 · Kích thước 24×24
-- **Vật triệu hồi:** Mecha chiến đấu (lái được)
+- **Chỉ số thực đầu hiệp:** HP 2.5 · Sát thương 1 · Đạn 1 · Tốc độ 4.55 · Kích thước 24×24
+- **Vật triệu hồi / hiệu ứng:** Mecha (lái được, Full Evo: ném Robot tự hủy)
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -653,11 +689,102 @@ HP:1 | Dame:1 | Đạn:1 | Tốc: 1.3x. Thu thập Bánh Răng & Linh Kiện. M�
   | Tối Ưu Hóa (`evo_gen_1`) | $90 | Giảm tiêu hao Bánh Răng vào Mecha còn 6 BR; Kỹ năng giảm 1 NL; Hoàn lại 4 BR khi Mecha vỡ; Hồi 2 NL/s khi không dùng kỹ năng 2s. |
   | Vũ Trang Hóa (`evo_gen_2`) | $110 | Bắn thường Mecha có Xuyên Thấu. Trang bị 4 module tự động (Bắn phụ 3s, Radar AAA 8s, Chấn Động 10s, Pháo Thủy Lực 8 NL). |
 
-- **Mã nguồn:** `js/characters/genius/logic.js`, `js/characters/genius/render.js`
+- **Mã nguồn:** `js/characters/genius/logic.js`, `js/characters/genius/render.js`, `js/characters/genius/summons.js`
+
+### 42. Kiếm Khách (`kiem_khach`) 🆕
+
+HP:3 | Dame:1.2 | Đạn:3. Bắn phi kiếm. Mất khiên -> Tập Trung 3s (né mọi đòn). Mỗi hiệp nhận Bài Tập Luyện Kiếm để tăng sức mạnh vĩnh viễn.
+
+- **Chỉ số thực đầu hiệp:** HP 3 · Sát thương 1.2 · Đạn 3 · Tốc độ 3.5 · Kích thước 30×30
+- **Vật triệu hồi / hiệu ứng:** Đại kiếm giáng trời (Vân Tinh Vũ)
+- **Tiến hoá:**
+
+  | Evo | Giá | Hiệu ứng |
+  |---|---:|---|
+  | Lấy Tâm Luyện Kiếm (`evo_kk_1`) | $90 | Giảm 50% yêu cầu của mọi bài tập. Tập Trung khi mất khiên kéo dài 5s (thay vì 3s). |
+  | Thí Luyện (`evo_kk_2`) | $110 | Chọn 2 bài tập mỗi lần mở bảng. Đầu mỗi hiệp nhận sẵn 1 Khiên. FULL EVO: chọn 4 bài, yêu cầu giảm sâu, mở 5 Bài Tập Cuối -> Hóa Thần. |
+
+- **Mã nguồn:** `js/characters/kiem_khach/logic.js`, `js/characters/kiem_khach/render.js`, `js/characters/kiem_khach/quests.js`
+
+### 43. Bình Phun (`sprayer`) 🆕
+
+HP:5 (+2 xe lớn) | Năng lượng. Nhấp: Bật/Tắt phun hình nón. Giữ 0.5s: đổi chất Lửa/Axit/Băng. Lớp phủ đầy 100% -> Nổ / Câm Lặng / Đóng Băng. Vật cản chặn luồng phun.
+
+- **Chỉ số thực đầu hiệp:** HP 7 · Sát thương 0 · Đạn — (năng lượng riêng) · Tốc độ 2.89 · Kích thước 34×34
+- **Vật triệu hồi / hiệu ứng:** Vũng Lửa / Axit / Băng (Evo 2)
+- **Tiến hoá:**
+
+  | Evo | Giá | Hiệu ứng |
+  |---|---:|---|
+  | Năng Lượng Xanh (`evo_spray_1`) | $80 | Hồi năng lượng nhanh hơn 50%, phun tiêu hao chậm hơn 30%. |
+  | Dấu Vết Độc Địa (`evo_spray_2`) | $110 | Lớp phủ bám lâu hơn. Phun liên tục để lại vũng Lửa/Axit/Băng 3s. FULL EVO: Nổ 7 dmg lan, Axit ăn mòn x2 & câm thêm 1s, Đóng băng 2.5s. |
+
+- **Mã nguồn:** `js/characters/sprayer/logic.js`, `js/characters/sprayer/render.js`
+
+### 44. Tùy Biến (`customize`) 🆕
+
+HP:6 | Dame:1.5 | Đạn:1. Xe lắp ghép: mỗi hiệp nhận Điểm Tùy Chỉnh để lắp Lối Bắn, Dạng Đạn, Tính Chất Đạn, Kích Thước. Thua liên tiếp nhận thêm điểm.
+
+- **Chỉ số thực đầu hiệp:** HP 6 · Sát thương 1.5 · Đạn 4 · Tốc độ 3.5 · Kích thước 30×30
+- **Vật triệu hồi / hiệu ứng:** Vũng hiệu ứng theo mô-đun
+- **Tiến hoá:**
+
+  | Evo | Giá | Hiệu ứng |
+  |---|---:|---|
+  | Gói VIP (`evo_cu_1`) | $80 | Mở thêm mô-đun: Đạn Tự Ngắm, Đạn Hút (kéo đối thủ), Nảy Tường (+sát thương mỗi lần nảy). |
+  | Cá Nhân Hóa (`evo_cu_2`) | $110 | Mọi hiệu ứng lắp ghép mạnh hơn 30%. +1 Điểm Tùy Chỉnh mỗi hiệp. FULL EVO: chọn 1 Nội Tại Độc Quyền. |
+
+- **Mã nguồn:** `js/characters/customize/logic.js`, `js/characters/customize/render.js`
+
+### 45. Kiếm Sư (`kiem_su`) 🆕
+
+HP:4 | Dame:1 | Đạn:5 | Tốc: 1.1x. Ngũ Hành: mỗi phi kiếm mang 1 nguyên tố ngẫu nhiên (Kim tiền, Mộc trói, Hỏa nổ, Thổ dựng đá, Thủy hồi máu).
+
+- **Chỉ số thực đầu hiệp:** HP 4 · Sát thương 1 · Đạn 5 · Tốc độ 3.85 · Kích thước 28×28
+- **Vật triệu hồi / hiệu ứng:** Khối Đá, Vùng Rễ, Bùn, Gai, Biển Lửa
+- **Tiến hoá:**
+
+  | Evo | Giá | Hiệu ứng |
+  |---|---:|---|
+  | Điều Tức Chuyển Khí (`evo_ks_1`) | $90 | Cường hóa mọi nguyên tố. Giữ Bắn 0.25s: đổi chỗ viên đạn hiện tại và viên kế tiếp (trùng màu thì tự đổi màu). |
+  | Ngũ Hành Giao Thoa (`evo_ks_2`) | $120 | 2 phi kiếm liên tiếp tạo phản ứng: Đồng nguyên tố / Tương sinh / Tương khắc (15 phản ứng). FULL EVO: mỗi phát kèm 2 kiếm hộ tống, phản ứng mạnh hơn. |
+
+- **Mã nguồn:** `js/characters/kiem_su/logic.js`, `js/characters/kiem_su/render.js`
+
+## Phụ lục: cơ chế các body mới
+
+### Kiếm Khách — Bài Tập Luyện Kiếm
+- Shop có nút **📜 LUYỆN KIẾM**: mỗi hiệp nhận 1 lượt chọn bài (Evo 2: 2 lượt, Full Evo: 4). Hiệp 1 tự nhận *Mưa Kiếm I* + *Mài Kiếm*.
+- **Kỹ năng:** Mưa Kiếm I–III (+1/2/3 kiếm mỗi loạt) · Kiếm Vũ I–III (bắn chùm) · Phá Trời (xuyên) · Kiếm Ảnh I–III (Tập Trung: kiếm x2 tốc, +1/2/3s) · Bảo Kiếm (Tập Trung: vô hạn đạn, giữ để xả; cần 3 bài kỹ năng).
+- **Chỉ số (làm lại được, yêu cầu tăng dần):** Thối Thể (+1 HP) · Mài Kiếm (+0.25 dmg) · Tích Lũy (+50$) · Bộ Pháp (+0.2 tốc) · Băng Đạn (+1 đạn).
+- **5 Bài Cuối (Full Evo):** Vân Tinh Vũ · Phân Ảnh · Phá · Kiếm Thế Cường · Cơ Hội Cuối → xong cả 5 thành **Hóa Thần**.
+- Evo 1 giảm 50% yêu cầu; Full Evo giảm còn 35%.
+
+### Bình Phun — Lớp phủ
+| Chất | Khi đang phủ | Đầy 100% |
+|---|---|---|
+| Lửa | Thiêu 0.25 HP/s | Nổ 5 dmg (Full: 7, lan rộng) |
+| Axit | Ăn mòn 1.25% HP tối đa/s, Suy Yếu tới +30% sát thương nhận | Câm Lặng đến khi tụt dưới 99% (Full: +1s) |
+| Băng | 0.125 HP/s, chậm dần tới -60% | Đóng băng 2s (Full: 2.5s), còn 25% |
+
+Luồng phun bị chặn bởi Tường Sniper, thanh cản, tường thành, Xe Tiền, Khiên Thép, Khối Đá. Axit làm tan vật cản/ụ súng rất nhanh, Lửa đốt nổ vật cản, Băng làm chậm vật cản di động.
+
+### Tùy Biến — Điểm Tùy Chỉnh (CP)
+- Mỗi hiệp +1 CP; thắng +1; thua liên tiếp ≥2 hiệp +2; Evo 2 +1. Mỗi mô-đun tốn 1 CP.
+- Lối Bắn: Tap / Shotgun / SMG / Tích Tụ / Hold (tia) / Tiến Công (lao húc). Dạng Đạn: Tròn / Thẳng / Kiếm / Pháo.
+- Tính chất (cộng dồn): Nổ, Xuyên, 1 loại Vùng (Axit/Băng/Lửa/Câm Lặng), Hitscan. VIP (Evo 1): Tự Ngắm, Đạn Hút, Nảy Tường.
+- Kích thước: Thu Nhỏ (24×24, +30% tốc, -1 HP) / Phóng To (38×38, -20% tốc, +4 HP). Full Evo: chọn 1 Nội Tại độc quyền.
+
+### Kiếm Sư — 15 phản ứng Ngũ Hành (Evo 2)
+| Nhóm | Phản ứng |
+|---|---|
+| Đồng nguyên tố | Kim+Kim: kiếm to xuyên +1 dmg · Mộc+Mộc: hồi 0.5 HP, +20% tốc 2s · Thủy+Thủy: khiên nước, vỡ đẩy lùi · Hỏa+Hỏa: nổ x2, xóa đạn địch · Thổ+Thổ: đá x2 máu & thời gian |
+| Tương sinh | Kim+Thủy: hồi 0.5 HP + 2 đạn · Thủy+Mộc: rễ lan rộng hút máu · Mộc+Hỏa: biển lửa 3s · Hỏa+Thổ: tường nham thạch phản đòn · Thổ+Kim: +30$, 3 phát nhanh hơn 40% |
+| Tương khắc | Kim+Mộc: gai gây Chảy Máu · Mộc+Thổ: xuyên & phá vật cản nhân tạo · Thổ+Thủy: đầm lầy -70% tốc · Thủy+Hỏa: hơi nước làm mù HUD 1.5s · Hỏa+Kim: Câm Lặng 1.5s |
 
 ## Cửa hàng riêng
 
-### ⚙ Chợ Linh Kiện — Nhà Phát Minh (trả bằng Linh Kiện LK)
+### ⚙ Chợ Linh Kiện — Nhà Phát Minh
 
 | Món | ID | Nhóm | Giá (LK) | Cấp tối đa | Hiệu ứng |
 |---|---|---|---:|---:|---|
@@ -681,7 +808,7 @@ HP:1 | Dame:1 | Đạn:1 | Tốc: 1.3x. Thu thập Bánh Răng & Linh Kiện. M�
 | Khiên Drone (Evo) | `inv_khien_drone` | evo2 | 2 | 3 | Tăng máu, giáp ảo trực tiếp cho Drone. |
 | Nâng Cấp Cuối Cùng | `inv_full_evo` | fullevo | 15 | 1 | FULL EVO: 4 Drone (200% chỉ số), giảm 60% CD nòng phụ, xe chủ tích hợp toàn bộ vũ khí! |
 
-### 🤖 Chợ Đen Robot — Thiên Tài (trả bằng Bánh Răng)
+### 🤖 Chợ Đen Robot — Thiên Tài
 
 | Món | ID | Hiệu ứng |
 |---|---|---|

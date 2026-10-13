@@ -61,7 +61,7 @@ Object.assign(Player.prototype, {
                 // ====================================================
                 if (this.sukunaChargeTimer === 1 && !this.domainActive) {
                     // ✅ THÊM COOLDOWN 300ms: now - this.lastShot > 300
-                    if (this.cursedEnergy >= 10 && now - this.lastShot > 300) {
+                    if (this.cursedEnergy >= 10 && now - this.lastShot > 450) { // [CÂN BẰNG] 300 -> 450ms
                         this.cursedEnergy -= 5;
                         this.lastShot = now; // Lưu lại mốc thời gian bắn để chống spam
                         this.bullets.push({
@@ -71,7 +71,7 @@ Object.assign(Player.prototype, {
                             w: hasEvo2 ? 60 : 30, h: 6,
                             vx: 0,
                             vy: (this.id === 1) ? -18 : 18,
-                            dmg: 1, owner: this, hitIds: [], isSukunaSlash: true
+                            dmg: 0.5, owner: this, hitIds: [], isSukunaSlash: true // [CÂN BẰNG] 1 -> 0.5
                         });
                     }
                 }

@@ -7,7 +7,7 @@ Object.assign(Player.prototype, {
         let dirY = (this.id === 1) ? -1 : 1;
         let isDouble = this.shortgunDoubleTap;
         // [CÂN BẰNG] Bắn sát mặt nên gần như mọi viên đều trúng: 0.45x mỗi viên (trước 1x), Double Tap 7 viên x1.5 (trước 8 viên x2)
-        let dmgMultiplier = (isDouble ? 1.5 : 1) * 0.45;
+        let dmgMultiplier = (isDouble ? 1.5 : 1) * 0.35;
         let pelletCount = isDouble ? 7 : 5;
         let coneSpread = 0.45;
         let startX = this.x + this.w / 2;

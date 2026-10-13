@@ -40,3 +40,24 @@ Thêm file mới thì nhớ thêm thẻ `<script>` vào `index.html`, đặt **s
 nếu file đó gắn method vào `Player.prototype`.
 
 Xem thông tin chi tiết các body (chỉ số, tiến hoá, vật triệu hồi): [docs/BODIES.md](../docs/BODIES.md).
+
+## Thêm body mới (cách khuyên dùng)
+
+Body mới không cần sửa lõi Player. Tạo `js/characters/<id>/logic.js` và đăng ký hook
+(xem đầy đủ trong `js/core/hooks.js`):
+
+```js
+CharHooks.register('my_body', {
+    setup() { ... },                 // đầu hiệp
+    update(inp, effInp, now) { ... }, // mỗi tick
+    shoot(inp, now) { return true; }, // tự xử lý nút bắn
+    draw() { ... }, drawUI() { ... },
+    beforeDamage(dmg, attacker) { return false; }, // true = chặn đòn
+    shieldBreak() {}, beforeLethal() {}, damaged(d) {}, roundEnd(result) {},
+    shopButtons(container, playerId) {},          // nút riêng trong shop
+});
+```
+
+Đạn dùng `spawnBullet(owner, {..., hook: 'my_body'})` và `BulletHooks.register('my_body', { hit, edge, obstacle, draw })`.
+Thêm dữ liệu body vào `js/data/modules.js`, tiến hoá vào `js/data/evolutions.js`, và thẻ `<script>` vào `index.html`.
+Các body Kiếm Khách, Bình Phun, Tùy Biến, Kiếm Sư được viết theo cách này.

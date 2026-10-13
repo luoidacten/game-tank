@@ -11,7 +11,7 @@ Object.assign(Player.prototype, {
         // [CÂN BẰNG] Mỗi cú lao chỉ trúng địch 1 lần (trước đây trúng mỗi tick khi đi xuyên qua)
         if (!this.tankDashHitEnemy && rectIntersect(this.x, this.y, this.w, this.h, enemy.x, enemy.y, enemy.w, enemy.h)) {
             this.tankDashHitEnemy = true;
-            let dmg = this.damage * 3;
+            let dmg = this.damage * 1.1; // [CÂN BẰNG] 3x -> 1.1x
             if (this.hasUpgrade('evo_tank_1')) dmg *= 1.5;
 
             enemy.takeDamage(dmg, this);
@@ -253,7 +253,7 @@ Object.assign(Player.prototype, {
                 if ((this.id === 1 && this.y >= this.dashStartY) || (this.id === 2 && this.y <= this.dashStartY)) {
                     this.y = this.dashStartY;
                     this.dashState = 0;
-                    this.tankDashCooldown = 90; // [CÂN BẰNG] hồi chiêu 1.5s (hòm đạn reset ngay)
+                    this.tankDashCooldown = 120; // [CÂN BẰNG] hồi chiêu 2s (hòm đạn reset ngay)
                 }
                 return true;
             }
