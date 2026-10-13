@@ -170,5 +170,21 @@ const EVOLUTIONS = {
     genius: [
         { id: 'evo_gen_1', name: 'Tối Ưu Hóa', desc: 'Giảm tiêu hao Bánh Răng vào Mecha còn 6 BR; Kỹ năng giảm 1 NL; Hoàn lại 4 BR khi Mecha vỡ; Hồi 2 NL/s khi không dùng kỹ năng 2s.', cost: 90, type: 'evo' },
         { id: 'evo_gen_2', name: 'Vũ Trang Hóa', desc: 'Bắn thường Mecha có Xuyên Thấu. Trang bị 4 module tự động (Bắn phụ 3s, Radar AAA 8s, Chấn Động 10s, Pháo Thủy Lực 8 NL).', cost: 110, type: 'evo' }
+    ],
+    kiem_khach: [
+        { id: 'evo_kk_1', name: 'Lấy Tâm Luyện Kiếm', desc: 'Giảm 50% yêu cầu của mọi bài tập. Tập Trung khi mất khiên kéo dài 5s (thay vì 3s).', cost: 90, type: 'evo' },
+        { id: 'evo_kk_2', name: 'Thí Luyện', desc: 'Chọn 2 bài tập mỗi lần mở bảng. Đầu mỗi hiệp nhận sẵn 1 Khiên. FULL EVO: chọn 4 bài, yêu cầu giảm sâu, mở 5 Bài Tập Cuối -> Hóa Thần.', cost: 110, type: 'evo' }
+    ],
+    sprayer: [
+        { id: 'evo_spray_1', name: 'Năng Lượng Xanh', desc: 'Hồi năng lượng nhanh hơn 50%, phun tiêu hao chậm hơn 30%.', cost: 80, type: 'evo' },
+        { id: 'evo_spray_2', name: 'Dấu Vết Độc Địa', desc: 'Lớp phủ bám lâu hơn. Phun liên tục để lại vũng Lửa/Axit/Băng 3s. FULL EVO: Nổ 7 dmg lan, Axit ăn mòn x2 & câm thêm 1s, Đóng băng 2.5s.', cost: 110, type: 'evo' }
+    ],
+    customize: [
+        { id: 'evo_cu_1', name: 'Gói VIP', desc: 'Mở thêm mô-đun: Đạn Tự Ngắm, Đạn Hút (kéo đối thủ), Nảy Tường (+sát thương mỗi lần nảy).', cost: 80, type: 'evo' },
+        { id: 'evo_cu_2', name: 'Cá Nhân Hóa', desc: 'Mọi hiệu ứng lắp ghép mạnh hơn 30%. +1 Điểm Tùy Chỉnh mỗi hiệp. FULL EVO: chọn 1 Nội Tại Độc Quyền.', cost: 110, type: 'evo' }
+    ],
+    kiem_su: [
+        { id: 'evo_ks_1', name: 'Điều Tức Chuyển Khí', desc: 'Cường hóa mọi nguyên tố. Giữ Bắn 0.25s: đổi chỗ viên đạn hiện tại và viên kế tiếp (trùng màu thì tự đổi màu).', cost: 90, type: 'evo' },
+        { id: 'evo_ks_2', name: 'Ngũ Hành Giao Thoa', desc: '2 phi kiếm liên tiếp tạo phản ứng: Đồng nguyên tố / Tương sinh / Tương khắc (15 phản ứng). FULL EVO: mỗi phát kèm 2 kiếm hộ tống, phản ứng mạnh hơn.', cost: 120, type: 'evo' }
     ]
 };

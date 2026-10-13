@@ -240,6 +240,9 @@ function renderShop(playerId, keepItems = false) {
         container.appendChild(card);
     });
 
+    // Nút riêng của các body đăng ký qua CharHooks (Luyện Kiếm, Tùy Biến...)
+    CharHooks.call(player, 'shopButtons', container, playerId);
+
     // Nút độc quyền cho Nhà Phát Minh: MỞ CHỢ LINH KIỆN
     if (player.weapon === 'inventor') {
         const invBtn = document.createElement('div');

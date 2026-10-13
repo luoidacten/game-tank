@@ -43,6 +43,7 @@ function startRound() {
     fireZones = [];
     floatingTexts = [];
     particles = [];
+    bodyEffects = [];
 
     // Map selection & Mutators
     let isOnlineGuest = (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'guest');
@@ -194,6 +195,14 @@ function endRound(winnerId) {
     }
 
     updateScoreBoard();
+
+    // Hook kết thúc hiệp cho body (bài tập, điểm tùy chỉnh...)
+    [p1, p2].forEach(p => {
+        const res = winnerId === 0 ? 'draw' : (winnerId === p.id ? 'win' : 'lose');
+        p.lastRoundResult = res;
+        p.loseStreak = res === 'lose' ? (p.loseStreak || 0) + 1 : 0;
+        CharHooks.call(p, 'roundEnd', res);
+    });
 
     // Online: host gửi kết quả hiệp cho guest
     if (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'host') {

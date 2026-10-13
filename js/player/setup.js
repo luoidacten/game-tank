@@ -249,6 +249,10 @@ Object.assign(Player.prototype, {
         // Genius setup
         this.setupGenius();
 
+        // Body đăng ký qua CharHooks (js/core/hooks.js)
+        this.statusSpeedMult = 1; this.statusVuln = 0; this._nextSpeedMult = 1; this._nextVuln = 0;
+        CharHooks.call(this, 'setup');
+
         // 6. FINAL STATE RESET (QUAN TRỌNG NHẤT)
         // Đặt ở cuối cùng để đảm bảo nhận đủ MaxHP và MaxAmmo từ tất cả nguồn trên
         this.hp = this.maxHp;

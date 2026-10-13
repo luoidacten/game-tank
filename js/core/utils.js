@@ -26,6 +26,7 @@ function clearOwnedSummons(owner) {
     floatingSwords = floatingSwords.filter(notMine);
     arrowRains = arrowRains.filter(notMine);
     mortars = mortars.filter(notMine);
+    bodyEffects = bodyEffects.filter(notMine);
 }
 
 function rectIntersect(x1, y1, w1, h1, x2, y2, w2, h2) {

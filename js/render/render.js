@@ -162,6 +162,7 @@ function renderFrame() {
     });
     ctx.restore();
 
+    bodyEffects.forEach(e => e.draw());
     confinementCages.forEach(c => c.draw());
     creatorTurrets.forEach(t => t.draw());
     creatorRobots.forEach(r => r.draw());

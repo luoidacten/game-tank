@@ -145,9 +145,11 @@ Object.assign(Player.prototype, {
         // Reset Alpha ở cuối hàm draw
         ctx.globalAlpha = 1.0;
 
+        CharHooks.call(this, 'draw');
         this.drawUI();
 
         this.bullets.forEach(b => {
+            if (b.hook && BulletHooks.registry[b.hook] && BulletHooks.registry[b.hook].draw) { BulletHooks.call(b, 'draw'); return; }
             // --- VẼ TIA SÁNG NEON (NƯỚC / LỬA) ---
             if (b.isWater || b.isFurnace) {
                 ctx.save();
@@ -506,5 +508,6 @@ Object.assign(Player.prototype, {
         this.drawUIForEvolution();
 
         ctx.restore();
+        CharHooks.call(this, 'drawUI');
     }
 });

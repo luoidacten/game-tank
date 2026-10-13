@@ -305,8 +305,15 @@ function tickPhysics() {
         onlineManager.onGameLoopTick();
     }
 
+    // Hiệu ứng của các body mới (vùng, khối đá, kiếm trời, hitscan)
+    for (let i = bodyEffects.length - 1; i >= 0; i--) {
+        bodyEffects[i].update();
+        if (!bodyEffects[i].active) bodyEffects.splice(i, 1);
+    }
+
     p1.update(); p2.update();
     checkHits(p1, p2); checkHits(p2, p1);
+    commitStatuses(p1); commitStatuses(p2);
 
     for (let i = mortars.length - 1; i >= 0; i--) {
         let m = mortars[i];

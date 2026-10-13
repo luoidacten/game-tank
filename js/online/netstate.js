@@ -14,6 +14,7 @@ const NET_CLASSES = {
     ShadowTrap, ShortgunFireZone, FireZone, WindWall, InventorDrone, ConfinementCage,
     CreatorTurret, CreatorShield, CreatorDrone, CreatorRobot,
     SniperWall, NecroMinion, GhostDecoy, Turret,
+    BodyZone, StoneBlock, SkyStrike, HitscanTelegraph,
 };
 
 // Biến toàn cục cần đồng bộ: [tên, getter, setter]
@@ -49,9 +50,13 @@ const NET_ROOTS = [
     ['creatorDrones', () => creatorDrones, v => creatorDrones = v],
     ['creatorRobots', () => creatorRobots, v => creatorRobots = v],
     ['necroMinions', () => necroMinions, v => necroMinions = v],
+    ['bodyEffects', () => bodyEffects, v => bodyEffects = v],
     ['screenShake', () => screenShake, v => Object.assign(screenShake, v)],
     ['fatalCinematic', () => fatalCinematic, v => fatalCinematic = v],
 ];
+
+// Mảng chứa object thường (được vẽ bằng hàm riêng, không có .draw)
+const NET_PLAIN_LISTS = new Set(['thunderPlantedSpears', 'magnetNodes']);
 
 // Trường của gameState được host quyết định
 const NET_GAMESTATE_KEYS = ['round', 'p1Score', 'p2Score', 'p1Coins', 'p2Coins', 'phase', 'currentMap', 'winScore', 'lastObstacleSpawn', 'lastArtillerySpawn'];
@@ -59,7 +64,8 @@ const NET_GAMESTATE_KEYS = ['round', 'p1Score', 'p2Score', 'p1Coins', 'p2Coins',
 // Trang bị / ví của người chơi (đồng bộ ở màn hình shop)
 const NET_LOADOUT_KEYS = ['upgrades', 'rerollCount', 'upgradeLevel', 'invUpgrades', 'boughtInvShopItems', 'boughtShopItems', 'isFullEvoInventor',
     'components', 'gears', 'geniusUpgrades', 'geniusPurchaseCount', 'mechaSummonMultiplier',
-    'shortgunBonusMaxHp', 'shortgunBonusDmg', 'evolutionPermanentBonus'];
+    'shortgunBonusMaxHp', 'shortgunBonusDmg', 'evolutionPermanentBonus',
+    'kkData', 'cuData', 'loseStreak', 'lastRoundResult'];
 
 const NetState = {
     // ---------- Tuần tự hoá ----------
@@ -149,7 +155,14 @@ const NetState = {
         const data = JSON.parse(json);
         const now = Date.now();
         const w = this.decode(data, now, { p1, p2 });
-        for (const [name, , set] of NET_ROOTS) if (name in w) set(w[name]);
+        // Mảng được vẽ bằng item.draw(): bỏ phần tử mất hàm draw khi truyền mạng
+        // (vd. hiệu ứng tia kiếm tạo bằng object chứa function) để guest không lỗi khung hình
+        for (const [name, , set] of NET_ROOTS) {
+            if (!(name in w)) continue;
+            let v = w[name];
+            if (Array.isArray(v) && !NET_PLAIN_LISTS.has(name)) v = v.filter(it => it && typeof it.draw === 'function');
+            set(v);
+        }
         if (w.gs) {
             NET_GAMESTATE_KEYS.forEach(k => { if (w.gs[k] !== undefined) gameState[k] = w.gs[k]; });
             gameState.roundStartTime = now - (w.gs.roundElapsed || 0);

@@ -159,6 +159,7 @@ function checkHits(attacker, victim) {
                     }
 
                     t.hp -= dmgToTurret;
+                    BulletHooks.call(b, 'obstacle', attacker, t, 'turret');
                     explosions.push(new Explosion(t.x + t.w / 2, t.y + t.h / 2, 20, 'gray', 0, attacker));
 
                     // KÍCH HOẠT HIỆU ỨNG NHƯ NGƯỜI CHƠI
@@ -237,10 +238,13 @@ function checkHits(attacker, victim) {
         if (typeof sniperWalls !== 'undefined') allWalls.push(...sniperWalls);
         if (typeof movingObstacle !== 'undefined' && movingObstacle && movingObstacle.active) allWalls.push(movingObstacle);
         if (typeof bastions !== 'undefined' && bastions.length > 0) allWalls.push(...bastions);
+        for (let s of bodyEffects) if (s.isStone && s.active && s.owner !== b.owner) allWalls.push(s); // Khối đá Thổ chặn đạn đối thủ
 
         for (let w of allWalls) {
             if (w.active && rectIntersect(b.x, b.y, b.w, b.h, w.x, w.y, w.w, w.h)) {
                 if (b.isPiercing && b.hitIds && b.hitIds.includes(w)) continue;
+                if (BulletHooks.call(b, 'obstacle', attacker, w, w.isStone ? 'stone' : 'wall') === 'pass') continue;
+                if (w.isStone && w.isLava) BulletHooks.call({ hook: 'kiem_su' }, 'lavaHit', w, b);
                 let isOwnEvoWall = (b.owner && w.owner === b.owner && b.owner.hasUpgrade('evo_sniper_1'));
 
                 if (!w.isImmortal) {
@@ -447,7 +451,9 @@ function checkHits(attacker, victim) {
             }
             if (hitIllusion) continue; // Nếu trúng bóng, bỏ qua xét trúng bản thể
         }
-        let hitReal = rectIntersect(b.x, b.y, b.w, b.h, victim.x, victim.y, victim.w, victim.h);
+        // [FIX] Xe đã về 0 HP không nhận va chạm đạn nữa. Trước đây Shortgun (Evo 2) hạ gục ->
+        // sinh đạn pháo ngay trên xác -> đạn trúng xác -> lại tính hạ gục... vòng lặp vô hạn làm sập game.
+        let hitReal = victim.hp > 0 && rectIntersect(b.x, b.y, b.w, b.h, victim.x, victim.y, victim.w, victim.h);
 
         // 1. Check Mirror clone projection
         let hitProjection = false;
@@ -650,7 +656,8 @@ function checkHits(attacker, victim) {
             }
 
             if (localApplyDamage) {
-                victim.takeDamage(finalDmg, attacker);
+                let dealtDmg = victim.takeDamage(finalDmg, attacker);
+                BulletHooks.call(b, 'hit', attacker, victim, dealtDmg);
 
                 // --- SHADOW HUNTER BULLET HIT EFFECTS ---
                 if (attacker.weapon === 'shadow_hunter' || b.isShadowHunter) {

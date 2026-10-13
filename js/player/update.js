@@ -282,6 +282,8 @@ Object.assign(Player.prototype, {
 
         // --- DI CHUYỂN BÌNH THƯỜNG ---
 
+        CharHooks.call(this, 'update', inp, effectiveInp, now);
+
         let currentSpeed = this.speed;
         if (this.slowTimer > 0) currentSpeed *= 0.5;
         if (this.acidBurnTimer > 0) currentSpeed *= 0.75;
@@ -445,10 +447,16 @@ Object.assign(Player.prototype, {
             }
         }
 
+        // Trạng thái chung (vùng làm chậm...) & hook tốc độ của body mới
+        currentSpeed *= (this.statusSpeedMult === undefined ? 1 : this.statusSpeedMult);
+        if (CharHooks.has(this, 'speed')) currentSpeed = CharHooks.call(this, 'speed', currentSpeed);
+
+        const prevXForStone = this.x;
         if (inp.l) this.x -= currentSpeed;
         if (inp.r) this.x += currentSpeed;
 
         this.updatePortal();
+        if (bodyEffects.length) resolveStoneBlocking(this, prevXForStone);
 
         // Tự động hồi đạn lẻ theo thời gian (Chặn khi Shadow Hunter đang tàng hình)
         if (this.weapon !== 'tank' && this.weapon !== 'sniper' && !(this.weapon === 'shadow_hunter' && this.stealthActive)) {
@@ -468,6 +476,7 @@ Object.assign(Player.prototype, {
 
     handleShooting(inp, now) {
         if (this.weapon === 'cung') return;
+        if (CharHooks.call(this, 'shoot', inp, now) === true) return;
 
         // ==========================================
         // SHADOW HUNTER

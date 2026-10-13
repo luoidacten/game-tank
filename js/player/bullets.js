@@ -374,6 +374,7 @@ Object.assign(Player.prototype, {
                 } else hitWall = true;
             }
             if (hitWall) {
+                if (BulletHooks.call(b, 'edge', this) === 'keep') continue; // hook tự xử lý (vd. nảy tường)
                 // --- THUNDER SPEAR CẮM TƯỜNG & NỔ ---
                 if (b.isThunderSpear) {
                     let hasEvo1 = (this.hasUpgrade && this.hasUpgrade('evo_thun_1'));
@@ -486,6 +487,7 @@ Object.assign(Player.prototype, {
             }
 
             if (movingObstacle && movingObstacle.active && rectIntersect(b.x, b.y, b.w, b.h, movingObstacle.x, movingObstacle.y, movingObstacle.w, movingObstacle.h)) {
+                if (!b.isPiercing || b.hook) BulletHooks.call(b, 'obstacle', this, movingObstacle, 'moving');
                 if (!b.isPiercing) {
                     if (b.isRocket) {
                         let range = this.hasUpgrade('evo_rocket_1') || this.hasUpgrade('evo_rocket_2') ? 100 : 60;
@@ -502,6 +504,7 @@ Object.assign(Player.prototype, {
                 for (let bw of bastions) {
                     if (bw.active && rectIntersect(b.x, b.y, b.w, b.h, bw.x, bw.y, bw.w, bw.h)) {
                         bw.hp -= (b.dmg || 1);
+                        BulletHooks.call(b, 'obstacle', this, bw, 'bastion');
                         if (bw.hp <= 0) {
                             bw.active = false;
                             explosions.push(new Explosion(bw.x + bw.w / 2, bw.y + bw.h / 2, 50, '#1abc9c', 0, this));
@@ -522,7 +525,9 @@ Object.assign(Player.prototype, {
                     if (b.isPiercing && b.hitIds.includes(t)) continue;
                     let dmg = b.dmg;
                     if (this.weapon === 'money_tank') dmg *= 3;
+                    dmg *= (BulletHooks.call(b, 'truckDmgMult', this, t) || 1);
                     t.hp -= dmg;
+                    BulletHooks.call(b, 'obstacle', this, t, 'truck');
                     if (b.isPiercing) b.hitIds.push(t);
 
                     if (b.isRocket || b.isExplosive) {
@@ -565,6 +570,7 @@ Object.assign(Player.prototype, {
             for (let c of crates) {
                 if (c.active && rectIntersect(b.x, b.y, b.w, b.h, c.x, c.y, c.w, c.h)) {
                     c.active = false;
+                    BulletHooks.call(b, 'obstacle', this, c, 'crate');
                     if (c.isMimic) {
                         triggerMimicExplosion(c, this);
                     }

@@ -66,6 +66,7 @@ Object.assign(Player.prototype, {
             addFloatingText(this.x + this.w / 2, this.y - 10, "IMMUNE", "#3498db", 13);
             return 0;
         }
+        if (CharHooks.call(this, 'beforeDamage', amount, attacker, options) === true) return 0;
 
         // 2. Ghost Phasing
         if (this.weapon === 'ghost' && this.isGhostActive && !options.isEnvironmental) {
@@ -129,6 +130,7 @@ Object.assign(Player.prototype, {
         // 4. Steel Shield
         if (this.shield > 0 && !options.bypassShield) {
             this.shield--;
+            CharHooks.call(this, 'shieldBreak', attacker, options);
             addFloatingText(this.x + this.w / 2, this.y - 10, "BLOCKED", "#00f0ff", 14);
             spawnSparkParticles(this.x + this.w / 2, this.y + this.h / 2, "#00f0ff", 12);
             triggerScreenShake(5, 8);
@@ -167,6 +169,7 @@ Object.assign(Player.prototype, {
         if (this.permanentVulnerability) {
             amount *= (1 + this.permanentVulnerability);
         }
+        if (this.statusVuln) amount *= (1 + this.statusVuln); // Suy Yếu từ vùng / lớp phủ axit
 
         let actualDmg = Math.max(0.05, amount);
 
@@ -245,7 +248,9 @@ Object.assign(Player.prototype, {
             }
         }
 
+        if (this.hp - actualDmg <= 0 && CharHooks.call(this, 'beforeLethal', actualDmg, attacker) === true) return actualDmg;
         this.hp -= actualDmg;
+        CharHooks.call(this, 'damaged', actualDmg, attacker);
 
         // Visual floating text & screen shake
         let displayVal = actualDmg >= 1 ? (Math.round(actualDmg * 10) / 10).toString() : actualDmg.toFixed(1);

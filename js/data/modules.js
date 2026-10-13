@@ -153,6 +153,38 @@ const MODULES = {
             size: { w: 24, h: 24 },
             stats: { hp: 1, dmg: 1, ammo: 1, speedMult: 1.3 }
         },
+        {
+            id: 'kiem_khach',
+            name: 'Kiếm Khách',
+            desc: 'HP:2 | Dame:1 | Đạn:3. Bắn phi kiếm. Mất khiên -> Tập Trung 3s (né mọi đòn). Mỗi hiệp nhận Bài Tập Luyện Kiếm để tăng sức mạnh vĩnh viễn.',
+            type: 'body',
+            size: { w: 30, h: 30 },
+            stats: { hp: 2, dmg: 1, ammo: 3, speedMult: 1.0 }
+        },
+        {
+            id: 'sprayer',
+            name: 'Bình Phun',
+            desc: 'HP:5 (+2 xe lớn) | Năng lượng. Nhấp: Bật/Tắt phun hình nón. Giữ 0.5s: đổi chất Lửa/Axit/Băng. Lớp phủ đầy 100% -> Nổ / Câm Lặng / Đóng Băng. Vật cản chặn luồng phun.',
+            type: 'body',
+            size: { w: 34, h: 34 },
+            stats: { hp: 5, dmg: 0, ammo: 0, speedMult: 0.825 }
+        },
+        {
+            id: 'customize',
+            name: 'Tùy Biến',
+            desc: 'HP:3 | Dame:1 | Đạn:1. Xe lắp ghép: mỗi hiệp nhận Điểm Tùy Chỉnh để lắp Lối Bắn, Dạng Đạn, Tính Chất Đạn, Kích Thước. Thua liên tiếp nhận thêm điểm.',
+            type: 'body',
+            size: { w: 30, h: 30 },
+            stats: { hp: 3, dmg: 1, ammo: 1, speedMult: 1.0 }
+        },
+        {
+            id: 'kiem_su',
+            name: 'Kiếm Sư',
+            desc: 'HP:4 | Dame:1 | Đạn:5 | Tốc: 1.1x. Ngũ Hành: mỗi phi kiếm mang 1 nguyên tố ngẫu nhiên (Kim tiền, Mộc trói, Hỏa nổ, Thổ dựng đá, Thủy hồi máu).',
+            type: 'body',
+            size: { w: 28, h: 28 },
+            stats: { hp: 4, dmg: 1, ammo: 5, speedMult: 1.1 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển.', type: 'feet', cost: 30 },
