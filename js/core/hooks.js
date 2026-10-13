@@ -60,6 +60,16 @@ function aimVelocity(sx, sy, target, speed, lead = true) {
     return { vx: dx / L * speed, vy: dy / L * speed, angle: Math.atan2(dy, dx) };
 }
 
+// [ĐỔI] Vùng hiệu ứng mặt đất dạng HÌNH VUÔNG (hợp lối chơi chỉ đi trái/phải):
+// zoneDist = khoảng cách Chebyshev -> "trong vùng" khi |dx| < r và |dy| < r (cạnh vuông = 2r).
+function zoneDist(dx, dy) { return Math.max(Math.abs(dx), Math.abs(dy)); }
+function zoneRectPath(x, y, r) {
+    ctx.beginPath();
+    const rr = Math.max(0, r);
+    if (ctx.roundRect) ctx.roundRect(x - rr, y - rr, rr * 2, rr * 2, Math.min(8, rr * 0.2));
+    else ctx.rect(x - rr, y - rr, rr * 2, rr * 2);
+}
+
 function commitStatuses(p) {
     if (!p) return;
     p._vx = (typeof p._lastX === 'number') ? Math.max(-12, Math.min(12, p.x - p._lastX)) : 0;

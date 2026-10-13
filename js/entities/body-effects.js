@@ -31,7 +31,7 @@ class BodyZone {
         if (--this.life <= 0) { this.active = false; return; }
         const enemy = this.owner === p1 ? p2 : p1;
         if (!enemy || enemy.hp <= 0) return;
-        const inside = Math.hypot(enemy.x + enemy.w / 2 - this.x, enemy.y + enemy.h / 2 - this.y) < this.r + enemy.w / 2;
+        const inside = zoneDist(enemy.x + enemy.w / 2 - this.x, enemy.y + enemy.h / 2 - this.y) < this.r + enemy.w / 2;
         if (!inside) { this.insideTicks = 0; return; }
         this.insideTicks++;
         const pw = this.power;
@@ -81,7 +81,7 @@ class BodyZone {
         ctx.save();
         ctx.globalAlpha = k;
         ctx.fillStyle = fill;
-        ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2); ctx.fill();
+        zoneRectPath(this.x, this.y, this.r); ctx.fill();
         ctx.strokeStyle = line; ctx.lineWidth = 1.5; ctx.setLineDash([5, 5]);
         ctx.lineDashOffset = -(this.maxLife - this.life) * 0.5;
         ctx.stroke(); ctx.setLineDash([]);

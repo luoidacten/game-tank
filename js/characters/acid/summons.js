@@ -34,7 +34,7 @@ class AcidZone {
 
         // 1. Phá giáp / Ăn mòn Địch
         const enemy = (this.owner.id === 1) ? p2 : p1;
-        let d = Math.hypot(this.x - (enemy.x + enemy.w / 2), this.y - (enemy.y + enemy.h / 2));
+        let d = zoneDist(this.x - (enemy.x + enemy.w / 2), this.y - (enemy.y + enemy.h / 2));
 
         if (d < this.r) {
             enemy.acidZoneSlow = 10; // Làm chậm nhẹ 25% khi đi qua vùng Axit
@@ -54,24 +54,24 @@ class AcidZone {
         // 2. Ăn mòn cực lớn lên các công trình/vật thể nhân tạo (Ụ súng, Xe Tiền, v.v.): Gấp 5 lần
         let structDmg = burnRate * 5;
         moneyTrucks.forEach(t => {
-            if (t.active && Math.hypot(this.x - (t.x + t.w / 2), this.y - (t.y + t.h / 2)) < this.r) t.hp -= structDmg;
+            if (t.active && zoneDist(this.x - (t.x + t.w / 2), this.y - (t.y + t.h / 2)) < this.r) t.hp -= structDmg;
         });
         turrets.forEach(t => {
-            if (t.active && t.owner.id !== this.owner.id && Math.hypot(this.x - (t.x + t.w / 2), this.y - (t.y + t.h / 2)) < this.r) t.hp -= structDmg;
+            if (t.active && t.owner.id !== this.owner.id && zoneDist(this.x - (t.x + t.w / 2), this.y - (t.y + t.h / 2)) < this.r) t.hp -= structDmg;
         });
         if (typeof creatorTurrets !== 'undefined') {
             creatorTurrets.forEach(t => {
-                if (t.active && t.owner.id !== this.owner.id && Math.hypot(this.x - (t.x + t.w / 2), this.y - (t.y + t.h / 2)) < this.r) t.hp -= structDmg;
+                if (t.active && t.owner.id !== this.owner.id && zoneDist(this.x - (t.x + t.w / 2), this.y - (t.y + t.h / 2)) < this.r) t.hp -= structDmg;
             });
         }
         if (typeof bastions !== 'undefined') {
             bastions.forEach(b => {
-                if (b.active && Math.hypot(this.x - (b.x + b.w / 2), this.y - (b.y + b.h / 2)) < this.r) b.hp -= structDmg;
+                if (b.active && zoneDist(this.x - (b.x + b.w / 2), this.y - (b.y + b.h / 2)) < this.r) b.hp -= structDmg;
             });
         }
         if (typeof necroMinions !== 'undefined') {
             necroMinions.forEach(m => {
-                if (m.active && m.owner !== this.owner && Math.hypot(this.x - (m.x + m.w / 2), this.y - (m.y + m.h / 2)) < this.r) m.takeDamage(structDmg);
+                if (m.active && m.owner !== this.owner && zoneDist(this.x - (m.x + m.w / 2), this.y - (m.y + m.h / 2)) < this.r) m.takeDamage(structDmg);
             });
         }
     }
@@ -79,7 +79,7 @@ class AcidZone {
     draw() {
         if (!this.active) return;
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+        zoneRectPath(this.x, this.y, this.r);
         // Màu xanh lá đậm hơn, nguy hiểm hơn
         ctx.fillStyle = `rgba(50, 205, 50, ${this.lifeTime / 240 * 0.5})`;
         ctx.fill();

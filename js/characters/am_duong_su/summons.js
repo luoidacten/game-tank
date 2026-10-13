@@ -18,7 +18,7 @@ class VoidZone {
         if (this.lifeTime <= 0) this.active = false;
 
         let enemy = (this.owner.id === 1) ? p2 : p1;
-        let d = Math.hypot(this.x - (enemy.x + enemy.w / 2), this.y - (enemy.y + enemy.h / 2));
+        let d = zoneDist(this.x - (enemy.x + enemy.w / 2), this.y - (enemy.y + enemy.h / 2));
         if (d < this.r) {
             enemy.slowTimer = 10;
             enemy.silenceTimer = 10; // Câm lặng liên tục khi đứng trong vùng
@@ -27,7 +27,7 @@ class VoidZone {
     draw() {
         if (!this.active) return;
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+        zoneRectPath(this.x, this.y, this.r);
         ctx.fillStyle = `rgba(138, 43, 226, 0.3)`; // Màu tím hư vô
         ctx.fill();
         ctx.strokeStyle = '#8a2be2'; ctx.lineWidth = 2;
@@ -49,7 +49,7 @@ class RadiationZone {
 
         if (this.lifeTime % 30 === 0) {
             [p1, p2].forEach(p => {
-                let d = Math.hypot(this.x - (p.x + p.w / 2), this.y - (p.y + p.h / 2));
+                let d = zoneDist(this.x - (p.x + p.w / 2), this.y - (p.y + p.h / 2));
                 if (d < this.r) {
                     if (p.weapon === 'the_strongest') {
                         p.takeDamage(0.5, null, { isEnvironmental: true });
@@ -65,7 +65,7 @@ class RadiationZone {
     draw() {
         if (!this.active) return;
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+        zoneRectPath(this.x, this.y, this.r);
         ctx.fillStyle = `rgba(0, 255, 0, 0.3)`;
         ctx.fill();
         ctx.strokeStyle = '#00ff00';
@@ -172,7 +172,7 @@ class SpellZone {
         // Gây sát thương mỗi 0.5s (30 frame)
         if (this.lifeTime % 30 === 0) {
             const enemy = (this.owner.id === 1) ? p2 : p1;
-            if (Math.hypot(this.x - (enemy.x + enemy.w / 2), this.y - (enemy.y + enemy.h / 2)) < this.r) {
+            if (zoneDist(this.x - (enemy.x + enemy.w / 2), this.y - (enemy.y + enemy.h / 2)) < this.r) {
                 enemy.takeDamage(0.5, this.owner);
 
                 // Full Evo: Kèm câm lặng và làm chậm khi đứng trong trận
@@ -188,7 +188,7 @@ class SpellZone {
         ctx.save();
         ctx.translate(this.x, this.y);
         ctx.beginPath();
-        ctx.arc(0, 0, this.r, 0, Math.PI * 2);
+        zoneRectPath(0, 0, this.r);
         ctx.fillStyle = `rgba(138, 43, 226, 0.2)`; // Màu tím pháp trận
         ctx.fill();
         ctx.strokeStyle = '#8a2be2';

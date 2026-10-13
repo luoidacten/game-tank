@@ -97,7 +97,7 @@ class FireZone {
         if (this.lifeTime % 30 === 0) {
             // 1. Tác động lên Địch (Player)
             const enemy = (this.owner.id === 1) ? p2 : p1;
-            let d = Math.hypot(this.x - (enemy.x + enemy.w / 2), this.y - (enemy.y + enemy.h / 2));
+            let d = zoneDist(this.x - (enemy.x + enemy.w / 2), this.y - (enemy.y + enemy.h / 2));
             if (d < this.r) {
                 enemy.burnTimer = this.owner.hasUpgrade('evo_furnace_2') ? 360 : 180;
                 enemy.burnStacks++;
@@ -111,7 +111,7 @@ class FireZone {
             // 2. Tác động lên Xe Tiền
             moneyTrucks.forEach(t => {
                 if (t.active) {
-                    let dt = Math.hypot(this.x - (t.x + t.w / 2), this.y - (t.y + t.h / 2));
+                    let dt = zoneDist(this.x - (t.x + t.w / 2), this.y - (t.y + t.h / 2));
                     if (dt < this.r) {
                         t.burnStacks = (t.burnStacks || 0) + 1;
                         t.hp -= 0.5; // DoT nhẹ
@@ -127,7 +127,7 @@ class FireZone {
             // 3. Tác động lên Ụ Súng Địch
             turrets.forEach(t => {
                 if (t.active && t.owner.id !== this.owner.id) {
-                    let dt = Math.hypot(this.x - (t.x + t.w / 2), this.y - (t.y + t.h / 2));
+                    let dt = zoneDist(this.x - (t.x + t.w / 2), this.y - (t.y + t.h / 2));
                     if (dt < this.r) {
                         t.burnStacks = (t.burnStacks || 0) + 1;
                         t.hp -= 0.5;
@@ -144,7 +144,7 @@ class FireZone {
     draw() {
         if (!this.active) return;
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+        zoneRectPath(this.x, this.y, this.r);
         ctx.fillStyle = `rgba(255, 69, 0, ${this.lifeTime / 240 + 0.2})`; // Cam đỏ
         ctx.fill();
         ctx.strokeStyle = '#ff4500';

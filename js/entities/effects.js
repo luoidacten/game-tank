@@ -113,7 +113,7 @@ class IceZone {
 
         let enemies = [p1, p2].filter(p => p.id !== this.owner.id);
         enemies.forEach(p => {
-            let d = Math.hypot(this.x - (p.x + p.w / 2), this.y - (p.y + p.h / 2));
+            let d = zoneDist(this.x - (p.x + p.w / 2), this.y - (p.y + p.h / 2));
             if (d < this.r) {
                 p.slowTimer = 10;
 
@@ -141,7 +141,7 @@ class IceZone {
     draw() {
         if (!this.active) return;
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+        zoneRectPath(this.x, this.y, this.r);
         ctx.fillStyle = `rgba(0, 255, 255, 0.3)`;
         ctx.fill();
         ctx.strokeStyle = '#00ffff';
