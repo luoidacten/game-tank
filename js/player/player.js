@@ -24,6 +24,7 @@ class Player {
 
     hasUpgrade(id) { return this.upgrades.includes(id); }
     addUpgrade(moduleId) {
+        if (typeof feetMaxed === 'function' && feetMaxed(this, moduleId)) return false;
         this.upgrades.push(moduleId);
         return true;
     }

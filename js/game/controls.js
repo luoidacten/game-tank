@@ -223,12 +223,32 @@ function setupControls() {
         const btn = el && el.closest ? el.closest('.btn') : null;
         return (btn && allBtns.includes(btn) && btn.offsetParent !== null) ? btn : null;
     };
+    // Khoảng cách từ điểm chạm tới khung nút (0 = nằm trong khung)
+    const rectDist = (btn, x, y) => {
+        const r = btn.getBoundingClientRect();
+        const dx = Math.max(r.left - x, 0, x - r.right), dy = Math.max(r.top - y, 0, y - r.bottom);
+        return Math.hypot(dx, dy);
+    };
+    // [FIX] Nút tròn chỉ nhận chạm trong hình tròn -> ngón cái lệch ra góc / khe giữa 2 nút là bị nhả (xe khựng).
+    // Nhận cả vùng chữ nhật quanh nút + 14px; ngón đang giữ nút thì còn "dính" thêm tới 30px.
+    const btnNear = (x, y, prev) => {
+        const hit = btnAt(x, y);
+        if (hit) return hit;
+        if (prev && prev.offsetParent !== null && rectDist(prev, x, y) <= 30) return prev;
+        let best = null, bd = 14;
+        for (const b of allBtns) {
+            if (b.offsetParent === null) continue;
+            const d = rectDist(b, x, y);
+            if (d <= bd) { bd = d; best = b; }
+        }
+        return best;
+    };
     const onTouch = (e) => {
         let handled = false;
         for (const t of e.changedTouches) {
             const prev = touchOwner.get(t.identifier) || null;
             const ended = (e.type === 'touchend' || e.type === 'touchcancel');
-            const now = ended ? null : btnAt(t.clientX, t.clientY);
+            const now = ended ? null : btnNear(t.clientX, t.clientY, prev);
             if (e.type === 'touchstart' && !now) continue; // chạm ngoài nút: để trình duyệt xử lý (cuộn menu...)
             if (prev || now) handled = true;
             if (prev === now) continue;

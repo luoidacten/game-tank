@@ -186,11 +186,12 @@ Object.assign(Player.prototype, {
         this.setupGhost();
         // 4. ÁP DỤNG FEET (GIÀY/PHỤ KIỆN) - QUAN TRỌNG: Đặt trước logic tính Dash Tank
         const feetIds = MODULES.FEET.map(m => m.id);
+        let dmgStacks = 0;
         this.upgrades.forEach(uId => {
             if (feetIds.includes(uId)) {
                 if (uId === 'speed') this.speed += 1.5;
                 if (uId === 'armor') this.maxHp += 1;
-                if (uId === 'damage') this.damage *= 1.25;
+                if (uId === 'damage') this.damage *= feetDamageMult(++dmgStacks);
             }
         });
 

@@ -4,9 +4,20 @@
 
 
 
-// Module chân mua không giới hạn, nhưng mỗi lần đã mua làm giá tăng thêm 50% giá gốc
+// Module chân: mỗi lần đã mua làm giá tăng thêm 50% giá gốc.
+// Động Cơ giới hạn 3 lần (chống "ma tốc độ"), đủ rồi thì không xuất hiện trong shop nữa.
 const FEET_PRICE_STEP = 0.5;
+const FEET_MAX = { speed: 3 };
 function feetOwnedCount(player, id) { return (player.upgrades || []).filter(u => u === id).length; }
+function feetMaxed(player, id) { return FEET_MAX[id] !== undefined && feetOwnedCount(player, id) >= FEET_MAX[id]; }
+// Bánh Xích: 3 lần đầu x1.25, sau đó hiệu quả giảm dần (x1.15, x1.09, x1.05...)
+function feetDamageMult(n) { return n <= 3 ? 1.25 : 1 + 0.25 * Math.pow(0.6, n - 3); }
+// Lợi Tức: tiền nhận mỗi hiệp không chỉ cộng dồn mà còn nhân thêm 20% mỗi tầng
+// (1 tầng 30$, 2 tầng 72$, 3 tầng 126$, 4 tầng 192$...; Xe Tiền gấp đôi)
+function interestIncome(n, isMoneyTank) {
+    if (n <= 0) return 0;
+    return Math.round(n * (isMoneyTank ? 60 : 30) * (1 + 0.2 * (n - 1)));
+}
 function shopItemPrice(player, item) {
     const base = item.cost || 10;
     if (item.type !== 'feet') return base;
@@ -194,7 +205,7 @@ function renderShop(playerId, keepItems = false) {
 
     // Smart Shop: Caching & Cơ chế Bảo Hiểm (Pity System)
     if (!keepItems || !player.currentShopItems) {
-        let poolFeet = MODULES.FEET.slice();
+        let poolFeet = MODULES.FEET.filter(f => !feetMaxed(player, f.id));
         let availableEvos = [];
         const weaponEvos = EVOLUTIONS[player.weapon];
         if (weaponEvos) {
@@ -231,13 +242,17 @@ function renderShop(playerId, keepItems = false) {
             else card.className = 'card';
 
             const owned = item.type === 'feet' ? feetOwnedCount(player, item.id) : 0;
-            const lvlTxt = owned > 0 ? ` <span style="color:#94a3b8">(đã có ${owned})</span>` : '';
-            card.innerHTML = `<h4>${item.name}${lvlTxt}</h4><p>${item.desc}</p><p style="color:#f1c40f; font-weight:bold">$${price}</p>`;
+            const cap = FEET_MAX[item.id];
+            const lvlTxt = owned > 0 || cap ? ` <span style="color:#94a3b8">(${cap ? `${owned}/${cap}` : `đã có ${owned}`})</span>` : '';
+            let extra = '';
+            if (item.id === 'damage') extra = `<br><span style="color:#facc15">Lần này: x${feetDamageMult(owned + 1).toFixed(2)} sát thương</span>`;
+            if (item.id === 'interest') extra = `<br><span style="color:#facc15">Mỗi hiệp: ${interestIncome(owned, player.weapon === 'money_tank')}$ → ${interestIncome(owned + 1, player.weapon === 'money_tank')}$</span>`;
+            card.innerHTML = `<h4>${item.name}${lvlTxt}</h4><p>${item.desc}${extra}</p><p style="color:#f1c40f; font-weight:bold">$${price}</p>`;
 
             card.onclick = () => {
                 const currentCoin = (playerId === 'p1') ? gameState.p1Coins : gameState.p2Coins;
                 if (currentCoin >= price) {
-                    player.addUpgrade(item.id);
+                    if (!player.addUpgrade(item.id)) return; // Động Cơ đã đủ giới hạn
                     if (playerId === 'p1') gameState.p1Coins -= price; else gameState.p2Coins -= price;
                     updateShopTitle();
                     soundSystem.playPowerup();

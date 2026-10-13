@@ -132,14 +132,8 @@ function endRound(winnerId) {
         let interestCount = p.upgrades.filter(u => u === 'interest').length;
 
         if (interestCount > 0) {
-            let profitPerStack = 30; // Mặc định 30 xu
-
-            // Nếu cầm Xe Tiền thì nhân đôi lợi tức
-            if (p.weapon === 'money_tank') {
-                profitPerStack = 60;
-            }
-
-            let totalProfit = interestCount * profitPerStack;
+            // Cộng dồn + nhân giá trị theo số tầng (Xe Tiền nhân đôi) - xem interestIncome()
+            let totalProfit = interestIncome(interestCount, p.weapon === 'money_tank');
 
             // Cộng tiền vào game state
             if (p.id === 1) gameState.p1Coins += totalProfit;
