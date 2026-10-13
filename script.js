@@ -245,10 +245,27 @@ function drawVictoryBanner(winnerId, timer, maxTimer) {
 }
 
 let floatingTexts = [];
+const MAX_FLOATING_TEXTS = 60;
 function addFloatingText(x, y, text, color = '#fff', size = 14) {
+    // Gộp chữ trùng lặp vừa xuất hiện gần đó (tránh chồng chữ khi bị trúng liên tục)
+    for (let ft of floatingTexts) {
+        if (ft.text === text && ft.life > ft.maxLife - 12 && Math.abs(ft.baseX - x) < 30 && Math.abs(ft.y - y) < 20) {
+            ft.life = ft.maxLife;
+            return;
+        }
+    }
+    // Đẩy chữ mới lệch xuống nếu trùng vị trí với chữ khác vừa sinh ra
+    let stackOffset = 0;
+    for (let ft of floatingTexts) {
+        if (ft.life > ft.maxLife - 10 && Math.abs(ft.baseX - x) < 40 && Math.abs(ft.y - (y + stackOffset)) < size) {
+            stackOffset += size + 2;
+        }
+    }
+    if (floatingTexts.length >= MAX_FLOATING_TEXTS) floatingTexts.shift();
     floatingTexts.push({
+        baseX: x,
         x: x + (Math.random() - 0.5) * 12,
-        y: y,
+        y: y + Math.min(stackOffset, 48),
         text: text,
         color: color,
         size: size,
@@ -261,27 +278,44 @@ function updateAndDrawFloatingTexts() {
     for (let i = floatingTexts.length - 1; i >= 0; i--) {
         let ft = floatingTexts[i];
         ft.y += ft.vy;
+        ft.vy *= 0.97;
         ft.life--;
         if (ft.life <= 0) {
             floatingTexts.splice(i, 1);
             continue;
         }
         let alpha = Math.min(1, ft.life / 15);
+        let age = ft.maxLife - ft.life;
+        let pop = age < 6 ? 0.6 + (age / 6) * 0.55 : (age < 10 ? 1.15 - ((age - 6) / 4) * 0.15 : 1);
         ctx.save();
         ctx.globalAlpha = alpha;
-        ctx.fillStyle = ft.color;
         ctx.font = "bold " + ft.size + "px 'Orbitron', Arial, sans-serif";
         ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        // Giữ chữ nằm trong sân đấu (không tràn ra mép trái/phải/trên/dưới)
+        let halfW = (ctx.measureText(ft.text).width * pop) / 2 + 4;
+        let drawX = Math.max(halfW, Math.min(canvas.width - halfW, ft.x));
+        let drawY = Math.max(ft.size, Math.min(canvas.height - ft.size, ft.y));
+        ctx.translate(drawX, drawY);
+        ctx.scale(pop, pop);
+        ctx.lineJoin = 'round';
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = 'rgba(5, 8, 18, 0.85)';
+        ctx.fillStyle = ft.color;
         ctx.shadowBlur = 8;
         ctx.shadowColor = ft.color;
-        drawWorldText(ctx, ft.text, ft.x, ft.y);
+        if (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'guest') ctx.rotate(Math.PI);
+        ctx.strokeText(ft.text, 0, 0);
+        ctx.fillText(ft.text, 0, 0);
         ctx.restore();
     }
 }
 
 let particles = [];
+const MAX_PARTICLES = 500;
 function spawnSparkParticles(x, y, color = '#ffd700', count = 8) {
     for (let i = 0; i < count; i++) {
+        if (particles.length >= MAX_PARTICLES) particles.shift();
         let angle = Math.random() * Math.PI * 2;
         let speed = 1 + Math.random() * 4;
         particles.push({
@@ -296,8 +330,11 @@ function spawnSparkParticles(x, y, color = '#ffd700', count = 8) {
     }
 }
 function updateAndDrawParticles() {
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
     for (let i = particles.length - 1; i >= 0; i--) {
         let p = particles[i];
+        let px = p.x, py = p.y;
         p.x += p.vx;
         p.y += p.vy;
         p.vx *= 0.94;
@@ -307,14 +344,22 @@ function updateAndDrawParticles() {
             particles.splice(i, 1);
             continue;
         }
-        ctx.save();
-        ctx.globalAlpha = p.life / p.maxLife;
+        let k = p.life / p.maxLife;
+        ctx.globalAlpha = k;
+        // Vệt sáng theo hướng bay + lõi tròn
+        ctx.strokeStyle = p.color;
+        ctx.lineWidth = p.r * k * 1.2;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(px - p.vx * 2, py - p.vy * 2);
+        ctx.lineTo(p.x, p.y);
+        ctx.stroke();
         ctx.fillStyle = p.color;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, Math.max(0.5, p.r * k), 0, Math.PI * 2);
         ctx.fill();
-        ctx.restore();
     }
+    ctx.restore();
 }
 
 const canvas = document.getElementById('gameCanvas');
@@ -335,8 +380,31 @@ function updateCanvasDimensions() {
         canvas.height = container.clientHeight;
     }
     if (typeof p1 !== 'undefined' && typeof p2 !== 'undefined' && p1 && p2 && typeof gameState !== 'undefined' && gameState.phase === 'playing') {
+        let oldP1Y = p1.y, oldP2Y = p2.y;
         p1.y = canvas.height - p1.h - 22;
         p2.y = 20;
+        p1.x = Math.max(0, Math.min(canvas.width - p1.w, p1.x));
+        p2.x = Math.max(0, Math.min(canvas.width - p2.w, p2.x));
+        // [FIX] Dời các vật triệu hồi bám theo làn của chủ khi sân đổi kích thước
+        let dy1 = (typeof oldP1Y === 'number') ? p1.y - oldP1Y : 0;
+        let dy2 = (typeof oldP2Y === 'number') ? p2.y - oldP2Y : 0;
+        const shiftList = (list) => {
+            if (!Array.isArray(list)) return;
+            list.forEach(o => {
+                if (!o || !o.owner) return;
+                let dy = (o.owner === p1) ? dy1 : (o.owner === p2 ? dy2 : 0);
+                if (typeof o.y === 'number') o.y += dy;
+                if (typeof o.x === 'number' && o.w) o.x = Math.max(0, Math.min(canvas.width - o.w, o.x));
+            });
+        };
+        shiftList(turrets);
+        shiftList(creatorTurrets);
+        shiftList(necroMinions);
+        shiftList(ghostDecoys);
+        shiftList(shadowTraps);
+        [p1, p2].forEach(p => {
+            if (Array.isArray(p.illusions)) p.illusions.forEach(ill => { ill.y = p.y; ill.x = Math.max(0, Math.min(canvas.width - ill.w, ill.x)); });
+        });
     }
 }
 
@@ -1173,15 +1241,17 @@ class WindWall {
 // --- CLASS INVENTOR DRONE (DRONE KHÔNG KÍCH) ---
 // ==========================================
 class InventorDrone {
-    constructor(owner, offsetX = 0) {
+    constructor(owner, offsetX = 0, lane = 0) {
         this.owner = owner;
         this.w = 26;
         this.h = 20;
         this.offsetX = offsetX;
-        this.x = Math.max(20, Math.min(canvas.width - 40, (canvas.width / 2) + offsetX));
-        this.y = (this.owner.id === 1) ? canvas.height * 0.45 : canvas.height * 0.55;
+        this.lane = lane;
+        this.x = Math.max(20, Math.min(canvas.width - 40, (canvas.width / 2) + offsetX - this.w / 2));
+        this.y = this.getLaneY();
         this.baseSpeed = 3;
-        this.vx = (Math.random() > 0.5 ? 1 : -1) * this.baseSpeed;
+        // [FIX] Hướng bay ban đầu theo phía được triển khai -> các drone tản ra thay vì dồn cục
+        this.vx = (offsetX === 0 ? (Math.random() > 0.5 ? 1 : -1) : Math.sign(offsetX)) * this.baseSpeed;
 
         this.active = true;
         this.deadTimer = 0;
@@ -1195,6 +1265,14 @@ class InventorDrone {
         this.lastLua = 0;
         this.lastTuGio = 0;
         this.lastKhien = 0;
+    }
+
+    // [FIX] Mỗi drone bay trên 1 làn riêng (lùi dần về phía sân nhà) để không chồng lên nhau,
+    // tính theo chiều cao sân hiện tại nên vẫn đúng vị trí khi màn hình đổi kích thước.
+    getLaneY() {
+        let laneGap = this.h + 6;
+        if (this.owner.id === 1) return canvas.height * 0.45 + this.lane * laneGap;
+        return canvas.height * 0.55 - this.h - this.lane * laneGap;
     }
 
     getMaxHp() {
@@ -1252,6 +1330,7 @@ class InventorDrone {
             fireRate *= 0.5;
         }
 
+        this.y = this.getLaneY();
         this.x += Math.sign(this.vx) * speed;
         if (this.x <= 4) { this.x = 4; this.vx = Math.abs(this.vx); }
         else if (this.x + this.w >= canvas.width - 4) { this.x = canvas.width - this.w - 4; this.vx = -Math.abs(this.vx); }
@@ -1776,13 +1855,18 @@ class CreatorDrone {
         this.w = 26;
         this.h = 20;
         this.x = canvas.width / 2 - 13;
-        this.y = (owner.id === 1) ? canvas.height * 0.44 : canvas.height * 0.56;
+        this.y = this.getHomeY();
         this.vx = 2.8;
         this.active = true;
         this.deadTimer = 0;
         this.lastShot = Date.now();
         this.reloadTime = 1200;
         this.hp = this.getMaxHp();
+    }
+
+    // [FIX] Đối xứng chuẩn giữa 2 phe & cập nhật theo kích thước sân hiện tại
+    getHomeY() {
+        return (this.owner.id === 1) ? canvas.height * 0.44 : canvas.height * 0.56 - this.h;
     }
 
     getMaxHp() {
@@ -1809,6 +1893,7 @@ class CreatorDrone {
         }
 
         // Tuần tra bay qua bay lại
+        this.y = this.getHomeY();
         this.x += this.vx;
         if (this.x <= 15) { this.x = 15; this.vx = Math.abs(this.vx); }
         if (this.x + this.w >= canvas.width - 15) { this.x = canvas.width - 15 - this.w; this.vx = -Math.abs(this.vx); }
@@ -1895,8 +1980,8 @@ class CreatorRobot {
         this.owner = owner;
         this.w = 36;
         this.h = 36;
-        this.x = owner.x + owner.w / 2 - 18;
-        this.y = (owner.id === 1) ? canvas.height * 0.6 : canvas.height * 0.4;
+        this.x = Math.max(5, Math.min(canvas.width - this.w - 5, owner.x + owner.w / 2 - this.w / 2));
+        this.y = this.getHomeY();
         this.maxHp = 10;
         this.hp = 10;
         this.dmg = 0.5;
@@ -1925,6 +2010,10 @@ class CreatorRobot {
         this.laserTelegraph = 0;
     }
 
+    getHomeY() {
+        return (this.owner.id === 1) ? canvas.height * 0.6 : canvas.height * 0.4 - this.h;
+    }
+
     update() {
         if (!this.active) {
             // Hồi sinh sau 30s (1800 ticks)
@@ -1934,8 +2023,9 @@ class CreatorRobot {
                 this.deadTimer = 0;
                 this.hp = this.maxHp;
                 this.energy = this.maxEnergy;
-                this.x = this.owner.x;
-                this.y = (this.owner.id === 1) ? canvas.height * 0.6 : canvas.height * 0.4;
+                this.x = Math.max(5, Math.min(canvas.width - this.w - 5, this.owner.x + this.owner.w / 2 - this.w / 2));
+                this.y = this.getHomeY();
+                this.isDashing = false;
                 explosions.push(new Explosion(this.x + this.w / 2, this.y + this.h / 2, 50, '#ff9800', 0, this.owner));
                 if (typeof addFloatingText === 'function') addFloatingText(this.x, this.y - 15, "ROBOT TỰ ĐỘNG XUẤT XƯỞNG! 🤖⚙️", "#ff9800", 14);
             }
@@ -1972,6 +2062,11 @@ class CreatorRobot {
             this.y = Math.max(30, Math.min(canvas.height - this.h - 30, this.y));
             return;
         }
+
+        // [FIX] Sau Cú Đấm Thép, robot từ từ quay về vị trí trực chiến thay vì kẹt ở làn đối thủ
+        let homeY = this.getHomeY();
+        if (Math.abs(this.y - homeY) > 1) this.y += (homeY - this.y) * 0.08;
+        else this.y = homeY;
 
         // 2. AI Di chuyển gây áp lực
         if (enemy && enemy.hp > 0) {
@@ -4661,14 +4756,14 @@ class Player {
             this.drones = [];
             if (isFullEvo) {
                 // 4 Drones cùng lúc trên sân
-                this.drones.push(new InventorDrone(this, -75));
-                this.drones.push(new InventorDrone(this, -25));
-                this.drones.push(new InventorDrone(this, 25));
-                this.drones.push(new InventorDrone(this, 75));
+                this.drones.push(new InventorDrone(this, -75, 0));
+                this.drones.push(new InventorDrone(this, -25, 1));
+                this.drones.push(new InventorDrone(this, 25, 2));
+                this.drones.push(new InventorDrone(this, 75, 3));
             } else if (this.hasUpgrade('evo_inv_2')) {
                 // 2 Drones
-                this.drones.push(new InventorDrone(this, -35));
-                this.drones.push(new InventorDrone(this, 35));
+                this.drones.push(new InventorDrone(this, -35, 0));
+                this.drones.push(new InventorDrone(this, 35, 1));
             } else {
                 // 1 Drone mặc định
                 this.drones.push(new InventorDrone(this, 0));
@@ -5014,7 +5109,10 @@ class Player {
     enterMecha(cost) {
         this.gears = Math.max(0, (this.gears || 0) - cost);
         this.isPilotingMecha = true;
+        // [FIX] Giữ nguyên tâm xe khi phóng to thành Mecha (trước đây bị lệch sang phải)
+        let cxM = this.x + this.w / 2;
         this.w = 40; this.h = 40;
+        this.x = Math.max(0, Math.min(canvas.width - this.w, cxM - this.w / 2));
         this.y = (this.id === 1) ? canvas.height - this.h - 22 : 20;
 
         let upg = this.geniusUpgrades || {};
@@ -5035,7 +5133,9 @@ class Player {
     ejectMecha(fromSelfDestruct = false) {
         if (!this.isPilotingMecha) return;
         this.isPilotingMecha = false;
+        let cxM = this.x + this.w / 2;
         this.w = 24; this.h = 24;
+        this.x = Math.max(0, Math.min(canvas.width - this.w, cxM - this.w / 2));
         this.y = (this.id === 1) ? canvas.height - this.h - 22 : 20;
 
         if (!fromSelfDestruct) {
@@ -5171,12 +5271,17 @@ class Player {
     }
 
     spawnShadowTraps() {
-        let enemyHalfMinY = (this.id === 1) ? 80 : 380;
-        let enemyHalfMaxY = (this.id === 1) ? 280 : 580;
+        // [FIX] Đặt bẫy ngay trên làn di chuyển của đối thủ (tính theo vị trí thực tế),
+        // thay vì toạ độ Y cố định khiến bẫy rơi giữa sân và không bao giờ kích hoạt.
+        const enemy = (this.id === 1) ? p2 : p1;
+        let eh = (enemy && enemy.h) || C.tankH;
+        let laneY = (this.id === 1) ? 20 + eh / 2 : canvas.height - 22 - eh / 2;
         let isFullEvo = this.hasUpgrade('evo_sh_1') && this.hasUpgrade('evo_sh_2');
         for (let k = 0; k < 2; k++) {
-            let trapX = 50 + Math.random() * (canvas.width - 100);
-            let trapY = enemyHalfMinY + Math.random() * (enemyHalfMaxY - enemyHalfMinY);
+            // Chia đôi sân theo chiều ngang để 2 bẫy không chồng lên nhau
+            let half = (canvas.width - 100) / 2;
+            let trapX = 50 + k * half + Math.random() * half;
+            let trapY = laneY + (Math.random() - 0.5) * 12;
             shadowTraps.push(new ShadowTrap(trapX, trapY, this, isFullEvo));
         }
     }
@@ -5690,9 +5795,15 @@ class Player {
                 this.creatorTurretTimer = 0;
                 let activeTurrets = creatorTurrets.filter(t => t.owner === this && t.active);
                 if (activeTurrets.length < 2) {
-                    let sideX = activeTurrets.length === 0 ? this.x - 30 : this.x + this.w + 10;
-                    sideX = Math.max(20, Math.min(canvas.width - 40, sideX));
                     let sideY = (this.id === 1) ? this.y - 35 : this.y + this.h + 15;
+                    // [FIX] Thử bên trái rồi bên phải xe; tránh đặt ụ mới chồng lên ụ cũ
+                    let candidates = [this.x - 30, this.x + this.w + 10, this.x - 60, this.x + this.w + 40, this.x + this.w / 2 - 10];
+                    let sideX = null;
+                    for (let cx of candidates) {
+                        let clamped = Math.max(20, Math.min(canvas.width - 40, cx));
+                        if (!activeTurrets.some(t => Math.abs(t.x - clamped) < 26 && Math.abs(t.y - sideY) < 26)) { sideX = clamped; break; }
+                    }
+                    if (sideX === null) sideX = Math.max(20, Math.min(canvas.width - 40, this.x - 30));
                     let newTurret = new CreatorTurret(this, sideX, sideY);
                     creatorTurrets.push(newTurret);
                     explosions.push(new Explosion(sideX + 10, sideY + 10, 25, '#00e5ff', 0, this));
@@ -8045,10 +8156,14 @@ class Player {
                             } else {
                                 // NỘI TẠI 3: MÀN TRÌNH DIỄN ĐÁNH LẠC HƯỚNG (Đứng yên)
                                 let ghostDir = Math.random() > 0.5 ? 1 : -1;
+                                // [FIX] Nếu sát mép thì cho bóng xuất hiện về phía còn trống, không lọt ra ngoài sân
+                                if (this.x + this.w + 20 > canvas.width - this.w) ghostDir = -1;
+                                else if (this.x - 20 < this.w) ghostDir = 1;
+                                let ghostX = Math.max(0, Math.min(canvas.width - this.w, this.x + ghostDir * 20));
 
                                 // Tạo bóng BIẾT ĐI ở vị trí bên cạnh
                                 this.illusions.push({
-                                    x: this.x + ghostDir * 20, y: this.y, w: this.w, h: this.h,
+                                    x: ghostX, y: this.y, w: this.w, h: this.h,
                                     hp: this.hp, maxHp: myMaxHp,
                                     type: 'ghost', vx: ghostDir * C.baseSpeed,
                                     spawnTime: now, lifeTime: 20000, invisTimer: 45,
@@ -11230,6 +11345,23 @@ const TICK_TIME = 1000 / TICK_RATE; // ~16.66667 ms
 let fixedPhysicsAccumulator = 0;
 let lastFixedLoopTime = 0;
 
+// [FIX] Xoá toàn bộ vật triệu hồi thuộc về 1 người chơi (dùng khi đổi body giữa trận ở phòng tập)
+function clearOwnedSummons(owner) {
+    const notMine = (o) => o && o.owner !== owner;
+    turrets = turrets.filter(notMine);
+    creatorTurrets = creatorTurrets.filter(notMine);
+    creatorRobots = creatorRobots.filter(notMine);
+    necroMinions = necroMinions.filter(notMine);
+    ghostDecoys = ghostDecoys.filter(notMine);
+    confinementCages = confinementCages.filter(notMine);
+    shadowTraps = shadowTraps.filter(notMine);
+    thunderPlantedSpears = thunderPlantedSpears.filter(notMine);
+    magnetNodes = magnetNodes.filter(notMine);
+    floatingSwords = floatingSwords.filter(notMine);
+    arrowRains = arrowRains.filter(notMine);
+    mortars = mortars.filter(notMine);
+}
+
 function rectIntersect(x1, y1, w1, h1, x2, y2, w2, h2) {
     return x2 < x1 + w1 && x2 + w2 > x1 && y2 < y1 + h1 && y2 + h2 > y1;
 }
@@ -11624,10 +11756,10 @@ function renderInventorShop(playerId, keepItems = false) {
                     if (!player.upgrades.includes('evo_inv_1')) player.addUpgrade('evo_inv_1');
                     if (!player.upgrades.includes('evo_inv_2')) player.addUpgrade('evo_inv_2');
                     player.drones = [
-                        new InventorDrone(player, -75),
-                        new InventorDrone(player, -25),
-                        new InventorDrone(player, 25),
-                        new InventorDrone(player, 75)
+                        new InventorDrone(player, -75, 0),
+                        new InventorDrone(player, -25, 1),
+                        new InventorDrone(player, 25, 2),
+                        new InventorDrone(player, 75, 3)
                     ];
                     soundSystem.playPowerup();
                     if (typeof addFloatingText === 'function') addFloatingText(player.x + player.w / 2, player.y - 20, "FULL EVO UNLOCKED! 🔥", "gold", 16);
@@ -11909,6 +12041,18 @@ function startRound() {
     artilleryHazards = [];
     ghostDecoys = [];
     necroMinions = [];
+    // [FIX] Dọn sạch vật triệu hồi / hiệu ứng còn sót từ hiệp trước (tránh ụ súng, robot,
+    // lồng cấm... của hiệp cũ nằm lại sai vị trí và tiếp tục hoạt động)
+    creatorTurrets = [];
+    creatorDrones = [];
+    creatorRobots = [];
+    confinementCages = [];
+    arrowRains = [];
+    arrowDrops = [];
+    voidZones = [];
+    fireZones = [];
+    floatingTexts = [];
+    particles = [];
 
     // Map selection & Mutators
     let isOnlineGuest = (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'guest');
@@ -11940,10 +12084,11 @@ function startRound() {
         canvas.height = ONLINE_ARENA_HEIGHT;
     }
 
-    p1.setupForNewRound(); p2.setupForNewRound();
+    // [FIX] Reset trước khi setup: bẫy Shadow Hunter (Evo 2) sinh ra lúc đầu hiệp không bị xoá mất
     mortars = []; // Reset pháo
     shadowTraps = [];
     shortgunFireZones = [];
+    p1.setupForNewRound(); p2.setupForNewRound();
     lastFixedLoopTime = performance.now();
     fixedPhysicsAccumulator = 0;
 
@@ -12401,6 +12546,86 @@ function drawMagnetNode(m) {
     ctx.restore();
 }
 
+// ==========================================
+// --- NỀN SÀN ĐẤU (Cache offscreen để tối ưu hiệu năng) ---
+// ==========================================
+let arenaFloorCache = null;
+function getArenaFloor() {
+    let w = canvas.width, h = canvas.height;
+    if (arenaFloorCache && arenaFloorCache.width === w && arenaFloorCache.height === h) return arenaFloorCache;
+    let off = document.createElement('canvas');
+    off.width = w; off.height = h;
+    let g = off.getContext('2d');
+
+    // Nền tối dạng vignette
+    let bg = g.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.1, w / 2, h / 2, Math.max(w, h) * 0.75);
+    bg.addColorStop(0, '#121a2c');
+    bg.addColorStop(1, '#05070c');
+    g.fillStyle = bg;
+    g.fillRect(0, 0, w, h);
+
+    // Lưới neon mờ
+    let cell = 34;
+    g.lineWidth = 1;
+    g.strokeStyle = 'rgba(0, 240, 255, 0.045)';
+    g.beginPath();
+    for (let x = (w / 2) % cell; x < w; x += cell) { g.moveTo(Math.round(x) + 0.5, 0); g.lineTo(Math.round(x) + 0.5, h); }
+    for (let y = (h / 2) % cell; y < h; y += cell) { g.moveTo(0, Math.round(y) + 0.5); g.lineTo(w, Math.round(y) + 0.5); }
+    g.stroke();
+
+    // Làn sân nhà của 2 phe (P2 trên - đỏ, P1 dưới - xanh)
+    let laneH = 70;
+    let topLane = g.createLinearGradient(0, 0, 0, laneH);
+    topLane.addColorStop(0, 'rgba(255, 0, 85, 0.16)');
+    topLane.addColorStop(1, 'rgba(255, 0, 85, 0)');
+    g.fillStyle = topLane;
+    g.fillRect(0, 0, w, laneH);
+    let botLane = g.createLinearGradient(0, h - laneH, 0, h);
+    botLane.addColorStop(0, 'rgba(0, 240, 255, 0)');
+    botLane.addColorStop(1, 'rgba(0, 240, 255, 0.16)');
+    g.fillStyle = botLane;
+    g.fillRect(0, h - laneH, w, laneH);
+
+    // Vạch giữa sân + vòng tròn trung tâm
+    g.save();
+    g.strokeStyle = 'rgba(255, 255, 255, 0.07)';
+    g.lineWidth = 2;
+    g.setLineDash([14, 10]);
+    g.beginPath();
+    g.moveTo(0, h / 2); g.lineTo(w, h / 2);
+    g.stroke();
+    g.setLineDash([]);
+    g.beginPath();
+    g.arc(w / 2, h / 2, Math.min(w, h) * 0.12, 0, Math.PI * 2);
+    g.stroke();
+    g.fillStyle = 'rgba(255, 255, 255, 0.08)';
+    g.beginPath();
+    g.arc(w / 2, h / 2, 3, 0, Math.PI * 2);
+    g.fill();
+    g.restore();
+
+    // Ký hiệu góc sân (HUD style)
+    g.strokeStyle = 'rgba(0, 240, 255, 0.18)';
+    g.lineWidth = 2;
+    const corner = (x, y, dx, dy) => { g.beginPath(); g.moveTo(x + dx * 18, y); g.lineTo(x, y); g.lineTo(x, y + dy * 18); g.stroke(); };
+    corner(6, 6, 1, 1); corner(w - 6, 6, -1, 1); corner(6, h - 6, 1, -1); corner(w - 6, h - 6, -1, -1);
+
+    arenaFloorCache = off;
+    return off;
+}
+
+// Bóng đổ mềm dưới xe / vật triệu hồi giúp tách khối khỏi nền
+function drawSoftShadow(o, scale = 1) {
+    if (!o || o.active === false || typeof o.x !== 'number' || !o.w) return;
+    let cx = o.x + o.w / 2;
+    let cy = o.y + (o.h || o.w) * 0.85;
+    let rx = o.w * 0.62 * scale;
+    let ry = Math.max(3, (o.h || o.w) * 0.22 * scale);
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+    ctx.fill();
+}
+
 function renderFrame() {
     if (gameState.phase !== 'playing' && !fatalCinematic.active) return;
 
@@ -12431,6 +12656,9 @@ function renderFrame() {
     } else {
         screenShake.x = 0; screenShake.y = 0;
     }
+
+    // NỀN SÀN ĐẤU (vẽ trong world-space để rung màn hình đồng bộ)
+    ctx.drawImage(getArenaFloor(), 0, 0);
 
     // VẼ TRỜI MƯA NẾU CÓ STORM FULL EVO
     if (isRaining) drawRain();
@@ -12527,6 +12755,21 @@ function renderFrame() {
     sniperWalls.forEach(sw => sw.draw());
     windWalls.forEach(w => w.draw());
     beams.forEach(b => b.draw());
+
+    // Bóng đổ dưới các vật triệu hồi & xe
+    ctx.save();
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+    turrets.forEach(t => drawSoftShadow(t));
+    creatorTurrets.forEach(t => drawSoftShadow(t));
+    creatorRobots.forEach(r => drawSoftShadow(r));
+    necroMinions.forEach(m => drawSoftShadow(m));
+    [p1, p2].forEach(p => {
+        if (!p) return;
+        if (p.hp > 0) drawSoftShadow(p, 1.1);
+        if (p.drones) p.drones.forEach(d => drawSoftShadow(d, 0.8));
+        if (p.creatorDrone) drawSoftShadow(p.creatorDrone, 0.8);
+    });
+    ctx.restore();
 
     confinementCages.forEach(c => c.draw());
     creatorTurrets.forEach(t => t.draw());
@@ -13994,11 +14237,12 @@ class BotAIController {
         p2.upgrades = p2.upgrades.filter(u => !bodyIds.includes(u));
         p2.upgrades.push(bodyId);
 
-        const curX = p2.x;
-        const curY = p2.y;
+        // [FIX] Giữ tâm xe theo trục X; Y do setupForNewRound tính theo kích thước body mới
+        // (trước đây giữ Y cũ khiến xe to/nhỏ bị lơ lửng hoặc lún khỏi mép sân).
+        const curCX = p2.x + (p2.w || C.tankW) / 2;
+        clearOwnedSummons(p2);
         p2.setupForNewRound();
-        p2.x = curX;
-        p2.y = curY;
+        p2.x = Math.max(0, Math.min(canvas.width - p2.w, curCX - p2.w / 2));
         p2.hp = p2.maxHp;
         p2.bullets = [];
         p2.bowChargeTimer = 0;
@@ -14026,11 +14270,12 @@ class BotAIController {
         p1.upgrades = p1.upgrades.filter(u => !bodyIds.includes(u));
         p1.upgrades.push(bodyId);
 
-        const curX = p1.x;
-        const curY = p1.y;
+        // [FIX] Giữ tâm xe theo trục X; Y do setupForNewRound tính theo kích thước body mới
+        // (trước đây giữ Y cũ khiến xe to/nhỏ bị lơ lửng hoặc lún khỏi mép sân).
+        const curCX = p1.x + (p1.w || C.tankW) / 2;
+        clearOwnedSummons(p1);
         p1.setupForNewRound();
-        p1.x = curX;
-        p1.y = curY;
+        p1.x = Math.max(0, Math.min(canvas.width - p1.w, curCX - p1.w / 2));
         p1.hp = p1.maxHp;
         p1.bullets = [];
         p1.bowChargeTimer = 0;
