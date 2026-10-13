@@ -1,0 +1,356 @@
+// ==========================================
+// Điều khiển bàn phím / cảm ứng / menu
+// ==========================================
+
+
+
+function setupControls() {
+    // Mode Buttons in Main Menu
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            gameState.winScore = parseInt(btn.dataset.wins) || 3;
+            updateScoreBoard();
+            if (!soundSystem.muted) soundSystem.playCoin();
+        });
+    });
+
+    // Map Buttons in Main Menu
+    document.querySelectorAll('.map-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.map-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            gameState.selectedMapMode = btn.dataset.map || 'classic';
+            gameState.currentMap = gameState.selectedMapMode;
+            if (typeof updateMapHUD === 'function') updateMapHUD();
+            if (soundSystem && !soundSystem.muted) soundSystem.playCoin();
+        });
+    });
+
+    // Start Battle Button
+    const startBtn = document.getElementById('startBattleBtn');
+    if (startBtn) startBtn.addEventListener('click', startBattle);
+
+    // Sound Toggles
+    const updateSoundUI = () => {
+        const icon = soundSystem.muted ? '\u{1F507}' : '\u{1F50A}';
+        const txt = soundSystem.muted ? 'T\u1EAET' : 'B\u1EACT';
+        const menuSoundBtn = document.getElementById('menuSoundToggleBtn');
+        if (menuSoundBtn) menuSoundBtn.innerText = `${icon} \u00C2M THANH: SFX ${txt}`;
+        const hudSoundText = document.getElementById('soundText');
+        if (hudSoundText) hudSoundText.innerText = soundSystem.muted ? 'OFF' : 'SFX';
+        const hudSoundIcon = document.getElementById('soundIcon');
+        if (hudSoundIcon) hudSoundIcon.innerText = icon;
+    };
+
+    const toggleSound = () => {
+        soundSystem.muted = !soundSystem.muted;
+        if (!soundSystem.muted) soundSystem.playCoin();
+        updateSoundUI();
+    };
+
+    const menuSoundBtn = document.getElementById('menuSoundToggleBtn');
+    if (menuSoundBtn) menuSoundBtn.addEventListener('click', toggleSound);
+    const soundBtn = document.getElementById('soundToggleBtn');
+    if (soundBtn) soundBtn.addEventListener('click', toggleSound);
+    updateSoundUI();
+
+    // Guide Modal
+    const guideModal = document.getElementById('guideModal');
+    const openGuide = () => { if (guideModal) guideModal.style.display = 'flex'; };
+    const closeGuide = () => { if (guideModal) guideModal.style.display = 'none'; };
+
+    const openGuideBtn = document.getElementById('openGuideBtn');
+    if (openGuideBtn) openGuideBtn.addEventListener('click', openGuide);
+    const openGuideFromPause = document.getElementById('openGuideFromPauseBtn');
+    if (openGuideFromPause) openGuideFromPause.addEventListener('click', openGuide);
+    const closeGuideBtn = document.getElementById('closeGuideBtn');
+    if (closeGuideBtn) closeGuideBtn.addEventListener('click', closeGuide);
+    const guideGotItBtn = document.getElementById('guideGotItBtn');
+    if (guideGotItBtn) guideGotItBtn.addEventListener('click', closeGuide);
+
+    // Pause / In-Game Menu Modal
+    const pauseModal = document.getElementById('pauseMenuModal');
+    const menuToggleBtn = document.getElementById('menuToggleBtn');
+    if (menuToggleBtn) {
+        menuToggleBtn.addEventListener('click', () => {
+            gameState.isPaused = true;
+            if (pauseModal) pauseModal.style.display = 'flex';
+        });
+    }
+
+    const resumeBtn = document.getElementById('resumeBtn');
+    if (resumeBtn) {
+        resumeBtn.addEventListener('click', () => {
+            gameState.isPaused = false;
+            if (pauseModal) pauseModal.style.display = 'none';
+        });
+    }
+
+    const restartCurrentBtn = document.getElementById('restartCurrentMatchBtn');
+    if (restartCurrentBtn) {
+        restartCurrentBtn.addEventListener('click', () => {
+            if (pauseModal) pauseModal.style.display = 'none';
+            gameState.isPaused = false;
+            startBattle();
+        });
+    }
+
+    const backToMenu = () => {
+        if (typeof botAI !== 'undefined') botAI.enabled = false;
+        if (typeof onlineManager !== 'undefined') onlineManager.leaveRoom();
+        const tb = document.getElementById('trainingToolbar');
+        if (tb) tb.style.display = 'none';
+        const botModal = document.getElementById('botWeaponModal');
+        if (botModal) botModal.style.display = 'none';
+        const p2Controls = document.getElementById('p2-controls');
+        if (p2Controls) p2Controls.style.display = 'flex';
+        const p1Label = document.querySelector('.p1-tag');
+        if (p1Label) p1Label.innerHTML = '🔵 PLAYER 1 (BLUE)';
+        if (pauseModal) pauseModal.style.display = 'none';
+        const endScreen = document.getElementById('endScreen');
+        if (endScreen) endScreen.style.display = 'none';
+        const upgradeScreen = document.getElementById('upgradeScreen');
+        if (upgradeScreen) upgradeScreen.style.display = 'none';
+        const mainMenu = document.getElementById('mainMenu');
+        if (mainMenu) mainMenu.style.display = 'flex';
+        gameState.phase = 'menu';
+        gameState.isPaused = false;
+        cancelAnimationFrame(animationId);
+    };
+
+    const backToMenuBtn = document.getElementById('backToMainMenuBtn');
+    if (backToMenuBtn) backToMenuBtn.addEventListener('click', backToMenu);
+    const backFromEndBtn = document.getElementById('backToMenuFromEndBtn');
+    if (backFromEndBtn) backFromEndBtn.addEventListener('click', backToMenu);
+
+    const restartBtn = document.getElementById('restartBtn');
+    if (restartBtn) restartBtn.addEventListener('click', startBattle);
+
+    // Touch and Mouse Input Handling
+    function handleInput(p, action, pressed) {
+        if (p === 'p2' && typeof botAI !== 'undefined' && botAI.enabled) return;
+
+        // In Online Mode as Guest: map bottom controls directly to P2
+        if (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'guest') {
+            if (action === 'left') {
+                inputs.p2.r = pressed; // Screen Left -> World +X (Left from inverted view)
+            } else if (action === 'right') {
+                inputs.p2.l = pressed; // Screen Right -> World -X (Right from inverted view)
+            } else if (action === 'shoot') {
+                inputs.p2.s = pressed;
+            }
+            if (onlineManager.conn && onlineManager.conn.open) {
+                onlineManager.conn.send({ type: 'INPUT', input: inputs.p2 });
+            }
+            if (pressed && action === 'shoot' && gameState.phase === 'upgrade') {
+                handlePlayerReady('p2');
+                if (onlineManager.conn && onlineManager.conn.open) {
+                    onlineManager.conn.send({ type: 'READY', pid: 'p2' });
+                }
+            }
+            return;
+        }
+
+        // In Online Mode as Host:
+        if (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'host') {
+            if (p === 'p1') {
+                inputs.p1[action === 'left' ? 'l' : (action === 'right' ? 'r' : 's')] = pressed;
+                if (onlineManager.conn && onlineManager.conn.open) {
+                    onlineManager.conn.send({ type: 'HOST_INPUT', input: inputs.p1 });
+                }
+                if (pressed && action === 'shoot' && gameState.phase === 'upgrade') {
+                    handlePlayerReady('p1');
+                    if (onlineManager.conn && onlineManager.conn.open) {
+                        onlineManager.conn.send({ type: 'READY', pid: 'p1' });
+                    }
+                }
+            }
+            return;
+        }
+
+        if (pressed && action === 'shoot' && gameState.phase === 'upgrade') {
+            handlePlayerReady(p);
+        }
+        if (p === 'p1') inputs.p1[action === 'left' ? 'l' : (action === 'right' ? 'r' : 's')] = pressed;
+        if (p === 'p2') inputs.p2[action === 'left' ? 'l' : (action === 'right' ? 'r' : 's')] = pressed;
+    }
+
+    let lastTouchActionTimestamp = 0;
+    document.querySelectorAll('.btn').forEach(btn => {
+        const p = btn.dataset.p; const a = btn.dataset.a;
+        btn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            lastTouchActionTimestamp = Date.now();
+            btn.classList.add('pressed');
+            if (navigator.vibrate) { try { navigator.vibrate(12); } catch(err) {} }
+            handleInput(p, a, true);
+        }, { passive: false });
+        btn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            lastTouchActionTimestamp = Date.now();
+            btn.classList.remove('pressed');
+            handleInput(p, a, false);
+        });
+        btn.addEventListener('mousedown', () => {
+            if (Date.now() - lastTouchActionTimestamp < 500) return; // Chống double input do touch sinh ra mousedown
+            btn.classList.add('pressed');
+            handleInput(p, a, true);
+        });
+        btn.addEventListener('mouseup', () => {
+            if (Date.now() - lastTouchActionTimestamp < 500) return;
+            btn.classList.remove('pressed');
+            handleInput(p, a, false);
+        });
+        btn.addEventListener('mouseleave', () => {
+            if (Date.now() - lastTouchActionTimestamp < 500) return;
+            btn.classList.remove('pressed');
+            handleInput(p, a, false);
+        });
+    });
+
+    window.addEventListener('resize', updateCanvasDimensions);
+
+    // Click/Tap on Mecha to cycle modes (Mobile / Touch friendly)
+    canvas.addEventListener('pointerdown', (e) => {
+        if (gameState.phase !== 'playing') return;
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const clickX = (e.clientX - rect.left) * scaleX;
+        const clickY = (e.clientY - rect.top) * scaleY;
+
+        let myPlayer = (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'guest') ? p2 : p1;
+        if (myPlayer && myPlayer.weapon === 'genius' && myPlayer.isPilotingMecha) {
+            if (Math.abs(clickX - (myPlayer.x + myPlayer.w / 2)) < 60 && Math.abs(clickY - (myPlayer.y + myPlayer.h / 2)) < 60) {
+                myPlayer.cycleMechaMode();
+            }
+        }
+    });
+
+    // Keyboard controls for PC
+    window.addEventListener('keydown', (e) => {
+        if (e.repeat) return; // FIX DOUBLE INPUT TỪ OS KEYBOARD AUTO-REPEAT
+        if (gameState.phase === 'upgrade') {
+            if (e.key === 's' || e.key === 'S' || e.key === ' ') {
+                if (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'guest') {
+                    handlePlayerReady('p2');
+                    if (onlineManager.conn && onlineManager.conn.open) onlineManager.conn.send({ type: 'READY', pid: 'p2' });
+                } else {
+                    handlePlayerReady('p1');
+                    if (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.conn && onlineManager.conn.open) {
+                        onlineManager.conn.send({ type: 'READY', pid: 'p1' });
+                    }
+                }
+            }
+            if ((e.key === 'ArrowDown' || e.key === 'Enter') && (!botAI || !botAI.enabled) && (!onlineManager || !onlineManager.isOnline)) {
+                handlePlayerReady('p2');
+            }
+        }
+
+        // Online mode for Guest: PC keyboard (A/D/S/Space or Arrows) maps to P2
+        if (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'guest') {
+            let changed = false;
+            if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') { inputs.p2.r = true; changed = true; }
+            if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') { inputs.p2.l = true; changed = true; }
+            if (e.key === 's' || e.key === 'S' || e.key === 'w' || e.key === 'W' || e.key === ' ' || e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter') {
+                inputs.p2.s = true; changed = true;
+            }
+            if (changed && onlineManager.conn && onlineManager.conn.open) {
+                onlineManager.conn.send({ type: 'INPUT', input: inputs.p2 });
+            }
+            return;
+        }
+
+        // P1 Controls: A / D / S / W / Space
+        if (e.key === 'a' || e.key === 'A') inputs.p1.l = true;
+        if (e.key === 'd' || e.key === 'D') inputs.p1.r = true;
+        if (e.key === 's' || e.key === 'S' || e.key === 'w' || e.key === 'W' || e.key === ' ') inputs.p1.s = true;
+
+        // Online mode for Host: Send host inputs
+        if (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'host') {
+            if (onlineManager.conn && onlineManager.conn.open) {
+                onlineManager.conn.send({ type: 'HOST_INPUT', input: inputs.p1 });
+            }
+            return;
+        }
+
+        // P2 Controls: Left / Right / Down / Up / Enter (Vô hiệu hóa khi bật Bot hoặc chơi Online)
+        if ((typeof botAI === 'undefined' || !botAI.enabled) && (typeof onlineManager === 'undefined' || !onlineManager.isOnline)) {
+            if (e.key === 'ArrowLeft') inputs.p2.l = true;
+            if (e.key === 'ArrowRight') inputs.p2.r = true;
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter') inputs.p2.s = true;
+        }
+
+        // Mecha Mode Switching for Genius (Keys 1-5, Q, E)
+        if (['1', '2', '3', '4', '5'].includes(e.key)) {
+            let mNum = parseInt(e.key);
+            if (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'guest') {
+                if (p2.weapon === 'genius' && p2.isPilotingMecha) p2.cycleMechaMode(mNum);
+            } else {
+                if (p1.weapon === 'genius' && p1.isPilotingMecha) p1.cycleMechaMode(mNum);
+            }
+        }
+        if (e.key === 'q' || e.key === 'Q') {
+            if (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'guest') {
+                if (p2.weapon === 'genius' && p2.isPilotingMecha) p2.cycleMechaMode((p2.mechaMode === 1 ? 5 : p2.mechaMode - 1));
+            } else {
+                if (p1.weapon === 'genius' && p1.isPilotingMecha) p1.cycleMechaMode((p1.mechaMode === 1 ? 5 : p1.mechaMode - 1));
+            }
+        }
+        if (e.key === 'e' || e.key === 'E') {
+            if (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'guest') {
+                if (p2.weapon === 'genius' && p2.isPilotingMecha) p2.cycleMechaMode();
+            } else {
+                if (p1.weapon === 'genius' && p1.isPilotingMecha) p1.cycleMechaMode();
+            }
+        }
+        if ((typeof botAI === 'undefined' || !botAI.enabled) && (typeof onlineManager === 'undefined' || !onlineManager.isOnline)) {
+            if (p2.weapon === 'genius' && p2.isPilotingMecha) {
+                if (['Numpad1', 'Numpad2', 'Numpad3', 'Numpad4', 'Numpad5'].includes(e.code)) {
+                    p2.cycleMechaMode(parseInt(e.code.replace('Numpad', '')));
+                } else if (['6', '7', '8', '9', '0'].includes(e.key)) {
+                    let map = {'6': 1, '7': 2, '8': 3, '9': 4, '0': 5};
+                    p2.cycleMechaMode(map[e.key]);
+                } else if (e.key === 'o' || e.key === 'O') {
+                    p2.cycleMechaMode((p2.mechaMode === 1 ? 5 : p2.mechaMode - 1));
+                } else if (e.key === 'p' || e.key === 'P') {
+                    p2.cycleMechaMode();
+                }
+            }
+        }
+    });
+
+    window.addEventListener('keyup', (e) => {
+        if (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'guest') {
+            let changed = false;
+            if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') { inputs.p2.r = false; changed = true; }
+            if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') { inputs.p2.l = false; changed = true; }
+            if (e.key === 's' || e.key === 'S' || e.key === 'w' || e.key === 'W' || e.key === ' ' || e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter') {
+                inputs.p2.s = false; changed = true;
+            }
+            if (changed && onlineManager.conn && onlineManager.conn.open) {
+                onlineManager.conn.send({ type: 'INPUT', input: inputs.p2 });
+            }
+            return;
+        }
+
+        if (e.key === 'a' || e.key === 'A') inputs.p1.l = false;
+        if (e.key === 'd' || e.key === 'D') inputs.p1.r = false;
+        if (e.key === 's' || e.key === 'S' || e.key === 'w' || e.key === 'W' || e.key === ' ') inputs.p1.s = false;
+
+        if (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'host') {
+            if (onlineManager.conn && onlineManager.conn.open) {
+                onlineManager.conn.send({ type: 'HOST_INPUT', input: inputs.p1 });
+            }
+            return;
+        }
+
+        if ((typeof botAI === 'undefined' || !botAI.enabled) && (typeof onlineManager === 'undefined' || !onlineManager.isOnline)) {
+            if (e.key === 'ArrowLeft') inputs.p2.l = false;
+            if (e.key === 'ArrowRight') inputs.p2.r = false;
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter') inputs.p2.s = false;
+        }
+    });
+}

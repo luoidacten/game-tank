@@ -1,0 +1,266 @@
+// ==========================================
+// Luồng trận đấu: bắt đầu/kết thúc hiệp, bảng điểm
+// ==========================================
+
+
+
+function startRound() {
+    cancelAnimationFrame(animationId);
+    fatalCinematic = { active: false, timer: 0, maxTimer: 90, winnerId: null, victimX: 0, victimY: 0 };
+    document.getElementById('upgradeScreen').style.display = 'none';
+    gameState.phase = 'playing';
+    crates = []; moneyTrucks = []; movingObstacle = null;
+    if (typeof onlineManager !== 'undefined' && onlineManager.guestDestroyedCrates) {
+        onlineManager.guestDestroyedCrates.clear();
+    }
+    explosions = []; beams = []; radiationZones = []; iceZones = [];
+    gameState.lastObstacleSpawn = Date.now();
+    gameState.roundStartTime = Date.now();
+    lastCrateSpawn = Date.now();
+    talismans = [];
+    spellZones = [];
+    floatingSwords = [];
+    turrets = [];
+    sniperWalls = [];
+    windWalls = [];
+    thunderPlantedSpears = [];
+    magnetNodes = [];
+    bastions = [];
+    artilleryHazards = [];
+    ghostDecoys = [];
+    necroMinions = [];
+    // [FIX] Dọn sạch vật triệu hồi / hiệu ứng còn sót từ hiệp trước (tránh ụ súng, robot,
+    // lồng cấm... của hiệp cũ nằm lại sai vị trí và tiếp tục hoạt động)
+    creatorTurrets = [];
+    creatorDrones = [];
+    creatorRobots = [];
+    confinementCages = [];
+    arrowRains = [];
+    arrowDrops = [];
+    voidZones = [];
+    fireZones = [];
+    floatingTexts = [];
+    particles = [];
+
+    // Map selection & Mutators
+    let isOnlineGuest = (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'guest');
+    if (!isOnlineGuest) {
+        if (!gameState.selectedMapMode || gameState.selectedMapMode === 'random') {
+            const mapList = ['classic', 'bastion', 'artillery', 'overdrive', 'fast_shrink', 'rush_hour', 'supply_drop'];
+            gameState.currentMap = mapList[Math.floor(Math.random() * mapList.length)];
+        } else {
+            gameState.currentMap = gameState.selectedMapMode;
+        }
+    }
+
+    if (gameState.currentMap === 'bastion') {
+        let count = 3;
+        let step = (canvas.height - 240) / (count + 1);
+        for (let bIdx = 0; bIdx < count; bIdx++) {
+            let bY = 120 + (bIdx + 1) * step;
+            let vx = (bIdx % 2 === 0 ? 2 : -2);
+            bastions.push(new BastionWall(bY, 60, vx));
+        }
+    }
+
+    updateMapHUD();
+    triggerRoundIntroBanner();
+
+    // Cố định kích thước sàn đấu mobile khi online
+    if (typeof onlineManager !== 'undefined' && onlineManager.isOnline) {
+        canvas.width = ONLINE_ARENA_WIDTH;
+        canvas.height = ONLINE_ARENA_HEIGHT;
+    }
+
+    // [FIX] Reset trước khi setup: bẫy Shadow Hunter (Evo 2) sinh ra lúc đầu hiệp không bị xoá mất
+    mortars = []; // Reset pháo
+    shadowTraps = [];
+    shortgunFireZones = [];
+    p1.setupForNewRound(); p2.setupForNewRound();
+    lastFixedLoopTime = performance.now();
+    fixedPhysicsAccumulator = 0;
+
+    // Thêm vào cuối hàm startRound()
+    if (p1.weapon === 'cung' && p1.hasUpgrade('evo_cung_1') && p1.hasUpgrade('evo_cung_2')) {
+        arrowRains.push(new ArrowRain(p1, 0, 0, 0, true));
+    }
+    if (p2.weapon === 'cung' && p2.hasUpgrade('evo_cung_1') && p2.hasUpgrade('evo_cung_2')) {
+        arrowRains.push(new ArrowRain(p2, 0, 0, 0, true));
+    }
+    animationId = requestAnimationFrame(gameLoop);
+}
+
+let roundBannerTimeout = null;
+function triggerRoundIntroBanner() {
+    const banner = document.getElementById('roundIntroBanner');
+    if (!banner) return;
+    banner.classList.remove('show');
+    void banner.offsetWidth; // Force reflow
+    banner.classList.add('show');
+    if (roundBannerTimeout) clearTimeout(roundBannerTimeout);
+    roundBannerTimeout = setTimeout(() => {
+        banner.classList.remove('show');
+    }, 2800);
+}
+
+function updateMapHUD() {
+    let badge = document.getElementById('hudMapBadge');
+    if (!badge) return;
+    const mapNames = {
+        classic: '🏛️ CỔ ĐIỂN',
+        bastion: '🛡️ PHÁO ĐÀI',
+        artillery: '💣 PHÁO KÍCH',
+        overdrive: '⚡ SIÊU TỐC',
+        fast_shrink: '💀 BO THẦN TỐC',
+        rush_hour: '🚛 CAO ĐIỂM',
+        supply_drop: '📦 TIẾP TẾ'
+    };
+    badge.innerText = `MAP: ${mapNames[gameState.currentMap] || (gameState.currentMap ? gameState.currentMap.toUpperCase() : 'CỔ ĐIỂN')}`;
+}
+function endRound(winnerId) {
+    if (gameState.phase === 'end_round') return;
+    // --- LOGIC LỢI TỨC (MỚI) ---
+    // Duyệt qua cả 2 người chơi để tính tiền lãi
+    [p1, p2].forEach(p => {
+        // Đếm số lượng 'Lợi Tức' mà người chơi đã mua
+        // p.upgrades lưu danh sách ID, nên mua bao nhiêu cái thì đếm bấy nhiêu
+        let interestCount = p.upgrades.filter(u => u === 'interest').length;
+
+        if (interestCount > 0) {
+            let profitPerStack = 30; // Mặc định 30 xu
+
+            // Nếu cầm Xe Tiền thì nhân đôi lợi tức
+            if (p.weapon === 'money_tank') {
+                profitPerStack = 60;
+            }
+
+            let totalProfit = interestCount * profitPerStack;
+
+            // Cộng tiền vào game state
+            if (p.id === 1) gameState.p1Coins += totalProfit;
+            else gameState.p2Coins += totalProfit;
+
+            // (Tùy chọn) Hiệu ứng visual báo nhận tiền lãi
+            // Hiển thị text bay lên từ vị trí người chơi
+            ctx.fillStyle = "gold";
+            ctx.font = "bold 20px Arial";
+            ctx.fillText(`+$${totalProfit}`, p.x, p.y - 20);
+        }
+    });
+    // ----------------------------
+    gameState.phase = 'end_round';
+    cancelAnimationFrame(animationId);
+
+    soundSystem.playWin();
+    if (winnerId === 1) { gameState.p1Score++; gameState.p1Coins += 50; gameState.p2Coins += 15; }
+    else if (winnerId === 2) { gameState.p2Score++; gameState.p2Coins += 50; gameState.p1Coins += 15; }
+    else { gameState.p1Coins += 10; gameState.p2Coins += 10; }
+
+    // Thưởng Linh Kiện (LK) an toàn cho Inventor (Thắng: 4 -> 6 LK, Thua: 2 -> 3 LK)
+    let winnerPlayer = (winnerId === 1) ? p1 : ((winnerId === 2) ? p2 : null);
+    let loserPlayer = (winnerId === 1) ? p2 : ((winnerId === 2) ? p1 : null);
+    if (winnerPlayer && winnerPlayer.weapon === 'inventor') {
+        let lkWin = winnerPlayer.hasUpgrade('evo_inv_1') ? 6 : 4;
+        winnerPlayer.components = (winnerPlayer.components || 0) + lkWin;
+        if (typeof addFloatingText === 'function') addFloatingText(winnerPlayer.x + winnerPlayer.w / 2, winnerPlayer.y - 15, `+${lkWin} LK (THẮNG)`, "#00ffcc", 14);
+    }
+    if (loserPlayer && loserPlayer.weapon === 'inventor') {
+        let lkLoss = loserPlayer.hasUpgrade('evo_inv_1') ? 3 : 2;
+        loserPlayer.components = (loserPlayer.components || 0) + lkLoss;
+        if (typeof addFloatingText === 'function') addFloatingText(loserPlayer.x + loserPlayer.w / 2, loserPlayer.y - 15, `+${lkLoss} LK (AN ỦI)`, "#00ffcc", 14);
+    }
+    if (winnerId === 0) {
+        [p1, p2].forEach(p => {
+            if (p && p.weapon === 'inventor') {
+                let lkTie = p.hasUpgrade('evo_inv_1') ? 4 : 3;
+                p.components = (p.components || 0) + lkTie;
+                if (typeof addFloatingText === 'function') addFloatingText(p.x + p.w / 2, p.y - 15, `+${lkTie} LK (HÒA)`, "#00ffcc", 14);
+            }
+        });
+    }
+
+    // Thưởng vĩnh viễn cho Shortgun Full Evo khi thắng hiệp (+2 Max HP, +1 DMG)
+    if (winnerPlayer && winnerPlayer.weapon === 'shortgunATK' && winnerPlayer.hasUpgrade('evo_sg_1') && winnerPlayer.hasUpgrade('evo_sg_2')) {
+        winnerPlayer.shortgunBonusMaxHp = (winnerPlayer.shortgunBonusMaxHp || 0) + 2;
+        winnerPlayer.shortgunBonusDmg = (winnerPlayer.shortgunBonusDmg || 0) + 1;
+        winnerPlayer.maxHp += 2;
+        winnerPlayer.hp += 2;
+        winnerPlayer.damage += 1;
+        if (typeof addFloatingText === 'function') addFloatingText(winnerPlayer.x + winnerPlayer.w / 2, winnerPlayer.y - 15, `+2 MAX HP & +1 DMG!`, "#ff6600", 16);
+    }
+
+    updateScoreBoard();
+
+    let targetWins = gameState.winScore || 3;
+    if (gameState.p1Score >= targetWins || gameState.p2Score >= targetWins) {
+        let winnerName = (gameState.p1Score >= targetWins) ? "PLAYER 1" : "PLAYER 2";
+        document.getElementById('finalWinner').innerText = winnerName + " VÔ ĐỊCH!";
+        setTimeout(() => {
+            document.getElementById('endScreen').style.display = 'block';
+        }, 1200);
+    } else {
+        gameState.round++;
+        setTimeout(showUpgradeScreen, 1800);
+    }
+}
+
+function updateScoreBoard() {
+    let targetWins = gameState.winScore || 3;
+    const p1Row = document.getElementById('p1-score-row');
+    const p2Row = document.getElementById('p2-score-row');
+    if (p1Row && p2Row) {
+        p1Row.innerHTML = '';
+        p2Row.innerHTML = '';
+        for (let i = 1; i <= targetWins; i++) {
+            const d1 = document.createElement('div');
+            d1.id = `p1-s${i}`;
+            d1.className = `score-dot ${i <= gameState.p1Score ? 'active-p1' : ''}`;
+            p1Row.appendChild(d1);
+
+            const d2 = document.createElement('div');
+            d2.id = `p2-s${i}`;
+            d2.className = `score-dot ${i <= gameState.p2Score ? 'active-p2' : ''}`;
+            p2Row.appendChild(d2);
+        }
+    }
+
+    const badge = document.getElementById('hudRoundBadge');
+    if (badge) {
+        let totalRounds = targetWins * 2 - 1;
+        badge.innerText = `BO${totalRounds} \u2022 HI\u1EC6P ${gameState.round}`;
+    }
+    if (typeof triggerRoundIntroBanner === 'function' && gameState.phase === 'playing') {
+        triggerRoundIntroBanner();
+    }
+}
+
+function startBattle() {
+    const mainMenu = document.getElementById('mainMenu');
+    if (mainMenu) mainMenu.style.display = 'none';
+    const endScreen = document.getElementById('endScreen');
+    if (endScreen) endScreen.style.display = 'none';
+    const pauseModal = document.getElementById('pauseMenuModal');
+    if (pauseModal) pauseModal.style.display = 'none';
+
+    gameState.round = 1;
+    gameState.p1Score = 0;
+    gameState.p2Score = 0;
+    gameState.p1Coins = 0;
+    gameState.p2Coins = 0;
+    gameState.isPaused = false;
+
+    p1 = new Player(1, "#3498db");
+    p2 = new Player(2, "#e74c3c");
+
+    thunderPlantedSpears = [];
+    magnetNodes = [];
+    bastions = [];
+    artilleryHazards = [];
+    ghostDecoys = [];
+    necroMinions = [];
+    updateMapHUD();
+
+    updateScoreBoard();
+    soundSystem.playPowerup();
+    showUpgradeScreen();
+}
