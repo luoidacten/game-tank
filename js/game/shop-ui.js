@@ -4,9 +4,14 @@
 
 
 
-// Số lần mua tối đa cho mỗi module chân
-const FEET_MAX = { speed: 3, armor: 5, damage: 3, interest: 3 };
+// Module chân mua không giới hạn, nhưng mỗi lần đã mua làm giá tăng thêm 50% giá gốc
+const FEET_PRICE_STEP = 0.5;
 function feetOwnedCount(player, id) { return (player.upgrades || []).filter(u => u === id).length; }
+function shopItemPrice(player, item) {
+    const base = item.cost || 10;
+    if (item.type !== 'feet') return base;
+    return Math.round(base * (1 + FEET_PRICE_STEP * feetOwnedCount(player, item.id)));
+}
 
 function showUpgradeScreen() {
     gameState.phase = 'upgrade';
@@ -189,8 +194,7 @@ function renderShop(playerId, keepItems = false) {
 
     // Smart Shop: Caching & Cơ chế Bảo Hiểm (Pity System)
     if (!keepItems || !player.currentShopItems) {
-        // [FIX] Giới hạn số lần mua module chân (trước đây mua vô hạn)
-        let poolFeet = MODULES.FEET.filter(f => feetOwnedCount(player, f.id) < (FEET_MAX[f.id] || 3));
+        let poolFeet = MODULES.FEET.slice();
         let availableEvos = [];
         const weaponEvos = EVOLUTIONS[player.weapon];
         if (weaponEvos) {
@@ -212,29 +216,28 @@ function renderShop(playerId, keepItems = false) {
         }
 
         player.currentShopItems = shopItems;
-        player.boughtShopItems = []; // "ĐÃ MUA" chỉ tính trong lượt hàng hiện tại; giới hạn tổng do FEET_MAX
+        player.boughtShopItems = []; // "ĐÃ MUA" chỉ tính trong lượt hàng hiện tại
     }
 
     player.currentShopItems.forEach(item => {
-        const price = item.cost || 10;
+        const price = shopItemPrice(player, item);
         const card = document.createElement('div');
 
-        const feetMaxed = item.type === 'feet' && feetOwnedCount(player, item.id) >= (FEET_MAX[item.id] || 3);
-        if ((player.boughtShopItems && player.boughtShopItems.includes(item.id)) || feetMaxed) {
+        if (player.boughtShopItems && player.boughtShopItems.includes(item.id)) {
             card.className = 'card sold';
-            card.innerHTML = `<h4>${item.name}</h4><p>${feetMaxed ? 'TỐI ĐA' : 'ĐÃ MUA'}</p>`;
+            card.innerHTML = `<h4>${item.name}</h4><p>ĐÃ MUA</p>`;
         } else {
             if (item.type === 'evo') card.className = 'card evo-card';
             else card.className = 'card';
 
-            const lvlTxt = item.type === 'feet' ? ` <span style="color:#94a3b8">(${feetOwnedCount(player, item.id)}/${FEET_MAX[item.id] || 3})</span>` : '';
+            const owned = item.type === 'feet' ? feetOwnedCount(player, item.id) : 0;
+            const lvlTxt = owned > 0 ? ` <span style="color:#94a3b8">(đã có ${owned})</span>` : '';
             card.innerHTML = `<h4>${item.name}${lvlTxt}</h4><p>${item.desc}</p><p style="color:#f1c40f; font-weight:bold">$${price}</p>`;
 
             card.onclick = () => {
-                if (item.type === 'feet' && feetOwnedCount(player, item.id) >= (FEET_MAX[item.id] || 3)) return;
                 const currentCoin = (playerId === 'p1') ? gameState.p1Coins : gameState.p2Coins;
                 if (currentCoin >= price) {
-                    if (!player.addUpgrade(item.id)) return; // đã đạt giới hạn
+                    player.addUpgrade(item.id);
                     if (playerId === 'p1') gameState.p1Coins -= price; else gameState.p2Coins -= price;
                     updateShopTitle();
                     soundSystem.playPowerup();

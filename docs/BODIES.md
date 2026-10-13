@@ -10,7 +10,7 @@
 - Gốc: xe 30×30, tốc độ 3.5, tốc đạn 4.8, nạp đạn 1.5s. Sau 60s **Đột Tử**: vùng an toàn thu hẹp.
 - Xe to được cộng máu: rộng 31–33 → +1, 34–35 → +2, 36 → +3, 37 → +4, ≥38 → +5 HP.
 - Mỗi Body có 2 Evo. Có **cả 2 = FULL EVO**.
-- Module chân có giới hạn mua: Động Cơ tối đa 3, Giáp Thép tối đa 5, Bánh Xích tối đa 3, Lợi Tức tối đa 3.
+- Module chân mua không giới hạn, nhưng mỗi lần đã mua làm giá tăng thêm 50% giá gốc: Động Cơ 30$ → 45$ → 60$ → …, Giáp Thép 15$ → 23$ → 30$ → …, Bánh Xích 20$ → 30$ → 40$ → …, Lợi Tức 10$ → 15$ → 20$ → ….
 
 ## Bảng tổng hợp
 
@@ -101,12 +101,12 @@
 
 ## Module chân (FEET)
 
-| Module | ID | Giá | Tối đa | Hiệu ứng |
+| Module | ID | Giá gốc | Lần 2 / 3 / 4 | Hiệu ứng |
 |---|---|---:|---:|---|
-| Động Cơ | `speed` | $30 | 3 | Tăng tốc độ di chuyển. |
-| Giáp Thép | `armor` | $15 | 5 | +1 Máu tối đa. |
-| Bánh Xích | `damage` | $20 | 3 | x1.25 Sát thương. |
-| Lợi Tức | `interest` | $10 | 3 | Sau mỗi round: +30$ (Xe Tiền +60$). Cộng dồn. |
+| Động Cơ | `speed` | $30 | 45$ / 60$ / 75$ | Tăng tốc độ di chuyển. |
+| Giáp Thép | `armor` | $15 | 23$ / 30$ / 38$ | +1 Máu tối đa. |
+| Bánh Xích | `damage` | $20 | 30$ / 40$ / 50$ | x1.25 Sát thương. |
+| Lợi Tức | `interest` | $10 | 15$ / 20$ / 25$ | Sau mỗi round: +30$ (Xe Tiền +60$). Cộng dồn. |
 
 ## Chi tiết từng Body
 
