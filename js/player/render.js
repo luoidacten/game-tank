@@ -404,6 +404,8 @@ Object.assign(Player.prototype, {
             else if (this.weapon === 'six_barrel') {
                 barColor = (this.isOverheated) ? "#ff0000" : (this.heat >= 75 ? "#ff3300" : (this.heat >= 50 ? "#ff9900" : "#ffd700"));
                 ratio = this.heat / 100;
+                // Đang khởi động nòng (giữ 0.5s): hiện thanh trắng
+                if (!this.isOverheated && (this.sbSpin || 0) < 30 && this.heat < 1) { barColor = "#ffffff"; ratio = (this.sbSpin || 0) / 30; }
             }
             else if (this.weapon === 'the_strongest') {
                 barColor = "#00ffff";

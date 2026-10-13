@@ -75,10 +75,8 @@ CharHooks.register('kiem_khach', {
     setup() {
         if (!this.kkData) {
             this.kkData = kkNewData();
-            // Hiệp 1 chưa có shop: tự nhận 2 bài khởi đầu
-            this.kkData.picksLeft = 2;
-            kkAcceptQuest(this, 'mua_kiem');
-            kkAcceptQuest(this, 'mai_kiem');
+            // Hiệp 1 chưa có shop: tự nhận ngẫu nhiên 3 bài khởi đầu
+            kkAutoPick(this, 3);
         }
         const d = this.kkData;
         this.maxHp += d.stats.hp; this.damage += d.stats.dmg; this.maxAmmo += d.stats.ammo; this.speed += d.stats.speed;
@@ -182,7 +180,7 @@ CharHooks.register('kiem_khach', {
             if (a.id === 'van_tinh_vu' && !this.kkNoDmgFail) kkComplete(this, a);
             if (a.id === 'co_hoi_cuoi' && result === 'lose') { a.prog++; if (a.prog >= a.need) kkComplete(this, a); }
         }
-        d.picksLeft = Math.min(8, d.picksLeft + kkPicksPerPhase(this));
+        d.rounds = (d.rounds || 0) + 1;
     },
 
     shopButtons(container, playerId) {
@@ -191,7 +189,7 @@ CharHooks.register('kiem_khach', {
         btn.className = 'card';
         btn.style.border = '2px solid #7dd3fc';
         btn.style.background = '#0c2235';
-        btn.innerHTML = `<h4 style="color:#7dd3fc">📜 LUYỆN KIẾM</h4><p>Nhận bài tập (${d.active.length} đang làm)</p><p style="color:#7dd3fc">Lượt: ${d.picksLeft}</p>`;
+        btn.innerHTML = `<h4 style="color:#7dd3fc">📜 LUYỆN KIẾM</h4><p>Nhận bài tập (${d.active.length} đang làm)</p><p style="color:#7dd3fc">Ô trống: ${kkFreeSlots(this)}/${kkCapacity(this)}</p>`;
         btn.onclick = () => kkRenderQuestPanel(playerId);
         container.appendChild(btn);
     },
@@ -205,7 +203,7 @@ function kkRenderQuestPanel(playerId) {
     const d = p.kkData;
     container.innerHTML = '';
     const title = document.getElementById('roundTitleText');
-    if (title) title.innerText = `LUYỆN KIẾM — Lượt chọn: ${d.picksLeft}${d.hoaThan ? ' • HÓA THẦN' : ''}`;
+    if (title) title.innerText = `LUYỆN KIẾM — Đang làm ${d.active.length}/${kkCapacity(p)}${d.hoaThan ? ' • HÓA THẦN' : ''}`;
 
     const back = document.createElement('div');
     back.className = 'card';
@@ -231,7 +229,7 @@ function kkRenderQuestPanel(playerId) {
         const color = q.group === 'skill' ? '#7dd3fc' : (q.group === 'stat' ? '#facc15' : '#f0abfc');
         card.innerHTML = `<h4 style="color:${color}">${q.name}${q.tiers > 1 ? ' ' + ['I', 'II', 'III'][tier] : ''}</h4>` +
             `<p>${q.task(need)}<br><span style="color:#e2e8f0">➜ ${q.reward(tier)}</span></p>` +
-            `<p style="color:${d.picksLeft > 0 ? color : '#ef4444'}">${d.picksLeft > 0 ? 'NHẬN' : 'HẾT LƯỢT'}</p>`;
+            `<p style="color:${kkFreeSlots(p) > 0 ? color : '#ef4444'}">${kkFreeSlots(p) > 0 ? 'NHẬN' : 'ĐẦY Ô'}</p>`;
         card.onclick = () => {
             if (kkAcceptQuest(p, q.id)) {
                 if (soundSystem && !soundSystem.muted) soundSystem.playPowerup();

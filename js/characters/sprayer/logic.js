@@ -8,7 +8,14 @@ const SP_CHEM_COLOR = { fire: '#ff6a1a', acid: '#7bf85c', ice: '#5ee7ff' };
 // Tầm phun theo trục dọc: tới hết làn đối thủ. Nón mở từ 8px ở nòng tới ~48px ở cuối.
 function spMaxRange() { return canvas.height - 30; }
 const SP_HALF_NEAR = 8, SP_HALF_FAR = 48;
-function spHalfWidth(fwd) { return SP_HALF_NEAR + (SP_HALF_FAR - SP_HALF_NEAR) * Math.max(0, Math.min(1, fwd / spMaxRange())); }
+// [ĐỔI] Luồng phun bay ra từ từ (spFront tăng dần); chỉ khi chạm tầm tối đa (hoặc vật cản) mới mở rộng
+// sang hai bên (spWiden 0 -> 1). Khi chưa mở, luồng chỉ là tia hẹp.
+const SP_FRONT_SPEED = 7;      // px mỗi tick
+const SP_WIDEN_TICKS = 24;     // thời gian mở rộng sau khi chạm tầm tối đa
+function spHalfWidth(fwd, p) {
+    const w = p && typeof p.spWiden === 'number' ? p.spWiden : 1;
+    return SP_HALF_NEAR + (SP_HALF_FAR - SP_HALF_NEAR) * Math.max(0, Math.min(1, fwd / spMaxRange())) * w;
+}
 const SP_COAT_RATE = 55;       // % lớp phủ mỗi giây khi đứng trong luồng
 
 function spIsFullEvo(p) { return p.hasUpgrade('evo_spray_1') && p.hasUpgrade('evo_spray_2'); }
@@ -51,7 +58,7 @@ function spInCone(p, n, rect, range) {
     const tx = rect.x + rect.w / 2, ty = rect.y + rect.h / 2;
     const fwd = (ty - n.y) * n.dirY;
     if (fwd < -rect.h / 2 || fwd > range + rect.h / 2) return false;
-    const halfW = spHalfWidth(fwd) + rect.w / 2;
+    const halfW = spHalfWidth(fwd, p) + rect.w / 2;
     return Math.abs(tx - n.x) <= halfW;
 }
 
@@ -127,23 +134,27 @@ function spApplySpray(p) {
     const chem = p.spChem;
     const full = spIsFullEvo(p);
     const blockers = spBlockers(p);
-    p.spRange = spEffectiveRange(p, n, blockers);
+    const reach = spEffectiveRange(p, n, blockers);
+    p.spFront = Math.min(spMaxRange(), (p.spFront || 0) + SP_FRONT_SPEED);
+    p.spRange = Math.min(reach, p.spFront);
+    if (p.spFront >= reach) p.spWiden = Math.min(1, (p.spWiden || 0) + 1 / SP_WIDEN_TICKS);
+    const front = p.spFront;
 
     // Vật cản trong luồng phun hứng hiệu ứng
     let firstBlocker = null, firstDist = 1e9;
     for (const b of blockers) {
-        if (!spInCone(p, n, b, spMaxRange())) continue;
+        if (!spInCone(p, n, b, front)) continue;
         spAffectStructure(p, b, chem, full);
         const dist = Math.abs((b.y + b.h / 2) - n.y);
         if (dist < firstDist) { firstDist = dist; firstBlocker = b; }
     }
     // Ụ súng / ụ triệu hồi của đối thủ: axit làm tan chảy
     [...turrets, ...creatorTurrets].forEach(t => {
-        if (t.active && t.owner !== p && spInCone(p, n, t, spMaxRange())) spAffectStructure(p, t, chem, full);
+        if (t.active && t.owner !== p && spInCone(p, n, t, front)) spAffectStructure(p, t, chem, full);
     });
 
     // Đối thủ: trong nón và không bị vật cản che
-    if (enemy && enemy.hp > 0 && spInCone(p, n, enemy, spMaxRange())) {
+    if (enemy && enemy.hp > 0 && spInCone(p, n, enemy, front)) {
         const ex = enemy.x + enemy.w / 2, ey = enemy.y + enemy.h / 2;
         const blocked = blockers.some(b => segHitsRect(n.x, n.y, ex, ey, b));
         if (!blocked) {
@@ -188,7 +199,7 @@ CharHooks.register('sprayer', {
         this.maxAmmo = 0; this.ammo = 0;
         this.spEnergy = 100; this.spOn = false; this.spChem = this.spChem || 'fire';
         this.spHold = 0; this.spPrevS = false; this.spRegenDelay = 0; this.spZoneTick = 0;
-        this.spRange = spMaxRange(); this.spLock = false;
+        this.spRange = 0; this.spFront = 0; this.spWiden = 0; this.spLock = false;
     },
 
     update() {
@@ -202,6 +213,7 @@ CharHooks.register('sprayer', {
             spApplySpray(this);
         } else {
             this.spZoneTick = 0;
+            this.spFront = 0; this.spWiden = 0;
             if (this.spRegenDelay > 0) this.spRegenDelay--;
             else this.spEnergy = Math.min(100, this.spEnergy + (evo1 ? 27 : 18) / 60);
             if (this.spLock && this.spEnergy >= 30) this.spLock = false;

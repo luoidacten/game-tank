@@ -240,7 +240,7 @@ Object.assign(Player.prototype, {
         if (this.updateSukuna(now, effectiveInp)) return;
 
         // --- LOGIC CUỒNG PHONG (STORM) ---
-        if (this.updateStorm()) return;
+        if (this.updateStorm(effectiveInp)) return;
         // --- LOGIC FULL EVO: PHONG TRẢM (WIND SLASH) ---
         this.updateWindSlash();
 
@@ -349,30 +349,24 @@ Object.assign(Player.prototype, {
                 return; // Đang lướt thì không làm hành động khác
             }
 
-            // 2. LOGIC TỤ LỰC & BẮN CUNG MỚI (TAP TO CHARGE, TAP TO RELEASE)
-            let shootJustPressed = inp.s && !this.prevInpS;
+            // 2. TỤ LỰC CUNG: GIỮ NÚT ĐỂ KÉO (nạp nhanh x1.6), NHẢ RA ĐỂ BẮN
             this.prevInpS = !!inp.s;
-
-            if (shootJustPressed) {
-                if (!this.bowIsCharging && this.ammo > 0) {
-                    // Tap 1: Bắt đầu tụ lực tự động
-                    this.bowIsCharging = true;
-                    this.bowChargeTimer = 0;
-                    this.crosshairX = enemy.x + enemy.w / 2;
-                    this.crosshairY = enemy.y + enemy.h / 2;
-                } else if (this.bowIsCharging) {
-                    // Tap 2: Nhả tên theo mốc thời gian đã sạc
-                    let chargeSec = this.bowChargeTimer / 60;
-                    this.fireBow(chargeSec, isFullEvo);
-                    this.triggerBowDodgeDash(inp);
-                    this.bowIsCharging = false;
-                    this.bowChargeTimer = 0;
-                }
+            if (inp.s && !this.bowIsCharging && this.ammo > 0) {
+                this.bowIsCharging = true;
+                this.bowChargeTimer = 0;
+                this.crosshairX = enemy.x + enemy.w / 2;
+                this.crosshairY = enemy.y + enemy.h / 2;
+            } else if (!inp.s && this.bowIsCharging) {
+                let chargeSec = this.bowChargeTimer / 60;
+                this.fireBow(chargeSec, isFullEvo);
+                this.triggerBowDodgeDash(inp);
+                this.bowIsCharging = false;
+                this.bowChargeTimer = 0;
             }
 
-            // Trong lúc đang tụ lực
+            // Trong lúc đang tụ lực (đầy lực thì giữ nguyên tới khi nhả nút)
             if (this.bowIsCharging) {
-                this.bowChargeTimer++;
+                this.bowChargeTimer = Math.min(150, this.bowChargeTimer + 1.6);
                 let chargeSec = this.bowChargeTimer / 60;
 
                 // Tốc độ di chuyển chỉ bị giảm 15% (currentSpeed *= 0.85)
@@ -386,14 +380,6 @@ Object.assign(Player.prototype, {
                     this.crosshairY += dy * 0.1;
                     let shrinkRatio = Math.min((chargeSec - 2) / 1.5, 1);
                     this.crosshairRadius = 150 - (shrinkRatio * 120);
-                }
-
-                // Tự động xả đạn nếu đạt mốc sạc tối đa (2.5s = 150 ticks) để chống kẹt trạng thái
-                if (this.bowChargeTimer >= 150) {
-                    this.fireBow(chargeSec, isFullEvo);
-                    this.triggerBowDodgeDash(inp);
-                    this.bowIsCharging = false;
-                    this.bowChargeTimer = 0;
                 }
             }
 

@@ -16,8 +16,8 @@ Object.assign(CharHooks.registry.sprayer, {
         ctx.strokeRect(n.x - 5, n.dirY < 0 ? this.y - 10 : this.y + this.h, 10, 10);
         // Luồng phun hình nón (cắt ngắn tại vật cản)
         if (this.spOn) {
-            const r = Math.max(8, this.spRange || spMaxRange());
-            const half = spHalfWidth(r);
+            const r = Math.max(8, this.spRange || 0);
+            const half = Math.max(4, spHalfWidth(r, this));
             const y0 = n.dirY < 0 ? n.y - 10 : n.y + 10;
             const g = ctx.createLinearGradient(n.x, y0, n.x, y0 + n.dirY * r);
             g.addColorStop(0, col);

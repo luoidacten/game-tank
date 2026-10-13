@@ -103,7 +103,7 @@ Object.assign(Player.prototype, {
             this.stormDashState = 0;
             this.stormChargeStart = 0;
             this.stormAutoChargeTimer = 0;
-            this.stormMaxChargeTime = 14000; // 14 giây tự tụ lực (tăng mạnh từ 8s)
+            this.stormMaxChargeTime = 3500; // [ĐỔI] Giữ nút 3.5s là đầy lực (trước: tự nạp 14s)
             this.stormChargeRatio = 0;
             this.stormShadowTimer = 0;
             this.stormShadowCooldown = 200 + Math.random() * 300;
@@ -111,11 +111,12 @@ Object.assign(Player.prototype, {
             this.stormSlashDelay = 0;
             this.stormReturnPos = null;
             this.stormEcho = false;
+            this.stormHeld = false;
         }
     },
 
     // [update] Cuồng Phong — trả về true nếu cần dừng update()
-    updateStorm() {
+    updateStorm(inp) {
         if (this.weapon === 'storm') {
             // 1. Xử lý Delay chờ chém (Dùng cho cả lúc Lao xong hoặc Dịch chuyển xong)
             if (this.stormSlashDelay > 0) {
@@ -127,8 +128,8 @@ Object.assign(Player.prototype, {
                 return true;
             }
 
-            // Tự tụ lực Cuồng Phong (Auto-Charge): Tự nạp theo thời gian mà không cần nhấn giữ
-            if (this.stormDashState === 0 && this.stormSlashDelay <= 0) {
+            // [ĐỔI] Tụ lực khi GIỮ nút bắn (không còn tự nạp); nhả nút để xuất chiêu
+            if (this.stormDashState === 0 && this.stormSlashDelay <= 0 && inp && inp.s) {
                 let chargeDuration = this.stormMaxChargeTime || 14000;
                 this.stormAutoChargeTimer = Math.min(chargeDuration, (this.stormAutoChargeTimer || 0) + (1000 / 60));
                 this.stormChargeRatio = this.stormAutoChargeTimer / chargeDuration;
@@ -230,9 +231,11 @@ Object.assign(Player.prototype, {
         if (this.weapon === 'storm') {
             if (this.stormDashState === 1 || this.stormSlashDelay > 0) return true;
 
-            if (inp.s) {
+            const released = !inp.s && this.stormHeld;
+            this.stormHeld = !!inp.s;
+            if (released) {
                 let ratio = this.stormChargeRatio || 0;
-                // Nhấn nút bắn để giải phóng lực (cần ít nhất 10% lực hoặc xuất chiêu ngay)
+                // Nhả nút để giải phóng lực (cần ít nhất 5% lực)
                 if (ratio >= 0.05) {
                     this.savedChargeRatio = ratio;
                     this.stormReturnPos = { x: this.x, y: this.y };
@@ -253,9 +256,12 @@ Object.assign(Player.prototype, {
                     this.stormAutoChargeTimer = 0;
                     this.stormChargeRatio = 0;
                     this.stormChargeStart = 0;
+                } else {
+                    this.stormAutoChargeTimer = 0;
+                    this.stormChargeRatio = 0;
                 }
-                inp.s = false;
             }
+            inp.s = false;
             return true;
         }
     }

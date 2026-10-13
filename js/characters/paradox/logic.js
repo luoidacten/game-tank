@@ -10,6 +10,8 @@ Object.assign(Player.prototype, {
             this.enemyHistory = [];        // Lưu trữ {x, y} của địch trong 3 giây
             this.paradoxCooldown = 0;      // Hồi chiêu 12s hoặc 7s
             this.paradoxCharge = 0;        // Tụ lực giữ nút
+            this.paradoxAnchor = null;     // [MỚI] Neo thời không {x, y, hp, ammo, timer}
+            this.paradoxAnchorCD = 0;      // Hồi chiêu neo (20s)
 
             this.enemyTimeMarks = 0;       // Số tầng ấn thời gian trên người địch
             this.enemyStationaryShadow = null; // Bóng đứng yên (Evo 1)
@@ -54,6 +56,11 @@ Object.assign(Player.prototype, {
             if (this.enemyHistory.length > 180) this.enemyHistory.shift();
 
             if (this.paradoxCooldown > 0) this.paradoxCooldown--;
+            if (this.paradoxAnchorCD > 0) this.paradoxAnchorCD--;
+            if (this.paradoxAnchor && --this.paradoxAnchor.timer <= 0) {
+                this.paradoxAnchor = null; // Neo tồn tại 10s
+                if (typeof addFloatingText === 'function') addFloatingText(this.x + this.w / 2, this.y - 20, 'NEO TAN BIẾN', '#88aaff', 12);
+            }
         }
     },
 
@@ -66,6 +73,78 @@ Object.assign(Player.prototype, {
         }
     },
 
+    // Các mốc tụ lực (frame). 0 = mốc không dùng được lúc này.
+    //   rewind: tua ngược (giảm từ 20 -> 12 frame) | pull: kéo địch (Full Evo) | anchor: mốc trống cuối -> đặt neo
+    paradoxMilestones() {
+        const isFullEvo = this.hasUpgrade('evo_paradox_1') && this.hasUpgrade('evo_paradox_2');
+        const pull = (isFullEvo && this.paradoxCooldown <= 0) ? 40 : 0;
+        const anchor = (this.paradoxAnchorCD <= 0 && !this.paradoxAnchor) ? (isFullEvo ? 75 : 45) : 0;
+        return { rewind: 12, pull, anchor };
+    },
+
+    paradoxRewind(pullOnly) {
+        const hasEvo1 = this.hasUpgrade('evo_paradox_1');
+        const hasEvo2 = this.hasUpgrade('evo_paradox_2');
+        const isFullEvo = hasEvo1 && hasEvo2;
+        const enemy = (this.id === 1) ? p2 : p1;
+        const pastSelf = this.paradoxHistory[0]; // Bản thân 3s trước
+        const pastEnemy = this.enemyHistory[0] || { x: enemy.x, y: enemy.y }; // Địch 3s trước
+
+        // Kéo địch: luôn ưu tiên tuyệt đối Bóng Đứng Yên của Evo 1
+        const pullEnemy = () => {
+            if (hasEvo1 && this.enemyStationaryShadow) {
+                enemy.x = this.enemyStationaryShadow.x;
+                enemy.y = this.enemyStationaryShadow.y;
+                enemy.freezeTimer = 90; // Choáng 1.5s
+                this.enemyStationaryShadow = null;
+                explosions.push(new Explosion(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, 60, 'magenta', 0, this));
+            } else if (isFullEvo) {
+                enemy.x = pastEnemy.x;
+                enemy.y = pastEnemy.y;
+                enemy.freezeTimer = 90;
+                explosions.push(new Explosion(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, 60, 'magenta', 0, this));
+            }
+        };
+
+        if (pullOnly) {
+            // MỐC 2 (Full Evo): chỉ kéo đối thủ
+            pullEnemy();
+        } else if (this.paradoxAnchor) {
+            // Có NEO: tua về đúng neo (vị trí, máu, đạn) rồi xoá neo
+            const a = this.paradoxAnchor;
+            this.x = a.x; this.y = a.y;
+            this.hp = Math.min(this.maxHp, a.hp);
+            this.ammo = Math.min(this.maxAmmo, a.ammo);
+            this.paradoxAnchor = null;
+            explosions.push(new Explosion(this.x + this.w / 2, this.y + this.h / 2, 70, '#88aaff', 0, this));
+            if (typeof addFloatingText === 'function') addFloatingText(this.x + this.w / 2, this.y - 20, 'VỀ NEO! ⚓', '#88aaff', 14);
+            if (hasEvo1) pullEnemy();
+        } else {
+            // MỐC 1: Tua lại bản thân 3s
+            this.x = pastSelf.x;
+            this.y = pastSelf.y;
+            this.hp = pastSelf.hp;
+            explosions.push(new Explosion(this.x + this.w / 2, this.y + this.h / 2, 60, 'cyan', 0, this));
+
+            // Tự động bắn lặp lại các phát đạn đã bắn trong 3s trước đó
+            let pastShots = this.paradoxHistory.filter(h => h.shot).length;
+            if (pastShots > 0) {
+                if (typeof addFloatingText === 'function') addFloatingText(this.x + this.w / 2, this.y - 20, `TUA NGƯỢC BẮN LẶP LẠI x${pastShots}! ⏳`, '#00f0ff', 14);
+                for (let s = 0; s < pastShots; s++) {
+                    setTimeout(() => {
+                        if (typeof gameState !== 'undefined' && gameState.phase === 'playing') {
+                            this.fireBullet(hasEvo2 ? 1.5 : 1.0, false, 'paradox_echo');
+                        }
+                    }, s * 120);
+                }
+            }
+            if (hasEvo1) pullEnemy();
+        }
+
+        // Hồi chiêu: Evo 2 còn 7s (420 frames), gốc 12s (720 frames)
+        this.paradoxCooldown = hasEvo2 ? 420 : 720;
+    },
+
     // [handleShooting] paradox — trả về true nếu cần dừng handleShooting()
     shootParadox(inp, now) {
         if (this.weapon === 'paradox') {
@@ -73,78 +152,31 @@ Object.assign(Player.prototype, {
             let hasEvo2 = this.hasUpgrade('evo_paradox_2');
             let isFullEvo = hasEvo1 && hasEvo2;
 
-            if (this.paradoxCooldown <= 0) {
+            const m = this.paradoxMilestones();
+            const rewindReady = this.paradoxCooldown <= 0;
+            const anchorReady = m.anchor > 0;
+
+            if (rewindReady || anchorReady) {
                 if (inp.s) {
                     this.paradoxCharge++;
-                } else {
-                    // NHẢ NÚT -> Kiểm tra xem đã sạc đủ các mốc chưa (Giữ ngắn 20 frame ~0.33s là tua ngược)
-                    if (this.paradoxCharge >= 20 && this.paradoxHistory.length > 0) {
-
-                        let pastSelf = this.paradoxHistory[0]; // Bản thân 3s trước
-                        const enemy = (this.id === 1) ? p2 : p1;
-                        let pastEnemy = this.enemyHistory[0] || { x: enemy.x, y: enemy.y }; // Địch 3s trước
-
-                        // [FIX LỖI 2] HÀM KÉO ĐỊCH: Luôn ưu tiên tuyệt đối Bóng Đứng Yên của Evo 1
-                        let pullEnemy = () => {
-                            if (hasEvo1 && this.enemyStationaryShadow) {
-                                // Ưu tiên 1: Kéo về Dấu Ấn (Bóng đứng yên)
-                                enemy.x = this.enemyStationaryShadow.x;
-                                enemy.y = this.enemyStationaryShadow.y;
-                                enemy.freezeTimer = 90; // Choáng 1.5s
-                                this.enemyStationaryShadow = null; // Xóa ấn sau khi kéo
-                                explosions.push(new Explosion(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, 60, 'magenta', 0, this));
-                            } else if (isFullEvo) {
-                                // Ưu tiên 2: Kéo về quá khứ 3s (Chỉ kéo khi đối thủ KHÔNG bị dính Dấu Ấn)
-                                enemy.x = pastEnemy.x;
-                                enemy.y = pastEnemy.y;
-                                enemy.freezeTimer = 90; // Choáng 1.5s
-                                explosions.push(new Explosion(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, 60, 'magenta', 0, this));
-                            }
-                        };
-
-                        // MỐC 2: Giữ đủ 1 giây (60 frame - Chỉ Full Evo) - Kéo mỗi đối thủ
-                        if (isFullEvo && this.paradoxCharge >= 60) {
-                            pullEnemy();
-                        }
-                        // MỐC 1: Giữ ngắn (>= 20 frame ~0.33s) -> Tua lại bản thân (Kèm tua địch nếu có)
-                        else {
-                            // Tua bản thân
-                            this.x = pastSelf.x;
-                            this.y = pastSelf.y;
-                            this.hp = pastSelf.hp;
-                            explosions.push(new Explosion(this.x + this.w / 2, this.y + this.h / 2, 60, 'cyan', 0, this));
-
-                            // Tự động bắn lặp lại các phát đạn đã bắn trong 3s trước đó
-                            let pastShots = this.paradoxHistory.filter(h => h.shot).length;
-                            if (pastShots > 0) {
-                                if (typeof addFloatingText === 'function') addFloatingText(this.x + this.w / 2, this.y - 20, `TUA NGƯỢC BẮN LẶP LẠI x${pastShots}! ⏳`, '#00f0ff', 14);
-                                for (let s = 0; s < pastShots; s++) {
-                                    setTimeout(() => {
-                                        if (typeof gameState !== 'undefined' && gameState.phase === 'playing') {
-                                            this.fireBullet(hasEvo2 ? 1.5 : 1.0, false, 'paradox_echo');
-                                        }
-                                    }, s * 120);
-                                }
-                            }
-
-                            // Tiến hành kéo địch (Sẽ tự động xét ưu tiên Dấu Ấn bên trong hàm)
-                            if (hasEvo1) {
-                                pullEnemy();
-                            }
-                        }
-
-                        // Hồi chiêu giảm mạnh: Evo 2 còn 7s (420 frames), gốc 12s (720 frames)
-                        this.paradoxCooldown = hasEvo2 ? 420 : 720;
-                        this.paradoxCharge = 0;
-
-                    } else if (this.paradoxCharge > 0 && this.paradoxCharge < 20) {
-                        // Bấm rất nhẹ (< 20 frame) -> Bắn đạn thường
+                } else if (this.paradoxCharge > 0) {
+                    const c = this.paradoxCharge;
+                    this.paradoxCharge = 0;
+                    if (anchorReady && c >= m.anchor) {
+                        // MỐC CUỐI (mốc trống): Đặt NEO THỜI KHÔNG - lần tua ngược kế tiếp sẽ về neo
+                        this.paradoxAnchor = { x: this.x, y: this.y, hp: this.hp, ammo: this.ammo, timer: 600 };
+                        this.paradoxAnchorCD = 1200;
+                        explosions.push(new Explosion(this.x + this.w / 2, this.y + this.h / 2, 45, '#88aaff', 0, this));
+                        if (typeof addFloatingText === 'function') addFloatingText(this.x + this.w / 2, this.y - 20, 'NEO THỜI KHÔNG ⚓', '#88aaff', 14);
+                    } else if (rewindReady && c >= m.rewind && this.paradoxHistory.length > 0) {
+                        this.paradoxRewind(m.pull > 0 && c >= m.pull);
+                    } else if (c < m.rewind || !rewindReady) {
+                        // Bấm nhẹ (hoặc tua ngược đang hồi) -> Bắn đạn thường
                         if (this.ammo > 0 && now - this.lastShot > 500) {
                             this.fireBullet(1);
                             this.ammo--;
                             this.lastShot = now;
                         }
-                        this.paradoxCharge = 0;
                     }
                 }
             } else {

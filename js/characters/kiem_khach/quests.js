@@ -53,7 +53,7 @@ function kkNewData() {
         totalDone: 0,
         swordsTotal: 0,
         counters: 0,            // phản kiếm (Vân Tinh Vũ)
-        picksLeft: 0,
+        rounds: 0,              // số hiệp đã qua -> +1 ô bài tập mỗi hiệp
         hoaThan: false,
     };
 }
@@ -70,10 +70,21 @@ function kkReqMult(p) {
     return 1;
 }
 
-function kkPicksPerPhase(p) {
-    if (kkIsFullEvo(p)) return 4;
-    if (p.hasUpgrade('evo_kk_2')) return 2;
-    return 1;
+// [ĐỔI] Số bài làm cùng lúc: 3 + 1 mỗi hiệp đã qua (+1 Evo 2, +2 Full Evo)
+function kkCapacity(p) {
+    const d = p.kkData;
+    const bonus = kkIsFullEvo(p) ? 2 : (p.hasUpgrade('evo_kk_2') ? 1 : 0);
+    return Math.min(12, 3 + (d.rounds || 0) + bonus);
+}
+function kkFreeSlots(p) { return Math.max(0, kkCapacity(p) - p.kkData.active.length); }
+
+// Đầu trận: tự nhận ngẫu nhiên cho đủ ô (không lấy bài cuối)
+function kkAutoPick(p, n) {
+    for (let i = 0; i < n; i++) {
+        const pool = kkAvailableQuests(p).filter(e => e.q.group !== 'final' && e.q.metric !== 'instant');
+        if (!pool.length || kkFreeSlots(p) <= 0) break;
+        kkAcceptQuest(p, pool[Math.floor(Math.random() * pool.length)].q.id);
+    }
 }
 
 // Danh sách bài có thể nhận lúc này
@@ -107,8 +118,7 @@ function kkQuestNeed(p, q, tier) {
 function kkAcceptQuest(p, id) {
     const d = p.kkData;
     const entry = kkAvailableQuests(p).find(e => e.q.id === id);
-    if (!entry || d.picksLeft <= 0) return false;
-    d.picksLeft--;
+    if (!entry || kkFreeSlots(p) <= 0) return false;
     const a = { id, tier: entry.tier, prog: 0, need: kkQuestNeed(p, entry.q, entry.tier) };
     d.active.push(a);
     if (entry.q.metric === 'instant') kkComplete(p, a);

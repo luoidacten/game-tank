@@ -2108,3 +2108,58 @@ body.online-active.role-guest .score-dots-wrapper {
 body.online-active.role-guest .score-side {
     flex-direction: column-reverse;
 }
+
+/* ============================================================================
+   KIỂU NÚT MỚI (mặc định): 2 mũi tên bên trái, nút ngắm bên phải, nút tròn.
+   Giữ đồ họa neon của kiểu cũ: P1 xanh, P2 đỏ.
+   Bật/tắt bằng class body.ctrl-new (nút "Kiểu nút" trong menu)
+   ============================================================================ */
+body.ctrl-new .btn-group {
+    justify-content: flex-start;
+    gap: 18px;
+    padding: 0 6px;
+    max-width: 520px;
+}
+body.ctrl-new .btn-group > .btn-move:first-child { order: 1; }
+body.ctrl-new .btn-group > .btn-move:last-child { order: 2; }
+body.ctrl-new .btn-group > .btn-shoot { order: 3; margin-left: auto; }
+body.ctrl-new .btn {
+    width: 64px !important;
+    height: 64px !important;
+    border-radius: 50% !important;
+}
+body.ctrl-new .btn-shoot { width: 72px !important; height: 72px !important; }
+body.ctrl-new .btn .btn-icon,
+body.ctrl-new .btn .btn-text,
+body.ctrl-new .btn .key-hint { display: none !important; }
+body.ctrl-new .btn::after {
+    content: '';
+    position: relative;
+    width: 32px; height: 32px;
+    background-color: var(--ctrl-accent);
+    filter: drop-shadow(0 0 4px var(--ctrl-glow));
+    -webkit-mask: var(--ctrl-icon) center / contain no-repeat;
+    mask: var(--ctrl-icon) center / contain no-repeat;
+}
+body.ctrl-new .player-p1 { --ctrl-accent: #00f0ff; --ctrl-glow: rgba(0, 240, 255, 0.9); }
+body.ctrl-new .player-p2 { --ctrl-accent: #ff2d6f; --ctrl-glow: rgba(255, 0, 85, 0.9); }
+body.ctrl-new .btn-shoot::after { background-color: #fff; }
+body.ctrl-new .btn-group > .btn-move:first-child {
+    --ctrl-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10 5 3 12l7 7v-4.5h11v-5H10z'/%3E%3C/svg%3E");
+}
+body.ctrl-new .btn-group > .btn-move:last-child {
+    --ctrl-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M14 5l7 7-7 7v-4.5H3v-5h11z'/%3E%3C/svg%3E");
+}
+body.ctrl-new .btn-shoot {
+    --ctrl-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='8'/%3E%3Ccircle cx='12' cy='12' r='3.2'/%3E%3Ccircle cx='12' cy='12' r='1' fill='black'/%3E%3Cpath d='M12 1v5M12 18v5M1 12h5M18 12h5'/%3E%3C/svg%3E");
+}
+body.ctrl-new .btn-shoot::after { width: 42px; height: 42px; }
+@media (max-height: 740px) {
+    body.ctrl-new .btn { width: 56px !important; height: 56px !important; }
+    body.ctrl-new .btn-shoot { width: 62px !important; height: 62px !important; }
+    body.ctrl-new .btn::after { width: 30px; height: 30px; }
+}
+@media (max-height: 640px) {
+    body.ctrl-new .btn { width: 50px !important; height: 50px !important; }
+    body.ctrl-new .btn-shoot { width: 56px !important; height: 56px !important; }
+}

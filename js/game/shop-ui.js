@@ -234,9 +234,9 @@ function renderShop(playerId, keepItems = false) {
                 if (item.type === 'feet' && feetOwnedCount(player, item.id) >= (FEET_MAX[item.id] || 3)) return;
                 const currentCoin = (playerId === 'p1') ? gameState.p1Coins : gameState.p2Coins;
                 if (currentCoin >= price) {
+                    if (!player.addUpgrade(item.id)) return; // đã đạt giới hạn
                     if (playerId === 'p1') gameState.p1Coins -= price; else gameState.p2Coins -= price;
                     updateShopTitle();
-                    player.addUpgrade(item.id);
                     soundSystem.playPowerup();
                     if (!player.boughtShopItems) player.boughtShopItems = [];
                     player.boughtShopItems.push(item.id);
@@ -585,14 +585,20 @@ function renderGeniusBlackMarket(playerId, keepItems = false) {
     container.appendChild(readyBtn);
 }
 
+function streakNote(p) {
+    const b = p && p.lastStreakBonus;
+    return b && gameState.round > 1 ? ` [+${b.bonus}$ ${b.notes.join(' + ')}]` : '';
+}
+
 function updateShopTitle() {
     if (typeof onlineManager !== 'undefined' && onlineManager.isOnline) {
-        const myCoin = (onlineManager.role === 'guest') ? gameState.p2Coins : gameState.p1Coins;
-        const myColor = (onlineManager.role === 'guest') ? 'ĐỎ' : 'XANH';
-        document.getElementById('roundTitleText').innerText = `CỬA HÀNG (BẠN: ${myColor} • $${myCoin})`;
+        const isGuest = onlineManager.role === 'guest';
+        const myCoin = isGuest ? gameState.p2Coins : gameState.p1Coins;
+        const myColor = isGuest ? 'ĐỎ' : 'XANH';
+        document.getElementById('roundTitleText').innerText = `CỬA HÀNG (BẠN: ${myColor} • $${myCoin})${streakNote(isGuest ? p2 : p1)}`;
         return;
     }
-    document.getElementById('roundTitleText').innerText = `SHOP (Coin: P1:${gameState.p1Coins} - P2:${gameState.p2Coins})`;
+    document.getElementById('roundTitleText').innerText = `SHOP (Coin: P1:${gameState.p1Coins}${streakNote(p1)} - P2:${gameState.p2Coins}${streakNote(p2)})`;
 }
 
 function handlePlayerReady(pid) {

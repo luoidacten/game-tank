@@ -65,7 +65,7 @@ const NET_GAMESTATE_KEYS = ['round', 'p1Score', 'p2Score', 'p1Coins', 'p2Coins',
 const NET_LOADOUT_KEYS = ['upgrades', 'rerollCount', 'upgradeLevel', 'invUpgrades', 'boughtInvShopItems', 'boughtShopItems', 'isFullEvoInventor',
     'components', 'gears', 'geniusUpgrades', 'geniusPurchaseCount', 'mechaSummonMultiplier',
     'shortgunBonusMaxHp', 'shortgunBonusDmg', 'evolutionPermanentBonus',
-    'kkData', 'cuData', 'loseStreak', 'lastRoundResult'];
+    'kkData', 'cuData', 'loseStreak', 'winStreak', 'lastRoundResult', 'lastStreakBonus'];
 
 const NetState = {
     // ---------- Tuần tự hoá ----------

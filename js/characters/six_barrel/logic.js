@@ -12,6 +12,8 @@ Object.assign(Player.prototype, {
             this.isOverheated = false;
             this.heatHoldFrames = 0;    // Đếm số frame giữ nút
             this.heatRestFrames = 0;    // Đếm số frame nhả nút
+            this.sbSpin = 0;            // [MỚI] Khởi động nòng: giữ 0.5s (30 frame) mới bắn được
+            this.sbIdle = 0;            // Số frame nhả nút sau khi đã quay (quá 1s thì nòng dừng)
         }
     },
 
@@ -28,6 +30,18 @@ Object.assign(Player.prototype, {
     // [update] 6 Nòng
     updateSixBarrel2(effectiveInp) {
         if (this.weapon === 'six_barrel') {
+            // Khởi động nòng: giữ nút 0.5s để quay; đã quay rồi thì nhấp/nhấp liên tục vẫn bắn.
+            // Nhả nút quá 1s nòng dừng quay, phải khởi động lại.
+            if (effectiveInp.s && !this.isOverheated) {
+                this.sbIdle = 0;
+                if (this.sbSpin < 30) {
+                    this.sbSpin++;
+                    if (this.sbSpin === 30) spawnSparkParticles(this.x + this.w / 2, this.id === 1 ? this.y : this.y + this.h, '#ffd700', 6);
+                }
+            } else if (this.sbSpin > 0) {
+                if (this.sbSpin < 30 || this.isOverheated) this.sbSpin = 0; // chưa khởi động xong mà nhả -> hủy
+                else if (++this.sbIdle > 60) { this.sbSpin = 0; this.sbIdle = 0; }
+            }
             if (this.isOverheated) {
                 // Đang quá tải: Hạ nhiệt từ 100 về 0 trong đúng 5s (300 frames)
                 this.heat -= (100 / 300);
@@ -36,7 +50,7 @@ Object.assign(Player.prototype, {
                     this.isOverheated = false;
                 }
             } else {
-                if (effectiveInp.s) {
+                if (effectiveInp.s && this.sbSpin >= 30) {
                     // ĐANG BẮN: Tăng nhiệt nhanh dần
                     this.heatRestFrames = 0;
                     this.heatHoldFrames++;
@@ -93,7 +107,7 @@ Object.assign(Player.prototype, {
     // [handleShooting] 6 Nòng — trả về true nếu cần dừng handleShooting()
     shootSixBarrel(inp, now) {
         if (this.weapon === 'six_barrel') {
-            if (inp.s && !this.isOverheated) {
+            if (inp.s && !this.isOverheated && this.sbSpin >= 30) {
                 let currentCooldown = 100; // Mặc định
                 let dmgMultiplier = 1;
                 let bulletCount = 1;

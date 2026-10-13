@@ -9,6 +9,7 @@ Object.assign(Player.prototype, {
             this.mirrorCharge = 0;
             this.mirrorCD = 0;
             this.mirrorBuffTimer = 0;
+            this.mirrorQuickShot = 0;
             this.speedBuffActive = false;
             this.enemyClone = null;      // Ảnh chiếu kẻ thù đứng yên
             this.shatteredClone = null;  // Ảnh chiếu tan vỡ (Full Evo)
@@ -23,6 +24,7 @@ Object.assign(Player.prototype, {
             let isFullEvo = hasEvo1 && hasEvo2;
 
             if (this.mirrorCD > 0) this.mirrorCD--;
+            if (this.mirrorQuickShot > 0) this.mirrorQuickShot--;
             if (this.mirrorBuffTimer > 0) {
                 this.mirrorBuffTimer--;
                 if (this.mirrorBuffTimer <= 0 && hasEvo1) this.dmgBuff -= 1;
@@ -43,6 +45,8 @@ Object.assign(Player.prototype, {
 
                     this.mirrorCD = hasEvo1 ? 180 : 300;
                     this.mirrorBuffTimer = 60;
+                    this.mirrorQuickShot = 90; // [MỚI] 1.5s sau dịch chuyển: bắn ngay, nhịp & tốc độ đạn x2
+                    this.lastShot = 0;
                     this.speedBuffActive = true;
                     if (hasEvo1) {
                         this.dmgBuff += 1;
@@ -90,7 +94,17 @@ Object.assign(Player.prototype, {
     shootMirror(inp, now) {
         if (this.weapon === 'mirror') {
             // (Logic đếm mirrorCharge và Swap của bạn thường được đặt trong hàm update() nên không cần ghi ở đây)
-            if (inp.s) {
+            if (this.mirrorQuickShot > 0) {
+                // [MỚI] Vừa dịch chuyển: giữ/nhấn là bắn ngay, nhịp bắn x2 (175ms) và đạn bay x2
+                this.mirrorReleasedCharge = 0;
+                if (inp.s && this.ammo > 0 && now - this.lastShot > 175) {
+                    const n0 = this.bullets.length;
+                    this.fireBullet(1);
+                    for (let i = n0; i < this.bullets.length; i++) { this.bullets[i].vx *= 2; this.bullets[i].vy *= 2; }
+                    this.ammo--;
+                    this.lastShot = now;
+                }
+            } else if (inp.s) {
                 // Đang giữ phím -> Không làm gì cả, để cho update() đếm charge
             } else {
                 // KHI NHẢ PHÍM: Nếu thời gian giữ ngắn (chưa đủ để Swap) -> Bắn đạn

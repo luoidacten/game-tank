@@ -194,14 +194,33 @@ function endRound(winnerId) {
         if (typeof addFloatingText === 'function') addFloatingText(winnerPlayer.x + winnerPlayer.w / 2, winnerPlayer.y - 15, `+2 MAX HP & +1 DMG!`, "#ff6600", 16);
     }
 
-    updateScoreBoard();
-
-    // Hook kết thúc hiệp cho body (bài tập, điểm tùy chỉnh...)
+    // [MỚI] Thưởng chuỗi: thua liên tiếp +60$, sắp bị loại (hiệp sau là cơ hội cuối) +120$,
+    // thắng liên tiếp +30$ mỗi trận thắng
+    const targetScore = gameState.winScore || 3;
     [p1, p2].forEach(p => {
         const res = winnerId === 0 ? 'draw' : (winnerId === p.id ? 'win' : 'lose');
         p.lastRoundResult = res;
         p.loseStreak = res === 'lose' ? (p.loseStreak || 0) + 1 : 0;
-        CharHooks.call(p, 'roundEnd', res);
+        p.winStreak = res === 'win' ? (p.winStreak || 0) + 1 : 0;
+        const myScore = p.id === 1 ? gameState.p1Score : gameState.p2Score;
+        const oppScore = p.id === 1 ? gameState.p2Score : gameState.p1Score;
+        let bonus = 0;
+        const notes = [];
+        if (p.loseStreak >= 2) { bonus += 60; notes.push('CHUỖI THUA'); }
+        if (oppScore === targetScore - 1 && myScore < targetScore) { bonus += 120; notes.push('CƠ HỘI CUỐI'); }
+        if (p.winStreak >= 2) { bonus += 30; notes.push(`CHUỖI THẮNG x${p.winStreak}`); }
+        if (bonus > 0) {
+            if (p.id === 1) gameState.p1Coins += bonus; else gameState.p2Coins += bonus;
+            p.lastStreakBonus = { bonus, notes };
+            if (typeof addFloatingText === 'function') addFloatingText(p.x + p.w / 2, p.y - 30, `+${bonus}$ ${notes.join(' + ')}`, '#ffd700', 14);
+        } else p.lastStreakBonus = null;
+    });
+
+    updateScoreBoard();
+
+    // Hook kết thúc hiệp cho body (bài tập, điểm tùy chỉnh...)
+    [p1, p2].forEach(p => {
+        CharHooks.call(p, 'roundEnd', p.lastRoundResult);
     });
 
     // Online: host gửi kết quả hiệp cho guest

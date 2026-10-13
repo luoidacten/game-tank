@@ -6,6 +6,7 @@
 ## Luật chung
 
 - Hiệp 1 chọn **1 Body**. Các hiệp sau mua Module / Tiến hoá (Evo) trong shop bằng tiền.
+- Tiền mỗi hiệp: thắng +50$, thua +15$, hoà +10$. Thua liên tiếp (≥2) +60$; nếu hiệp sau là **cơ hội cuối** (đối thủ chỉ cần 1 hiệp nữa) +120$; thắng liên tiếp (≥2) +30$ mỗi trận thắng.
 - Gốc: xe 30×30, tốc độ 3.5, tốc đạn 4.8, nạp đạn 1.5s. Sau 60s **Đột Tử**: vùng an toàn thu hẹp.
 - Xe to được cộng máu: rộng 31–33 → +1, 34–35 → +2, 36 → +3, 37 → +4, ≥38 → +5 HP.
 - Mỗi Body có 2 Evo. Có **cả 2 = FULL EVO**.
@@ -80,7 +81,7 @@
 | Phong Trảm | Dame 1 → 0.9 |
 | Lazer Xuyên Phá | Đổi cơ chế: giữ 1.5s để tụ Tia Xuyên Phá (3 dmg, tốn 6 đạn), nhấp = đạn thường 1x (trước 0.25x và phải đầy đúng 20/20 đạn mới tụ được). HP 2 → 4, Dame 0.25 → 0.5 |
 | Xe Tiền | HP 1 → 7, Dame 1 → 1.5 |
-| Mirror | Sửa lỗi không bắn được, hồi bắn 1.5s → 0.35s, HP 4 → 5.5, Dame 1 → 1.3 |
+| Mirror | Sửa lỗi không bắn được, hồi bắn 1.5s → 0.35s, HP 4 → 5.5, Dame 1 → 1.3. Ngay sau khi dịch chuyển: 1.5s bắn ngay, nhịp bắn & tốc độ đạn x2 |
 | Nhà Phát Minh | HP 2 → 5.5, Dame 0.5 → 0.7, sát thương Drone 50% → 100% chỉ số chủ. Drone ngắm chính xác (có đón đầu) |
 | Thiên Tài | HP 1 → 2.5, mỗi hiệp có sẵn 6 Bánh Răng. Tự Hủy: ném Robot lao tới, chạm tường mới nổ |
 | Kẻ Sáng Tạo | HP 1 → 3. Robot đứng gần sân nhà, đi chậm hơn, Laser có cảnh báo & bắn ra từ Robot |
@@ -90,9 +91,13 @@
 | Shotgun | HP 3.5 → 5.5, Dame 0.5 → 0.9 |
 | Tiểu Liên | HP 4 → 5, Dame 0.5 → 0.9 |
 | Trối Chết (DeathLock) | HP 5 → 6, Dame 0.5 → 0.8 |
-| Paradox | HP 5 → 6, Dame 1 → 1.2 |
+| Paradox | HP 5 → 6, Dame 1 → 1.2. Tua ngược chỉ cần giữ 0.2s; thêm mốc Neo Thời Không (10s, CD 20s): lần tua tới về neo (vị trí, máu, đạn) |
 | Lazer Pháo | HP 4 → 5 |
-| Kiếm Khách | HP 2 → 3, Dame 1 → 1.2 (so với bản thiết kế) |
+| Kiếm Khách | HP 2 → 3, Dame 1 → 1.2 (so với bản thiết kế). Làm 3 bài cùng lúc, +1 ô mỗi hiệp (Evo 2 +1, Full +2); đầu trận tự nhận 3 bài ngẫu nhiên |
+| Bow | Giữ nút để kéo cung, nhả để bắn (trước: nhấp để tự nạp); nạp nhanh x1.6, đầy lực không tự bắn |
+| Cuồng Phong | Giữ nút để tụ lực, nhả để xuất chiêu (trước: tự nạp 14s); đầy lực sau 3.5s |
+| 6 Nòng | Phải giữ 0.5s khởi động nòng; đã quay thì nhấp vẫn bắn (nhả >1s nòng dừng) |
+| Bình Phun | Luồng phun bay ra từ từ, chạm tầm tối đa mới mở rộng sang hai bên |
 
 ## Module chân (FEET)
 
@@ -283,7 +288,7 @@ HP:4 | Tụ lực bắn Kiếm Khí (Phá đạn)
 
 ### 14. Cuồng Phong (`storm`)
 
-HP:3.5 | Tự tụ lực 14s -> Lao & Chém Tròn (Phản đạn)
+HP:3.5 | Giữ nút tụ lực 3.5s, nhả -> Lao & Chém Tròn (Phản đạn)
 
 - **Chỉ số thực đầu hiệp:** HP 3.5 · Sát thương 2 · Đạn — (năng lượng riêng) · Tốc độ 5 · Kích thước 30×30
 - **Vật triệu hồi / hiệu ứng:** Lốc Xoáy Chém
@@ -429,7 +434,7 @@ HP:5 | Dame:0.5 | Đạn:4. Luân phiên Âm/Dương chú. Bùa kích nổ nhanh
 
 ### 24. 6 Nòng (`six_barrel`)
 
-HP:6 (+3 máu xe lớn) | Dame:0.4 | Đạn: Vô hạn. Bắn liên tục tăng Nhiệt, đi chậm. Quá nhiệt gây câm lặng.
+HP:6 (+3 máu xe lớn) | Dame:0.4 | Đạn: Vô hạn. Giữ 0.5s khởi động nòng rồi mới bắn (đã quay thì nhấp vẫn bắn). Bắn liên tục tăng Nhiệt, đi chậm. Quá nhiệt gây câm lặng.
 
 - **Chỉ số thực đầu hiệp:** HP 9 · Sát thương 0.4 · Đạn ∞ · Tốc độ 3.5 · Kích thước 36×36
 - **Tiến hoá:**
@@ -472,7 +477,7 @@ HP:3 | Dame:2 | Đạn:5. Tốc chậm. Giữ bắn tạo tường. Xuyên giả
 
 ### 27. Bow (`cung`)
 
-HP:3 | Dame:0.5 | Đạn:3 | Tốc: Nhanh. Tụ lực: Tăng sát thương/Tốc đạn. Nội tại Nhạy Bén: Tự né 1 lần đạn mỗi 8s (Full Evo 5s).
+HP:3 | Dame:0.5 | Đạn:3 | Tốc: Nhanh. Giữ nút kéo cung (đầy lực ~1.5s), nhả để bắn: Tăng sát thương/Tốc đạn. Nội tại Nhạy Bén: Tự né 1 lần đạn mỗi 8s (Full Evo 5s).
 
 - **Chỉ số thực đầu hiệp:** HP 3 · Sát thương 0.5 · Đạn 3 · Tốc độ 4.38 · Kích thước 24×24
 - **Vật triệu hồi / hiệu ứng:** Mưa Tên
@@ -515,7 +520,7 @@ HP:4.5 (+3 máu xe lớn) | Chú Lực tấn công. Giữ bắn Phản Chuyển 
 
 ### 30. Paradox (`paradox`)
 
-HP:6 | Dame:1.2 | Đạn:5. Có bóng đi sau 3s. Giữ ngắn (0.33s) tua ngược & tự xả đạn lặp lại (CD: 12s/7s).
+HP:6 | Dame:1.2 | Đạn:5. Có bóng đi sau 3s. Giữ 0.2s tua ngược & tự xả đạn lặp lại (CD: 12s/7s). Giữ tới mốc trống cuối: đặt Neo Thời Không (10s, CD 20s) - lần tua tới về neo (vị trí, máu, đạn).
 
 - **Chỉ số thực đầu hiệp:** HP 6 · Sát thương 1.2 · Đạn 5 · Tốc độ 3.5 · Kích thước 30×30
 - **Tiến hoá:**
@@ -693,7 +698,7 @@ HP:2.5 | Dame:1 | Đạn:1 | Tốc: 1.3x. Thu thập Bánh Răng & Linh Kiện. 
 
 ### 42. Kiếm Khách (`kiem_khach`) 🆕
 
-HP:3 | Dame:1.2 | Đạn:3. Bắn phi kiếm. Mất khiên -> Tập Trung 3s (né mọi đòn). Mỗi hiệp nhận Bài Tập Luyện Kiếm để tăng sức mạnh vĩnh viễn.
+HP:3 | Dame:1.2 | Đạn:3. Bắn phi kiếm. Mất khiên -> Tập Trung 3s (né mọi đòn). Làm 3 Bài Tập Luyện Kiếm cùng lúc (+1 ô mỗi hiệp), đầu trận tự nhận 3 bài ngẫu nhiên; xong bài tăng sức mạnh vĩnh viễn.
 
 - **Chỉ số thực đầu hiệp:** HP 3 · Sát thương 1.2 · Đạn 3 · Tốc độ 3.5 · Kích thước 30×30
 - **Vật triệu hồi / hiệu ứng:** Đại kiếm giáng trời (Vân Tinh Vũ)
@@ -702,7 +707,7 @@ HP:3 | Dame:1.2 | Đạn:3. Bắn phi kiếm. Mất khiên -> Tập Trung 3s (n�
   | Evo | Giá | Hiệu ứng |
   |---|---:|---|
   | Lấy Tâm Luyện Kiếm (`evo_kk_1`) | $90 | Giảm 50% yêu cầu của mọi bài tập. Tập Trung khi mất khiên kéo dài 5s (thay vì 3s). |
-  | Thí Luyện (`evo_kk_2`) | $110 | Chọn 2 bài tập mỗi lần mở bảng. Đầu mỗi hiệp nhận sẵn 1 Khiên. FULL EVO: chọn 4 bài, yêu cầu giảm sâu, mở 5 Bài Tập Cuối -> Hóa Thần. |
+  | Thí Luyện (`evo_kk_2`) | $110 | +1 ô bài tập làm cùng lúc. Đầu mỗi hiệp nhận sẵn 1 Khiên. FULL EVO: +2 ô bài tập, yêu cầu giảm sâu, mở 5 Bài Tập Cuối -> Hóa Thần. |
 
 - **Mã nguồn:** `js/characters/kiem_khach/logic.js`, `js/characters/kiem_khach/render.js`, `js/characters/kiem_khach/quests.js`
 

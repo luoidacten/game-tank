@@ -173,7 +173,7 @@ const EVOLUTIONS = {
     ],
     kiem_khach: [
         { id: 'evo_kk_1', name: 'Lấy Tâm Luyện Kiếm', desc: 'Giảm 50% yêu cầu của mọi bài tập. Tập Trung khi mất khiên kéo dài 5s (thay vì 3s).', cost: 90, type: 'evo' },
-        { id: 'evo_kk_2', name: 'Thí Luyện', desc: 'Chọn 2 bài tập mỗi lần mở bảng. Đầu mỗi hiệp nhận sẵn 1 Khiên. FULL EVO: chọn 4 bài, yêu cầu giảm sâu, mở 5 Bài Tập Cuối -> Hóa Thần.', cost: 110, type: 'evo' }
+        { id: 'evo_kk_2', name: 'Thí Luyện', desc: '+1 ô bài tập làm cùng lúc. Đầu mỗi hiệp nhận sẵn 1 Khiên. FULL EVO: +2 ô bài tập, yêu cầu giảm sâu, mở 5 Bài Tập Cuối -> Hóa Thần.', cost: 110, type: 'evo' }
     ],
     sprayer: [
         { id: 'evo_spray_1', name: 'Năng Lượng Xanh', desc: 'Hồi năng lượng nhanh hơn 50%, phun tiêu hao chậm hơn 30%.', cost: 80, type: 'evo' },

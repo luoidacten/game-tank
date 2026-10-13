@@ -20,7 +20,7 @@ const MODULES = {
         { id: 'rocket', name: 'Pháo Tên Lửa', desc: 'HP:5 | Dame:1.15 (Nổ lan) | Đạn:3', type: 'body', size: { w: 30, h: 30 }, stats: { hp: 5, dmg: 1.15, ammo: 3 } },
         { id: 'portal', name: 'Cổng Không Gian', desc: 'HP:5 | Dame:1 | Đạn:7 (Dịch chuyển)', type: 'body', size: { w: 30, h: 30 }, stats: { hp: 5, dmg: 1, ammo: 7 } },
         { id: 'wind_slash', name: 'Phong Trảm', desc: 'HP:4 | Tụ lực bắn Kiếm Khí (Phá đạn)', type: 'body', size: { w: 30, h: 30 }, stats: { hp: 4, dmg: 0.9, ammo: 1 } },
-        { id: 'storm', name: 'Cuồng Phong', desc: 'HP:3.5 | Tự tụ lực 14s -> Lao & Chém Tròn (Phản đạn)', type: 'body', size: { w: 30, h: 30 }, stats: { hp: 3.5, dmg: 2, ammo: 0 } },
+        { id: 'storm', name: 'Cuồng Phong', desc: 'HP:3.5 | Giữ nút tụ lực 3.5s, nhả -> Lao & Chém Tròn (Phản đạn)', type: 'body', size: { w: 30, h: 30 }, stats: { hp: 3.5, dmg: 2, ammo: 0 } },
         { id: 'acid', name: 'Axit Hóa', desc: 'HP:4 | Dame:0.5 | Đạn:1. Ăn mòn Max HP (Max HP<=1 nhận 4 Dame). Đạn tạo vùng', type: 'body', size: { w: 30, h: 30 }, stats: { hp: 4, dmg: 0.5, ammo: 1 } },
         { id: 'engineer', name: 'Kỹ Sư', desc: 'HP:3 (+2 máu xe lớn) | Dame:0.5 | Đạn:2. Tự tạo Ụ Thường. Giữ 1s đặt Ụ Thông Minh.', type: 'body', size: { w: 34, h: 34 }, stats: { hp: 3, dmg: 0.5, ammo: 2 } },
         { id: 'ghost', name: 'Ghost', desc: 'HP:2.5 | Tốc: Rất Nhanh | Đạn:4. Vô Ảnh 2s (CD 3s). Tàn Ảnh phân thân.', type: 'body', size: { w: 24, h: 24 }, stats: { hp: 2.5, dmg: 1.75, ammo: 4 } },
@@ -30,13 +30,13 @@ const MODULES = {
         { id: 'water_gun', name: 'Súng Nước', desc: 'HP:4 (+2 máu xe lớn) | Dame:1.5 Đạn: Nội năng (100%). Bấm: Tia nước. Giữ 1s: Laser nước.', type: 'body', size: { w: 34, h: 34 }, stats: { hp: 4, dmg: 1.5, ammo: 0 } },
         { id: 'furnace', name: 'Lò Nung', desc: 'HP:6 (+3 máu xe lớn) | Chậm | Dame:0.25 Đạn: Nội năng. Gây Đốt. 5 stack Đốt -> Nổ 5 dame.', type: 'body', size: { w: 36, h: 36 }, stats: { hp: 6, dmg: 0.25, ammo: 0 } },
         { id: 'am_duong_su', name: 'Âm Dương Sư', desc: 'HP:5 | Dame:0.5 | Đạn:4. Luân phiên Âm/Dương chú. Bùa kích nổ nhanh.', type: 'body', size: { w: 30, h: 30 }, stats: { hp: 5, dmg: 0.5, ammo: 4 } },
-        { id: 'six_barrel', name: '6 Nòng', desc: 'HP:6 (+3 máu xe lớn) | Dame:0.4 | Đạn: Vô hạn. Bắn liên tục tăng Nhiệt, đi chậm. Quá nhiệt gây câm lặng.', type: 'body', size: { w: 36, h: 36 }, stats: { hp: 6, dmg: 0.4, ammo: 999 } },
+        { id: 'six_barrel', name: '6 Nòng', desc: 'HP:6 (+3 máu xe lớn) | Dame:0.4 | Đạn: Vô hạn. Giữ 0.5s khởi động nòng rồi mới bắn (đã quay thì nhấp vẫn bắn). Bắn liên tục tăng Nhiệt, đi chậm. Quá nhiệt gây câm lặng.', type: 'body', size: { w: 36, h: 36 }, stats: { hp: 6, dmg: 0.4, ammo: 999 } },
         { id: 'the_strongest', name: 'Kẻ Mạnh Nhất', type: 'body', size: { w: 30, h: 30 }, desc: 'HP 1. Dùng Chú Lực vô hiệu sát thương. Nhấp: Lướt (Thương). Giữ: Hit-scan (Hách). Bị trúng đòn ngắt niệm.', stats: { hp: 1, dmg: 0.5, ammo: 999 } },
         { id: 'sniper', name: 'Sniper', desc: 'HP:3 | Dame:2 | Đạn:5. Tốc chậm. Giữ bắn tạo tường. Xuyên giảm dame. Nạp cả băng.', type: 'body', size: { w: 24, h: 24 }, stats: { hp: 3, dmg: 2, ammo: 5 } },
         {
             id: 'cung',
             name: 'Bow',
-            desc: 'HP:3 | Dame:0.5 | Đạn:3 | Tốc: Nhanh. Tụ lực: Tăng sát thương/Tốc đạn. Nội tại Nhạy Bén: Tự né 1 lần đạn mỗi 8s (Full Evo 5s).',
+            desc: 'HP:3 | Dame:0.5 | Đạn:3 | Tốc: Nhanh. Giữ nút kéo cung (đầy lực ~1.5s), nhả để bắn: Tăng sát thương/Tốc đạn. Nội tại Nhạy Bén: Tự né 1 lần đạn mỗi 8s (Full Evo 5s).',
             type: 'body',
             size: { w: 24, h: 24 },
             stats: { hp: 3, dmg: 0.5, ammo: 3, speedMult: 1.25 }
@@ -60,7 +60,7 @@ const MODULES = {
         {
             id: 'paradox',
             name: 'Paradox',
-            desc: 'HP:6 | Dame:1.2 | Đạn:5. Có bóng đi sau 3s. Giữ ngắn (0.33s) tua ngược & tự xả đạn lặp lại (CD: 12s/7s).',
+            desc: 'HP:6 | Dame:1.2 | Đạn:5. Có bóng đi sau 3s. Giữ 0.2s tua ngược & tự xả đạn lặp lại (CD: 12s/7s). Giữ tới mốc trống cuối: đặt Neo Thời Không (10s, CD 20s) - lần tua tới về neo (vị trí, máu, đạn).',
             type: 'body',
             size: { w: 30, h: 30 },
             stats: { hp: 6, dmg: 1.2, ammo: 5 }
@@ -156,7 +156,7 @@ const MODULES = {
         {
             id: 'kiem_khach',
             name: 'Kiếm Khách',
-            desc: 'HP:3 | Dame:1.2 | Đạn:3. Bắn phi kiếm. Mất khiên -> Tập Trung 3s (né mọi đòn). Mỗi hiệp nhận Bài Tập Luyện Kiếm để tăng sức mạnh vĩnh viễn.',
+            desc: 'HP:3 | Dame:1.2 | Đạn:3. Bắn phi kiếm. Mất khiên -> Tập Trung 3s (né mọi đòn). Làm 3 Bài Tập Luyện Kiếm cùng lúc (+1 ô mỗi hiệp), đầu trận tự nhận 3 bài ngẫu nhiên; xong bài tăng sức mạnh vĩnh viễn.',
             type: 'body',
             size: { w: 30, h: 30 },
             stats: { hp: 3, dmg: 1.2, ammo: 3, speedMult: 1.0 }

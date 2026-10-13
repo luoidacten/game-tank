@@ -26,17 +26,27 @@ Object.assign(Player.prototype, {
                 drawTether(this.x + this.w / 2, this.y + this.h / 2, pShadow.x + this.w / 2, pShadow.y + this.h / 2, "rgba(0, 255, 255, 0.3)");
             }
 
-            // 2. VẼ UI TỤ LỰC (2 MỐC)
-            if (this.paradoxCharge > 0) {
-                let chargeColor = (this.paradoxCharge >= 120 && isFullEvo) ? "magenta" : "cyan";
-                let fillRatio = Math.min(this.paradoxCharge / (isFullEvo ? 120 : 60), 1);
-
-                ctx.fillStyle = chargeColor;
+            // 2. VẼ UI TỤ LỰC: vạch các mốc, mốc đang đạt sáng lên
+            const m = this.paradoxMilestones();
+            const marks = [];
+            if (this.paradoxCooldown <= 0) marks.push({ t: m.rewind, label: this.paradoxAnchor ? 'VỀ NEO' : 'TUA NGƯỢC', color: 'cyan' });
+            if (m.pull) marks.push({ t: m.pull, label: 'KÉO ĐỊCH', color: 'magenta' });
+            if (m.anchor) marks.push({ t: m.anchor, label: 'ĐẶT NEO', color: '#88aaff' });
+            if (this.paradoxCharge > 0 && marks.length) {
+                const maxT = marks[marks.length - 1].t;
+                const fillRatio = Math.min(this.paradoxCharge / maxT, 1);
+                let cur = null;
+                for (const mk of marks) if (this.paradoxCharge >= mk.t) cur = mk;
+                ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                ctx.fillRect(this.x, this.y - 10, this.w, 5);
+                ctx.fillStyle = cur ? cur.color : 'rgba(200,200,200,0.8)';
                 ctx.fillRect(this.x, this.y - 10, this.w * fillRatio, 5);
-
-                ctx.fillStyle = "white"; ctx.font = "bold 9px Arial"; ctx.textAlign = "center";
-                let text = this.paradoxCharge >= 120 ? "FORCE REWIND" : (this.paradoxCharge >= 60 ? "REWIND READY" : "");
-                ctx.fillText(text, this.x + this.w / 2, this.y - 15);
+                ctx.fillStyle = 'white';
+                for (const mk of marks) ctx.fillRect(this.x + this.w * (mk.t / maxT) - 1, this.y - 12, 2, 9);
+                if (cur) {
+                    ctx.font = 'bold 9px Arial'; ctx.textAlign = 'center';
+                    ctx.fillText(cur.label, this.x + this.w / 2, this.y - 15);
+                }
             }
 
             // Vẽ hồi chiêu
@@ -44,6 +54,24 @@ Object.assign(Player.prototype, {
                 ctx.fillStyle = "gray";
                 let maxCd = this.hasUpgrade('evo_paradox_2') ? 420 : 720;
                 ctx.fillRect(this.x, this.y + this.h + 5, this.w * (this.paradoxCooldown / maxCd), 3);
+            }
+            if (this.paradoxAnchorCD > 0) {
+                ctx.fillStyle = "#5566aa";
+                ctx.fillRect(this.x, this.y + this.h + 9, this.w * (this.paradoxAnchorCD / 1200), 2);
+            }
+
+            // NEO THỜI KHÔNG
+            if (this.paradoxAnchor) {
+                const a = this.paradoxAnchor;
+                ctx.save();
+                ctx.globalAlpha = 0.35 + 0.25 * Math.sin(Date.now() / 150);
+                ctx.strokeStyle = '#88aaff'; ctx.lineWidth = 2; ctx.setLineDash([3, 3]);
+                ctx.strokeRect(a.x, a.y, this.w, this.h);
+                ctx.globalAlpha = 1;
+                ctx.fillStyle = '#88aaff'; ctx.font = 'bold 10px Arial'; ctx.textAlign = 'center';
+                ctx.fillText(`⚓ ${Math.ceil(a.timer / 60)}s`, a.x + this.w / 2, a.y - 5);
+                ctx.restore();
+                drawTether(this.x + this.w / 2, this.y + this.h / 2, a.x + this.w / 2, a.y + this.h / 2, "rgba(136, 170, 255, 0.4)");
             }
 
             // 2. VẼ BÓNG ĐỨNG YÊN CỦA ĐỊCH (EVO 1 - DẤU ẤN)

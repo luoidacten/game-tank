@@ -23,5 +23,11 @@ class Player {
     }
 
     hasUpgrade(id) { return this.upgrades.includes(id); }
-    addUpgrade(moduleId) { this.upgrades.push(moduleId); }
+    addUpgrade(moduleId) {
+        // [FIX] Chặn module chân vượt giới hạn ở mọi đường mua (shop, online, phòng tập...)
+        if (typeof FEET_MAX !== 'undefined' && FEET_MAX[moduleId] !== undefined &&
+            this.upgrades.filter(u => u === moduleId).length >= FEET_MAX[moduleId]) return false;
+        this.upgrades.push(moduleId);
+        return true;
+    }
 }

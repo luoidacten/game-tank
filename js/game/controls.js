@@ -4,7 +4,23 @@
 
 
 
+// Kiểu bố cục nút điều khiển: 'new' (nút tròn, mặc định) | 'old' (kiểu cũ)
+function applyControlLayout(mode) {
+    document.body.classList.toggle('ctrl-new', mode !== 'old');
+    document.querySelectorAll('.ctrl-layout-toggle').forEach(b => { b.textContent = `🎮 KIỂU NÚT: ${mode === 'old' ? 'CŨ' : 'MỚI'}`; });
+}
+function getControlLayout() {
+    try { return localStorage.getItem('ctrlLayout') || 'new'; } catch (e) { return 'new'; }
+}
+
 function setupControls() {
+    applyControlLayout(getControlLayout());
+    document.querySelectorAll('.ctrl-layout-toggle').forEach(btn => btn.addEventListener('click', () => {
+        const next = getControlLayout() === 'old' ? 'new' : 'old';
+        try { localStorage.setItem('ctrlLayout', next); } catch (e) {}
+        applyControlLayout(next);
+        if (typeof updateCanvasDimensions === 'function') updateCanvasDimensions();
+    }));
     // Mode Buttons in Main Menu
     document.querySelectorAll('.mode-btn').forEach(btn => {
         btn.addEventListener('click', () => {
