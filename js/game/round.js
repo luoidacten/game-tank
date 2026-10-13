@@ -44,7 +44,9 @@ function startRound() {
 
     // Map selection & Mutators
     let isOnlineGuest = (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'guest');
-    if (!isOnlineGuest) {
+    if (!isOnlineGuest && gameState.mapPreselected) {
+        gameState.mapPreselected = false; // host online đã chọn map trước khi gửi START_ROUND
+    } else if (!isOnlineGuest) {
         if (!gameState.selectedMapMode || gameState.selectedMapMode === 'random') {
             const mapList = ['classic', 'bastion', 'artillery', 'overdrive', 'fast_shrink', 'rush_hour', 'supply_drop'];
             gameState.currentMap = mapList[Math.floor(Math.random() * mapList.length)];
@@ -190,6 +192,11 @@ function endRound(winnerId) {
     }
 
     updateScoreBoard();
+
+    // Online: host gửi kết quả hiệp cho guest
+    if (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'host') {
+        onlineManager.sendRoundEnd(winnerId);
+    }
 
     let targetWins = gameState.winScore || 3;
     if (gameState.p1Score >= targetWins || gameState.p2Score >= targetWins) {

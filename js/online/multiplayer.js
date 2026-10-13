@@ -32,9 +32,59 @@ class OnlineMultiplayerManager {
         this.playersLobbyData = [];
         this.isJoinedSuccess = false;
         this.joinTimeoutTimer = null;
-        this.pingMs = 20;
+        this.pingMs = 0;
         this.pingTimer = null;
         this.isQuickMatch = false;
+
+        // ID cố định của máy này (không đổi khi PeerJS cấp peer id mới) + chống trùng tin nhắn
+        this.clientId = 'C' + Math.random().toString(36).substring(2, 10);
+        this.sendSeq = 0;
+        this.seenSeq = {};       // { senderId: Set(seq) }
+        this.peerToClient = {};  // Host: peerId WebRTC -> clientId
+        this.lastHeard = 0;
+        this.matchActive = false;
+
+        // Đồng bộ trận đấu
+        this.netTick = 0;
+        this.lastSnapshotAt = 0;
+        this.predX = null;
+        this.lastInputSent = '';
+        this.lastInputSentTick = 0;
+    }
+
+    // Nhận mọi tin nhắn (từ BroadcastChannel hoặc WebRTC) qua 1 cửa: lọc trùng rồi định tuyến
+    receive(data, transportId) {
+        if (!data || !data.type) return;
+        const from = data._from || transportId;
+        if (from === this.clientId) return;
+        if (data._seq !== undefined) {
+            const set = this.seenSeq[from] || (this.seenSeq[from] = new Set());
+            if (set.has(data._seq)) return; // đã nhận qua kênh khác
+            set.add(data._seq);
+            if (set.size > 4000) {
+                const keep = [...set].sort((a, b) => a - b).slice(-2000);
+                this.seenSeq[from] = new Set(keep);
+            }
+        }
+        if (transportId && data._from && this.role === 'host') this.peerToClient[transportId] = data._from;
+        this.lastHeard = Date.now();
+
+        if (data.type === 'PING') { this.sendNetworkMessage({ type: 'PONG', t: data.t }); return; }
+        if (data.type === 'PONG') { this.onPong(data.t); return; }
+
+        if (this.role === 'host') this.handleHostReceivedData(from, data);
+        else this.handleClientReceivedData(data);
+    }
+
+    onPong(t) {
+        if (typeof t !== 'number') return;
+        const rtt = Math.max(1, Date.now() - t);
+        this.pingMs = this.pingMs ? Math.round(this.pingMs * 0.7 + rtt * 0.3) : rtt;
+        const pingEl = document.getElementById('pingValueText');
+        const hudPingText = document.getElementById('hudPingText');
+        const via = (this.hostConn && this.hostConn.open) || Object.values(this.connections).some(c => c && c.open) ? 'P2P WebRTC' : 'Local Broadcast';
+        if (pingEl) pingEl.innerText = `Độ trễ: ${this.pingMs}ms (${via})`;
+        if (hudPingText) hudPingText.innerText = `${this.pingMs}ms`;
     }
 
     get conn() {
@@ -59,13 +109,8 @@ class OnlineMultiplayerManager {
             this.broadcastChannel = new BroadcastChannel('CYBER_ROOM_' + code);
             this.broadcastChannel.onmessage = (event) => {
                 const { senderId, payload } = event.data || {};
-                if (!payload || senderId === this.myPeerId) return;
-
-                if (this.role === 'host') {
-                    this.handleHostReceivedData(senderId, payload);
-                } else {
-                    this.handleClientReceivedData(payload);
-                }
+                if (!payload || senderId === this.clientId) return;
+                this.receive(payload, senderId);
             };
         } catch (e) {
             console.warn("BroadcastChannel error:", e);
@@ -73,10 +118,11 @@ class OnlineMultiplayerManager {
     }
 
     sendNetworkMessage(payload) {
+        payload = Object.assign({}, payload, { _from: this.clientId, _seq: ++this.sendSeq });
         // 1. Send to local broadcast channel (for same-machine multi-tab/window testing)
         if (this.broadcastChannel) {
             try {
-                this.broadcastChannel.postMessage({ senderId: this.myPeerId, payload });
+                this.broadcastChannel.postMessage({ senderId: this.clientId, payload });
             } catch (e) {}
         }
         // 2. Send to PeerJS WebRTC DataConnections (for cross-device online play)
@@ -279,12 +325,8 @@ class OnlineMultiplayerManager {
 
             this.peer.on('connection', (conn) => {
                 this.connections[conn.peer] = conn;
-                conn.on('data', (data) => this.handleHostReceivedData(conn.peer, data));
-                conn.on('close', () => {
-                    delete this.connections[conn.peer];
-                    this.playersLobbyData = this.playersLobbyData.filter(p => p.id !== conn.peer);
-                    this.broadcastLobbyState();
-                });
+                conn.on('data', (data) => this.receive(data, conn.peer));
+                conn.on('close', () => this.onHostConnClosed(conn.peer));
             });
 
             this.peer.on('error', (err) => {
@@ -376,7 +418,7 @@ class OnlineMultiplayerManager {
                     });
 
                     this.hostConn.on('data', (data) => {
-                        this.handleClientReceivedData(data);
+                        this.receive(data, targetHostPeerId);
                     });
 
                     this.hostConn.on('close', () => {
@@ -445,44 +487,32 @@ class OnlineMultiplayerManager {
             case 'INPUT':
             case 'INPUT_UPDATE':
                 if (data.input && inputs && inputs.p2) {
-                    inputs.p2.l = data.input.l;
-                    inputs.p2.r = data.input.r;
-                    inputs.p2.s = data.input.s;
+                    inputs.p2.l = !!data.input.l;
+                    inputs.p2.r = !!data.input.r;
+                    inputs.p2.s = !!data.input.s;
                 }
                 break;
 
-            case 'UPGRADE_PICK':
-                if (data.pid === 'p2' && p2) {
-                    p2.addUpgrade(data.modId);
-                    handlePlayerReady('p2');
-                }
+            case 'LOADOUT':
+                // Guest chỉ được sửa trang bị của chính mình (P2)
+                if (data.pid === 'p2' && p2) NetState.applyLoadout(p2, 'p2', data.loadout);
                 break;
 
-            case 'MONEY_TANK_UPGRADE':
-                if (data.pid === 'p2' && p2) {
-                    p2.upgradeLevel = data.level;
-                }
-                break;
-
-            case 'INVENTOR_UPGRADE':
-                if (data.pid === 'p2' && p2) {
-                    if (!p2.boughtInvShopItems) p2.boughtInvShopItems = [];
-                    p2.boughtInvShopItems.push(data.itemId);
-                    if (!p2.invUpgrades) p2.invUpgrades = {};
-                    p2.invUpgrades[data.itemId] = (p2.invUpgrades[data.itemId] || 0) + 1;
-                    if (data.itemId === 'inv_giap') { p2.maxHp += 1; p2.hp += 1; }
-                    if (data.itemId === 'inv_tangcuong') { p2.maxAmmo += 2; p2.ammo += 2; }
-                    if (data.itemId === 'inv_bodam') { p2.speed *= 1.1; }
-                    if (data.itemId === 'inv_full_evo') {
-                        p2.isFullEvoInventor = true;
-                        if (!p2.upgrades.includes('evo_inv_1')) p2.addUpgrade('evo_inv_1');
-                        if (!p2.upgrades.includes('evo_inv_2')) p2.addUpgrade('evo_inv_2');
-                    }
+            case 'PAY_TO_WIN':
+                if (gameState.phase === 'upgrade' && gameState.p2Coins >= 500) {
+                    gameState.p2Coins -= 500;
+                    endRound(2);
+                    const upg = document.getElementById('upgradeScreen');
+                    if (upg) upg.style.display = 'none';
                 }
                 break;
 
             case 'READY':
-                handlePlayerReady(data.pid);
+                if (data.pid === 'p2') handlePlayerReady('p2');
+                break;
+
+            case 'LEAVE':
+                this.onDisconnected();
                 break;
         }
     }
@@ -494,7 +524,7 @@ class OnlineMultiplayerManager {
             case 'JOIN_ACCEPT':
             case 'HANDSHAKE_ACCEPTED':
             case 'LOBBY_STATE':
-                if (data.type === 'JOIN_ACCEPT' && data.targetId && data.targetId !== this.myPeerId) return;
+                if (data.type === 'JOIN_ACCEPT' && data.targetId && data.targetId !== this.clientId) return;
                 if (!this.isJoinedSuccess) {
                     this.initClientLobby();
                 }
@@ -504,7 +534,7 @@ class OnlineMultiplayerManager {
                 break;
 
             case 'ROOM_FULL':
-                if (!data.targetId || data.targetId === this.myPeerId) {
+                if (!data.targetId || data.targetId === this.clientId) {
                     this.showJoinError(`⚠️ Phòng "${data.code || this.roomCode}" đã đủ 2 người chơi!`);
                     this.cleanup(true);
                 }
@@ -515,62 +545,99 @@ class OnlineMultiplayerManager {
                 break;
 
             case 'START_ROUND':
-                if (data.p1Upgrades && p1) p1.upgrades = [...data.p1Upgrades];
-                if (data.p2Upgrades && p2) p2.upgrades = [...data.p2Upgrades];
-                if (data.p1InvUpgrades && p1) p1.invUpgrades = { ...data.p1InvUpgrades };
-                if (data.p2InvUpgrades && p2) p2.invUpgrades = { ...data.p2InvUpgrades };
-                if (data.p1IsFullEvo !== undefined && p1) p1.isFullEvoInventor = data.p1IsFullEvo;
-                if (data.p2IsFullEvo !== undefined && p2) p2.isFullEvoInventor = data.p2IsFullEvo;
+                // Host là nguồn chuẩn cho trang bị & ví của cả 2 bên
+                if (data.p1Loadout) NetState.applyLoadout(p1, 'p1', data.p1Loadout);
+                if (data.p2Loadout) NetState.applyLoadout(p2, 'p2', data.p2Loadout);
                 if (data.round) gameState.round = data.round;
+                if (data.map) gameState.currentMap = data.map;
+                this.predX = null;
                 startRound();
                 break;
 
-            case 'HOST_INPUT':
-                if (data.input && inputs && inputs.p1) {
-                    inputs.p1.l = data.input.l;
-                    inputs.p1.r = data.input.r;
-                    inputs.p1.s = data.input.s;
-                }
-                break;
-
             case 'SYNC':
-            case 'GAME_STATE_SYNC':
-                this.applyHostSync(data.state || data);
+                this.applyHostSync(data);
                 break;
 
-            case 'UPGRADE_PICK':
-                if (data.pid === 'p1' && p1) {
-                    p1.addUpgrade(data.modId);
-                    handlePlayerReady('p1');
-                }
+            case 'ROUND_END':
+                this.guestEndRound(data);
                 break;
 
-            case 'MONEY_TANK_UPGRADE':
-                if (data.pid === 'p1' && p1) {
-                    p1.upgradeLevel = data.level;
-                }
-                break;
-
-            case 'INVENTOR_UPGRADE':
-                if (data.pid === 'p1' && p1) {
-                    if (!p1.boughtInvShopItems) p1.boughtInvShopItems = [];
-                    p1.boughtInvShopItems.push(data.itemId);
-                    if (!p1.invUpgrades) p1.invUpgrades = {};
-                    p1.invUpgrades[data.itemId] = (p1.invUpgrades[data.itemId] || 0) + 1;
-                    if (data.itemId === 'inv_giap') { p1.maxHp += 1; p1.hp += 1; }
-                    if (data.itemId === 'inv_tangcuong') { p1.maxAmmo += 2; p1.ammo += 2; }
-                    if (data.itemId === 'inv_bodam') { p1.speed *= 1.1; }
-                    if (data.itemId === 'inv_full_evo') {
-                        p1.isFullEvoInventor = true;
-                        if (!p1.upgrades.includes('evo_inv_1')) p1.addUpgrade('evo_inv_1');
-                        if (!p1.upgrades.includes('evo_inv_2')) p1.addUpgrade('evo_inv_2');
-                    }
-                }
+            case 'LOADOUT':
+                if (data.pid === 'p1' && p1) NetState.applyLoadout(p1, 'p1', data.loadout);
                 break;
 
             case 'READY':
-                handlePlayerReady(data.pid);
+                if (data.pid === 'p1') handlePlayerReady('p1');
                 break;
+
+            case 'LEAVE':
+                this.onDisconnected();
+                break;
+        }
+    }
+
+    // Gửi trang bị + ví của người chơi máy này sau mỗi lần mua / chọn
+    sendLoadout(pid) {
+        if (!this.isOnline) return;
+        const p = pid === 'p1' ? p1 : p2;
+        const coins = pid === 'p1' ? gameState.p1Coins : gameState.p2Coins;
+        this.sendNetworkMessage({ type: 'LOADOUT', pid, loadout: NetState.captureLoadout(p, coins) });
+    }
+
+    sendReady(pid) {
+        if (!this.isOnline) return;
+        this.sendNetworkMessage({ type: 'READY', pid });
+    }
+
+    myPid() {
+        return this.role === 'guest' ? 'p2' : 'p1';
+    }
+
+    // Host: thông báo bắt đầu hiệp kèm trang bị chuẩn của cả 2 bên
+    sendStartRound() {
+        this.sendNetworkMessage({
+            type: 'START_ROUND',
+            round: gameState.round,
+            map: gameState.currentMap,
+            p1Loadout: NetState.captureLoadout(p1, gameState.p1Coins),
+            p2Loadout: NetState.captureLoadout(p2, gameState.p2Coins)
+        });
+    }
+
+    // Host: kết thúc hiệp -> gửi ảnh chụp cuối + kết quả cho Guest
+    sendRoundEnd(winnerId) {
+        if (!this.isOnline || this.role !== 'host') return;
+        this.sendNetworkMessage({
+            type: 'ROUND_END',
+            winnerId,
+            world: NetState.captureWorld(),
+            ev: NetState.flushEvents(),
+            p1Loadout: NetState.captureLoadout(p1, gameState.p1Coins),
+            p2Loadout: NetState.captureLoadout(p2, gameState.p2Coins),
+        });
+        NetState.recording = false;
+    }
+
+    // Guest: hiển thị kết thúc hiệp theo kết quả host
+    guestEndRound(data) {
+        if (data.world) { try { NetState.applyWorld(data.world); } catch (e) { console.warn('ROUND_END world', e); } }
+        NetState.replayEvents(data.ev);
+        if (data.p1Loadout) NetState.applyLoadout(p1, 'p1', data.p1Loadout);
+        if (data.p2Loadout) NetState.applyLoadout(p2, 'p2', data.p2Loadout);
+        fatalCinematic.active = false;
+        gameState.phase = 'end_round';
+        cancelAnimationFrame(animationId);
+        const ctrl = document.getElementById('p1-controls');
+        if (ctrl) ctrl.classList.remove('blinded-hud');
+        updateScoreBoard();
+        let targetWins = gameState.winScore || 3;
+        if (gameState.p1Score >= targetWins || gameState.p2Score >= targetWins) {
+            const iWon = (gameState.p2Score >= targetWins);
+            document.getElementById('finalWinner').innerText = (iWon ? "BẠN (PLAYER 2)" : "PLAYER 1") + " VÔ ĐỊCH!";
+            setTimeout(() => { document.getElementById('endScreen').style.display = 'block'; }, 1200);
+        } else {
+            gameState.round++; // host cũng tăng hiệp sau khi gửi ROUND_END
+            setTimeout(showUpgradeScreen, 1800);
         }
     }
 
@@ -617,7 +684,7 @@ class OnlineMultiplayerManager {
                     });
                     this.hostConn.on('data', (data) => {
                         clearTimeout(quickTimeout);
-                        this.handleClientReceivedData(data);
+                        this.receive(data, quickCode);
                     });
                 } catch(e){}
             });
@@ -654,12 +721,8 @@ class OnlineMultiplayerManager {
             });
             this.peer.on('connection', (conn) => {
                 this.connections[conn.peer] = conn;
-                conn.on('data', (data) => this.handleHostReceivedData(conn.peer, data));
-                conn.on('close', () => {
-                    delete this.connections[conn.peer];
-                    this.playersLobbyData = this.playersLobbyData.filter(p => p.id !== conn.peer);
-                    this.broadcastLobbyState();
-                });
+                conn.on('data', (data) => this.receive(data, conn.peer));
+                conn.on('close', () => this.onHostConnClosed(conn.peer));
             });
             this.peer.on('error', (err) => {
                 if (loadQuick) loadQuick.style.display = 'none';
@@ -777,177 +840,121 @@ class OnlineMultiplayerManager {
 
         updateCanvasDimensions();
 
+        NetState.installHooks();
+        this.matchActive = true;
+        this.lastHeard = Date.now();
         gameState.winScore = winScore || 3;
         startBattle();
     }
 
+    // Gọi mỗi tick vật lý (host & guest)
     onGameLoopTick() {
         if (!this.isOnline) return;
-
-        // Host broadcasts state to Guest at ~30 Hz (every 2 frames)
-        if (this.role === 'host') {
-            if (animationId % 2 === 0 && p1 && p2) {
-                this.sendNetworkMessage({
-                    type: 'SYNC',
-                    p1: { x: p1.x, y: p1.y, hp: p1.hp, maxHp: p1.maxHp, shield: p1.shield, ammo: p1.ammo },
-                    p2: { x: p2.x, y: p2.y, hp: p2.hp, maxHp: p2.maxHp, shield: p2.shield, ammo: p2.ammo },
-                    p1Score: gameState.p1Score,
-                    p2Score: gameState.p2Score,
-                    p1Coins: gameState.p1Coins,
-                    p2Coins: gameState.p2Coins,
-                    phase: gameState.phase,
-                    round: gameState.round,
-                    crates: (crates || []).map(c => ({
-                        id: c.id, x: c.x, y: c.y, w: c.w, h: c.h,
-                        type: c.type, active: c.active,
-                        spawnTime: c.spawnTime, lifeTime: c.lifeTime
-                    })),
-                    moneyTrucks: (moneyTrucks || []).map(t => ({
-                        id: t.id, x: t.x, y: t.y, w: t.w, h: t.h,
-                        hp: t.hp, dir: t.dir, speed: t.speed, active: t.active
-                    })),
-                    movingObstacle: (movingObstacle && movingObstacle.active) ? {
-                        x: movingObstacle.x, y: movingObstacle.y, w: movingObstacle.w, h: movingObstacle.h,
-                        vx: movingObstacle.vx, active: movingObstacle.active, opacity: movingObstacle.opacity,
-                        spawnTime: movingObstacle.spawnTime, lifeTime: movingObstacle.lifeTime
-                    } : null,
-                    map: gameState.currentMap,
-                    bastions: (bastions || []).filter(b => b.active).map(b => ({
-                        x: b.x, y: b.y, vx: b.vx, hp: b.hp, maxHp: b.maxHp, active: b.active
-                    })),
-                    spears: (thunderPlantedSpears || []).map(s => ({
-                        id: s.id, ownerId: s.owner ? s.owner.id : 1, x: s.x, y: s.y, angle: s.angle
-                    })),
-                    magnetNodes: (magnetNodes || []).filter(m => m.active).map(m => ({
-                        id: m.id, ownerId: m.owner ? m.owner.id : 1, x: m.x, y: m.y, polarity: m.polarity, radius: m.radius, active: m.active
-                    })),
-                    turrets: (turrets || []).filter(t => t.active).map(t => ({
-                        ownerId: t.owner ? t.owner.id : 1, isSmart: t.isSmart, x: t.x, y: t.y, hp: t.hp, maxHp: t.maxHp, active: t.active
-                    }))
-                });
-            }
+        this.netTick++;
+        // Gửi lại phím định kỳ (phòng mất gói) + khi có thay đổi
+        const pid = this.myPid();
+        const inp = inputs[pid];
+        const key = (inp.l ? 'L' : '') + (inp.r ? 'R' : '') + (inp.s ? 'S' : '');
+        if (key !== this.lastInputSent || this.netTick - this.lastInputSentTick >= 15) {
+            this.lastInputSent = key;
+            this.lastInputSentTick = this.netTick;
+            this.sendNetworkMessage({ type: this.role === 'guest' ? 'INPUT' : 'HOST_INPUT', input: { l: inp.l, r: inp.r, s: inp.s } });
         }
+    }
+
+    // Host: cuối mỗi tick, gửi ảnh chụp thế giới ~30 lần/giây
+    onTickEnd() {
+        if (!this.isOnline || this.role !== 'host') return;
+        NetState.recording = true;
+        if (this.netTick % 2 !== 0) return;
+        let world;
+        try { world = NetState.captureWorld(); } catch (e) { console.warn('captureWorld', e); return; }
+        this.sendNetworkMessage({ type: 'SYNC', world, ev: NetState.flushEvents() });
+    }
+
+    // Guest: không mô phỏng – chỉ dự đoán chuyển động xe mình cho mượt
+    guestTick() {
+        this.onGameLoopTick();
+        if (screenShake.duration > 0) screenShake.duration--;
+        if (!p2 || this.predX === null) return;
+        const dir = (inputs.p2.r ? 1 : 0) - (inputs.p2.l ? 1 : 0);
+        const frozen = (p2.freezeTimer > 0) || p2.hp <= 0;
+        if (dir !== 0 && !frozen) {
+            let spd = p2.speed || C.baseSpeed;
+            if (p2.slowTimer > 0) spd *= 0.5;
+            this.predX = Math.max(0, Math.min(canvas.width - p2.w, this.predX + dir * spd));
+        }
+        p2.x = this.predX;
+        this.applyGuestLocalEffects();
     }
 
     applyHostSync(data) {
-        if (!p1 || !p2) return;
-
-        // P1 is host-controlled: smooth reconciliation
-        if (Math.abs(p1.x - data.p1.x) > 40) {
-            p1.x = data.p1.x;
-        } else {
-            p1.x += (data.p1.x - p1.x) * 0.5;
+        if (!p1 || !p2 || !data.world) return;
+        if (gameState.phase !== 'playing' && !fatalCinematic.active) return; // đang ở shop: bỏ qua ảnh chụp cũ
+        try {
+            NetState.applyWorld(data.world);
+        } catch (e) {
+            console.warn('applyWorld', e);
+            return;
         }
-        p1.y = data.p1.y;
-        p1.hp = data.p1.hp; p1.maxHp = data.p1.maxHp; p1.shield = data.p1.shield; p1.ammo = data.p1.ammo;
+        this.lastSnapshotAt = Date.now();
+        NetState.replayEvents(data.ev);
 
-        // P2 is client-controlled: reconcile smoothly
-        if (Math.abs(p2.x - data.p2.x) > 35) {
-            p2.x = data.p2.x;
-        } else if (Math.abs(p2.x - data.p2.x) > 4) {
-            p2.x += (data.p2.x - p2.x) * 0.2;
-        }
-        p2.y = data.p2.y;
-        p2.hp = data.p2.hp; p2.maxHp = data.p2.maxHp; p2.shield = data.p2.shield; p2.ammo = data.p2.ammo;
-
-        gameState.p1Score = data.p1Score;
-        gameState.p2Score = data.p2Score;
-        gameState.p1Coins = data.p1Coins;
-        gameState.p2Coins = data.p2Coins;
-        if (gameState.phase !== data.phase) {
-            gameState.phase = data.phase;
-        }
-        updateScoreBoard();
-
-        // Map Sync
-        if (data.map) {
-            gameState.currentMap = data.map;
-            if (typeof updateMapHUD === 'function') updateMapHUD();
-        }
-
-        // Authoritative Crate Synchronization
-        if (Array.isArray(data.crates)) {
-            if (this.guestDestroyedCrates) {
-                const hostIds = new Set(data.crates.map(c => c.id));
-                for (let id of this.guestDestroyedCrates) {
-                    if (!hostIds.has(id)) this.guestDestroyedCrates.delete(id);
-                }
-            }
-            crates = data.crates
-                .filter(raw => raw.active && !(this.guestDestroyedCrates && this.guestDestroyedCrates.has(raw.id)))
-                .map(raw => {
-                    const c = Object.create(Crate.prototype);
-                    return Object.assign(c, raw);
-                });
-        }
-
-        // Authoritative MoneyTruck Synchronization
-        if (Array.isArray(data.moneyTrucks)) {
-            moneyTrucks = data.moneyTrucks
-                .filter(raw => raw.active)
-                .map(raw => {
-                    const t = Object.create(MoneyTruck.prototype);
-                    return Object.assign(t, raw);
-                });
-        }
-
-        // Authoritative MovingObstacle Synchronization
-        if (data.movingObstacle) {
-            const obs = Object.create(MovingObstacle.prototype);
-            movingObstacle = Object.assign(obs, data.movingObstacle);
-        } else if (data.hasOwnProperty('movingObstacle')) {
-            movingObstacle = null;
-        }
-
-        // Authoritative Bastions Synchronization
-        if (Array.isArray(data.bastions)) {
-            bastions = data.bastions.map(raw => {
-                let b = new BastionWall(raw.y, raw.maxHp || 60, raw.vx);
-                b.x = raw.x; b.hp = raw.hp; b.active = raw.active;
-                return b;
-            });
-        }
-
-        // Authoritative Planted Spears Synchronization
-        if (Array.isArray(data.spears)) {
-            thunderPlantedSpears = data.spears.map(raw => ({
-                id: raw.id, owner: raw.ownerId === 1 ? p1 : p2, x: raw.x, y: raw.y, angle: raw.angle
-            }));
-        }
-
-        // Authoritative Magnet Nodes Synchronization
-        if (Array.isArray(data.magnetNodes)) {
-            magnetNodes = data.magnetNodes.map(raw => ({
-                id: raw.id, owner: raw.ownerId === 1 ? p1 : p2, x: raw.x, y: raw.y, polarity: raw.polarity, radius: raw.radius, active: raw.active
-            }));
-        }
-
-        // Authoritative Turrets Synchronization
-        if (Array.isArray(data.turrets)) {
-            turrets = data.turrets.map(raw => {
-                let owner = raw.ownerId === 1 ? p1 : p2;
-                let t = new Turret(owner, raw.isSmart, raw.x, raw.y);
-                t.x = raw.x; t.y = raw.y; t.hp = raw.hp; t.active = raw.active;
-                return t;
-            });
-        }
+        // Hoà giải vị trí dự đoán với vị trí thật từ host
+        const hostX = p2.x;
+        if (this.predX === null) this.predX = hostX;
+        const err = hostX - this.predX;
+        const moving = inputs.p2.l || inputs.p2.r;
+        if (Math.abs(err) > 60) this.predX = hostX;
+        else this.predX += err * (moving ? 0.08 : 0.35);
+        p2.x = this.predX;
+        this.applyGuestLocalEffects();
     }
 
+    // Hiệu ứng chỉ hiển thị trên máy guest (vd: Mù bảng điều khiển)
+    applyGuestLocalEffects() {
+        const ctrlEl = document.getElementById('p1-controls');
+        if (!ctrlEl || !p2) return;
+        if (p2.blindTimer > 0) ctrlEl.classList.add('blinded-hud');
+        else ctrlEl.classList.remove('blinded-hud');
+    }
+
+    // Ping thật (PING/PONG) + phát hiện mất kết nối
     startPingMonitor() {
         if (this.pingTimer) clearInterval(this.pingTimer);
-        const pingEl = document.getElementById('pingValueText');
-        const hudPingText = document.getElementById('hudPingText');
+        this.lastHeard = Date.now();
         this.pingTimer = setInterval(() => {
-            this.pingMs = Math.floor(18 + Math.random() * 10);
-            if (pingEl) pingEl.innerText = `Độ trễ: ~${this.pingMs}ms (P2P WebRTC / Local Broadcast)`;
-            if (hudPingText) hudPingText.innerText = `${this.pingMs}ms`;
-        }, 2500);
+            if (!this.isOnline) return;
+            this.sendNetworkMessage({ type: 'PING', t: Date.now() });
+            const silence = Date.now() - this.lastHeard;
+            const hudPing = document.getElementById('hudOnlinePing');
+            if (hudPing) hudPing.classList.toggle('ping-bad', silence > 2500);
+            if (this.matchActive && silence > 8000) this.onDisconnected();
+        }, 1000);
+    }
+
+    // Host: 1 kết nối WebRTC đóng
+    onHostConnClosed(peerId) {
+        delete this.connections[peerId];
+        const cid = this.peerToClient[peerId] || peerId;
+        if (this.matchActive) {
+            // BroadcastChannel có thể vẫn sống (cùng máy) – heartbeat sẽ quyết định
+            if (!this.broadcastChannel) this.onDisconnected();
+            return;
+        }
+        this.playersLobbyData = this.playersLobbyData.filter(p => p.id !== cid && p.id !== peerId);
+        this.broadcastLobbyState();
     }
 
     onDisconnected() {
         if (this.isOnline) {
-            alert('⚠️ Đối thủ đã ngắt kết nối hoặc rời phòng đấu!');
+            this.matchActive = false;
             this.leaveRoom();
+            alert('⚠️ Đối thủ đã ngắt kết nối hoặc rời phòng đấu!');
+            const upg = document.getElementById('upgradeScreen');
+            if (upg) upg.style.display = 'none';
+            const endScreen = document.getElementById('endScreen');
+            if (endScreen) endScreen.style.display = 'none';
             const pauseModal = document.getElementById('pauseMenuModal');
             if (pauseModal) pauseModal.style.display = 'none';
             const mainMenu = document.getElementById('mainMenu');
@@ -958,6 +965,10 @@ class OnlineMultiplayerManager {
     }
 
     leaveRoom() {
+        if (this.isOnline) { try { this.sendNetworkMessage({ type: 'LEAVE' }); } catch (e) {} }
+        this.matchActive = false;
+        NetState.recording = false;
+        NetState.events = [];
         this.cleanup();
         this.isOnline = false;
         document.body.classList.remove('online-active', 'role-host', 'role-guest');
@@ -980,6 +991,10 @@ class OnlineMultiplayerManager {
         this.isJoinedSuccess = false;
         this.playersLobbyData = [];
         this.guestDestroyedCrates = null;
+        this.seenSeq = {};
+        this.peerToClient = {};
+        this.predX = null;
+        this.matchActive = false;
         if (this.joinTimeoutTimer) {
             clearTimeout(this.joinTimeoutTimer);
             this.joinTimeoutTimer = null;

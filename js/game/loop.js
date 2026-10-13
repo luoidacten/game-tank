@@ -21,6 +21,8 @@ function gameLoop(timestamp) {
 
         if (cinematicTimer <= 0) {
             cinematicMode = false;
+            // Online guest không tự quyết định kết thúc hiệp (chờ ROUND_END từ host)
+            if (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'guest') return;
             endRound(cinematicWinnerId);
             return;
         }

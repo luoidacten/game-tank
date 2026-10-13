@@ -1948,3 +1948,11 @@ body.online-active .ready-badge {
     pointer-events: none;
     z-index: 100;
 }
+/* Online: cảnh báo mất tín hiệu (không nhận dữ liệu > 2.5s) */
+.ping-hud-badge.ping-bad .ping-dot-mini {
+    background: #ff3b3b;
+    box-shadow: 0 0 8px #ff3b3b;
+}
+.ping-hud-badge.ping-bad {
+    color: #ff6b6b;
+}

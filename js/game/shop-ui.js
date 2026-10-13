@@ -99,8 +99,9 @@ function renderStandardCards(playerId, list) {
             div.style.cursor = 'default'; div.onclick = null;
             container.appendChild(div);
             handlePlayerReady(playerId);
-            if (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.conn && onlineManager.conn.open) {
-                onlineManager.conn.send({ type: 'UPGRADE_PICK', pid: playerId, modId: mod.id });
+            if (typeof onlineManager !== 'undefined' && onlineManager.isOnline) {
+                onlineManager.sendLoadout(playerId);
+                onlineManager.sendReady(playerId);
             }
         };
         container.appendChild(div);
@@ -127,6 +128,7 @@ function renderShop(playerId, keepItems = false) {
             soundSystem.playCoin();
             updateShopTitle();
             renderShop(playerId, false);
+            if (typeof onlineManager !== 'undefined' && onlineManager.isOnline) onlineManager.sendLoadout(playerId);
         }
     };
     container.appendChild(rerollBtn);
@@ -153,9 +155,7 @@ function renderShop(playerId, keepItems = false) {
                     soundSystem.playPowerup();
                     updateShopTitle();
                     renderShop(playerId, true);
-                    if (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.conn && onlineManager.conn.open) {
-                        onlineManager.conn.send({ type: 'MONEY_TANK_UPGRADE', pid: playerId, level: player.upgradeLevel });
-                    }
+                    if (typeof onlineManager !== 'undefined' && onlineManager.isOnline) onlineManager.sendLoadout(playerId);
                 }
             };
             container.appendChild(upgradeBtn);
@@ -168,6 +168,13 @@ function renderShop(playerId, keepItems = false) {
             winBtn.onclick = () => {
                 let curMoney = (playerId === 'p1') ? gameState.p1Coins : gameState.p2Coins;
                 if (curMoney >= 500) {
+                    // Online guest: gửi yêu cầu cho host xử lý (host trừ tiền & kết thúc hiệp)
+                    if (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'guest') {
+                        onlineManager.sendNetworkMessage({ type: 'PAY_TO_WIN' });
+                        return;
+                    }
+                    // [FIX] Trước đây không trừ 500$
+                    if (playerId === 'p1') gameState.p1Coins -= 500; else gameState.p2Coins -= 500;
                     endRound(playerId === 'p1' ? 1 : 2);
                     document.getElementById('upgradeScreen').style.display = 'none';
                 }
@@ -226,9 +233,7 @@ function renderShop(playerId, keepItems = false) {
                     if (!player.boughtShopItems) player.boughtShopItems = [];
                     player.boughtShopItems.push(item.id);
                     renderShop(playerId, true);
-                    if (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.conn && onlineManager.conn.open) {
-                        onlineManager.conn.send({ type: 'UPGRADE_PICK', pid: playerId, modId: item.id });
-                    }
+                    if (typeof onlineManager !== 'undefined' && onlineManager.isOnline) onlineManager.sendLoadout(playerId);
                 }
             };
         }
@@ -268,8 +273,9 @@ function renderShop(playerId, keepItems = false) {
     readyBtn.innerHTML = `<h4>SẴN SÀNG</h4>`;
     readyBtn.onclick = () => {
         handlePlayerReady(playerId);
-        if (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.conn && onlineManager.conn.open) {
-            onlineManager.conn.send({ type: 'READY', pid: playerId });
+        if (typeof onlineManager !== 'undefined' && onlineManager.isOnline) {
+            onlineManager.sendLoadout(playerId);
+            onlineManager.sendReady(playerId);
         }
     };
     container.appendChild(readyBtn);
@@ -389,7 +395,7 @@ function renderInventorShop(playerId, keepItems = false) {
                     ];
                     soundSystem.playPowerup();
                     if (typeof addFloatingText === 'function') addFloatingText(player.x + player.w / 2, player.y - 20, "FULL EVO UNLOCKED! 🔥", "gold", 16);
-                    if (typeof onlineManager !== 'undefined' && onlineManager.isOnline) onlineManager.sendNetworkMessage({ type: 'INVENTOR_UPGRADE', pid: playerId, itemId: 'inv_full_evo' });
+                    if (typeof onlineManager !== 'undefined' && onlineManager.isOnline) onlineManager.sendLoadout(playerId);
                     renderInventorShop(playerId, false);
                 }
             };
@@ -416,7 +422,7 @@ function renderInventorShop(playerId, keepItems = false) {
                     if (item.id === 'inv_tangcuong') { player.maxAmmo += 2; player.ammo += 2; }
                     if (item.id === 'inv_bodam') { player.speed *= 1.1; }
                     renderInventorShop(playerId, false);
-                    if (typeof onlineManager !== 'undefined' && onlineManager.isOnline) onlineManager.sendNetworkMessage({ type: 'INVENTOR_UPGRADE', pid: playerId, itemId: item.id });
+                    if (typeof onlineManager !== 'undefined' && onlineManager.isOnline) onlineManager.sendLoadout(playerId);
                 }
             };
         }
@@ -452,8 +458,9 @@ function renderInventorShop(playerId, keepItems = false) {
     readyBtn.innerHTML = `<h4 style="color:#4ade80; font-size:12px;">SẴN SÀNG</h4><p style="font-size:9px; color:#bbf7d0;">Vào trận ngay</p><p style="color:#2ecc71; font-size:16px;">✔</p>`;
     readyBtn.onclick = () => {
         handlePlayerReady(playerId);
-        if (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.conn && onlineManager.conn.open) {
-            onlineManager.conn.send({ type: 'READY', pid: playerId });
+        if (typeof onlineManager !== 'undefined' && onlineManager.isOnline) {
+            onlineManager.sendLoadout(playerId);
+            onlineManager.sendReady(playerId);
         }
     };
     container.appendChild(readyBtn);
@@ -542,9 +549,7 @@ function renderGeniusBlackMarket(playerId, keepItems = false) {
                 player.geniusUpgrades[item.id] = (player.geniusUpgrades[item.id] || 0) + 1;
                 if (soundSystem && !soundSystem.muted) soundSystem.playPowerup();
                 renderGeniusBlackMarket(playerId, true);
-                if (typeof onlineManager !== 'undefined' && onlineManager.isOnline) {
-                    onlineManager.sendNetworkMessage({ type: 'GENIUS_UPGRADE', pid: playerId, itemId: item.id });
-                }
+                if (typeof onlineManager !== 'undefined' && onlineManager.isOnline) onlineManager.sendLoadout(playerId);
             } else {
                 if (typeof addFloatingText === 'function') addFloatingText(player.x + player.w / 2, player.y - 15, `CẦN ${cost} BÁNH RĂNG! ⚙️`, "#ff5722", 13);
             }
@@ -561,8 +566,9 @@ function renderGeniusBlackMarket(playerId, keepItems = false) {
     readyBtn.innerHTML = `<h4 style="color:#4ade80; font-size:12px;">SẴN SÀNG</h4><p style="font-size:9px; color:#bbf7d0;">Vào trận ngay</p><p style="color:#2ecc71; font-size:16px;">✔</p>`;
     readyBtn.onclick = () => {
         handlePlayerReady(playerId);
-        if (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.conn && onlineManager.conn.open) {
-            onlineManager.conn.send({ type: 'READY', pid: playerId });
+        if (typeof onlineManager !== 'undefined' && onlineManager.isOnline) {
+            onlineManager.sendLoadout(playerId);
+            onlineManager.sendReady(playerId);
         }
     };
     container.appendChild(readyBtn);
@@ -624,16 +630,15 @@ function handlePlayerReady(pid) {
 
         if (typeof onlineManager !== 'undefined' && onlineManager.isOnline) {
             if (onlineManager.role === 'host') {
-                onlineManager.sendNetworkMessage({
-                    type: 'START_ROUND',
-                    round: gameState.round,
-                    p1Upgrades: p1 ? p1.upgrades : [],
-                    p2Upgrades: p2 ? p2.upgrades : [],
-                    p1InvUpgrades: p1 ? p1.invUpgrades : {},
-                    p2InvUpgrades: p2 ? p2.invUpgrades : {},
-                    p1IsFullEvo: p1 ? !!p1.isFullEvoInventor : false,
-                    p2IsFullEvo: p2 ? !!p2.isFullEvoInventor : false
-                });
+                // Chọn map trước để gửi cho guest cùng lúc
+                if (!gameState.selectedMapMode || gameState.selectedMapMode === 'random') {
+                    const mapList = ['classic', 'bastion', 'artillery', 'overdrive', 'fast_shrink', 'rush_hour', 'supply_drop'];
+                    gameState.currentMap = mapList[Math.floor(Math.random() * mapList.length)];
+                } else {
+                    gameState.currentMap = gameState.selectedMapMode;
+                }
+                gameState.mapPreselected = true;
+                onlineManager.sendStartRound();
                 setTimeout(startRound, 400);
             }
         } else {

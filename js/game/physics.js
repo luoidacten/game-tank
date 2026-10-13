@@ -5,6 +5,11 @@
 
 
 function tickPhysics() {
+    // Online Guest: host mô phỏng toàn bộ, guest chỉ gửi phím & dự đoán xe mình
+    if (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'guest') {
+        onlineManager.guestTick();
+        return;
+    }
     const now = Date.now();
 
     // 1. Giảm thời gian rung màn hình theo nhịp tick cố định
@@ -321,5 +326,10 @@ function tickPhysics() {
         if (p1.hp <= 0 && p2.hp <= 0) triggerFatalCinematic(0, p1);
         else if (p1.hp <= 0) triggerFatalCinematic(2, p1);
         else if (p2.hp <= 0) triggerFatalCinematic(1, p2);
+    }
+
+    // Online Host: gửi ảnh chụp thế giới cho guest
+    if (typeof onlineManager !== 'undefined' && onlineManager.isOnline) {
+        onlineManager.onTickEnd();
     }
 }
