@@ -60,14 +60,23 @@ function aimVelocity(sx, sy, target, speed, lead = true) {
     return { vx: dx / L * speed, vy: dy / L * speed, angle: Math.atan2(dy, dx) };
 }
 
-// [ĐỔI] Vùng hiệu ứng mặt đất dạng HÌNH VUÔNG (hợp lối chơi chỉ đi trái/phải):
-// zoneDist = khoảng cách Chebyshev -> "trong vùng" khi |dx| < r và |dy| < r (cạnh vuông = 2r).
-function zoneDist(dx, dy) { return Math.max(Math.abs(dx), Math.abs(dy)); }
+// Điểm rơi cho pháo kích / mưa tên / sét ngẫu nhiên: đúng LÀN của mục tiêu (xe chỉ đi trái/phải),
+// lệch ngang ngẫu nhiên ±spread quanh xe -> vẫn né được nhưng không rơi vào khoảng trống giữa sân.
+function laneTargetPoint(target, spread = 80) {
+    const x = target.x + target.w / 2 + (Math.random() * 2 - 1) * spread;
+    return { x: Math.max(20, Math.min(canvas.width - 20, x)), y: target.y + target.h / 2 };
+}
+
+// [ĐỔI] Vùng hiệu ứng mặt đất dạng HÌNH CHỮ NHẬT NẰM NGANG (hợp lối chơi chỉ đi trái/phải):
+// bán trục ngang = r * ZONE_AX, bán trục dọc = r * ZONE_AY (diện tích ~ hình vuông cạnh 2r).
+// zoneDist(dx, dy) < r  <=>  |dx| < r*ZONE_AX và |dy| < r*ZONE_AY -> hình vẽ & vùng trúng đòn khớp nhau.
+const ZONE_AX = 1.3, ZONE_AY = 0.75;
+function zoneDist(dx, dy) { return Math.max(Math.abs(dx) / ZONE_AX, Math.abs(dy) / ZONE_AY); }
 function zoneRectPath(x, y, r) {
     ctx.beginPath();
-    const rr = Math.max(0, r);
-    if (ctx.roundRect) ctx.roundRect(x - rr, y - rr, rr * 2, rr * 2, Math.min(8, rr * 0.2));
-    else ctx.rect(x - rr, y - rr, rr * 2, rr * 2);
+    const hw = Math.max(0, r) * ZONE_AX, hh = Math.max(0, r) * ZONE_AY;
+    if (ctx.roundRect) ctx.roundRect(x - hw, y - hh, hw * 2, hh * 2, Math.min(8, hh * 0.3));
+    else ctx.rect(x - hw, y - hh, hw * 2, hh * 2);
 }
 
 function commitStatuses(p) {

@@ -314,6 +314,7 @@ function checkHits(attacker, victim) {
                         if (!onlineManager.guestDestroyedCrates) onlineManager.guestDestroyedCrates = new Set();
                         onlineManager.guestDestroyedCrates.add(n.id);
                     }
+                    crateOnBreak(n, attacker);
                     if (n.isMimic) {
                         triggerMimicExplosion(n, attacker);
                     }
@@ -386,7 +387,7 @@ function checkHits(attacker, victim) {
                         addFloatingText(attacker.x + attacker.w / 2, attacker.y - 15, "+1 SHIELD (5s)", "#00ffff", 12);
                     }
                     if (n.type === 'boom') {
-                        explosions.push(new Explosion(n.x, n.y, 60, 'rgba(255,0,0,', 2, null));
+                        explosions.push(new Explosion(n.x, n.y, 60, 'rgba(255,0,0,', 0, null));
                     } else {
                         explosions.push(new Explosion(n.x, n.y, 30, 'rgba(255,255,255,', 0, attacker));
                     }

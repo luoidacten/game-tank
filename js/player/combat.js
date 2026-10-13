@@ -62,20 +62,22 @@ Object.assign(Player.prototype, {
         }
 
         // 1. Invincibility
-        if (this.invincibleTimer > 0 && !options.ignoreInvincible) {
+        // options.unavoidable: đòn không thể né (bỏ qua bất tử / né / lướt), nhưng các loại khiên vẫn chặn
+        const canDodge = !options.unavoidable;
+        if (this.invincibleTimer > 0 && !options.ignoreInvincible && canDodge) {
             addFloatingText(this.x + this.w / 2, this.y - 10, "IMMUNE", "#3498db", 13);
             return 0;
         }
-        if (CharHooks.call(this, 'beforeDamage', amount, attacker, options) === true) return 0;
+        if (canDodge && CharHooks.call(this, 'beforeDamage', amount, attacker, options) === true) return 0;
 
         // 2. Ghost Phasing
-        if (this.weapon === 'ghost' && this.isGhostActive && !options.isEnvironmental) {
+        if (canDodge && this.weapon === 'ghost' && this.isGhostActive && !options.isEnvironmental) {
             addFloatingText(this.x + this.w / 2, this.y - 10, "PHASED", "#bdc3c7", 13);
             return 0;
         }
 
         // Thunder Invulnerability & Shield
-        if (this.weapon === 'thunder' && this.thunderIsSlashing) {
+        if (canDodge && this.weapon === 'thunder' && this.thunderIsSlashing) {
             return 0; // i-frame during Trảm Lôi Liên Hoàn
         }
         if (this.weapon === 'thunder' && (this.thunderShieldHits || 0) > 0) {
@@ -87,12 +89,12 @@ Object.assign(Player.prototype, {
         }
 
         // Magnet Polar Dash Invulnerability
-        if (this.weapon === 'magnet' && this.isPolarDashing) {
+        if (canDodge && this.weapon === 'magnet' && this.isPolarDashing) {
             return 0; // i-frame during Polar Dash
         }
 
         // Bow (Cung) - Nội tại Nhạy Bén: Tự động né 1 đòn đánh mỗi 8s (5s Full Evo)
-        if (this.weapon === 'cung' && this.bowDodgeReady && !options.isEnvironmental) {
+        if (canDodge && this.weapon === 'cung' && this.bowDodgeReady && !options.isEnvironmental) {
             this.bowDodgeReady = false;
             let cd = (this.hasUpgrade('evo_cung_1') && this.hasUpgrade('evo_cung_2')) ? 300 : 480;
             this.bowDodgeCooldown = cd;
@@ -336,13 +338,14 @@ Object.assign(Player.prototype, {
         crates.forEach(c => {
             if (checkLineHit(c)) {
                 c.active = false;
+                crateOnBreak(c, this);
                 if (c.isMimic) triggerMimicExplosion(c, this);
                 if (c.type === 'hp') this.hp = Math.min(this.hp + 1, this.maxHp);
                 if (c.type === 'ammo') this.onCollectAmmoCrate(c);
                 if (c.type === 'shield') this.shield++;
                 if (c.type === 'dmg') this.dmgBuff++;
                 if (this.weapon === 'evolution') this.onEvolutionCrateEat(c.type);
-                if (c.type === 'boom') explosions.push(new Explosion(c.x, c.y, 60, 'red', 2, this));
+                if (c.type === 'boom') explosions.push(new Explosion(c.x, c.y, 60, 'red', 0, this));
                 explosions.push(new Explosion(c.x, c.y, 30, 'white', 0, this));
             }
         });

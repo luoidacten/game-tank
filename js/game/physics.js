@@ -68,9 +68,12 @@ function tickPhysics() {
         if (gameState.currentMap === 'artillery') {
             if (!gameState.lastArtillerySpawn || now - gameState.lastArtillerySpawn > 2500) {
                 gameState.lastArtillerySpawn = now;
-                let hx = 40 + Math.random() * (canvas.width - 80);
-                let hy = 60 + Math.random() * (canvas.height - 120);
-                artilleryHazards.push(new ArtilleryHazard(hx, hy));
+                // [FIX] Trước đây rơi ngẫu nhiên khắp sân (đa số vào khoảng trống giữa sân, không trúng ai).
+                // Nay nhắm luân phiên vào làn của 2 xe, lệch ngang ngẫu nhiên để còn né được.
+                gameState.artilleryTurn = ((gameState.artilleryTurn || 0) + 1) % 2;
+                const tgt = gameState.artilleryTurn === 0 ? p1 : p2;
+                let pt = (tgt && tgt.hp > 0) ? laneTargetPoint(tgt, 90) : { x: 40 + Math.random() * (canvas.width - 80), y: 60 + Math.random() * (canvas.height - 120) };
+                artilleryHazards.push(new ArtilleryHazard(pt.x, pt.y));
             }
         }
 
@@ -255,6 +258,7 @@ function tickPhysics() {
             crates.forEach(c => {
                 if (c.active && rectIntersect(b.x, b.y, b.w, b.h, c.x, c.y, c.w, c.h)) {
                     c.active = false;
+                    crateOnBreak(c, owner);
                     if (c.isMimic) {
                         triggerMimicExplosion(c, owner);
                     }
@@ -264,7 +268,7 @@ function tickPhysics() {
                     if (c.type === 'dmg') { owner.dmgBuff++; if (owner.weapon === 'inventor') owner.components = (owner.components || 0) + 1; }
                     if (owner.weapon === 'evolution') { owner.onEvolutionCrateEat(c.type); }
                     if (c.type === 'boom') {
-                        explosions.push(new Explosion(c.x + c.w / 2, c.y + c.h / 2, 60, 'rgba(255,0,0,', 2, null));
+                        explosions.push(new Explosion(c.x + c.w / 2, c.y + c.h / 2, 60, 'rgba(255,0,0,', 0, null));
                         if (owner.weapon === 'inventor') owner.components = (owner.components || 0) + 3;
                     }
                     if (c.type === 'coin') {

@@ -14,7 +14,7 @@ const NET_CLASSES = {
     ShadowTrap, ShortgunFireZone, FireZone, WindWall, InventorDrone, ConfinementCage,
     CreatorTurret, CreatorShield, CreatorDrone, CreatorRobot,
     SniperWall, NecroMinion, GhostDecoy, Turret,
-    BodyZone, StoneBlock, SkyStrike, HitscanTelegraph, ThrownMecha,
+    BodyZone, StoneBlock, SkyStrike, HitscanTelegraph, ThrownMecha, CrateBurst,
 };
 
 // Biến toàn cục cần đồng bộ: [tên, getter, setter]

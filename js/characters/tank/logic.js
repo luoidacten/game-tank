@@ -80,6 +80,8 @@ Object.assign(Player.prototype, {
                     c.active = false; // Phá hủy hòm ngay lập tức
                     hitSomething = true;
 
+                    crateOnBreak(c, this);
+
                     if (c.isMimic) {
                         triggerMimicExplosion(c, this);
                     }
@@ -151,7 +153,7 @@ Object.assign(Player.prototype, {
 
                     // Hiệu ứng nổ hòm
                     if (c.type === 'boom') {
-                        explosions.push(new Explosion(c.x, c.y, 60, 'rgba(255,0,0,', 2, this));
+                        explosions.push(new Explosion(c.x, c.y, 60, 'rgba(255,0,0,', 0, this));
                     } else {
                         explosions.push(new Explosion(c.x, c.y, 30, 'rgba(255,255,255,', 0, this));
                     }

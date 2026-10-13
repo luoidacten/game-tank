@@ -162,6 +162,7 @@ Object.assign(Player.prototype, {
         crates.forEach(c => {
             if (c.active && c.x <= startX + 22 && c.x + c.w >= startX - 22) {
                 c.active = false;
+                crateOnBreak(c, this);
                 if (c.isMimic) triggerMimicExplosion(c, this);
                 this.onCollectAmmoCrate(c);
             }
@@ -273,8 +274,9 @@ Object.assign(Player.prototype, {
                 this.thunderFullEvoTimer = (this.thunderFullEvoTimer || 0) + 1;
                 if (this.thunderFullEvoTimer >= 150) {
                     this.thunderFullEvoTimer = 0;
-                    let rx = 30 + Math.random() * (canvas.width - 60);
-                    let ry = 40 + Math.random() * (canvas.height - 80);
+                    // [FIX] Sét rơi đúng làn đối thủ (trước: ngẫu nhiên khắp sân)
+                    const lt = laneTargetPoint((this.id === 1) ? p2 : p1, 90);
+                    let rx = lt.x, ry = lt.y;
                     let hazard = new ArtilleryHazard(rx, ry);
                     hazard.detonateTime = 500;
                     hazard.maxR = 50;

@@ -52,6 +52,11 @@ class ArrowRain {
             // Lấy tọa độ ngẫu nhiên
             let dropX = this.isGlobal ? Math.random() * canvas.width : this.x + (Math.random() * 2 - 1) * this.radius;
             let dropY = this.isGlobal ? Math.random() * canvas.height : this.y + (Math.random() * 2 - 1) * this.radius;
+            // [FIX] Mưa tên toàn sân: rơi trên làn đối thủ (trước: rải khắp sân, đa số rơi vào khoảng trống)
+            if (this.isGlobal) {
+                const enemy = this.owner === p1 ? p2 : p1;
+                if (enemy) dropY = enemy.y + enemy.h / 2 + (Math.random() * 2 - 1) * 18;
+            }
 
             // Ép tọa độ không lọt ra ngoài mép bản đồ
             dropX = Math.max(15, Math.min(canvas.width - 15, dropX));

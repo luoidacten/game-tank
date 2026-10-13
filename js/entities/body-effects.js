@@ -31,7 +31,7 @@ class BodyZone {
         if (--this.life <= 0) { this.active = false; return; }
         const enemy = this.owner === p1 ? p2 : p1;
         if (!enemy || enemy.hp <= 0) return;
-        const inside = zoneDist(enemy.x + enemy.w / 2 - this.x, enemy.y + enemy.h / 2 - this.y) < this.r + enemy.w / 2;
+        const inside = Math.abs(enemy.x + enemy.w / 2 - this.x) < this.r * ZONE_AX + enemy.w / 2 && Math.abs(enemy.y + enemy.h / 2 - this.y) < this.r * ZONE_AY + enemy.h / 2;
         if (!inside) { this.insideTicks = 0; return; }
         this.insideTicks++;
         const pw = this.power;

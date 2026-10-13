@@ -10,6 +10,8 @@
 - Gốc: xe 30×30, tốc độ 3.5, tốc đạn 4.8, nạp đạn 1.5s. Sau 60s **Đột Tử**: vùng an toàn thu hẹp.
 - Xe to được cộng máu: rộng 31–33 → +1, 34–35 → +2, 36 → +3, 37 → +4, ≥38 → +5 HP.
 - Mỗi Body có 2 Evo. Có **cả 2 = FULL EVO**.
+- **Thùng tiếp tế:** Thùng Nổ (!) phản 1.5 sát thương vào người phá - không thể né, khiên chặn được. Thùng Đạn (✸) bắn 16 viên ra 360°, trúng cả 2 xe (body Tiến Hóa phá thì chỉ trúng đối thủ). Thùng Giả chỉ xuất hiện khi trận có body Tiến Hóa; Thùng Bánh Răng chỉ khi có Kỹ Sư / Kẻ Sáng Tạo / Thiên Tài / Nhà Phát Minh.
+- **Vùng hiệu ứng mặt đất** là hình chữ nhật nằm ngang (rộng 2.6r × cao 1.5r). Pháo kích (map Pháo Kích), sét Full Evo Lôi Thần, bom Evo 2 Pháo Cao Xạ và Mưa Tên toàn sân rơi đúng làn xe mục tiêu.
 - Module chân: mỗi lần đã mua làm giá tăng thêm 50% giá gốc. **Động Cơ tối đa 3 lần** (đủ thì không xuất hiện trong shop). **Bánh Xích** x1.25 cho 3 lần đầu, sau đó giảm dần (x1.15, x1.09, x1.05…). **Lợi Tức** cộng dồn và nhân giá trị: 1/2/3/4/5 tầng = 30/72/126/192/270$ mỗi hiệp (Xe Tiền x2).
 
 ## Bảng tổng hợp

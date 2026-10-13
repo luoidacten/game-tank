@@ -571,6 +571,7 @@ Object.assign(Player.prototype, {
                 if (c.active && rectIntersect(b.x, b.y, b.w, b.h, c.x, c.y, c.w, c.h)) {
                     c.active = false;
                     BulletHooks.call(b, 'obstacle', this, c, 'crate');
+                    crateOnBreak(c, this);
                     if (c.isMimic) {
                         triggerMimicExplosion(c, this);
                     }
@@ -587,7 +588,7 @@ Object.assign(Player.prototype, {
                     if (c.type === 'shield') this.shield++;
                     if (c.type === 'dmg') this.dmgBuff++;
                     if (this.weapon === 'evolution') this.onEvolutionCrateEat(c.type);
-                    if (c.type === 'boom') explosions.push(new Explosion(c.x + c.w / 2, c.y + c.h / 2, 60, 'rgba(255,0,0,', 2, null));
+                    if (c.type === 'boom') explosions.push(new Explosion(c.x + c.w / 2, c.y + c.h / 2, 60, 'rgba(255,0,0,', 0, null));
                     if (c.type === 'coin') {
                         let money = 30; if (this.weapon === 'money_tank') money *= 2;
                         if (this.id === 1) gameState.p1Coins += money; else gameState.p2Coins += money;

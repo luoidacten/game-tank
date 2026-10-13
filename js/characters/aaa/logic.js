@@ -38,8 +38,9 @@ Object.assign(Player.prototype, {
                 if (this.hasUpgrade('evo_aaa_2')) {
                     const enemy = (this.id === 1) ? p2 : p1;
                     for (let k = 0; k < 3; k++) {
-                        let rx = Math.random() * canvas.width;
-                        let ry = (this.id === 1) ? (Math.random() * canvas.height / 2) : (canvas.height / 2 + Math.random() * canvas.height / 2);
+                        // [FIX] Bom rơi trên làn đối thủ (trước: ngẫu nhiên nửa sân, ít khi trúng)
+                        const lt = laneTargetPoint(enemy, 120);
+                        let rx = lt.x, ry = lt.y;
                         mortars.push(new MortarMarker(rx, ry, this, true));
                     }
                 }

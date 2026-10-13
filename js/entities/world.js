@@ -42,36 +42,18 @@ class Crate {
         this.active = true;
         this.spawnTime = Date.now();
         this.lifeTime = 10000;
-        this.isMimic = (Math.random() < 0.2);
-
-        let hasInventor = (typeof p1 !== 'undefined' && p1 && (p1.weapon === 'inventor' || p1.weapon === 'genius')) || (typeof p2 !== 'undefined' && p2 && (p2.weapon === 'inventor' || p2.weapon === 'genius'));
-        let hasEvo1 = (typeof p1 !== 'undefined' && p1 && ((p1.weapon === 'inventor' && p1.hasUpgrade('evo_inv_1')) || (p1.weapon === 'genius' && p1.hasUpgrade('evo_gen_1')))) || (typeof p2 !== 'undefined' && p2 && ((p2.weapon === 'inventor' && p2.hasUpgrade('evo_inv_1')) || (p2.weapon === 'genius' && p2.hasUpgrade('evo_gen_1'))));
-
-        let rand = Math.random();
-        if (hasEvo1) {
-            if (rand < 0.20) this.type = 'coin';
-            else if (rand < 0.35) this.type = 'hp';
-            else if (rand < 0.45) this.type = 'ammo';
-            else if (rand < 0.55) this.type = 'shield';
-            else if (rand < 0.65) this.type = 'dmg';
-            else if (rand < 0.85) this.type = 'gear';
-            else this.type = 'boom';
-        } else if (hasInventor) {
-            if (rand < 0.20) this.type = 'coin';
-            else if (rand < 0.38) this.type = 'hp';
-            else if (rand < 0.50) this.type = 'ammo';
-            else if (rand < 0.62) this.type = 'shield';
-            else if (rand < 0.72) this.type = 'dmg';
-            else if (rand < 0.86) this.type = 'gear';
-            else this.type = 'boom';
-        } else {
-            if (rand < 0.25) this.type = 'coin';
-            else if (rand < 0.45) this.type = 'hp';
-            else if (rand < 0.60) this.type = 'ammo';
-            else if (rand < 0.75) this.type = 'shield';
-            else if (rand < 0.85) this.type = 'dmg';
-            else this.type = 'boom';
-        }
+        const ws = [typeof p1 !== 'undefined' && p1 ? p1 : null, typeof p2 !== 'undefined' && p2 ? p2 : null].filter(Boolean);
+        // [ĐỔI] Thùng giả (Mimic) chỉ xuất hiện khi trận có body Tiến Hóa
+        this.isMimic = ws.some(p => p.weapon === 'evolution') && Math.random() < 0.2;
+        // [ĐỔI] Thùng bánh răng chỉ xuất hiện khi có Kỹ Sư / Kẻ Sáng Tạo / Thiên Tài / Nhà Phát Minh
+        const hasMaker = ws.some(p => CRATE_GEAR_BODIES.includes(p.weapon));
+        const hasEvo1 = ws.some(p => (p.weapon === 'inventor' && p.hasUpgrade('evo_inv_1')) || (p.weapon === 'genius' && p.hasUpgrade('evo_gen_1')));
+        const weights = { coin: 25, hp: 20, ammo: 15, shield: 13, dmg: 10, boom: 9, bullets: 8 };
+        if (hasMaker) weights.gear = hasEvo1 ? 24 : 16;
+        let total = 0; for (const k in weights) total += weights[k];
+        let rand = Math.random() * total;
+        this.type = 'coin';
+        for (const k in weights) { if ((rand -= weights[k]) < 0) { this.type = k; break; } }
     }
     update() {
         if (!this.active) return;
@@ -86,6 +68,7 @@ class Crate {
         else if (this.type === 'dmg') ctx.fillStyle = '#9b59b6';
         else if (this.type === 'boom') ctx.fillStyle = '#c0392b';
         else if (this.type === 'gear') ctx.fillStyle = '#00ffcc';
+        else if (this.type === 'bullets') ctx.fillStyle = '#ff9f1a';
 
         ctx.fillRect(this.x, this.y, this.w, this.h);
         ctx.fillStyle = '#000'; ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center';
@@ -97,6 +80,7 @@ class Crate {
         else if (this.type === 'dmg') txt = 'D';
         else if (this.type === 'boom') txt = '!';
         else if (this.type === 'gear') txt = 'G';
+        else if (this.type === 'bullets') txt = '✸';
 
         const isGuestView = (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'guest');
         if (isGuestView) {
@@ -111,6 +95,78 @@ class Crate {
 
         let lifePct = 1 - (Date.now() - this.spawnTime) / this.lifeTime;
         ctx.fillStyle = 'white'; ctx.fillRect(this.x, this.y + 22, this.w * lifePct, 2);
+    }
+}
+
+const CRATE_GEAR_BODIES = ['engineer', 'creator', 'genius', 'inventor'];
+const CRATE_BOOM_DMG = 1.5;
+
+// Hiệu ứng chung khi 1 thùng bị phá (gọi ở MỌI đường phá thùng: đạn, lao, chém, tia...)
+//  - Thùng nổ (boom): người phá bị PHẢN SÁT THƯƠNG ngay lập tức, không thể né, khiên chặn được.
+//  - Thùng đạn (bullets): bắn 16 viên ra 360 độ, trúng cả người phá lẫn đối thủ
+//    (người phá là body Tiến Hóa thì chỉ gây sát thương lên đối thủ).
+function crateOnBreak(c, opener) {
+    if (!c || c._broke) return;
+    c._broke = true;
+    const cx = c.x + c.w / 2, cy = c.y + c.h / 2;
+    if (c.type === 'boom' && opener && typeof opener.takeDamage === 'function') {
+        explosions.push(new Explosion(opener.x + opener.w / 2, opener.y + opener.h / 2, 40, 'rgba(255,0,0,', 0, null));
+        addFloatingText(opener.x + opener.w / 2, opener.y - 18, 'PHẢN NỔ! 💥', '#ff4d4d', 14);
+        opener.takeDamage(CRATE_BOOM_DMG, null, { unavoidable: true, isEnvironmental: true });
+        triggerScreenShake(6, 10);
+    }
+    if (c.type === 'bullets') {
+        bodyEffects.push(new CrateBurst(cx, cy, opener, !!(opener && opener.weapon === 'evolution')));
+        explosions.push(new Explosion(cx, cy, 34, 'rgba(255,160,30,', 0, null));
+    }
+}
+
+// Chùm đạn 360 độ từ Thùng Đạn (đạn trung lập: trúng cả 2 xe)
+class CrateBurst {
+    constructor(x, y, breaker, onlyEnemy) {
+        this.breakerId = breaker ? breaker.id : 0;
+        this.onlyEnemy = onlyEnemy;
+        this.dmg = 0.75;
+        this.active = true;
+        this.life = 240;
+        this.pellets = [];
+        const n = 16, spd = 4.2;
+        for (let i = 0; i < n; i++) {
+            const a = i * Math.PI * 2 / n; // có cả 2 viên bay thẳng lên / xuống làn xe
+            this.pellets.push({ x, y, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd, on: true });
+        }
+    }
+    update() {
+        if (!this.active) return;
+        if (--this.life <= 0) { this.active = false; return; }
+        const breaker = this.breakerId === 1 ? p1 : (this.breakerId === 2 ? p2 : null);
+        let alive = 0;
+        for (const b of this.pellets) {
+            if (!b.on) continue;
+            b.x += b.vx; b.y += b.vy;
+            if (b.x < -10 || b.x > canvas.width + 10 || b.y < -10 || b.y > canvas.height + 10) { b.on = false; continue; }
+            for (const p of [p1, p2]) {
+                if (!p || p.hp <= 0) continue;
+                if (this.onlyEnemy && p === breaker) continue;
+                if (rectIntersect(b.x - 3, b.y - 3, 6, 6, p.x, p.y, p.w, p.h)) {
+                    p.takeDamage(this.dmg, p === breaker ? null : breaker, { isEnvironmental: p === breaker });
+                    spawnSparkParticles(b.x, b.y, '#ff9f1a', 5);
+                    b.on = false; break;
+                }
+            }
+            if (b.on) alive++;
+        }
+        if (!alive) this.active = false;
+    }
+    draw() {
+        if (!this.active) return;
+        ctx.save();
+        ctx.fillStyle = '#ffb347'; ctx.strokeStyle = '#7a3a00'; ctx.lineWidth = 1;
+        for (const b of this.pellets) {
+            if (!b.on) continue;
+            ctx.beginPath(); ctx.arc(b.x, b.y, 3.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        }
+        ctx.restore();
     }
 }
 

@@ -71,6 +71,7 @@ class StormSlash {
                 let d = Math.hypot(this.x - (c.x + c.w / 2), this.y - (c.y + c.h / 2));
                 if (d < this.r) {
                     c.active = false; // Phá thùng ngay lập tức
+                    crateOnBreak(c, this.owner);
                     if (c.isMimic) {
                         triggerMimicExplosion(c, this.owner);
                     }
@@ -129,7 +130,7 @@ class StormSlash {
                     }
 
                     // Hiệu ứng nổ thùng
-                    if (c.type === 'boom') explosions.push(new Explosion(c.x, c.y, 60, 'rgba(255,0,0,', 2, this.owner));
+                    if (c.type === 'boom') explosions.push(new Explosion(c.x, c.y, 60, 'rgba(255,0,0,', 0, this.owner));
                     else explosions.push(new Explosion(c.x, c.y, 30, 'rgba(255,255,255,', 0, this.owner));
                 }
             }
