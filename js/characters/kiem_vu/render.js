@@ -166,6 +166,15 @@ Object.assign(CharHooks.registry.kiem_vu, {
         }
         if (this.kvSwState === KV_SW_FLY || this.kvSwState === KV_SW_RETURN) {
             kvDrawBlade(this.kvSwX, this.kvSwY, this.kvSwAng, 34, 6, full ? '#7dd3fc' : KV_WATER, KV_WATER);
+            // Đang thu về & đã sang nửa sân mình: vòng sáng báo "có thể phóng lại"
+            if (this.kvSwState === KV_SW_RETURN && kvSwordOnOwnHalf(this)) {
+                ctx.save();
+                ctx.globalCompositeOperation = 'lighter';
+                ctx.strokeStyle = `rgba(186, 230, 253, ${0.55 + 0.35 * Math.sin(t / 3)})`; ctx.lineWidth = 1.5;
+                ctx.shadowBlur = 8; ctx.shadowColor = KV_WATER;
+                ctx.beginPath(); ctx.arc(this.kvSwX, this.kvSwY, 14, 0, Math.PI * 2); ctx.stroke();
+                ctx.restore();
+            }
         }
 
         // 4. Bản Mệnh Kiếm lơ lửng trước mặt
@@ -258,6 +267,12 @@ Object.assign(CharHooks.registry.kiem_vu, {
         ctx.shadowBlur = 0; ctx.globalAlpha = 1;
         ctx.fillStyle = 'rgba(2, 6, 23, 0.9)';
         for (let k = 1; k < 4; k++) ctx.fillRect(x + W * k / 4 - 0.5, y1, 1, 3);
+        // Khoá hồi Tâm Định (1.25s sau khi dùng kỹ năng / tiêu Tâm Định): vạch xám chạy ngược
+        if (this.kvTamCd > 0) {
+            const k = this.kvTamCd / KV_TAM_DELAY;
+            ctx.fillStyle = 'rgba(148, 163, 184, 0.85)';
+            ctx.fillRect(x, y1 - 2, W * k, 1);
+        }
         // Thanh Sát Ý
         const sat = Math.max(0, Math.min(100, this.kvSat || 0)) / 100;
         const fullSat = sat >= 1;

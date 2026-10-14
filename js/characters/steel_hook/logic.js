@@ -16,11 +16,32 @@ const SH_HOLD_TIMEOUT = 240;               // không bấm giai đoạn 2 -> thu
 const SH_TRUCK_IDLE = 150;                 // ngoạm xe tiền mà không spam -> nhả
 const SH_SIDE_ANGLE = 0.42;                // Full Evo: 2 móc lệch ±24°
 const SH_AUTO_PERIOD = 420;                // Evo 2: móc phụ tự động mỗi 7s
+const SH_FLY_SLOW = 75;                    // nhấp nhanh: móc đi hết đường xích trong 1.25s
+const SH_FLY_FAST = 30;                    // tụ lực tối đa: chỉ 0.5s
+const SH_BREAK_TICKS = 45;                 // móc đã neo: giữ Bắn 0.75s -> tự cắt xích
+const SH_SIDE_HP = 0.25;                   // Full Evo: 2 móc phụ chỉ có 25% máu tối đa (dễ bắn đứt)
 
 function shIsFull(p) { return p.hasUpgrade('evo_hook_1') && p.hasUpgrade('evo_hook_2'); }
 function shMaxBounces(p) { return shIsFull(p) ? 17 : (p.hasUpgrade('evo_hook_1') ? 15 : 9); }
 function shBouncesForTier(p, tier) { return Math.floor(1 + tier * (shMaxBounces(p) - 1) / 4); }
-function shHookSpeed(p) { return p.hasUpgrade('evo_hook_1') ? 16 : 9.5; }
+// Thời gian bay hết đường xích theo lực tụ (giữ càng lâu càng nhanh)
+function shFlyTicks(charge) {
+    const k = Math.max(0, Math.min(1, (charge || 0) / (SH_TIER_TICKS * 4)));
+    return Math.round(SH_FLY_SLOW + (SH_FLY_FAST - SH_FLY_SLOW) * k);
+}
+// Ước lượng chiều dài đường xích (chỉ tính nảy tường + giới hạn chiều dài, giống shFlyStep)
+function shPlanLen(p, x, y, dx, dy, bounces, cap) {
+    const W = canvas.width, H = canvas.height, r = shHeadR(p);
+    let len = 0, b = bounces;
+    while (len < cap) {
+        x += dx * 4; y += dy * 4; len += 4;
+        let hit = false;
+        if (x < r) { x = r; dx = Math.abs(dx); hit = true; } else if (x > W - r) { x = W - r; dx = -Math.abs(dx); hit = true; }
+        if (y < r) { y = r; dy = Math.abs(dy); hit = true; } else if (y > H - r) { y = H - r; dy = -Math.abs(dy); hit = true; }
+        if (hit && b-- <= 0) break;
+    }
+    return Math.min(len, cap);
+}
 function shHeadR(p) { return p.hasUpgrade('evo_hook_2') ? 10.5 : 7; }
 function shLaneY(p) { return p.id === 1 ? canvas.height - p.h - 22 : 20; }
 function shFwd(p) { return p.id === 1 ? -1 : 1; }
@@ -117,19 +138,22 @@ function shUnpinAll(p) {
 }
 
 // ---------- Phóng móc ----------
-function shLaunch(p, tier) {
+function shLaunch(p, tier, charge) {
     const n = shNose(p);
     const bounces = shBouncesForTier(p, tier);
     const base = shAngle(p);
     const angs = shIsFull(p) ? [base, base - SH_SIDE_ANGLE, base + SH_SIDE_ANGLE] : [base];
-    const spd = shHookSpeed(p);
-    const hp = p.maxHp * (shIsFull(p) ? 1 : 0.5);
+    const ticks = shFlyTicks(charge);
+    const cap = 600 + 220 * bounces;
     p.shHooks = angs.map((a, i) => {
         a = Math.max(-1.4, Math.min(1.4, a));
         const d = shDir(p, a);
+        // Tốc độ = chiều dài cả đường xích / thời gian mong muốn -> mọi móc tới đích cùng lúc
+        const spd = Math.max(3, shPlanLen(p, n.x, n.y, d.x, d.y, bounces, cap) / ticks);
+        const hp = i === 0 ? p.maxHp * (shIsFull(p) ? 1 : 0.5) : p.maxHp * SH_SIDE_HP;
         return {
             sid: ++p.shSerial, pts: [{ x: n.x, y: n.y }], x: n.x, y: n.y, vx: d.x * spd, vy: d.y * spd,
-            b: bounces, len: 0, cap: 600 + 220 * bounces, hp, maxHp: hp, st: 'fly', truckId: '', main: i === 0, flash: 0,
+            b: bounces, len: 0, cap, hp, maxHp: hp, st: 'fly', truckId: '', main: i === 0, flash: 0,
         };
     });
     p.shPhase = 'fly';
@@ -250,6 +274,20 @@ function shSnap(p, h) {
     explosions.push(new Explosion(h.x, h.y, 26, 'rgba(255,120,120,', 0, p));
     spawnSparkParticles(h.x, h.y, '#cfd8e3', 12);
     if (h.st === 'enemy') { const e = shEnemy(p); if (e) e.freezeTimer = Math.min(e.freezeTimer || 0, 1); }
+}
+// Tự cắt xích (giữ Bắn 0.75s khi móc đã neo): huỷ mọi móc, hồi gần như ngay để phóng lại
+function shCutChains(p) {
+    (p.shHooks || []).forEach(h => {
+        spawnSparkParticles(h.x, h.y, '#cfd8e3', 8);
+        if (h.st === 'enemy') { const e = shEnemy(p); if (e) e.freezeTimer = Math.min(e.freezeTimer || 0, 1); }
+    });
+    const n = shNose(p);
+    addFloatingText(n.x, n.y + shFwd(p) * 16, 'CẮT XÍCH! ✂', '#ffb4b4', 13);
+    explosions.push(new Explosion(n.x, n.y, 20, 'rgba(255,160,160,', 0, p));
+    if (soundSystem && !soundSystem.muted) soundSystem.playClick();
+    shUnpinAll(p);
+    shEnd(p);
+    p.shT = SH_COOLDOWN - 12;
 }
 function shEnd(p) { p.shPhase = 'cool'; p.shT = 0; p.shHooks = []; p.shDrag = null; p.shZip = null; }
 
@@ -477,6 +515,7 @@ CharHooks.register('steel_hook', {
         this.maxAmmo = 1;
         this.shBaseSpeed = this.speed;
         this.shPhase = 'ready'; this.shT = 0; this.shSwing = 0; this.shCharge = -1; this.shPrevS = false;
+        this.shHoldS = -1;
         this.shHooks = []; this.shPinned = []; this.shSerial = 0; this.shDrag = null; this.shZip = null;
         this.shAuto = null; shSetAutoObj(this, null); this.shAutoT = 0; this.shTick = 0; this.shLaunchBounces = 0;
     },
@@ -565,12 +604,19 @@ CharHooks.register('steel_hook', {
                 }
             } else if (release && this.shCharge >= 0) {
                 const tier = Math.min(4, Math.floor(this.shCharge / SH_TIER_TICKS));
+                shLaunch(this, tier, this.shCharge);
                 this.shCharge = -1;
-                shLaunch(this, tier);
             }
+            this.shHoldS = -1;
         } else {
             this.shCharge = -1;
-            if (press && this.shPhase === 'hold') shStage2(this);
+            if (this.shPhase === 'hold') {
+                // Nhấp (nhả trước 0.75s) -> giai đoạn 2; giữ đủ 0.75s -> tự cắt xích để phóng lại
+                if (press) this.shHoldS = 0;
+                else if (s && this.shHoldS >= 0) {
+                    if (++this.shHoldS >= SH_BREAK_TICKS) { this.shHoldS = -1; shCutChains(this); }
+                } else if (release && this.shHoldS >= 0) { this.shHoldS = -1; shStage2(this); }
+            } else this.shHoldS = -1;
         }
         this.ammo = this.shPhase === 'ready' ? 1 : 0;
         return true;

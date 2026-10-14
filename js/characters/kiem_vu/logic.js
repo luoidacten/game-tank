@@ -17,6 +17,7 @@ const KV_WATER = '#38bdf8';
 const KV_WATER_LIGHT = '#bae6fd';
 const KV_BLOOD = '#ff3860';
 const KV_SW_FLOAT = 0, KV_SW_FLY = 1, KV_SW_PLANT = 2, KV_SW_RETURN = 3;
+const KV_TAM_DELAY = 75; // Tâm Định chỉ hồi lại sau 1.25s không dùng kỹ năng / không tiêu Tâm Định
 const KV_AMMO_SENTINEL = 1000; // maxAmmo ảo: hòm Nạp Đạn đặt ammo = maxAmmo -> nhận biết được
 
 function kvEvo1(p) { return p.hasUpgrade('evo_kv_1'); }
@@ -28,6 +29,15 @@ function kvSwordDmg(p) { return (p.damage + (p.dmgBuff || 0)) * (kvFull(p) ? 1.1
 function kvSwordSpeed(p) { return kvFull(p) ? 15 : 11; }
 function kvFocusDur(p) { return kvEvo2(p) ? 60 : 30; }
 function kvLowHp(p) { return p.hp < p.maxHp * 0.25; }
+// Dùng kỹ năng / tiêu Tâm Định -> khoá hồi Tâm Định 1.25s
+function kvTamLock(p) { p.kvTamCd = KV_TAM_DELAY; }
+function kvSpendTam(p, n) { p.kvTam = Math.max(0, p.kvTam - n); kvTamLock(p); }
+// Kiếm đang ở nửa sân của mình? (ranh giới = giữa 2 làn)
+function kvSwordOnOwnHalf(p) {
+    const e = kvEnemy(p);
+    const mid = e ? (p.y + p.h / 2 + e.y + e.h / 2) / 2 : canvas.height / 2;
+    return p.id === 1 ? p.kvSwY >= mid : p.kvSwY <= mid;
+}
 // Vị trí Bản Mệnh Kiếm khi lơ lửng trước mặt
 function kvFloatPos(p) {
     const bob = Math.sin((p.kvTick || 0) / 12) * 2.5;
@@ -77,7 +87,7 @@ function kvSpawnReflect(p, srcX, srcY, srcVx, srcVy, dmg, opts = {}) {
 function kvOnReflect(p, kind, srcDmg, attacker, fxX, fxY) {
     const entering = !(p.kvFocus > 0);
     if (entering) {
-        p.kvTam = Math.max(0, p.kvTam - 25);
+        kvSpendTam(p, 25);
         addFloatingText(p.x + p.w / 2, p.y + (p.id === 1 ? -26 : p.h + 30), 'TẬP TRUNG!', KV_WATER_LIGHT, 13);
         if (soundSystem && !soundSystem.muted) soundSystem.playShieldBreak();
     } else if (soundSystem && !soundSystem.muted) soundSystem.playHit();
@@ -305,9 +315,12 @@ function kvCommand(p) {
     const enemy = kvEnemy(p);
     let acted = false;
     if (p.kvTkPending) return true; // đang chờ Tâm Kiếm chém
-    if (p.kvSwState === KV_SW_FLOAT) {
-        if (p.kvSat >= 100) { kvTamKiem(p); acted = true; }
+    // Phóng: kiếm trên tay, hoặc đang thu về & đã sang nửa sân mình (phóng lại từ vị trí hiện tại)
+    const canThrow = p.kvSwState === KV_SW_FLOAT || (p.kvSwState === KV_SW_RETURN && kvSwordOnOwnHalf(p));
+    if (canThrow) {
+        if (p.kvSat >= 100 && p.kvSwState === KV_SW_FLOAT) { kvTamKiem(p); acted = true; }
         else {
+            if (p.kvSwState === KV_SW_RETURN) addFloatingText(p.kvSwX, p.kvSwY + kvDirY(p) * 14, 'PHÓNG LẠI!', KV_WATER_LIGHT, 11);
             p.kvSwState = KV_SW_FLY;
             p.kvSwHit = false;
             p.kvSwTx = enemy ? Math.max(10, Math.min(canvas.width - 10, enemy.x + enemy.w / 2)) : p.x + p.w / 2;
@@ -320,8 +333,17 @@ function kvCommand(p) {
         p.kvSwHit = false;
         acted = true;
         if (soundSystem && !soundSystem.muted) soundSystem.playDash();
+    } else if (p.kvSwState === KV_SW_RETURN) {
+        // Kiếm còn ở sân địch: chưa phóng được, phải chờ thu về nửa sân mình
+        if (!(p.kvBlockFx > 0)) {
+            addFloatingText(p.kvSwX, p.kvSwY + kvDirY(p) * 16, 'KIẾM CÒN Ở SÂN ĐỊCH — THU VỀ!', '#fca5a5', 11);
+            p.kvBlockFx = 30;
+        }
+        p.kvCmdCd = 6;
+        return;
     }
     if (!acted) return;
+    kvTamLock(p);
     p.kvCmdCd = 8;
     if (kvFull(p)) {
         if ((p.kvCmdCount || 0) >= 5) { p.kvCmdCount = 0; kvSummonMinis(p); }
@@ -338,7 +360,7 @@ CharHooks.register('kiem_vu', {
         this.kvTick = 0;
         this.kvTam = 0; this.kvSat = 0; this.kvTkPending = false;
         this.kvFocus = 0; this.kvFocusMax = 30;
-        this.kvStill = false; this.kvStillT = 0;
+        this.kvStill = false; this.kvStillT = 0; this.kvTamCd = 0; this.kvBlockFx = 0;
         this.kvPrevS = false; this.kvCmdCd = 0; this.kvCmdCount = 0;
         this.kvSwState = KV_SW_FLOAT; this.kvSwX = this.x + this.w / 2; this.kvSwY = this.y;
         this.kvSwTx = 0; this.kvSwTy = 0; this.kvSwAng = 0; this.kvSwHit = false;
@@ -366,9 +388,11 @@ CharHooks.register('kiem_vu', {
 
         // --- Tâm Định: đứng yên tích lũy (1.2s đầy, Evo1 0.8s) ---
         this.kvStill = !inp.l && !inp.r;
+        if (this.kvTamCd > 0) this.kvTamCd--;
+        if (this.kvBlockFx > 0) this.kvBlockFx--;
         if (this.kvStill) {
             this.kvStillT++;
-            this.kvTam = Math.min(100, this.kvTam + 100 / (kvEvo1(this) ? 48 : 72));
+            if (!(this.kvTamCd > 0)) this.kvTam = Math.min(100, this.kvTam + 100 / (kvEvo1(this) ? 48 : 72));
         } else this.kvStillT = 0;
 
         // --- Tập Trung ---
@@ -413,7 +437,7 @@ CharHooks.register('kiem_vu', {
         // Cận chiến / lao húc: gạt đỡ, tốn 25% Tâm Định, không vào Tập Trung
         if (near && !isExplosion && !options.kvSword) {
             if (!kvInStance(this)) return false;
-            this.kvTam = Math.max(0, this.kvTam - 25);
+            kvSpendTam(this, 25);
             kvParryFx(this, attacker.x + attacker.w / 2, (attacker.y + this.y + this.h) / 2);
             addFloatingText(this.x + this.w / 2, this.y + (this.id === 1 ? -14 : this.h + 18), 'GẠT ĐỠ!', KV_WATER_LIGHT, 13);
             if (soundSystem && !soundSystem.muted) soundSystem.playShieldBreak();
