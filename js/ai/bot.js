@@ -327,7 +327,7 @@ class BotAIController {
             item.className = 'bot-weapon-item' + (mod.id === currentWeapon ? ' current' : '');
             const statsText = mod.stats ? `HP:${mod.stats.hp} | Dame:${mod.stats.dmg} | Đạn:${mod.stats.ammo}` : '';
             item.innerHTML = `
-                <div class="bwi-name">${mod.name}</div>
+                <div class="bwi-name">${mod.name}</div>${typeof roleBadges === 'function' ? roleBadges(mod) : ''}
                 <div class="bwi-stats">${statsText}</div>
                 <div class="bwi-desc">${mod.desc || ''}</div>
             `;

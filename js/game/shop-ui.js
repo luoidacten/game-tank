@@ -25,6 +25,14 @@ function shopItemPrice(player, item) {
     return Math.round(base * (1 + FEET_PRICE_STEP * feetOwnedCount(player, item.id)) * m);
 }
 
+// Huy hiệu vai trò của body (vai trò chính đứng đầu, nổi bật hơn)
+const ROLE_ICON = { 'Đối Đầu': '⚔️', 'Kiểm Soát': '🕸️', 'Cơ Động': '⚡', 'Sinh Tồn': '🛡️' };
+function roleBadges(mod) {
+    if (!mod || !mod.role || !mod.role.length) return '';
+    return '<div class="role-badges">' + mod.role.map((r, i) =>
+        `<span class="role-badge${i === 0 ? ' main' : ''}" data-role="${r}">${ROLE_ICON[r] || ''} ${r}</span>`).join('') + '</div>';
+}
+
 function showUpgradeScreen() {
     gameState.phase = 'upgrade';
     const upgScreen = document.getElementById('upgradeScreen');
@@ -122,7 +130,7 @@ function renderStandardCards(playerId, list) {
     shuffled.forEach(mod => {
         const div = document.createElement('div');
         div.className = 'card';
-        div.innerHTML = `<h4>${mod.name}</h4><p>${mod.desc}</p>`;
+        div.innerHTML = `<h4>${mod.name}</h4>${roleBadges(mod)}<p>${mod.desc}</p>`;
         div.onclick = () => {
             player.addUpgrade(mod.id); soundSystem.playPowerup();
             container.innerHTML = '';

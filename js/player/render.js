@@ -251,16 +251,26 @@ Object.assign(Player.prototype, {
 
                 ctx.rotate(rotation);
 
-                ctx.beginPath();
-                // 1. Vẽ lưng cong (Nửa vòng tròn)
-                ctx.arc(0, 0, b.w / 2, -Math.PI / 2, Math.PI / 2, false);
-
-                // 2. Vẽ bụng lõm (Bezier Curve) - Tạo hình khuyết
-                ctx.bezierCurveTo(b.w / 4, b.w / 2, b.w / 4, -b.w / 2, 0, -b.w / 2);
-
+                // Lưỡi liềm: các bóng mờ phía sau (vệt chém mượt) + thân chính + lõi trắng
+                const crescent = (scale) => {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, b.w / 2 * scale, -Math.PI / 2, Math.PI / 2, false);
+                    ctx.bezierCurveTo(b.w / 4 * scale, b.w / 2 * scale, b.w / 4 * scale, -b.w / 2 * scale, 0, -b.w / 2 * scale);
+                };
+                ctx.shadowBlur = 14; ctx.shadowColor = bulletColor;
+                for (let g = 3; g >= 1; g--) {
+                    ctx.save();
+                    ctx.translate(-g * 6, 0);
+                    ctx.globalAlpha = 0.18 * (4 - g) / 3;
+                    crescent(1 - g * 0.06);
+                    ctx.fill();
+                    ctx.restore();
+                }
+                crescent(1);
                 ctx.fill();
-                ctx.shadowBlur = 10; ctx.shadowColor = bulletColor;
-                ctx.fill();
+                ctx.globalAlpha = 0.85;
+                ctx.fillStyle = '#ffffff';
+                ctx.save(); ctx.translate(b.w * 0.06, 0); crescent(0.6); ctx.fill(); ctx.restore();
                 ctx.restore();
                 return;
             }
@@ -293,12 +303,10 @@ Object.assign(Player.prototype, {
                 let angle = Math.atan2(b.vy, b.vx);
                 ctx.translate(b.x + b.w / 2, b.y + b.h / 2);
                 ctx.rotate(angle);
-                ctx.fillStyle = "#ffff00";
-                ctx.shadowColor = "#ffff00";
-                ctx.shadowBlur = 12;
-                ctx.fillRect(-b.h / 2, -b.w / 2, b.h, b.w);
-                ctx.fillStyle = "#ffffff";
-                ctx.fillRect(-b.h / 4, -b.w / 4, b.h / 2, b.w / 2);
+                // Vệt sét phía sau cây giáo đang bay
+                ctx.strokeStyle = 'rgba(255, 245, 157, 0.5)'; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.moveTo(-b.h / 2 - 4, 0); ctx.lineTo(-b.h / 2 - 14, 3); ctx.lineTo(-b.h / 2 - 22, -2); ctx.lineTo(-b.h / 2 - 34, 1); ctx.stroke();
+                drawThunderSpearShape(b.h + 10, 1, true);
                 ctx.restore();
                 return;
             }

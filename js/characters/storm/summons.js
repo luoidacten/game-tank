@@ -139,17 +139,27 @@ class StormSlash {
 
     draw() {
         if (!this.active) return;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-        ctx.fillStyle = `${this.color} 0.3)`;
-        ctx.fill();
-        ctx.lineWidth = 4;
-        ctx.strokeStyle = `${this.color} 0.8)`;
-        ctx.stroke();
-
-        // Vẽ hiệu ứng gió xoáy
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.r * 0.7, 0 + Date.now() / 100, Math.PI + Date.now() / 100);
-        ctx.stroke();
+        // Chém tròn: 3 lưỡi gió hình lưỡi liềm xoay quanh tâm, vệt mờ dần phía sau
+        const k = Math.min(1, this.r / this.maxR);
+        const spin = (this.r / this.maxR) * Math.PI * 2.2;
+        ctx.save();
+        ctx.lineCap = 'round';
+        ctx.globalAlpha = 0.18 * (1 - k * 0.5);
+        ctx.fillStyle = `${this.color} 1)`;
+        ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2); ctx.fill();
+        for (let b = 0; b < 3; b++) {
+            const head = spin + b * (Math.PI * 2 / 3);
+            for (let i = 0; i < 6; i++) {
+                const f = i / 6;
+                ctx.globalAlpha = (0.15 + 0.85 * f) * (1 - k * 0.35);
+                ctx.strokeStyle = i === 5 ? '#ffffff' : `${this.color} 1)`;
+                ctx.lineWidth = 3 + 7 * f;
+                ctx.shadowBlur = 12; ctx.shadowColor = `${this.color} 1)`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.r * (0.82 + 0.18 * f), head - 1.2 + f * 0.9, head - 1.2 + f * 0.9 + 0.32);
+                ctx.stroke();
+            }
+        }
+        ctx.restore();
     }
 }

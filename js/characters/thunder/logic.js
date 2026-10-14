@@ -168,6 +168,12 @@ Object.assign(Player.prototype, {
             }
         });
         beams.push(new Beam(startX - 6, Math.min(startY, targetY), 12, Math.abs(targetY - startY), this.id, true));
+        // [HÌNH ẢNH] Hóa thành tia sét lao vút tới cuối sân rồi quay về chỗ cũ
+        fxBolt(startX, startY, startX, targetY, '#fff176', 16, 4, 16);
+        fxBolt(startX, startY, startX, targetY, '#80deea', 12, 2, 24);
+        this.thunderDashFx = 18; // khung hình tia sét lao đi - về (vẽ ở render)
+        this.thunderDashToY = targetY;
+        if (enemy && enemy.hp > 0 && enemy.x <= startX + hitWidth && enemy.x + enemy.w >= startX - hitWidth) fxSlashHit(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, '#fff176', 26);
         triggerScreenShake(4, 6);
         if (soundSystem && !soundSystem.muted) soundSystem.playLaser();
     },
@@ -190,6 +196,8 @@ Object.assign(Player.prototype, {
             this.thunderConsumedSpears = 0;
             this.thunderActionCooldown = 0;
             this.thunderRaycastWarningTimer = 0;
+            this.thunderDashFx = 0;
+            this.thunderAfterImage = null;
         }
     },
 
@@ -200,6 +208,8 @@ Object.assign(Player.prototype, {
             if ((this.thunderActionCooldown || 0) > 0) {
                 this.thunderActionCooldown--;
             }
+            if (this.thunderDashFx > 0) this.thunderDashFx--;
+            if (this.thunderAfterImage && --this.thunderAfterImage.t <= 0) this.thunderAfterImage = null;
 
             // Cảnh báo Lôi Minh / Thiên Kiếp trước khi bắn (0.25s)
             if ((this.thunderRaycastWarningTimer || 0) > 0) {
@@ -226,8 +236,16 @@ Object.assign(Player.prototype, {
                     if (this.thunderSlashQueue && this.thunderSlashIndex < this.thunderSlashQueue.length) {
                         let sp = this.thunderSlashQueue[this.thunderSlashIndex];
                         this.thunderSlashIndex++;
+                        const fromX = this.x + this.w / 2, fromY = this.y + this.h / 2;
                         this.x = Math.max(0, Math.min(canvas.width - this.w, sp.x - this.w / 2));
                         this.y = Math.max(0, Math.min(canvas.height - this.h, sp.y - this.h / 2));
+                        // [HÌNH ẢNH] Lôi Trảm: tia sét nối điểm cũ -> mới, bóng mờ và 2 nhát quét kiếm sấm sét
+                        const toX = this.x + this.w / 2, toY = this.y + this.h / 2;
+                        fxBolt(fromX, fromY, toX, toY, '#fff176', 14, 3.5, 18);
+                        const ang = Math.atan2(toY - fromY, toX - fromX);
+                        fxSweep(toX, toY, 46, ang - 1.9, ang + 1.9, '#ffeb3b', 18, 12);
+                        fxSweep(toX, toY, 34, ang + Math.PI + 1.6, ang + Math.PI - 1.6, '#80deea', 20, 8);
+                        this.thunderAfterImage = { x: fromX, y: fromY, t: 14 };
 
                         let radius = 60;
                         let enemy = (this.id === 1) ? p2 : p1;
@@ -245,8 +263,10 @@ Object.assign(Player.prototype, {
                     } else {
                         // Kết thúc chuỗi Trảm Lôi -> tốc biến về vị trí ban đầu
                         if (this.thunderOriginPos) {
+                            const fx0 = this.x + this.w / 2, fy0 = this.y + this.h / 2;
                             this.x = this.thunderOriginPos.x;
                             this.y = this.thunderOriginPos.y;
+                            fxBolt(fx0, fy0, this.x + this.w / 2, this.y + this.h / 2, '#80deea', 12, 3, 14);
                         }
                         this.thunderIsSlashing = false;
                         this.isInvulnerable = false;

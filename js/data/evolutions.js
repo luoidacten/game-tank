@@ -51,7 +51,7 @@ const EVOLUTIONS = {
         { id: 'evo_rocket_2', name: 'Đầu Đạn Lớn', desc: 'Tăng dame nổ + Phạm vi', cost: 40, type: 'evo' }
     ],
     portal: [
-        { id: 'evo_portal_1', name: 'Cổng Cường Hóa', desc: 'Dịch chuyển nhận đạn nổ', cost: 55, type: 'evo' },
+        { id: 'evo_portal_1', name: 'Cổng Cường Hóa', desc: 'Dịch chuyển nhận đạn nổ. Mỗi 6s tự mở 2 Cổng Bắn trên sân, mỗi cổng nhắm & bắn 3 viên vào kẻ thù. Đi xuyên mép màn hình -> hồi chiêu mở cổng ngay. FULL EVO: mở x3 cổng (6 cổng).', cost: 55, type: 'evo' },
         { id: 'evo_portal_2', name: 'Cổng Gia Tốc', desc: 'Dịch chuyển hồi đầy đạn + Tốc', cost: 40, type: 'evo' }
     ],
     wind_slash: [
