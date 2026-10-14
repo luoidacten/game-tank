@@ -185,6 +185,15 @@ const MODULES = {
             size: { w: 28, h: 28 },
             stats: { hp: 4, dmg: 1, ammo: 5, speedMult: 1.1 }
         },
+        {
+            id: 't_zero',
+            name: 'T-Zero',
+            desc: 'HP:6 (+2 xe lớn) | Dame:1 | Năng Lượng | Tốc: 0.9x. "Hệ Thống KÍCH HOẠT: T-ZERO ON". Giữ nhẹ Bắn 0.25s đổi Thiết Luật: THỦ (ném Khiên Boomerang 5% NL; khiên trên tay phản đạn địch 15%+dame×10% NL) -> CÔNG (tăng tốc & dame, lao đấm như Xe TANK 10% NL) -> THIÊN LUẬT THỨC (bay lên 25% NL + 5%/s, không thể bị bắn, tự dội pháo; nhấp lần nữa đáp xuống nổ choáng). Mỗi lần tiêu hao khóa hồi NL 1s.',
+            type: 'body',
+            role: ['Sinh Tồn', 'Đối Đầu', 'Kiểm Soát'],
+            size: { w: 34, h: 34 },
+            stats: { hp: 6, dmg: 1, ammo: 0, speedMult: 0.9 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 30 },
