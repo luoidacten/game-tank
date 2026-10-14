@@ -199,5 +199,9 @@ const EVOLUTIONS = {
     steel_hook: [
         { id: 'evo_hook_1', name: 'Tời Thủy Lực', desc: 'Móc phóng đi cực nhanh, đu dây & kéo nhanh hơn. Tụ lực tối đa 15 lần nảy (mạng nhện xích kín bản đồ).', cost: 90, type: 'evo' },
         { id: 'evo_hook_2', name: 'Quặp Sắt Trọng Lực', desc: 'Đầu móc to gấp rưỡi. Va đập khi kéo địch x2 (+2 dame/vật thể). Mỗi 7s móc phụ tự quặp Xe Tiền/vật thể trên sân rồi ném thẳng vào địch gây nổ lớn. FULL EVO: x2 Máu tối đa, đầu móc máu 100%, tối đa 17 lần nảy, mỗi lần phóng 3 móc cùng lúc.', cost: 110, type: 'evo' }
+    ],
+    flower_shadow: [
+        { id: 'evo_flw_1', name: 'Hoa Ảnh Song Hành', desc: 'Thanh Hoa hồi nhanh hơn mạnh. 1 Bóng Hoa đi theo đường cũ của bạn, lặp lại Vũ Điệu bạn vừa múa sau 3 giây.', cost: 100, type: 'evo' },
+        { id: 'evo_flw_2', name: 'Hương Sắc Tuyệt Trần', desc: 'Khai: cánh hoa nằm nghỉ tỏa phấn làm chậm. Phá: chém nát đạn thường của địch trên đường lướt. Thiên: hút & làm chậm mạnh hơn, đáp nhanh hơn, +1 dame. FULL EVO: hoa rơi khắp màn hình, định kỳ hoa tự ngắm lao vào địch, mọi Vũ Điệu mạnh hơn, thêm Bóng Hoa thứ hai trễ 5s.', cost: 120, type: 'evo' }
     ]
 };

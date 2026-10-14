@@ -16,6 +16,7 @@ const NET_CLASSES = {
     SniperWall, NecroMinion, GhostDecoy, Turret,
     BodyZone, StoneBlock, SkyStrike, HitscanTelegraph, ThrownMecha, CrateBurst, AttackTruck, SwordSweep, LightningBolt, PortalGate,
     DjSoundZone, DjBeam,
+    FsPetal, FsSlashMark, FsClone, FsShadow, FsLandStrike, FsStar,
 };
 
 // Biến toàn cục cần đồng bộ: [tên, getter, setter]
