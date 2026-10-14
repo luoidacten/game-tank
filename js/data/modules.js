@@ -194,6 +194,15 @@ const MODULES = {
             size: { w: 26, h: 26 },
             stats: { hp: 3.5, dmg: 1.25, ammo: 6, speedMult: 1.2 }
         },
+        {
+            id: 'dj',
+            name: 'DJ',
+            desc: 'HP:4 | Dame:0.75 | Đạn:2 (∞ khi đúng nhịp) | Tốc: 1.15x. "Lắng nghe nhịp điệu nào!" Nút Bắn đổi màu theo nhịp Xanh -> Vàng -> Đỏ: bấm lúc ĐỎ = Cảm Âm Hoàn Hảo (sóng âm rộng, không tốn đạn, làm chậm, +1 Combo). Bấm sai = Loạn Âm (đứt combo, nửa dame, tốn đạn; hết đạn khóa 1.5s). Giữ 0.4s: đổi bản nhạc Dễ/Trung Bình/Khó. Combo tăng tốc & dame; mỗi 30 combo +1 Khiên, mỗi 45 combo +1 HP.',
+            type: 'body',
+            role: ['Đối Đầu', 'Cơ Động', 'Sinh Tồn'],
+            size: { w: 28, h: 28 },
+            stats: { hp: 4, dmg: 0.75, ammo: 2, speedMult: 1.15 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 30 },

@@ -191,5 +191,9 @@ const EVOLUTIONS = {
     revolver: [
         { id: 'evo_rev_1', name: 'Đạn Độc Đắc', desc: 'Viên 1-5 có 50% Nổ khi trúng đích. Viên thứ 6 luôn Nổ lớn và gây Choáng.', cost: 90, type: 'evo' },
         { id: 'evo_rev_2', name: 'Rút Súng Thần Tốc', desc: 'Nạp ổ còn 0.9s. Bắn điểm xạ trúng 6/6 -> hồi đầy ổ ngay + 1 dame cho ổ kế tiếp. Quạt Cò trúng >= 50% -> hồi đầy ổ. FULL EVO: Ổ Đạn Ngũ Sắc (viên 1-2 Chậm, 3-4 Chảy Máu, 5 Choáng 0.3s, 6 Chí Mạng x2.5), nạp nhanh hơn nữa, Quạt Cò Song Lục (gấp đôi đạn) & mọi đạn quạt đều Xuyên Thấu.', cost: 110, type: 'evo' }
+    ],
+    dj: [
+        { id: 'evo_dj_1', name: 'Cảm Âm Dung Sai', desc: 'Được bấm sai tối đa 3 lần mới mất chuỗi Combo. Hồi lại đủ 3 lượt bảo hộ sau mỗi 30 Combo.', cost: 90, type: 'evo' },
+        { id: 'evo_dj_2', name: 'Giai Điệu Thăng Hoa', desc: 'Sóng Âm mở khóa theo Combo: 15 Xuyên Thấu, 30 Phát Nổ, 60 để lại Vùng Âm Nhiệt (thiêu đốt + làm chậm), 120 hóa tia Hitscan. FULL EVO: vào hiệp sẵn 30 Combo, bấm chuẩn Combo x2, buff mạnh hơn; sai 6 lần, lần thứ 6 tự đánh chuẩn; 2 Loa nổi bắn sóng phụ mỗi nhịp; mở Bản Nhạc Huyền Thoại.', cost: 120, type: 'evo' }
     ]
 };

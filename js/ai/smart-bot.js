@@ -26,6 +26,7 @@ const BOT_FIRE_STYLE = {
     overload: 'hold:95', lazer_charge: 'hold:95', lazer_auto: 'hold:95', storm: 'hold:40', van_kiem: 'stream',
     six_barrel: 'hold:40', mirror: 'hold:215', shadow_hunter: 'hold:40', shortgunATK: 'hold:40',
     necromancer: 'hold:40', genius: 'hold:40', sprayer: 'toggle',
+    dj: 'beat',
 };
 
 const BOT_CRATE_VALUE = { coin: 0.7, hp: 0.6, ammo: 0.45, shield: 0.85, dmg: 0.75, gear: 0.5, boom: -2, bullets: -0.4 };
@@ -246,6 +247,11 @@ class SmartBot {
         if (style === 'toggle') { // Bình Phun: bật khi thẳng hàng, tắt khi lệch lâu
             if (this.tapCool > 0) { this.tapCool--; inp.s = this.tapCool > 3; return; }
             if ((aligned && !bot.spOn) || (!aligned && bot.spOn && this.t % 60 === 0)) { this.tapCool = 7; inp.s = true; return; }
+            inp.s = false; return;
+        }
+        if (style === 'beat') { // DJ: bấm theo nhịp khi nút đỏ
+            if (this.tapCool > 0) { this.tapCool--; inp.s = this.tapCool > 3; return; }
+            if (typeof djBotWantsTap === 'function' && djBotWantsTap(bot, this.levelIdx)) { this.tapCool = 6; inp.s = true; this.nextShot(enemy); return; }
             inp.s = false; return;
         }
         if (style === 'stream') {
