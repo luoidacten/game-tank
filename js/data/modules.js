@@ -8,7 +8,7 @@
 const MODULES = {
     BODY: [
         { id: 'basic', name: 'Cơ Bản', desc: 'HP:8 | Dame:1 | Đạn:8', type: 'body', size: { w: 30, h: 30 }, stats: { hp: 8, dmg: 1, ammo: 8 } },
-        { id: 'money_tank', name: 'Xe Tiền', desc: 'HP:7 | Dame:1.5 | Đạn:2 (Evo: Nâng cấp toàn diện)', type: 'body', size: { w: 28, h: 28 }, stats: { hp: 7, dmg: 1.5, ammo: 2 } },
+        { id: 'money_tank', name: 'Xe Tiền', desc: 'HP:9 | Dame:1.5 | Đạn:2. Farm tiền, mua CẤP ĐỘ trong shop (Cấp 3: Khiên +2 HP, Cấp 4: Xuyên +0.5 dame, Cấp 5: Đạn nổ, Cấp 6: Đế Chế Tiền Tệ). Lợi Tức & tiền nhặt x2.', type: 'body', size: { w: 28, h: 28 }, stats: { hp: 9, dmg: 1.5, ammo: 2 } },
         { id: 'tank', name: 'Xe TANK', desc: 'HP:4.5 (+5 máu xe lớn) | Dame:2.5 | Tốc: Chậm. Nhấn Bắn: Lao húc (1.1x dame, hồi chiêu 2s, tự hồi khiên).', type: 'body', size: { w: 38, h: 38 }, stats: { hp: 4.5, dmg: 2.5, ammo: 0 } },
         { id: 'ice', name: 'Pháo Băng', desc: 'HP:5 | Dame:1 | Đạn:5 (Làm chậm)', type: 'body', size: { w: 30, h: 30 }, stats: { hp: 5, dmg: 1, ammo: 5 } },
         { id: 'big_bullet', name: 'Đạn Lớn', desc: 'HP:5 | Dame:2 | Đạn:2. Nảy tường phình to & tăng dame.', type: 'body', size: { w: 30, h: 30 }, stats: { hp: 5, dmg: 2, ammo: 2 } },
@@ -164,7 +164,7 @@ const MODULES = {
         {
             id: 'sprayer',
             name: 'Bình Phun',
-            desc: 'HP:5 (+2 xe lớn) | Năng lượng. Nhấp: Bật/Tắt phun hình nón. Giữ 0.5s: đổi chất Lửa/Axit/Băng. Lớp phủ đầy 100% -> Nổ / Câm Lặng / Đóng Băng. Vật cản chặn luồng phun.',
+            desc: 'HP:5 (+2 xe lớn) | Năng lượng. Nhấp: Bật/Tắt phun hình nón. Giữ 0.5s: đổi chất Lửa/Axit/Băng. Lớp phủ đầy 100% -> Nổ / Câm Lặng / Đóng Băng. Axit ăn mòn 2 dame/s mọi vật không phải body (thùng, xe tiền, triệu hồi, công trình). Vật cản chặn luồng phun.',
             type: 'body',
             size: { w: 34, h: 34 },
             stats: { hp: 5, dmg: 0, ammo: 0, speedMult: 0.825 }

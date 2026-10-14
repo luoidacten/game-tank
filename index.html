@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <!-- Mở từ biểu tượng ngoài màn hình chính -> chạy toàn màn hình (iPhone / Android) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
     <title>CYBER TANK 1v1 - BO5 DUAL ARENA</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
     <link rel="stylesheet" href="style.css">
@@ -52,6 +57,10 @@
                 <button id="soundToggleBtn" class="hud-btn sound-hud-btn" title="Bật/Tắt Âm Thanh">
                     <span id="soundIcon" class="hud-icon">&#128266;</span>
                     <span id="soundText" class="hud-text">SFX</span>
+                </button>
+                <button id="fullscreenHudBtn" class="hud-btn fullscreen-toggle" title="Toàn màn hình">
+                    <span class="hud-icon fs-icon">&#x26F6;</span>
+                    <span class="hud-text fs-text">FULL</span>
                 </button>
                 <div id="hudOnlinePing" class="hud-btn ping-hud-badge" style="display: none;" title="Độ trễ kết nối P2P">
                     <span class="ping-dot-mini"></span>
@@ -202,6 +211,7 @@
                         <button id="restartCurrentMatchBtn" class="glow-btn btn-warning">&#128260; CH&#416;I L&#7840;I TR&#7852;N N&Agrave;Y</button>
                         <button id="openGuideFromPauseBtn" class="glow-btn btn-secondary">&#128214; H&#431;&#7898;NG D&#7854;N &#272;I&#7870;U KHI&#7870;N</button>
                         <button class="glow-btn btn-secondary ctrl-layout-toggle">🎮 KIỂU NÚT: MỚI</button>
+                        <button class="glow-btn btn-secondary fullscreen-toggle"><span class="fs-text">⛶ TOÀN MÀN HÌNH</span></button>
                         <button id="backToMainMenuBtn" class="glow-btn btn-danger">&#127968; V&#7872; MENU CH&Iacute;NH</button>
                     </div>
                 </div>
@@ -378,6 +388,7 @@
                         <button id="openGuideBtn" class="glow-btn btn-secondary">
                             &#128214; H&#431;&#7898;NG D&#7854;N &amp; &#272;I&#7872;U KHI&#7874;N
                         </button>
+                        <button class="glow-btn btn-dark fullscreen-toggle"><span class="fs-text">⛶ TOÀN MÀN HÌNH</span></button>
                         <button class="glow-btn btn-dark ctrl-layout-toggle">🎮 KIỂU NÚT: MỚI</button>
                         <button id="menuSoundToggleBtn" class="glow-btn btn-dark">
                             &#128266; &Acirc;M THANH: SFX B&#7852;T

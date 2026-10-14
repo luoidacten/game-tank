@@ -294,25 +294,74 @@ class SmartBot {
     }
 }
 
-// ---- Bot tự mua đồ trong shop (PVE): ưu tiên Tiến Hoá, sau đó module chân ----
+// ---- Bot tự mua đồ trong shop (PVE) ----
+// 1. Mua thẻ đáng giá nhất còn đủ tiền (Tiến Hoá > Cấp Độ Xe Tiền > module chân).
+// 2. Vào các chợ đặc biệt của body (Chợ Linh Kiện, Chợ Đen, Luyện Kiếm, Tùy Biến...) và mua hết những gì mua được.
+// 3. Còn dư tiền thì đổi hàng (reroll) để tìm thêm món, rồi lặp lại.
 function botShopBuy(playerId) {
     const player = playerId === 'p1' ? p1 : p2;
     if (!player) return;
-    for (let guard = 0; guard < 8; guard++) {
-        const coins = playerId === 'p1' ? gameState.p1Coins : gameState.p2Coins;
-        const cards = [...document.querySelectorAll(`#${playerId}-upgrades .card`)].filter(c => !c.classList.contains('sold') && c.onclick);
-        const priced = cards.map(c => {
-            const m = (c.innerText.match(/\$\s?(\d+)/g) || []).map(s => +s.replace(/\D/g, ''));
-            const price = m.length ? m[m.length - 1] : Infinity;
-            const txt = c.innerText;
-            let pri = c.classList.contains('evo-card') ? 3 : 1;
-            if (/Bánh Xích|Giáp Thép/.test(txt)) pri += 0.6;
-            if (/Lợi Tức/.test(txt) && gameState.round <= 3) pri += 0.8;
-            if (/CẤP ĐỘ/.test(txt)) pri = 0.5;
-            if (/SẴN SÀNG|QUAY LẠI|LÀM MỚI|REROLL/i.test(txt)) pri = -1;
-            return { c, price, pri };
-        }).filter(x => x.pri > 0 && x.price <= coins).sort((a, b) => b.pri - a.pri);
-        if (!priced.length) break;
-        priced[0].c.click();
+    const box = () => document.getElementById(`${playerId}-upgrades`);
+    const coins = () => (playerId === 'p1' ? gameState.p1Coins : gameState.p2Coins);
+    const live = () => [...box().querySelectorAll('.card')].filter(c => c.onclick && !c.classList.contains('sold'));
+    const txt = (c) => c.innerText || c.textContent || '';
+    const isBack = (c) => /QUAY LẠI/.test(txt(c));
+    const isReady = (c) => c.id === `ready-btn-${playerId}` || /SẴN SÀNG/.test(txt(c));
+    const isReroll = (c) => /REROLL/.test(txt(c));
+    const isPayWin = (c) => /PAY TO WIN/.test(txt(c));
+    const priceOf = (c) => { const m = (txt(c).match(/\$\s?(\d+)/g) || []).map(x => +x.replace(/\D/g, '')); return m.length ? m[m.length - 1] : null; };
+    const sig = () => JSON.stringify([coins(), player.upgrades.length, player.upgradeLevel, player.components, player.gears,
+        player.invUpgrades, player.geniusUpgrades, player.geniusPurchaseCount, player.kkData && player.kkData.active.length, player.cuData]);
+
+    const buyMain = () => {
+        for (let guard = 0; guard < 12; guard++) {
+            const cands = live().filter(c => !isBack(c) && !isReady(c) && !isReroll(c) && !isPayWin(c)).map(c => {
+                const price = priceOf(c);
+                const t = txt(c);
+                let pri = c.classList.contains('evo-card') ? 3 : 1;
+                if (/CẤP ĐỘ/.test(t)) pri = player.weapon === 'money_tank' ? 2.8 : 0.5;
+                if (/Bánh Xích|Giáp Thép/.test(t)) pri += 0.6;
+                if (/Lợi Tức/.test(t) && gameState.round <= 4) pri += 0.9;
+                return { c, price, pri };
+            }).filter(x => x.price !== null && x.price <= coins()).sort((a, b) => b.pri - a.pri);
+            if (!cands.length) return;
+            const before = sig();
+            cands[0].c.click();
+            if (sig() === before) return; // không mua được (giới hạn...) -> dừng
+        }
+    };
+
+    // Chợ đặc biệt: thẻ không có giá $ mở ra bảng riêng có nút QUAY LẠI
+    const visitSpecialShops = () => {
+        const specials = live().filter(c => !isBack(c) && !isReady(c) && !isReroll(c) && !isPayWin(c) && priceOf(c) === null).map(c => txt(c).split('\n')[0]);
+        for (const title of specials) {
+            const card = live().find(c => txt(c).split('\n')[0] === title);
+            if (!card) continue;
+            card.click();
+            if (!live().some(isBack)) continue; // không phải chợ (đã tự xử lý) -> bỏ qua
+            const tried = new Set();
+            for (let guard = 0; guard < 30; guard++) {
+                const items = live().filter(c => !isBack(c) && !isReady(c) && !tried.has(txt(c)));
+                if (!items.length) break;
+                const c = items[0];
+                const before = sig();
+                c.click();
+                if (sig() === before) tried.add(txt(c)); else tried.clear(); // mua được -> quét lại từ đầu
+            }
+            const back = live().find(isBack);
+            if (back) back.click();
+        }
+    };
+
+    buyMain();
+    visitSpecialShops();
+    // Đổi hàng khi còn dư tiền (giữ lại ~10$)
+    for (let r = 0; r < 8; r++) {
+        const rr = live().find(isReroll);
+        const cost = rr ? priceOf(rr) : null;
+        if (!rr || cost === null || coins() < cost + 10) break;
+        rr.click();
+        buyMain();
     }
+    if (typeof updateShopTitle === 'function') updateShopTitle();
 }

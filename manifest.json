@@ -1,0 +1,9 @@
+{
+  "name": "Cyber Tank - Đấu Trường Xe Tăng",
+  "short_name": "Cyber Tank",
+  "start_url": "./index.html",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#05070b",
+  "theme_color": "#05070b"
+}

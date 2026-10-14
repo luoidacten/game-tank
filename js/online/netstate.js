@@ -14,7 +14,7 @@ const NET_CLASSES = {
     ShadowTrap, ShortgunFireZone, FireZone, WindWall, InventorDrone, ConfinementCage,
     CreatorTurret, CreatorShield, CreatorDrone, CreatorRobot,
     SniperWall, NecroMinion, GhostDecoy, Turret,
-    BodyZone, StoneBlock, SkyStrike, HitscanTelegraph, ThrownMecha, CrateBurst,
+    BodyZone, StoneBlock, SkyStrike, HitscanTelegraph, ThrownMecha, CrateBurst, AttackTruck,
 };
 
 // Biến toàn cục cần đồng bộ: [tên, getter, setter]
@@ -65,7 +65,7 @@ const NET_GAMESTATE_KEYS = ['round', 'p1Score', 'p2Score', 'p1Coins', 'p2Coins',
 const NET_LOADOUT_KEYS = ['upgrades', 'rerollCount', 'upgradeLevel', 'invUpgrades', 'boughtInvShopItems', 'boughtShopItems', 'isFullEvoInventor',
     'components', 'gears', 'geniusUpgrades', 'geniusPurchaseCount', 'mechaSummonMultiplier',
     'shortgunBonusMaxHp', 'shortgunBonusDmg', 'evolutionPermanentBonus',
-    'kkData', 'cuData', 'loseStreak', 'winStreak', 'lastRoundResult', 'lastStreakBonus'];
+    'kkData', 'cuData', 'loseStreak', 'winStreak', 'lastRoundResult', 'lastStreakBonus', 'mtSpend'];
 
 const NetState = {
     // ---------- Tuần tự hoá ----------
@@ -164,7 +164,9 @@ const NetState = {
             set(v);
         }
         if (w.gs) {
+            gameState._noSpendTrack = true;
             NET_GAMESTATE_KEYS.forEach(k => { if (w.gs[k] !== undefined) gameState[k] = w.gs[k]; });
+            gameState._noSpendTrack = false;
             gameState.roundStartTime = now - (w.gs.roundElapsed || 0);
         }
     },
@@ -180,7 +182,9 @@ const NetState = {
         if (!p || !d) return;
         NET_LOADOUT_KEYS.forEach(k => { if (d[k] !== undefined) p[k] = d[k]; });
         if (typeof d.coins === 'number') {
+            gameState._noSpendTrack = true; // tiền đã tiêu được tính ở máy người mua (mtSpend đi kèm)
             if (pid === 'p1') gameState.p1Coins = d.coins; else gameState.p2Coins = d.coins;
+            gameState._noSpendTrack = false;
         }
     },
 

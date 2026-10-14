@@ -13,7 +13,38 @@ function getControlLayout() {
     try { return localStorage.getItem('ctrlLayout') || 'new'; } catch (e) { return 'new'; }
 }
 
+// --- TOÀN MÀN HÌNH (điện thoại): Fullscreen API + khoá màn hình dọc nếu trình duyệt cho phép ---
+function isFullscreen() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+function toggleFullscreen() {
+    const el = document.documentElement;
+    try {
+        if (!isFullscreen()) {
+            const req = el.requestFullscreen || el.webkitRequestFullscreen;
+            if (req) {
+                const r = req.call(el, { navigationUI: 'hide' });
+                if (r && r.then) r.then(() => { try { screen.orientation && screen.orientation.lock && screen.orientation.lock('portrait').catch(() => {}); } catch (e) {} }).catch(() => {});
+            } else {
+                // iPhone (Safari) không hỗ trợ Fullscreen cho trang web: hướng dẫn "Thêm vào MH chính"
+                alert('Trình duyệt này chưa hỗ trợ toàn màn hình.\nTrên iPhone: bấm Chia sẻ → "Thêm vào Màn hình chính" rồi mở game từ biểu tượng đó.');
+            }
+        } else {
+            const ex = document.exitFullscreen || document.webkitExitFullscreen;
+            if (ex) ex.call(document);
+        }
+    } catch (e) { /* bỏ qua */ }
+}
+function updateFullscreenUI() {
+    const on = isFullscreen();
+    document.querySelectorAll('.fullscreen-toggle .fs-text').forEach(t => {
+        t.textContent = t.closest('.hud-btn') ? (on ? 'THOÁT' : 'FULL') : (on ? '⛶ THOÁT TOÀN MÀN HÌNH' : '⛶ TOÀN MÀN HÌNH');
+    });
+    setTimeout(() => { if (typeof updateCanvasDimensions === 'function') updateCanvasDimensions(); }, 120);
+}
+
 function setupControls() {
+    document.querySelectorAll('.fullscreen-toggle').forEach(b => b.addEventListener('click', toggleFullscreen));
+    document.addEventListener('fullscreenchange', updateFullscreenUI);
+    document.addEventListener('webkitfullscreenchange', updateFullscreenUI);
     applyControlLayout(getControlLayout());
     document.querySelectorAll('.ctrl-layout-toggle').forEach(btn => btn.addEventListener('click', () => {
         const next = getControlLayout() === 'old' ? 'new' : 'old';

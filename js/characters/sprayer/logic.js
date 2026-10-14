@@ -7,14 +7,16 @@ const SP_CHEM_NAME = { fire: 'NÓNG 🔥', acid: 'AXIT 🧪', ice: 'LẠNH ❄�
 const SP_CHEM_COLOR = { fire: '#ff6a1a', acid: '#7bf85c', ice: '#5ee7ff' };
 // Tầm phun theo trục dọc: tới hết làn đối thủ. Nón mở từ 8px ở nòng tới ~48px ở cuối.
 function spMaxRange() { return canvas.height - 30; }
-const SP_HALF_NEAR = 8, SP_HALF_FAR = 48;
+const SP_HALF_NEAR = 8, SP_HALF_FAR = 48, SP_HALF_FAR_FULL = 72;
+const SP_ACID_OBJ_DPS = 2;      // Axit: 2 sát thương/giây lên mọi đối tượng không phải body
 // [ĐỔI] Luồng phun bay ra từ từ (spFront tăng dần); chỉ khi chạm tầm tối đa (hoặc vật cản) mới mở rộng
 // sang hai bên (spWiden 0 -> 1). Khi chưa mở, luồng chỉ là tia hẹp.
 const SP_FRONT_SPEED = 7;      // px mỗi tick
 const SP_WIDEN_TICKS = 24;     // thời gian mở rộng sau khi chạm tầm tối đa
 function spHalfWidth(fwd, p) {
     const w = p && typeof p.spWiden === 'number' ? p.spWiden : 1;
-    return SP_HALF_NEAR + (SP_HALF_FAR - SP_HALF_NEAR) * Math.max(0, Math.min(1, fwd / spMaxRange())) * w;
+    const far = (p && spIsFullEvo(p)) ? SP_HALF_FAR_FULL : SP_HALF_FAR; // Full Evo: góc phun rộng hơn
+    return SP_HALF_NEAR + (far - SP_HALF_NEAR) * Math.max(0, Math.min(1, fwd / spMaxRange())) * w;
 }
 const SP_COAT_RATE = 55;       // % lớp phủ mỗi giây khi đứng trong luồng
 
@@ -89,9 +91,9 @@ function spAffectStructure(p, obj, chem, full) {
             if (typeof obj.hp === 'number' && obj.hp <= 0) obj.active = false;
         }
     } else if (chem === 'acid') {
-        // Axit ăn mòn vật cản nhân tạo cực mạnh (x5)
-        if (typeof obj.hp === 'number' && !obj.isImmortal) {
-            obj.hp -= (full ? 2.5 : 1.25) / 60 * (obj.maxHp ? Math.max(1, obj.maxHp / 10) : 1);
+        // Ụ súng (không nằm trong spAcidObjects): axit ăn mòn 2 dame/s
+        if ((obj instanceof Turret || obj instanceof CreatorTurret) && typeof obj.hp === 'number' && !obj.isImmortal) {
+            obj.hp -= SP_ACID_OBJ_DPS / 60;
             if (obj.hp <= 0) { obj.active = false; explosions.push(new Explosion(obj.x + obj.w / 2, obj.y + obj.h / 2, 35, '#7bf85c', 0, p)); }
         }
     } else if (chem === 'ice') {
@@ -133,6 +135,8 @@ function spApplySpray(p) {
     const n = spNozzle(p);
     const chem = p.spChem;
     const full = spIsFullEvo(p);
+    // Full Evo: phun cùng lúc cả 3 chất
+    const chems = full ? SP_CHEMS : [chem];
     const blockers = spBlockers(p);
     const reach = spEffectiveRange(p, n, blockers);
     p.spFront = Math.min(spMaxRange(), (p.spFront || 0) + SP_FRONT_SPEED);
@@ -144,14 +148,16 @@ function spApplySpray(p) {
     let firstBlocker = null, firstDist = 1e9;
     for (const b of blockers) {
         if (!spInCone(p, n, b, front)) continue;
-        spAffectStructure(p, b, chem, full);
+        chems.forEach(c => spAffectStructure(p, b, c, full));
         const dist = Math.abs((b.y + b.h / 2) - n.y);
         if (dist < firstDist) { firstDist = dist; firstBlocker = b; }
     }
     // Ụ súng / ụ triệu hồi của đối thủ: axit làm tan chảy
     [...turrets, ...creatorTurrets].forEach(t => {
-        if (t.active && t.owner !== p && spInCone(p, n, t, front)) spAffectStructure(p, t, chem, full);
+        if (t.active && t.owner !== p && spInCone(p, n, t, front)) chems.forEach(c => spAffectStructure(p, t, c, full));
     });
+    // Axit ăn mòn mọi đối tượng không phải body: thùng tiếp tế, triệu hồi & công trình của đối thủ
+    if (chems.includes('acid')) spAcidObjects(p, n, front, blockers);
 
     // Đối thủ: trong nón và không bị vật cản che
     if (enemy && enemy.hp > 0 && spInCone(p, n, enemy, front)) {
@@ -159,9 +165,11 @@ function spApplySpray(p) {
         const blocked = blockers.some(b => segHitsRect(n.x, n.y, ex, ey, b));
         if (!blocked) {
             const coat = spCoatOf(enemy);
-            coat[chem] = Math.min(100, coat[chem] + SP_COAT_RATE / 60);
-            enemy.spIdle[chem] = 0;
-            if (coat[chem] >= 100) spTrigger(p, enemy, chem, full);
+            for (const c of chems) {
+                coat[c] = Math.min(100, coat[c] + SP_COAT_RATE / 60);
+                enemy.spIdle[c] = 0;
+                if (coat[c] >= 100) spTrigger(p, enemy, c, full);
+            }
         }
     }
 
@@ -170,8 +178,40 @@ function spApplySpray(p) {
         p.spZoneTick = 0;
         let zx = n.x, zy = n.y + n.dirY * Math.max(30, p.spRange * 0.85);
         if (firstBlocker && p.spRange < spMaxRange()) { zx = firstBlocker.x + firstBlocker.w / 2; zy = n.dirY < 0 ? firstBlocker.y + firstBlocker.h + 14 : firstBlocker.y - 14; }
-        bodyEffects.push(new BodyZone(zx, zy, 34, chem, p, 180, full ? 1.3 : 1));
+        chems.forEach((c, i) => bodyEffects.push(new BodyZone(zx + (i - (chems.length - 1) / 2) * 22, zy, full ? 26 : 34, c, p, 180, full ? 1.3 : 1)));
     }
+}
+
+// Axit: SP_ACID_OBJ_DPS sát thương/giây lên vật thể trong luồng (không bị vật cản che)
+function spAcidObjects(p, n, front, blockers) {
+    const dmg = SP_ACID_OBJ_DPS / 60;
+    const visible = (o) => {
+        const ox = o.x + (o.w || 0) / 2, oy = o.y + (o.h || 0) / 2;
+        return !blockers.some(b => b !== o && segHitsRect(n.x, n.y, ox, oy, b));
+    };
+    const hit = (o) => {
+        if (!o || o.active === false || o === p || o === p1 || o === p2 || (o.owner && o.owner === p)) return;
+        if (typeof o.x !== 'number' || !o.w) return;
+        if (!spInCone(p, n, o, front)) return;
+        if (o.isImmortal || !visible(o)) return;
+        if (o instanceof Crate) {
+            o.spAcid = (o.spAcid || 0) + dmg;
+            if (o.spAcid >= 0.5) { o.active = false; crateOnBreak(o, p); grantCrateLoot(o, p); }
+            return;
+        }
+        if (typeof o.takeDamage === 'function') { o.takeDamage(dmg, p); return; }
+        if (typeof o.hp !== 'number') return;
+        o.hp -= dmg;
+        if (o.hp <= 0) {
+            o.active = false;
+            if (o instanceof MoneyTruck) { const m = 30; if (p.id === 1) gameState.p1Coins += m; else gameState.p2Coins += m; addFloatingText(o.x + o.w / 2, o.y - 8, '+30$', '#ffd700', 12); }
+            explosions.push(new Explosion(o.x + o.w / 2, o.y + o.h / 2, 35, '#7bf85c', 0, p));
+        }
+    };
+    crates.forEach(hit);
+    moneyTrucks.forEach(hit);
+    [necroMinions, creatorDrones, creatorRobots, ghostDecoys, confinementCages, bastions, sniperWalls].forEach(list => (list || []).forEach(hit));
+    bodyEffects.forEach(e => { if (e.isStone) hit(e); });
 }
 
 // Lớp phủ đạt 100%
@@ -206,7 +246,7 @@ CharHooks.register('sprayer', {
         const evo1 = this.hasUpgrade('evo_spray_1');
         if (this.silenceTimer > 0 || this.freezeTimer > 0) this.spOn = false;
         if (this.spOn) {
-            this.spEnergy -= (evo1 ? 15.4 : 22) / 60;
+            this.spEnergy -= (spIsFullEvo(this) ? 10 : (evo1 ? 15.4 : 22)) / 60; // Full Evo: phun lâu hơn
             addStatusVuln(this, 0.2); // Suy Yếu khi đang phun
             if (this.spEnergy <= 0) { this.spEnergy = 0; this.spOn = false; this.spLock = true; addFloatingText(this.x + this.w / 2, this.y - 14, 'HẾT NĂNG LƯỢNG!', '#94a3b8', 12); }
             this.spRegenDelay = 24;

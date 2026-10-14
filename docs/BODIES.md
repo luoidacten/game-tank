@@ -20,7 +20,7 @@
 | # | Body | ID | HP | Sát thương | Đạn | Tốc độ | Kích thước | Triệu hồi | Tỉ lệ thắng mô phỏng |
 |---|------|----|---:|---:|---:|---:|:---:|:---:|---:|
 | 1 | **Cơ Bản** | `basic` | 8 | 1 | 8 | 3.5 | 30×30 |  | 60% |
-| 2 | **Xe Tiền** | `money_tank` | 7 | 1.5 | 2 | 3.5 | 28×28 |  | 24% |
+| 2 | **Xe Tiền** | `money_tank` | 9 | 1.5 | 2 | 3.5 | 28×28 |  | 24% |
 | 3 | **Xe TANK** | `tank` | 9.5 | 2.5 | — (năng lượng riêng) | 2.45 | 38×38 |  | 84% |
 | 4 | **Pháo Băng** | `ice` | 5 | 1 | 5 | 3.5 | 30×30 |  | 43% |
 | 5 | **Đạn Lớn** | `big_bullet` | 5 | 2 | 2 | 3.5 | 30×30 |  | 53% |
@@ -83,7 +83,7 @@
 | Nam Châm | HP 5 → 4.5 |
 | Phong Trảm | Dame 1 → 0.9 |
 | Lazer Xuyên Phá | Đổi cơ chế: giữ 1.5s để tụ Tia Xuyên Phá (3 dmg, tốn 6 đạn), nhấp = đạn thường 1x (trước 0.25x và phải đầy đúng 20/20 đạn mới tụ được). HP 2 → 4, Dame 0.25 → 0.5 |
-| Xe Tiền | HP 1 → 7, Dame 1 → 1.5 |
+| Xe Tiền | HP 1 → 7, Dame 1 → 1.5. HP 7 → 9. Cấp 3 thêm +2 HP, Cấp 4 thêm +0.5 dame, Cấp 6 "Đế Chế Tiền Tệ" (+3 HP, +2 đạn, +1 dame, 2 khiên). Tiền Tấn Công: mỗi 8s phóng 2 xe tiền lao về phía địch. Evo 2 mới Sức Mạnh Đồng Tiền (giảm 25%, mốc thưởng mỗi 100$ tiêu tới 2500$); Full Evo giảm 50%, thêm xe tiền, 3 xe tấn công mỗi 5s |
 | Mirror | Sửa lỗi không bắn được, hồi bắn 1.5s → 0.35s, HP 4 → 5.5, Dame 1 → 1.3. Ngay sau khi dịch chuyển: 1.5s bắn ngay, nhịp bắn & tốc độ đạn x2 |
 | Nhà Phát Minh | HP 2 → 5.5, Dame 0.5 → 0.7, sát thương Drone 50% → 100% chỉ số chủ. Drone ngắm chính xác (có đón đầu) |
 | Thiên Tài | HP 1 → 2.5, mỗi hiệp có sẵn 6 Bánh Răng. Tự Hủy: ném Robot lao tới, chạm tường mới nổ |
@@ -100,7 +100,7 @@
 | Bow | Giữ nút để kéo cung, nhả để bắn (trước: nhấp để tự nạp); nạp nhanh x1.6, đầy lực không tự bắn |
 | Cuồng Phong | Giữ nút để tụ lực, nhả để xuất chiêu (trước: tự nạp 14s); đầy lực sau 3.5s |
 | 6 Nòng | Phải giữ 0.5s khởi động nòng; đã quay thì nhấp vẫn bắn (nhả >1s nòng dừng) |
-| Bình Phun | Luồng phun bay ra từ từ, chạm tầm tối đa mới mở rộng sang hai bên |
+| Bình Phun | Luồng phun bay ra từ từ, chạm tầm tối đa mới mở rộng sang hai bên. Axit ăn mòn 2 dame/s mọi vật không phải body (thùng, xe tiền, triệu hồi, công trình). Full Evo: phun cả 3 chất cùng lúc, góc rộng 48 → 72, phun lâu hơn |
 
 ## Module chân (FEET)
 
@@ -129,14 +129,15 @@ HP:8 | Dame:1 | Đạn:8
 
 ### 2. Xe Tiền (`money_tank`)
 
-HP:7 | Dame:1.5 | Đạn:2 (Evo: Nâng cấp toàn diện)
+HP:9 | Dame:1.5 | Đạn:2. Farm tiền, mua CẤP ĐỘ trong shop (Cấp 3: Khiên +2 HP, Cấp 4: Xuyên +0.5 dame, Cấp 5: Đạn nổ, Cấp 6: Đế Chế Tiền Tệ). Lợi Tức & tiền nhặt x2.
 
-- **Chỉ số thực đầu hiệp:** HP 7 · Sát thương 1.5 · Đạn 2 · Tốc độ 3.5 · Kích thước 28×28
+- **Chỉ số thực đầu hiệp:** HP 9 · Sát thương 1.5 · Đạn 2 · Tốc độ 3.5 · Kích thước 28×28
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
   |---|---:|---|
-  | Tiền Tấn Công (`evo_money_atk`) | $200 | Phá xe tiền -> Bắn chùm đạn vào địch |
+  | Tiền Tấn Công (`evo_money_atk`) | $150 | Mỗi 8s phóng 2 xe tiền từ làn bạn lao thẳng về phía địch (tông trúng 1.5 dame, chạm tường nổ 1.5 dame, phá xe tiền/thùng trên đường). Phá xe tiền bằng đạn -> bắn chùm đạn vào địch. |
+  | Sức Mạnh Đồng Tiền (`evo_money_2`) | $120 | Mọi nâng cấp giảm 25%. Mỗi 100$ tiêu (tối đa 2500$, tính từ lúc mua) nhận 1 mốc thưởng vĩnh viễn: HP, Dame, Đạn, Tốc, Khiên. FULL EVO: mọi mặt hàng giảm 50%, thêm xe tiền trên sân, 3 xe tấn công mỗi 5s (mạnh hơn). |
 
 - **Mã nguồn:** `js/characters/money_tank/logic.js`
 
@@ -716,7 +717,7 @@ HP:3 | Dame:1.2 | Đạn:3. Bắn phi kiếm. Mất khiên -> Tập Trung 3s (n�
 
 ### 43. Bình Phun (`sprayer`) 🆕
 
-HP:5 (+2 xe lớn) | Năng lượng. Nhấp: Bật/Tắt phun hình nón. Giữ 0.5s: đổi chất Lửa/Axit/Băng. Lớp phủ đầy 100% -> Nổ / Câm Lặng / Đóng Băng. Vật cản chặn luồng phun.
+HP:5 (+2 xe lớn) | Năng lượng. Nhấp: Bật/Tắt phun hình nón. Giữ 0.5s: đổi chất Lửa/Axit/Băng. Lớp phủ đầy 100% -> Nổ / Câm Lặng / Đóng Băng. Axit ăn mòn 2 dame/s mọi vật không phải body (thùng, xe tiền, triệu hồi, công trình). Vật cản chặn luồng phun.
 
 - **Chỉ số thực đầu hiệp:** HP 7 · Sát thương 0 · Đạn — (năng lượng riêng) · Tốc độ 2.89 · Kích thước 34×34
 - **Vật triệu hồi / hiệu ứng:** Vũng Lửa / Axit / Băng (Evo 2)
@@ -725,7 +726,7 @@ HP:5 (+2 xe lớn) | Năng lượng. Nhấp: Bật/Tắt phun hình nón. Giữ 
   | Evo | Giá | Hiệu ứng |
   |---|---:|---|
   | Năng Lượng Xanh (`evo_spray_1`) | $80 | Hồi năng lượng nhanh hơn 50%, phun tiêu hao chậm hơn 30%. |
-  | Dấu Vết Độc Địa (`evo_spray_2`) | $110 | Lớp phủ bám lâu hơn. Phun liên tục để lại vũng Lửa/Axit/Băng 3s. FULL EVO: Nổ 7 dmg lan, Axit ăn mòn x2 & câm thêm 1s, Đóng băng 2.5s. |
+  | Dấu Vết Độc Địa (`evo_spray_2`) | $110 | Lớp phủ bám lâu hơn. Phun liên tục để lại vũng Lửa/Axit/Băng 3s. FULL EVO: phun cùng lúc cả 3 chất, góc phun rộng hơn, phun lâu hơn; Nổ 7 dmg lan, Axit ăn mòn x2 & câm thêm 1s, Đóng băng 2.5s. |
 
 - **Mã nguồn:** `js/characters/sprayer/logic.js`, `js/characters/sprayer/render.js`
 

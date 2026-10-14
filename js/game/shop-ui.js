@@ -20,8 +20,9 @@ function interestIncome(n, isMoneyTank) {
 }
 function shopItemPrice(player, item) {
     const base = item.cost || 10;
-    if (item.type !== 'feet') return base;
-    return Math.round(base * (1 + FEET_PRICE_STEP * feetOwnedCount(player, item.id)));
+    const m = typeof mtPriceMult === 'function' ? mtPriceMult(player) : 1; // Xe Tiền Evo 2 / Full Evo giảm giá
+    if (item.type !== 'feet') return Math.round(base * m);
+    return Math.round(base * (1 + FEET_PRICE_STEP * feetOwnedCount(player, item.id)) * m);
 }
 
 function showUpgradeScreen() {
@@ -150,10 +151,11 @@ function renderShop(playerId, keepItems = false) {
     const rerollBtn = document.createElement('div');
     rerollBtn.className = 'card';
     rerollBtn.style.background = '#c0392b';
-    rerollBtn.innerHTML = `<h4>REROLL</h4><p>Đổi hàng</p><p style="color:yellow">$5</p>`;
+    const rerollCost = Math.max(2, Math.round(5 * (typeof mtPriceMult === 'function' ? mtPriceMult(player) : 1)));
+    rerollBtn.innerHTML = `<h4>REROLL</h4><p>Đổi hàng</p><p style="color:yellow">$${rerollCost}</p>`;
     rerollBtn.onclick = () => {
-        if ((playerId === 'p1' ? gameState.p1Coins : gameState.p2Coins) >= 5) {
-            if (playerId === 'p1') gameState.p1Coins -= 5; else gameState.p2Coins -= 5;
+        if ((playerId === 'p1' ? gameState.p1Coins : gameState.p2Coins) >= rerollCost) {
+            if (playerId === 'p1') gameState.p1Coins -= rerollCost; else gameState.p2Coins -= rerollCost;
             player.rerollCount++;
             soundSystem.playCoin();
             updateShopTitle();
@@ -166,12 +168,13 @@ function renderShop(playerId, keepItems = false) {
     // [FIX] Chỉ hiện Gói Nâng Cấp khi cầm XE TIỀN
     if (player.weapon === 'money_tank') {
         if (player.upgradeLevel < 6) {
-            let cost = 15 * Math.pow(2, player.upgradeLevel);
+            let cost = Math.round(15 * Math.pow(2, player.upgradeLevel) * mtPriceMult(player));
             let nextLvl = player.upgradeLevel + 1;
             let bonusText = "";
-            if (nextLvl === 3) bonusText = "<br>(Mở khóa: KHIÊN)";
-            if (nextLvl === 4) bonusText = "<br>(Mở khóa: ĐẠN XUYÊN)";
+            if (nextLvl === 3) bonusText = "<br>(Mở khóa: KHIÊN + 2 HP)";
+            if (nextLvl === 4) bonusText = "<br>(Mở khóa: ĐẠN XUYÊN + 0.5 DAME)";
             if (nextLvl === 5) bonusText = "<br>(Mở khóa: ĐẠN NỔ)";
+            if (nextLvl === 6) bonusText = "<br>(ĐẾ CHẾ TIỀN TỆ: +3 HP, +2 Đạn, +1 Dame, 2 Khiên)";
 
             let upgradeBtn = document.createElement('div');
             upgradeBtn.className = 'card';

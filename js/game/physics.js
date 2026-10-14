@@ -53,7 +53,8 @@ function tickPhysics() {
         // Rush Hour map: duy trì liên tục 2 - 3 xe chở tiền
         if (gameState.currentMap === 'rush_hour') {
             let activeTrucks = moneyTrucks.filter(t => t.active).length;
-            if (activeTrucks < 3) {
+            const truckCap = ([p1, p2].some(p => mtIsFull(p))) ? 4 : 3; // Xe Tiền Full Evo: thêm xe tiền trên sân
+            if (activeTrucks < truckCap) {
                 if (activeTrucks < 2 || Math.random() < 0.05) {
                     moneyTrucks.push(new MoneyTruck());
                 }
@@ -61,6 +62,7 @@ function tickPhysics() {
         } else {
             let spawnRate = 0.001;
             if (p1.upgradeLevel >= 2 || p2.upgradeLevel >= 2) spawnRate = 0.003;
+            if (mtIsFull(p1) || mtIsFull(p2)) spawnRate = 0.006;
             if (Math.random() < spawnRate) moneyTrucks.push(new MoneyTruck());
         }
 
