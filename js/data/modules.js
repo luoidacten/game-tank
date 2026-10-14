@@ -203,6 +203,15 @@ const MODULES = {
             size: { w: 28, h: 28 },
             stats: { hp: 4, dmg: 0.75, ammo: 2, speedMult: 1.15 }
         },
+        {
+            id: 'steel_hook',
+            name: 'Móc Thép',
+            desc: 'HP:3 (+3 xe lớn) | Dame:2 | Đạn:1 | Chậm. Móc lắc trái-phải ±70° trước mũi xe. Giữ Bắn tụ lực 4 mốc (+2 lần nảy mỗi mốc, tối đa 9), nhả để phóng xích nảy tường. Xuyên & phá hòm, 2 dame lên triệu hồi/công trình, ghim Xe Tiền làm trụ phản xạ (hết lượt nảy: ngoạm & spam Bắn để kéo về ăn tiền). Móc dừng: Bắn lần nữa -> Đu Dây Đột Kích (lao theo xích húc mọi thứ, nổ 2 dame) hoặc Lôi Xích Hành Hình nếu trúng địch (kéo địch ngược đường xích, +1 dame mỗi vật bị đập, nổ 2 dame). Đầu móc có máu = 50% máu xe: bắn trúng sẽ đứt xích.',
+            type: 'body',
+            role: ['Kiểm Soát', 'Đối Đầu', 'Sinh Tồn'],
+            size: { w: 36, h: 36 },
+            stats: { hp: 3, dmg: 2, ammo: 1, speedMult: 0.85 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 30 },
