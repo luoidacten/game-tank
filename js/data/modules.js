@@ -185,6 +185,15 @@ const MODULES = {
             size: { w: 28, h: 28 },
             stats: { hp: 4, dmg: 1, ammo: 5, speedMult: 1.1 }
         },
+        {
+            id: 'flower_shadow',
+            name: 'Hoa Ảnh',
+            desc: '"Khiêu vũ nào!" HP:3 | Dame:0.5 | Thanh Hoa 100% (tự hồi) | Tốc: 1.35x. Giữ Bắn 0.25s đổi Vũ Điệu Khai → Phá → Thiên, nhấp để múa. KHAI (10%): 3 cánh hoa bay tới cuối sân, nghỉ 5s rồi trôi về (gây dame, mỗi cánh hoàn 5%). PHÁ (25%): lướt xuyên thẳng tới cuối sân rồi về, 1s sau mọi mục tiêu bị xuyên chịu 5 nhát chém. THIÊN (50%): biến mất, lái Vòng Cảnh Báo (hút & làm chậm) tối đa 5s, nhấp để đáp: 3 dame + choáng 1.5s. Mỗi 50% Hoa tiêu hao: vũ điệu kế tiếp được Cường Hóa (Bách Hoa Nở Rộ).',
+            type: 'body',
+            role: ['Cơ Động', 'Đối Đầu', 'Kiểm Soát'],
+            size: { w: 24, h: 24 },
+            stats: { hp: 3, dmg: 0.5, ammo: 0, speedMult: 1.35 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 30 },
