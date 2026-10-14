@@ -330,8 +330,8 @@ Object.assign(Player.prototype, {
             }
 
             // -----------------------------------------------------------------
-            if (this.weapon === 'lazer_auto') ctx.fillRect(b.x, b.y, b.w, b.h);
-            else { ctx.beginPath(); ctx.arc(b.x + b.w / 2, b.y + b.h / 2, b.w / 2, 0, Math.PI * 2); ctx.fill(); }
+            // Hình ảnh đạn theo loại (sao chổi, laser, mũi xuyên, cầu nổ, tinh thể băng, tên lửa...) - js/render/bullet-art.js
+            drawBulletArt(b, bulletColor, this);
             ctx.globalAlpha = 1.0;
         });
     },
