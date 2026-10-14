@@ -224,6 +224,11 @@ function endRound(winnerId) {
 
     let targetWins = gameState.winScore || 3;
     if (gameState.p1Score >= targetWins || gameState.p2Score >= targetWins) {
+        if (typeof PVE !== 'undefined' && PVE.active) {
+            const won = gameState.p1Score >= targetWins;
+            setTimeout(() => PVE.onMatchEnd(won), 1200);
+            return;
+        }
         let winnerName = (gameState.p1Score >= targetWins) ? "PLAYER 1" : "PLAYER 2";
         document.getElementById('finalWinner').innerText = winnerName + " VÔ ĐỊCH!";
         setTimeout(() => {

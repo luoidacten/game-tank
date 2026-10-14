@@ -21,6 +21,16 @@ function setupControls() {
         applyControlLayout(next);
         if (typeof updateCanvasDimensions === 'function') updateCanvasDimensions();
     }));
+    // Điều hướng các màn của menu chính (Chơi -> Chế độ -> Cổ điển -> Offline)
+    const showMenuScreen = (name) => {
+        document.querySelectorAll('.menu-screen').forEach(sc => sc.classList.toggle('active', sc.dataset.screen === name));
+        const box = document.querySelector('#mainMenu .menu-container');
+        if (box) box.scrollTop = 0;
+    };
+    document.querySelectorAll('.menu-nav').forEach(btn => btn.addEventListener('click', () => {
+        showMenuScreen(btn.dataset.go);
+        if (soundSystem && !soundSystem.muted) soundSystem.playClick();
+    }));
     // Mode Buttons in Main Menu
     document.querySelectorAll('.mode-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -114,6 +124,7 @@ function setupControls() {
     }
 
     const backToMenu = () => {
+        if (typeof PVE !== 'undefined' && PVE.active) PVE.exit();
         if (typeof botAI !== 'undefined') botAI.enabled = false;
         if (typeof onlineManager !== 'undefined') onlineManager.leaveRoom();
         const tb = document.getElementById('trainingToolbar');

@@ -13,6 +13,7 @@ function init() {
     updateScoreBoard();
     onlineManager.initUI();
     botAI.initEvents();
+    PVE.initEvents();
     // The main menu is visible by default in index.html!
 }
 

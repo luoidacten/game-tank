@@ -14,6 +14,8 @@ class BotAIController {
         this.isGodMode = false;
         this.timer = 0;
         this.shootCycle = 0;
+        this.level = 3;      // cấp bot thông minh trong phòng tập (1-5)
+        this.smart = null;
     }
 
     setMode(mode) {
@@ -24,6 +26,14 @@ class BotAIController {
             const modeNames = { dummy: 'BAO CÁT (DUMMY)', shooter: 'CHỈ BẮN (SHOOTER)', combat: 'CHIẾN ĐẤU (COMBAT)' };
             addFloatingText(p2.x + p2.w / 2, p2.y + p2.h + 12, modeNames[mode] || mode, "#00f0ff", 14);
         }
+    }
+
+    cycleLevel() {
+        this.level = this.level % 5 + 1;
+        this.smart = new SmartBot(this.level);
+        this.updateToolbarUI();
+        if (soundSystem && !soundSystem.muted) soundSystem.playClick();
+        if (p2) addFloatingText(p2.x + p2.w / 2, p2.y + p2.h + 12, `BOT: ${BOT_LEVELS[this.level].name}`, "#00f0ff", 14);
     }
 
     toggleGodMode() {
@@ -157,8 +167,15 @@ class BotAIController {
             return;
         }
 
-        // 3. Chế độ Combat (Chiến đấu linh hoạt: Né đạn, lượm rương, ngắm bắn)
-        if (this.mode === 'combat') {
+        // 3. Bot thông minh (Giải Đấu PVE & chế độ Combat của phòng tập)
+        if (this.mode === 'pve' || this.mode === 'combat') {
+            if (!this.smart) this.smart = new SmartBot(this.level || 3);
+            this.smart.update(bot, player, inputs.p2);
+            return;
+        }
+
+        // (Bot combat cũ - giữ lại để tham khảo)
+        if (this.mode === 'combat_old') {
             const botCenterX = bot.x + bot.w / 2;
             const playerCenterX = player.x + player.w / 2;
 
@@ -249,6 +266,9 @@ class BotAIController {
         if (btnShooter) btnShooter.classList.toggle('active', this.mode === 'shooter');
         if (btnCombat) btnCombat.classList.toggle('active', this.mode === 'combat');
 
+        const btnLv = document.getElementById('btnBotLevel');
+        if (btnLv) btnLv.innerText = `🧠 CẤP: ${BOT_LEVELS[this.level].name}`;
+
         if (btnGod) {
             btnGod.classList.toggle('active-god', this.isGodMode);
             btnGod.innerText = this.isGodMode ? '🛡️ BẤT TỬ: BẬT' : '🛡️ BẤT TỬ: TẮT';
@@ -324,6 +344,8 @@ class BotAIController {
 
     startPractice() {
         this.enabled = true;
+        if (this.mode === 'pve') this.mode = 'dummy';
+        this.smart = new SmartBot(this.level);
         const mainMenu = document.getElementById('mainMenu');
         if (mainMenu) {
             mainMenu.style.display = 'none';
@@ -372,6 +394,9 @@ class BotAIController {
 
         const btnCombat = document.getElementById('btnBotCombat');
         if (btnCombat) btnCombat.addEventListener('click', () => this.setMode('combat'));
+
+        const btnLv = document.getElementById('btnBotLevel');
+        if (btnLv) btnLv.addEventListener('click', () => this.cycleLevel());
 
         const btnGod = document.getElementById('btnBotGodMode');
         if (btnGod) btnGod.addEventListener('click', () => this.toggleGodMode());

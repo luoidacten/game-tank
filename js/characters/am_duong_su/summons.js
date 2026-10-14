@@ -11,6 +11,7 @@ class VoidZone {
         this.lifeTime = duration;
         this.owner = owner;
         this.active = true;
+        zoneFit(this);
     }
     update() {
         if (!this.active) return;
@@ -41,6 +42,7 @@ class RadiationZone {
         this.r = 60;
         this.lifeTime = 180;
         this.active = true;
+        zoneFit(this);
     }
     update() {
         if (!this.active) return;
@@ -163,6 +165,7 @@ class SpellZone {
         this.owner = owner;
         this.isFullEvo = isFullEvo;
         this.active = true;
+        zoneFit(this);
     }
     update() {
         if (!this.active) return;

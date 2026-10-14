@@ -11,7 +11,8 @@
 - Xe to được cộng máu: rộng 31–33 → +1, 34–35 → +2, 36 → +3, 37 → +4, ≥38 → +5 HP.
 - Mỗi Body có 2 Evo. Có **cả 2 = FULL EVO**.
 - **Thùng tiếp tế:** Thùng Nổ (!) phản 1.5 sát thương vào người phá - không thể né, khiên chặn được. Thùng Đạn (✸) bắn 16 viên ra 360°, trúng cả 2 xe (body Tiến Hóa phá thì chỉ trúng đối thủ). Thùng Giả chỉ xuất hiện khi trận có body Tiến Hóa; Thùng Bánh Răng chỉ khi có Kỹ Sư / Kẻ Sáng Tạo / Thiên Tài / Nhà Phát Minh.
-- **Vùng hiệu ứng mặt đất** là hình chữ nhật nằm ngang (rộng 2.6r × cao 1.5r). Pháo kích (map Pháo Kích), sét Full Evo Lôi Thần, bom Evo 2 Pháo Cao Xạ và Mưa Tên toàn sân rơi đúng làn xe mục tiêu.
+- **Vùng hiệu ứng mặt đất** là hình chữ nhật nằm ngang (rộng 2.6r × cao 1.5r), luôn nằm trọn trong sân (vùng tạo sát mép được đẩy vào trong, không tràn ra sau lưng xe). Pháo kích (map Pháo Kích), sét Full Evo Lôi Thần, bom Evo 2 Pháo Cao Xạ và Mưa Tên toàn sân rơi đúng làn xe mục tiêu.
+- **Chế độ chơi:** Chơi → Chế Độ Cổ Điển → Online / Offline. Offline gồm 1v1 cùng máy, Phòng Tập (bot 5 cấp), **Giải Đấu PVE** 5 vòng (Vòng Loại → Chung Kết) với bot thông minh mạnh dần: dự đoán điểm rơi đạn & pháo để né, bắn thùng có lợi và tránh thùng nổ, bắn chặn khe né để ép góc, tự mua đồ trong shop.
 - Module chân: mỗi lần đã mua làm giá tăng thêm 50% giá gốc. **Động Cơ tối đa 3 lần** (đủ thì không xuất hiện trong shop). **Bánh Xích** x1.25 cho 3 lần đầu, sau đó giảm dần (x1.15, x1.09, x1.05…). **Lợi Tức** cộng dồn và nhân giá trị: 1/2/3/4/5 tầng = 30/72/126/192/270$ mỗi hiệp (Xe Tiền x2).
 
 ## Bảng tổng hợp

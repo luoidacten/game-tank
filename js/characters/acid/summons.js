@@ -17,6 +17,7 @@ class AcidZone {
             this.r = 100; // Siêu to khổng lồ
             this.lifeTime = 120; // 6 giây
         }
+        zoneFit(this);
     }
 
     update() {

@@ -25,6 +25,7 @@ class BodyZone {
         this.life = lifeTicks; this.maxLife = lifeTicks; this.power = power;
         this.active = true;
         this.insideTicks = 0; // cho Trói Chân (root)
+        zoneFit(this);
     }
     update() {
         if (!this.active) return;

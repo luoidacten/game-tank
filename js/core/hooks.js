@@ -72,6 +72,14 @@ function laneTargetPoint(target, spread = 80) {
 // zoneDist(dx, dy) < r  <=>  |dx| < r*ZONE_AX và |dy| < r*ZONE_AY -> hình vẽ & vùng trúng đòn khớp nhau.
 const ZONE_AX = 1.3, ZONE_AY = 0.75;
 function zoneDist(dx, dy) { return Math.max(Math.abs(dx) / ZONE_AX, Math.abs(dy) / ZONE_AY); }
+// Đẩy tâm vùng vào trong sân để vùng không tràn ra sau lưng xe / ngoài mép
+// (vd. đạn chạm mép sân tạo vùng -> vùng dời lên trên một đoạn nhỏ, nằm trọn trong sân)
+function zoneFit(z, r) {
+    const R = r !== undefined ? r : (z.maxR || z.r || 0);
+    const hw = R * ZONE_AX, hh = R * ZONE_AY;
+    if (canvas.height > hh * 2) z.y = Math.max(hh, Math.min(canvas.height - hh, z.y));
+    if (canvas.width > hw * 2) z.x = Math.max(hw, Math.min(canvas.width - hw, z.x));
+}
 function zoneRectPath(x, y, r) {
     ctx.beginPath();
     const hw = Math.max(0, r) * ZONE_AX, hh = Math.max(0, r) * ZONE_AY;

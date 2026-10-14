@@ -99,6 +99,7 @@
                         <button id="btnBotDummy" class="tb-btn active" title="Bot đứng yên làm bao cát">🧍 DUMMY</button>
                         <button id="btnBotShooter" class="tb-btn" title="Bot chỉ bắn đạn liên tục">🎯 CHỈ BẮN</button>
                         <button id="btnBotCombat" class="tb-btn" title="Bot chiến đấu AI thông minh">⚔️ CHIẾN ĐẤU</button>
+                        <button id="btnBotLevel" class="tb-btn" title="Đổi cấp độ bot chiến đấu">🧠 CẤP: Tinh Anh</button>
                         <button id="btnBotGodMode" class="tb-btn" title="Bật/Tắt Bot Bất Tử">🛡️ BẤT TỬ: TẮT</button>
                     </div>
                 </div>
@@ -154,6 +155,37 @@
             <div class="end-actions">
                 <button id="restartBtn" class="glow-btn btn-primary">&#9876; CH&#416;I L&#7840;I TR&#7852;N M&#7898;I</button>
                 <button id="backToMenuFromEndBtn" class="glow-btn btn-secondary">&#127968; V&#7872; MENU CH&Iacute;NH</button>
+            </div>
+        </div>
+
+        <!-- GIẢI ĐẤU PVE: SẢNH & KẾT QUẢ -->
+        <div id="pveModal" class="modal-overlay">
+            <div class="modal-card pve-card">
+                <div class="modal-header">
+                    <h2>🏆 GIẢI ĐẤU PVE</h2>
+                    <button id="closePveBtn" class="close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-subtitle" id="pveSubtitle">Vượt qua 5 vòng đấu. Bot mạnh dần: biết né đạn, ăn thùng và ép góc.</p>
+                    <div id="pveStageList" class="pve-stage-list"></div>
+                    <div class="menu-btn-group">
+                        <button id="pveStartBtn" class="glow-btn btn-primary">&#9654; BẮT ĐẦU</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="pveResultModal" class="modal-overlay">
+            <div class="modal-card pve-card">
+                <div class="modal-header"><h2 id="pveResultTitle">KẾT QUẢ</h2></div>
+                <div class="modal-body">
+                    <p class="modal-subtitle" id="pveResultText"></p>
+                    <div id="pveResultLadder" class="pve-stage-list"></div>
+                    <div class="menu-btn-group">
+                        <button id="pveNextBtn" class="glow-btn btn-primary">&#9654; VÒNG TIẾP THEO</button>
+                        <button id="pveRetryBtn" class="glow-btn btn-warning">&#128260; THỬ LẠI VÒNG NÀY</button>
+                        <button id="pveMenuBtn" class="glow-btn btn-danger">&#127968; VỀ MENU</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -332,56 +364,97 @@
         <!-- MAIN MENU OVERLAY -->
         <div id="mainMenu" class="menu-overlay">
             <div class="menu-container">
-                <div class="game-badge">&#9889; 1v1 LOCAL DUAL COMBAT</div>
+                <div class="game-badge">&#9889; 1v1 DUAL COMBAT · ONLINE · PVE</div>
                 <h1 class="game-title">CYBER TANK</h1>
                 <div class="game-subtitle">&#272;&#7844;U TR&#431;&#7898;NG XE T&Aacute;NG 2 NG&#431;&#7844;I</div>
 
-                <!-- GAME MODE SELECTOR -->
-                <div class="mode-select-box">
-                    <div class="mode-label">TH&#7874; TH&#7912;C THI &#272;&#7844;U:</div>
-                    <div class="mode-options">
-                        <button class="mode-btn" data-mode="bo3" data-wins="2">BO3 (2 Th&#7855;ng)</button>
-                        <button class="mode-btn active" data-mode="bo5" data-wins="3">BO5 (3 Th&#7855;ng)</button>
-                        <button class="mode-btn" data-mode="bo7" data-wins="4">BO7 (4 Th&#7855;ng)</button>
+                <!-- ===== MÀN 1: TRANG CHỦ ===== -->
+                <div class="menu-screen active" data-screen="home">
+                    <div class="menu-actions">
+                        <button id="menuPlayBtn" class="glow-btn btn-primary start-btn menu-nav" data-go="modes">
+                            <span class="btn-shine"></span>
+                            &#9654; CHƠI
+                        </button>
+                        <button id="openGuideBtn" class="glow-btn btn-secondary">
+                            &#128214; H&#431;&#7898;NG D&#7854;N &amp; &#272;I&#7872;U KHI&#7874;N
+                        </button>
+                        <button class="glow-btn btn-dark ctrl-layout-toggle">🎮 KIỂU NÚT: MỚI</button>
+                        <button id="menuSoundToggleBtn" class="glow-btn btn-dark">
+                            &#128266; &Acirc;M THANH: SFX B&#7852;T
+                        </button>
                     </div>
                 </div>
 
-                <!-- MAP SELECTOR (7 MAPS) -->
-                <div class="mode-select-box map-select-box">
-                    <div class="mode-label">ĐẤU TRƯỜNG (MAP):</div>
-                    <div class="map-options" id="mapSelectOptions">
-                        <button class="map-btn active" data-map="classic" title="Cổ Điển">🏛️ Cổ Điển</button>
-                        <button class="map-btn" data-map="bastion" title="Pháo Đài chắn đạn">🛡️ Pháo Đài</button>
-                        <button class="map-btn" data-map="artillery" title="Bão đạn pháo kích">💣 Pháo Kích</button>
-                        <button class="map-btn" data-map="overdrive" title="Tốc độ cao">⚡ Siêu Tốc</button>
-                        <button class="map-btn" data-map="fast_shrink" title="Bo tử thần 20s">💀 Bo Thần Tốc</button>
-                        <button class="map-btn" data-map="rush_hour" title="Nhiều xe tiền">🚛 Cao Điểm</button>
-                        <button class="map-btn" data-map="supply_drop" title="Tiếp tế liên tục">📦 Tiếp Tế</button>
-                        <button class="map-btn" data-map="random" title="Ngẫu nhiên mỗi trận">🎲 Ngẫu Nhiên</button>
+                <!-- ===== MÀN 2: CHỌN CHẾ ĐỘ ===== -->
+                <div class="menu-screen" data-screen="modes">
+                    <div class="menu-screen-title">CHỌN CHẾ ĐỘ</div>
+                    <div class="menu-actions">
+                        <button id="menuClassicBtn" class="glow-btn mode-card menu-nav" data-go="classic">
+                            <span class="mode-card-icon">🏛️</span>
+                            <span class="mode-card-text"><b>CHẾ ĐỘ CỔ ĐIỂN</b><small>1v1 · Online &amp; Offline · Shop &amp; Tiến hoá</small></span>
+                        </button>
+                        <button class="glow-btn mode-card locked" disabled>
+                            <span class="mode-card-icon">🔒</span>
+                            <span class="mode-card-text"><b>CHẾ ĐỘ MỚI</b><small>Sắp ra mắt</small></span>
+                        </button>
+                        <button class="glow-btn btn-dark menu-nav menu-back" data-go="home">&#8592; QUAY LẠI</button>
                     </div>
                 </div>
 
-                <!-- ACTION BUTTONS -->
-                <div class="menu-actions">
-                    <button id="startBattleBtn" class="glow-btn btn-primary start-btn">
-                        <span class="btn-shine"></span>
-                        &#9876; B&#7854;T &#272;&#7844;U CHI&#7870;N &#272;&#7844;U (LOCAL 1v1)
-                    </button>
-                    <button id="openPracticeBtn" class="glow-btn btn-practice">
-                        <span class="online-badge practice-badge">TEST BOT</span>
-                        🎮 PHÒNG LUYỆN TẬP (BOT TEST)
-                    </button>
-                    <button id="openOnlineBtn" class="glow-btn btn-online">
-                        <span class="online-badge">BETA</span>
-                        &#127760; CH&#7870; &#272;&#7896; ONLINE (MULTIPLAYER)
-                    </button>
-                    <button id="openGuideBtn" class="glow-btn btn-secondary">
-                        &#128214; H&#431;&#7898;NG D&#7854;N &amp; &#272;I&#7870;U KHI&#7870;N
-                    </button>
-                    <button class="glow-btn btn-dark ctrl-layout-toggle">🎮 KIỂU NÚT: MỚI</button>
-                    <button id="menuSoundToggleBtn" class="glow-btn btn-dark">
-                        &#128266; &Acirc;M THANH: SFX B&#7852;T
-                    </button>
+                <!-- ===== MÀN 3: CỔ ĐIỂN (ONLINE / OFFLINE) ===== -->
+                <div class="menu-screen" data-screen="classic">
+                    <div class="menu-screen-title">🏛️ CHẾ ĐỘ CỔ ĐIỂN</div>
+                    <div class="mode-select-box">
+                        <div class="mode-label">TH&#7874; TH&#7912;C THI &#272;&#7844;U:</div>
+                        <div class="mode-options">
+                            <button class="mode-btn" data-mode="bo3" data-wins="2">BO3 (2 Th&#7855;ng)</button>
+                            <button class="mode-btn active" data-mode="bo5" data-wins="3">BO5 (3 Th&#7855;ng)</button>
+                            <button class="mode-btn" data-mode="bo7" data-wins="4">BO7 (4 Th&#7855;ng)</button>
+                        </div>
+                    </div>
+                    <div class="mode-select-box map-select-box">
+                        <div class="mode-label">ĐẤU TRƯỜNG (MAP):</div>
+                        <div class="map-options" id="mapSelectOptions">
+                            <button class="map-btn active" data-map="classic" title="Cổ Điển">🏛️ Cổ Điển</button>
+                            <button class="map-btn" data-map="bastion" title="Pháo Đài chắn đạn">🛡️ Pháo Đài</button>
+                            <button class="map-btn" data-map="artillery" title="Bão đạn pháo kích">💣 Pháo Kích</button>
+                            <button class="map-btn" data-map="overdrive" title="Tốc độ cao">⚡ Siêu Tốc</button>
+                            <button class="map-btn" data-map="fast_shrink" title="Bo tử thần 20s">💀 Bo Thần Tốc</button>
+                            <button class="map-btn" data-map="rush_hour" title="Nhiều xe tiền">🚛 Cao Điểm</button>
+                            <button class="map-btn" data-map="supply_drop" title="Tiếp tế liên tục">📦 Tiếp Tế</button>
+                            <button class="map-btn" data-map="random" title="Ngẫu nhiên mỗi trận">🎲 Ngẫu Nhiên</button>
+                        </div>
+                    </div>
+                    <div class="menu-actions">
+                        <button id="openOnlineBtn" class="glow-btn btn-online">
+                            <span class="online-badge">BETA</span>
+                            &#127760; CHƠI ONLINE
+                        </button>
+                        <button id="menuOfflineBtn" class="glow-btn btn-primary menu-nav" data-go="offline">
+                            &#128241; CHƠI OFFLINE
+                        </button>
+                        <button class="glow-btn btn-dark menu-nav menu-back" data-go="modes">&#8592; QUAY LẠI</button>
+                    </div>
+                </div>
+
+                <!-- ===== MÀN 4: OFFLINE ===== -->
+                <div class="menu-screen" data-screen="offline">
+                    <div class="menu-screen-title">&#128241; CHƠI OFFLINE</div>
+                    <div class="menu-actions">
+                        <button id="startBattleBtn" class="glow-btn mode-card">
+                            <span class="mode-card-icon">&#9876;</span>
+                            <span class="mode-card-text"><b>1v1 CÙNG MÁY</b><small>2 người chơi trên 1 điện thoại / bàn phím</small></span>
+                        </button>
+                        <button id="openPracticeBtn" class="glow-btn mode-card">
+                            <span class="mode-card-icon">🎮</span>
+                            <span class="mode-card-text"><b>PHÒNG TẬP</b><small>Thử body, chỉnh bot, bất tử, thêm tiền</small></span>
+                        </button>
+                        <button id="openPveBtn" class="glow-btn mode-card mode-card-gold">
+                            <span class="mode-card-icon">🏆</span>
+                            <span class="mode-card-text"><b>GIẢI ĐẤU PVE</b><small id="pveMenuProgress">5 vòng đấu bot thông minh mạnh dần</small></span>
+                        </button>
+                        <button class="glow-btn btn-dark menu-nav menu-back" data-go="classic">&#8592; QUAY LẠI</button>
+                    </div>
                 </div>
 
                 <div class="menu-footer-hint">
@@ -532,6 +605,8 @@
     <script src="js/game/loop.js" charset="utf-8"></script>
     <script src="js/game/controls.js" charset="utf-8"></script>
     <script src="js/ai/bot.js" charset="utf-8"></script>
+    <script src="js/ai/smart-bot.js" charset="utf-8"></script>
+    <script src="js/ai/pve.js" charset="utf-8"></script>
     <script src="js/online/netstate.js" charset="utf-8"></script>
     <script src="js/online/multiplayer.js" charset="utf-8"></script>
     <script src="js/main.js" charset="utf-8"></script>

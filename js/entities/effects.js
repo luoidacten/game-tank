@@ -104,6 +104,7 @@ class IceZone {
         this.lifeTime = duration;
         this.active = true;
         this.owner = owner;
+        zoneFit(this);
     }
     update() {
         if (!this.active) return;

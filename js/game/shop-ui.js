@@ -72,6 +72,11 @@ function showUpgradeScreen() {
         renderStandardCards('p1', MODULES.BODY);
         renderStandardCards('p2', MODULES.BODY);
 
+        // Giải Đấu PVE: bot chọn đúng body của vòng
+        if (typeof PVE !== 'undefined' && PVE.active) {
+            setTimeout(() => { if (gameState.phase === 'upgrade' && !gameState.p2Ready) PVE.botPickBody(); }, 300);
+            return;
+        }
         // Tự động chọn vũ khí cho Bot trong phòng luyện tập
         if (typeof botAI !== 'undefined' && botAI.enabled) {
             setTimeout(() => {
@@ -92,6 +97,11 @@ function showUpgradeScreen() {
     renderShop('p1');
     renderShop('p2');
 
+    // Giải Đấu PVE: bot tự mua đồ rồi sẵn sàng
+    if (typeof PVE !== 'undefined' && PVE.active) {
+        setTimeout(() => { if (gameState.phase === 'upgrade' && !gameState.p2Ready) PVE.botShop(); }, 400);
+        return;
+    }
     // Tự động sẵn sàng cho Bot trong Shop ở các round tiếp theo
     if (typeof botAI !== 'undefined' && botAI.enabled) {
         setTimeout(() => {

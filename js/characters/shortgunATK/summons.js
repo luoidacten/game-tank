@@ -88,6 +88,7 @@ class FireZone {
         this.r = 45;
         this.lifeTime = 120; // Tồn tại 2s
         this.active = true;
+        zoneFit(this);
     }
     update() {
         if (!this.active) return;
