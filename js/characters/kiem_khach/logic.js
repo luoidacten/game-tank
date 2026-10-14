@@ -52,7 +52,7 @@ function kkFireVolley(p, isSpray = false) {
     }
     // Phá: một phần kiếm hóa tia Hitscan
     if ((d.finals.pha || gold) && Math.random() < 0.25) {
-        bodyEffects.push(new HitscanTelegraph(p, cx, p.damage * 1.2, '#ffd700', 1));
+        bodyEffects.push(new HitscanTelegraph(p, cx, p.damage * 1.2, '#ffd700', 30));
     }
     d.swordsTotal += fired;
     kkProgress(p, 'fire', fired);

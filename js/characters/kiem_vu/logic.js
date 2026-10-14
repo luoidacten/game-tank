@@ -269,8 +269,14 @@ function kvUpdateMinis(p) {
     }
 }
 
-// Tâm Kiếm: chém hitscan dọc cả cột, xuyên Khiên & Tường
+// Tâm Kiếm: hiện cột cảnh báo 1s (khoá vị trí) rồi mới chém hitscan dọc cả cột, xuyên Khiên & Tường
 function kvTamKiem(p) {
+    p.kvSat = 0;
+    p.kvTkPending = true;
+    scheduleHitscan(p, 60, '#ff3860', 30, () => { p.kvTkPending = false; kvTamKiemNow(p); });
+    addFloatingText(p.x + p.w / 2, p.y + (p.id === 1 ? -30 : p.h + 34), 'TÂM KIẾM...', '#fecdd3', 13);
+}
+function kvTamKiemNow(p) {
     const enemy = kvEnemy(p);
     const cx = p.x + p.w / 2;
     const dmg = 2 * kvSwordDmg(p);
@@ -298,6 +304,7 @@ function kvTamKiem(p) {
 function kvCommand(p) {
     const enemy = kvEnemy(p);
     let acted = false;
+    if (p.kvTkPending) return true; // đang chờ Tâm Kiếm chém
     if (p.kvSwState === KV_SW_FLOAT) {
         if (p.kvSat >= 100) { kvTamKiem(p); acted = true; }
         else {
@@ -329,7 +336,7 @@ CharHooks.register('kiem_vu', {
         this.maxAmmo = KV_AMMO_SENTINEL; // ẩn thanh đạn mặc định; xem kvAmmo
         this.kvArmed = false;
         this.kvTick = 0;
-        this.kvTam = 0; this.kvSat = 0;
+        this.kvTam = 0; this.kvSat = 0; this.kvTkPending = false;
         this.kvFocus = 0; this.kvFocusMax = 30;
         this.kvStill = false; this.kvStillT = 0;
         this.kvPrevS = false; this.kvCmdCd = 0; this.kvCmdCount = 0;

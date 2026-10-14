@@ -13,7 +13,13 @@ Object.assign(Player.prototype, {
         const bRw = beamW; const bRh = (this.id === 1 ? this.y : canvas.height - (this.y + this.h));
 
         const enemy = (this.id === 1) ? p2 : p1;
-        if (rectIntersect(bRx, bRy, bRw, bRh, enemy.x, enemy.y, enemy.w, enemy.h)) { enemy.takeDamage(3, this); } // [CÂN BẰNG] 6 -> 3
+        // [ĐỔI] Tia lớn 20 dame (one-shot), Full Evo xuyên khiên. Đây là đòn hitscan duy nhất không cảnh báo:
+        // người chơi phải giữ nạp 1.5s (thanh nạp & nòng sáng là tín hiệu cho đối thủ).
+        const lcFull = this.hasUpgrade('evo_lazer_c_1') && this.hasUpgrade('evo_lazer_c_2');
+        if (rectIntersect(bRx, bRy, bRw, bRh, enemy.x, enemy.y, enemy.w, enemy.h)) {
+            enemy.takeDamage(20, this, lcFull ? { bypassShield: true, isPiercing: true } : {});
+            if (typeof fxSlashHit === 'function') fxSlashHit(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, '#7dd3fc', 30);
+        }
 
         crates.forEach(c => {
             if (c.active && rectIntersect(bRx, bRy, bRw, bRh, c.x, c.y, c.w, c.h)) {

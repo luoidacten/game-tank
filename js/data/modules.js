@@ -15,7 +15,7 @@ const MODULES = {
         { id: 'shotgun', name: 'Shotgun', desc: 'HP:5.5 | Dame:0.9 | Đạn:2 (3 tia)', type: 'body', role: ['Đối Đầu'], size: { w: 26, h: 26 }, stats: { hp: 5.5, dmg: 0.9, ammo: 2 } },
         { id: 'overload', name: 'Cuộn Quá Tải', desc: 'HP:4.5 | Dame:0.7-12 (Tự tụ) | Đạn:6. Đạn sạc nổ xung kích điện.', type: 'body', role: ['Đối Đầu'], size: { w: 30, h: 30 }, stats: { hp: 4.5, dmg: 0.7, ammo: 6 } },
         { id: 'smg', name: 'Tiểu Liên', desc: 'HP:5 | Dame:0.9 | Đạn:12 (Lắc)', type: 'body', role: ['Đối Đầu'], size: { w: 24, h: 24 }, stats: { hp: 5, dmg: 0.9, ammo: 12 } },
-        { id: 'lazer_charge', name: 'Lazer Xuyên Phá', desc: 'HP:4 | Dame:0.5 | Đạn:20. Nhấp: đạn thường. Giữ 1.5s rồi nhả: Tia Xuyên Phá 3 dmg (tốn 6 đạn).', type: 'body', role: ['Đối Đầu'], size: { w: 30, h: 30 }, stats: { hp: 4, dmg: 0.5, ammo: 20 } },
+        { id: 'lazer_charge', name: 'Lazer Xuyên Phá', desc: 'HP:4 | Dame:0.5 | Đạn:12 (nạp nhanh 0.6s/viên). Nhấp: đạn thường. Giữ 1.5s rồi nhả: Tia Xuyên Phá 20 dmg - một phát hạ gục (tốn 6 đạn). Full Evo: tia xuyên khiên, nạp 0.25s/viên.', type: 'body', role: ['Đối Đầu'], size: { w: 30, h: 30 }, stats: { hp: 4, dmg: 0.5, ammo: 12 } },
         { id: 'lazer_auto', name: 'Lazer Pháo', desc: 'HP:5 | Dame:1 | Đạn:6 (Xuyên)', type: 'body', role: ['Đối Đầu'], size: { w: 30, h: 30 }, stats: { hp: 5, dmg: 1, ammo: 6 } },
         { id: 'rocket', name: 'Pháo Tên Lửa', desc: 'HP:5 | Dame:1.15 (Nổ lan) | Đạn:3', type: 'body', role: ['Đối Đầu', 'Kiểm Soát'], size: { w: 30, h: 30 }, stats: { hp: 5, dmg: 1.15, ammo: 3 } },
         { id: 'portal', name: 'Cổng Không Gian', desc: 'HP:5 | Dame:1 | Đạn:7 (Dịch chuyển)', type: 'body', role: ['Cơ Động', 'Đối Đầu'], size: { w: 30, h: 30 }, stats: { hp: 5, dmg: 1, ammo: 7 } },

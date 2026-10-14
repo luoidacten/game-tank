@@ -167,7 +167,14 @@ class Turret {
         }
     }
 
+    // Ụ thông minh: cảnh báo 0.5s (khoá cột) rồi mới bắn tia
     fireRaycast(enemy) {
+        if (!enemy || this.raycastPending) return;
+        this.raycastPending = true;
+        scheduleHitscan(this, 30, '#00ffff', 20, () => { this.raycastPending = false; if (this.active !== false) this.fireRaycastNow(enemy); });
+    }
+
+    fireRaycastNow(enemy) {
         if (!enemy) return;
         let isEvo2 = true;
         let beamW = 12;

@@ -214,7 +214,7 @@ CharHooks.register('customize', {
         this.cuPrevS = !!inp.s;
         const hitscan = cuHas(this, 'hitscan');
         const fireOne = (dmgMult = 1, sizeMult = 1) => {
-            if (hitscan) bodyEffects.push(new HitscanTelegraph(this, this.x + this.w / 2, this.damage * dmgMult, '#ff2244', 15, 'customize'));
+            if (hitscan) bodyEffects.push(new HitscanTelegraph(this, this.x + this.w / 2, this.damage * dmgMult, '#ff2244', 30, 'customize'));
             else cuSpawn(this, 0, dmgMult, sizeMult);
         };
         switch (d.fire) {

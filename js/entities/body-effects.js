@@ -174,7 +174,7 @@ class HitscanTelegraph {
     update() {
         if (!this.active) return;
         if (this.delay > 0) {
-            this.x = this.owner.x + this.owner.w / 2; // bám theo nòng
+            // Cột cảnh báo khoá tại chỗ (không bám theo nòng) -> đối thủ né được
             if (--this.delay === 0) this.fire();
             return;
         }

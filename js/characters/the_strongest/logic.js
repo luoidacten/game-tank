@@ -175,7 +175,8 @@ Object.assign(Player.prototype, {
                         this.usedRed = true;
                         this.canshotActive = false;
 
-                        this.fireGojoRed(hasSixEyes, enemy);
+                        // Cảnh báo 0.5s (khoá cột) rồi mới bắn tia Đỏ hitscan
+                        scheduleHitscan(this, 30, '#ff3b3b', hasSixEyes ? 30 : 20, () => this.fireGojoRed(hasSixEyes, enemy));
 
                         setTimeout(() => { this.canshotActive = true; }, 1000);
                     }

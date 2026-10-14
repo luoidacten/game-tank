@@ -102,7 +102,11 @@ Object.assign(Player.prototype, {
         if (this.hasUpgrade('evo_smg_1')) { this.maxAmmo = 26; this.damage *= 0.85; }
         if (this.hasUpgrade('evo_smg_2')) { this.maxAmmo = 26; this.reloadTime = 400; }
         if (this.hasUpgrade('evo_lazer_a_2')) { this.damage *= 1.5; }
-        if (this.hasUpgrade('evo_lazer_c_2')) { this.reloadTime = 1000; }
+        // Lazer Xuyên Phá: ít đạn hơn nhưng nạp nhanh (0.6s/viên; Evo 2: 0.4s; Full Evo: 0.25s)
+        if (this.weapon === 'lazer_charge') {
+            const lcFull = this.hasUpgrade('evo_lazer_c_1') && this.hasUpgrade('evo_lazer_c_2');
+            this.reloadTime = lcFull ? 250 : (this.hasUpgrade('evo_lazer_c_2') ? 400 : 600);
+        }
         if (this.weapon === 'portal') this.speed += 1.5;
 
         // --- KIẾM TÔN (BLADE GOD) ---

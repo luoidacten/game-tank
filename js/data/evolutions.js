@@ -40,7 +40,7 @@ const EVOLUTIONS = {
     ],
     lazer_charge: [
         { id: 'evo_lazer_c_1', name: 'Pháo Diệt Tinh', desc: 'Tia to, tồn tại 2s gây sát thương', cost: 150, type: 'evo' },
-        { id: 'evo_lazer_c_2', name: 'Năng Lượng Xanh', desc: 'Nạp đạn nhanh hơn', cost: 50, type: 'evo' }
+        { id: 'evo_lazer_c_2', name: 'Năng Lượng Xanh', desc: 'Nạp đạn nhanh hơn (0.4s/viên). FULL EVO: nạp 0.25s/viên, Tia Xuyên Phá xuyên khiên.', cost: 50, type: 'evo' }
     ],
     lazer_auto: [
         { id: 'evo_lazer_a_1', name: 'Xuyên Phá', desc: 'Đạn bay cực nhanh', cost: 30, type: 'evo' },

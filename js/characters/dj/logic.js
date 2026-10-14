@@ -221,9 +221,8 @@ function djExecute(p) {
     p.djPulse = 1;
     if (evo2 && c >= 120) {
         // Sóng âm hitscan tức thời
-        const beam = new DjBeam(p, p.x + p.w / 2, dmg, traits);
-        bodyEffects.push(beam);
-        beam.fire();
+        // Sóng âm hitscan: cảnh báo 0.5s (khoá cột) rồi mới bắn
+        scheduleHitscan(p, 30, '#e879f9', 30, () => { const beam = new DjBeam(p, p.x + p.w / 2, dmg, traits); bodyEffects.push(beam); beam.fire(); });
     } else {
         djFireWave(p, 'perfect', dmg, traits);
     }

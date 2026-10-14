@@ -125,3 +125,82 @@ function fxSlashHit(x, y, color = '#ffffff', size = 22) {
 function fxBolt(x0, y0, x1, y1, color, life, width, jag) {
     if (typeof bodyEffects !== 'undefined') bodyEffects.push(new LightningBolt(x0, y0, x1, y1, color, life, width, jag));
 }
+
+// ==========================================
+// Cảnh báo trước đòn hitscan (đánh tức thời theo cột dọc)
+// ------------------------------------------
+// Mọi đòn hitscan (trừ Lazer Xuyên Phá) phải hiện cột cảnh báo khoá tại chỗ trước khi bắn để đối thủ kịp né.
+// scheduleHitscan(owner, delay, color, width, fire): sau `delay` tick gọi fire() với owner.x tạm đặt về vị trí đã khoá.
+// (fire là hàm -> chỉ chạy trên máy host; guest nhận bản sao không có hàm và chỉ vẽ cảnh báo.)
+// ==========================================
+class HitscanWarning {
+    constructor(owner, x, delay, color, width, fire, fromY, dirY) {
+        this.owner = owner;
+        this.x = x;
+        this.delay = delay; this.maxDelay = delay;
+        this.color = color || '#ff3355';
+        this.width = width || 16;
+        this.fire = fire;
+        this.fromY = fromY; this.dirY = dirY;
+        this.flash = 0;
+        this.active = true;
+    }
+    update() {
+        if (!this.active) return;
+        if (this.delay > 0) {
+            if (--this.delay === 0) {
+                const o = this.owner;
+                if (typeof this.fire === 'function' && gameState.phase === 'playing' && (!o || o.hp === undefined || o.hp > 0)) {
+                    const ox = o ? o.x : 0;
+                    if (o && typeof o.x === 'number' && o.w) o.x = this.x - o.w / 2; // bắn đúng cột đã khoá
+                    try { this.fire(); } finally { if (o && typeof o.x === 'number' && o.w) o.x = ox; }
+                }
+                this.fire = null;
+                this.flash = 10;
+            }
+            return;
+        }
+        if (--this.flash <= 0) this.active = false;
+    }
+    draw() {
+        if (!this.active) return;
+        const y0 = this.fromY, y1 = this.dirY < 0 ? 0 : canvas.height;
+        const top = Math.min(y0, y1), h = Math.abs(y1 - y0);
+        ctx.save();
+        if (this.delay > 0) {
+            const k = 1 - this.delay / this.maxDelay;                 // 0 -> 1 khi sắp bắn
+            const blink = (Math.floor(this.delay / 4) % 2) ? 0.55 : 1;
+            ctx.globalAlpha = 0.12 + 0.18 * k;
+            ctx.fillStyle = this.color;
+            ctx.fillRect(this.x - this.width / 2, top, this.width, h);
+            ctx.globalAlpha = blink;
+            ctx.strokeStyle = this.color; ctx.lineWidth = 1.5; ctx.setLineDash([7, 5]);
+            ctx.lineDashOffset = -this.delay * 1.5;
+            ctx.strokeRect(this.x - this.width / 2, top, this.width, h);
+            // Vạch nạp: thu hẹp dần về tâm cột
+            ctx.setLineDash([]);
+            ctx.globalAlpha = 0.9;
+            ctx.lineWidth = 2;
+            const w = this.width * (1 - k);
+            ctx.beginPath(); ctx.moveTo(this.x - w / 2, y0); ctx.lineTo(this.x - w / 2, y1); ctx.moveTo(this.x + w / 2, y0); ctx.lineTo(this.x + w / 2, y1); ctx.stroke();
+            ctx.font = "bold 10px 'Orbitron', Arial"; ctx.textAlign = 'center'; ctx.fillStyle = this.color;
+            if (typeof drawWorldText === 'function') drawWorldText(ctx, `⚠ ${(this.delay / 60).toFixed(1)}s`, this.x, y0 + this.dirY * 14);
+        } else {
+            ctx.globalAlpha = this.flash / 10;
+            ctx.fillStyle = '#ffffff'; ctx.shadowBlur = 20; ctx.shadowColor = this.color;
+            ctx.fillRect(this.x - this.width * 0.3, top, this.width * 0.6, h);
+        }
+        ctx.restore();
+    }
+}
+
+function scheduleHitscan(owner, delay, color, width, fire, lockX) {
+    const x = typeof lockX === 'number' ? lockX : owner.x + owner.w / 2;
+    const ownerId = owner.id || (owner.owner && owner.owner.id) || 1;
+    const dirY = ownerId === 1 ? -1 : 1;
+    const fromY = ownerId === 1 ? owner.y : owner.y + owner.h;
+    const w = new HitscanWarning(owner, x, Math.max(1, delay | 0), color, width, fire, fromY, dirY);
+    if (typeof bodyEffects !== 'undefined') bodyEffects.push(w);
+    if (soundSystem && !soundSystem.muted && soundSystem.playClick) soundSystem.playClick();
+    return w;
+}

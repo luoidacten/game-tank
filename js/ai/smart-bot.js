@@ -111,6 +111,7 @@ class SmartBot {
         bodyEffects.forEach(e => {
             if (!e.active || e.owner === bot) return;
             if (e instanceof SkyStrike) zoneAt(e.x, e.y, e.r || 48, e.delay || 1, 2, e);
+            else if (e instanceof HitscanWarning) { if (e.delay > 0 && e.owner !== bot && (!e.owner || e.owner.owner !== bot) && this.perceive(e)) out.push({ t: Math.max(1, e.delay), x: e.x, half: e.width / 2 + bot.w / 2 + 4, w: 3 }); }
             else if (e instanceof HitscanTelegraph) { if (this.perceive(e)) out.push({ t: Math.max(1, e.delay), x: e.x, half: bot.w / 2 + 8, w: 2 }); }
             else if (e instanceof BodyZone) this.zoneRect(out, bot, e.x, e.y, e.r, 0.5);
             else if (e instanceof CrateBurst) {

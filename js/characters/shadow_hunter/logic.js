@@ -121,7 +121,9 @@ Object.assign(Player.prototype, {
                     // Tap 2: Thoát Vô Hình & Bắn Đòn Cường Hóa (chống double input)
                     this.stealthActive = false;
                     this.stealthCooldown = 480; // 8s CD
-                    this.fireShadowHunterEmpowered(isFullEvo, hasEvo1, hasEvo2);
+                    // Full Evo bắn tia hitscan -> cảnh báo 0.5s trước
+                    if (isFullEvo) scheduleHitscan(this, 30, '#a855f7', 26, () => this.fireShadowHunterEmpowered(isFullEvo, hasEvo1, hasEvo2));
+                    else this.fireShadowHunterEmpowered(isFullEvo, hasEvo1, hasEvo2);
                     inp.s = false;
                 } else if (!this.stealthActive && this.ammo > 0 && now - this.lastShot > 400) {
                     // Bắn đạn thường khi ngoài Vô Hình
