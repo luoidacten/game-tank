@@ -187,5 +187,9 @@ const EVOLUTIONS = {
     kiem_su: [
         { id: 'evo_ks_1', name: 'Điều Tức Chuyển Khí', desc: 'Cường hóa mọi nguyên tố. Giữ Bắn 0.25s: đổi chỗ viên đạn hiện tại và viên kế tiếp (trùng màu thì tự đổi màu).', cost: 90, type: 'evo' },
         { id: 'evo_ks_2', name: 'Ngũ Hành Giao Thoa', desc: '2 phi kiếm liên tiếp tạo phản ứng: Đồng nguyên tố / Tương sinh / Tương khắc (15 phản ứng). FULL EVO: mỗi phát kèm 2 kiếm hộ tống, phản ứng mạnh hơn.', cost: 120, type: 'evo' }
+    ],
+    kiem_vu: [
+        { id: 'evo_kv_1', name: 'Tâm Nhãn', desc: 'Tâm Định đầy nhanh hơn (0.8s), +50% Sát Ý mỗi lần phản đạn. Bản Mệnh Kiếm cắm trên sân địch tỏa kiếm khí làm chậm đối thủ đi ngang qua.', cost: 100, type: 'evo' },
+        { id: 'evo_kv_2', name: 'Lưu Thủy Phản Chiếu', desc: 'Tập Trung kéo dài 1.0s. Đạn phản bay thẳng chuẩn xác về phía địch. Vẫn điều khiển Bản Mệnh Kiếm khi đang Tập Trung. FULL EVO (Vạn Kiếm Quy Tâm): kiếm bay nhanh hơn, dame x1.15 + Chảy Máu; đi ngang chậm khi Tập Trung; mỗi 5 lần Điều Kiếm, lần kế tiếp triệu hồi 4 Kiếm Phụ tấn công rồi tự thu về.', cost: 120, type: 'evo' }
     ]
 };

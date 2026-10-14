@@ -185,6 +185,15 @@ const MODULES = {
             size: { w: 28, h: 28 },
             stats: { hp: 4, dmg: 1, ammo: 5, speedMult: 1.1 }
         },
+        {
+            id: 'kiem_vu',
+            name: 'Kiếm Vũ',
+            desc: 'HP:1.5 | Dame:1.5 | Đạn:1 (Bản Mệnh Kiếm). Nhấp: phóng kiếm tới trục X của địch rồi cắm xuống; nhấp lần 2: thu kiếm về (dame cả 2 lượt). Đứng yên tích Tâm Định: trúng đòn khi đứng yên (≥25%) -> phản đạn & Tập Trung 0.5s (đạn tiếp theo tự phản). Phản đạn tích Sát Ý; đầy 100% -> Tâm Kiếm hitscan xuyên Khiên & Tường.',
+            type: 'body',
+            size: { w: 28, h: 28 },
+            stats: { hp: 1.5, dmg: 1.5, ammo: 1, speedMult: 1.0 },
+            role: ['Đối Đầu', 'Sinh Tồn', 'Kiểm Soát']
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 30 },
