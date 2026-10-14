@@ -185,6 +185,15 @@ const MODULES = {
             size: { w: 28, h: 28 },
             stats: { hp: 4, dmg: 1, ammo: 5, speedMult: 1.1 }
         },
+        {
+            id: 'revolver',
+            name: 'Cao Bồi',
+            desc: 'HP:3.5 | Dame:1.25 | Đạn:6 (ổ cố định) | Tốc: 1.2x. "6 viên là đủ!" Chỉ nạp khi bắn cạn cả ổ (1.8s). Nhấp: đạn xuyên thủng; viên thứ 6 là đạn đồng x2 dame, xuyên khiên. Giữ 0.4s: Quạt Cò — khóa hồng tâm 1s rồi xả hết ổ (0.1s/viên).',
+            type: 'body',
+            role: ['Đối Đầu', 'Cơ Động'],
+            size: { w: 26, h: 26 },
+            stats: { hp: 3.5, dmg: 1.25, ammo: 6, speedMult: 1.2 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 30 },
