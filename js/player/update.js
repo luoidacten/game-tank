@@ -224,7 +224,7 @@ Object.assign(Player.prototype, {
         // ==========================================
         // --- LOGIC NAM CHÂM (MAGNET) ---
         // ==========================================
-        this.updateMagnet();
+        if (this.updateMagnet()) return;
 
         // Đếm lùi nhiễm từ tính trên người chơi
         if (this.infectedPolarityTimer > 0) {

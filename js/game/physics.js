@@ -115,10 +115,14 @@ function tickPhysics() {
     }
 
     let curMagnetTime = Date.now();
+    const MAGNET_STRONG_TICKS = 120;
     magnetNodes.forEach(node => {
         if (!node.active) return;
         let speedMult = (node.owner && node.owner.hasUpgrade && node.owner.hasUpgrade('evo_mag_net_2')) ? 1.5 : 1.0;
-        let baseForce = 2.8 * speedMult;
+        // Từ trường suy yếu theo thời gian: 2s đầu cực mạnh, sau đó yếu hẳn (tránh khóa đối thủ mãi)
+        node.age = (node.age || 0) + 1;
+        let strongField = node.age <= MAGNET_STRONG_TICKS;
+        let baseForce = (strongField ? 4.2 : 1.0) * speedMult;
         [p1, p2].forEach(p => {
             if (!p || p.hp <= 0) return;
             let dist = Math.hypot((p.x + p.w / 2) - node.x, (p.y + p.h / 2) - node.y);
@@ -147,7 +151,7 @@ function tickPhysics() {
                             p.x = Math.max(0, Math.min(canvas.width - p.w, p.x + dirX * baseForce));
                         }
                         if (Math.abs(dx) <= 30 && p !== node.owner) {
-                            p.freezeTimer = Math.max(p.freezeTimer || 0, 30);
+                            if (strongField) p.freezeTimer = Math.max(p.freezeTimer || 0, 30);
                             if (!node.lastDmgTime || curMagnetTime - node.lastDmgTime >= 1000) {
                                 node.lastDmgTime = curMagnetTime;
                                 let shockDmg = (node.owner && node.owner.hasUpgrade && node.owner.hasUpgrade('evo_mag_net_1')) ? 0.5 : 0.25;

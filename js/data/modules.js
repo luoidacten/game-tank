@@ -108,7 +108,7 @@ const MODULES = {
         {
             id: 'magnet',
             name: 'Nam Châm',
-            desc: 'HP:4.5 | Dame:0.5 | Đạn:6. Đổi Cực Âm/Dương (+/-). Bắn cắm Cột Từ Trường. Hút/Đẩy kẻ địch nhiễm từ. Lướt Cực Tính đâm cột.',
+            desc: 'HP:4.5 | Dame:0.5 | Đạn:6. Giữ: Đổi Cực Âm/Dương (+/-). Bắn cắm Cột Từ Trường (từ trường cực mạnh 2s đầu rồi yếu dần). Hút/Đẩy kẻ địch nhiễm từ. Nhấp đúp khi Cột/kẻ địch nhiễm từ phía trước KHÁC CỰC: Lướt Cực Tính lao thẳng tới húc như xe TANK, vừa hút mục tiêu về phía mình.',
             type: 'body', role: ['Kiểm Soát', 'Cơ Động'],
             size: { w: 34, h: 34 },
             stats: { hp: 4.5, dmg: 0.5, ammo: 6, speedMult: 1.0 }
@@ -197,7 +197,7 @@ const MODULES = {
         {
             id: 'dj',
             name: 'DJ',
-            desc: 'HP:4 | Dame:0.75 | Đạn:2 (∞ khi đúng nhịp) | Tốc: 1.15x. "Lắng nghe nhịp điệu nào!" Nút Bắn đổi màu theo nhịp Xanh -> Vàng -> Đỏ: bấm lúc ĐỎ = Cảm Âm Hoàn Hảo (sóng âm rộng, không tốn đạn, làm chậm, +1 Combo). Bấm sai = Loạn Âm (đứt combo, nửa dame, tốn đạn; hết đạn khóa 1.5s). Giữ 0.4s: đổi bản nhạc Dễ/Trung Bình/Khó. Combo tăng tốc & dame; mỗi 30 combo +1 Khiên, mỗi 45 combo +1 HP.',
+            desc: 'HP:4 | Dame:0.75 | Đạn:2 (∞ khi đúng nhịp) | Tốc: 1.15x. "Lắng nghe nhịp điệu nào!" Nút Bắn đổi màu theo nhịp Xanh -> Vàng -> Đỏ: bấm lúc ĐỎ = Cảm Âm Hoàn Hảo (sóng âm rộng, không tốn đạn, làm chậm, +1 Combo). Bấm sai = Loạn Âm (đứt combo, nửa dame, tốn đạn; hết đạn khóa 1.5s). Vùng canh nhịp dài & rộng. Giữ 0.4s: đổi bản nhạc Dễ (nốt chậm, thưa, Hoàn Hảo rất dễ) / Trung Bình (vừa phải, thỉnh thoảng Nốt Đôi: bấm 2 lần liên tiếp) / Khó (nhanh, cho người đã luyện). Combo tăng tốc & dame; mỗi 30 combo +1 Khiên, mỗi 45 combo +1 HP.',
             type: 'body',
             role: ['Đối Đầu', 'Cơ Động', 'Sinh Tồn'],
             size: { w: 28, h: 28 },
