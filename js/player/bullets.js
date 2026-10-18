@@ -413,7 +413,7 @@ Object.assign(Player.prototype, {
                     let plantX = Math.max(10, Math.min(canvas.width - 10, b.x));
                     let plantY = Math.max(10, Math.min(canvas.height - 10, b.y));
                     let isFullEvo = (this.hasUpgrade && this.hasUpgrade('evo_mag_net_1') && this.hasUpgrade('evo_mag_net_2'));
-                    let radius = isFullEvo ? 135 : 90;
+                    let radius = isFullEvo ? 118 : 78; // bán kính từ trường (đã thu nhỏ)
                     magnetNodes.push({
                         id: Math.random(),
                         owner: this,
@@ -421,6 +421,7 @@ Object.assign(Player.prototype, {
                         y: plantY,
                         polarity: b.polarity || this.magnetPolarity || 1,
                         radius: radius,
+                        age: 0,
                         active: true
                     });
                     explosions.push(new Explosion(plantX, plantY, 25, b.polarity === 1 ? '#ff5722' : '#00bcd4', 0, this));

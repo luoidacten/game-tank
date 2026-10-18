@@ -89,8 +89,8 @@ Object.assign(Player.prototype, {
         }
 
         // Magnet Polar Dash Invulnerability
-        if (canDodge && this.weapon === 'magnet' && this.isPolarDashing) {
-            return 0; // i-frame during Polar Dash
+        if (canDodge && this.weapon === 'magnet' && this.isPolarDashing && this.polarDashPhase === 1) {
+            return 0; // i-frame khi đang lao (pha bật về thì không)
         }
 
         // Bow (Cung) - Nội tại Nhạy Bén: Tự động né 1 đòn đánh mỗi 8s (5s Full Evo)

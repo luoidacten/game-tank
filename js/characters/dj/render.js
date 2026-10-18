@@ -3,11 +3,11 @@
 // và đèn báo nhịp trên NÚT BẮN (DOM) của người chơi tại máy này.
 // ==========================================
 
-const DJ_LANE_HALF = 64, DJ_LANE_H = 14;
+const DJ_LANE_HALF = 82, DJ_LANE_H = 18; // khuông dài & cao hơn -> dễ canh nhịp
 
 function djLaneGeom(p) {
     const cx = Math.max(DJ_LANE_HALF + 4, Math.min(canvas.width - DJ_LANE_HALF - 4, p.x + p.w / 2));
-    const cy = p.id === 1 ? p.y - 24 : p.y + p.h + 24;
+    const cy = p.id === 1 ? p.y - 26 : p.y + p.h + 26;
     return { cx, cy };
 }
 
@@ -135,6 +135,20 @@ function djDrawLane(p, tick) {
         ctx.beginPath();
         [-1, 1].forEach(s => { if (ctx.roundRect) ctx.roundRect(cx + s * off - 2, cy - h / 2 + 2, 4, h - 4, 2); else ctx.rect(cx + s * off - 2, cy - h / 2 + 2, 4, h - 4); });
         ctx.fill();
+        // Nốt Đôi: viền trắng + chấm nối 2 nhịp liên tiếp
+        if (n.dbl && !late) {
+            ctx.shadowBlur = 0; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1;
+            ctx.beginPath();
+            [-1, 1].forEach(s => { if (ctx.roundRect) ctx.roundRect(cx + s * off - 2.5, cy - h / 2 + 1.5, 5, h - 3, 2); else ctx.rect(cx + s * off - 2.5, cy - h / 2 + 1.5, 5, h - 3); });
+            ctx.stroke();
+            if (n.dbl === 1) {
+                const off2 = px(Math.max(-diff.perf * 2, d + diff.dblGap));
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)'; ctx.setLineDash([2, 2]);
+                ctx.beginPath();
+                [-1, 1].forEach(s => { ctx.moveTo(cx + s * off, cy); ctx.lineTo(cx + s * off2, cy); });
+                ctx.stroke(); ctx.setLineDash([]);
+            }
+        }
         ctx.shadowBlur = 0; ctx.globalAlpha = 1;
     }
     // Vòng tâm chuẩn

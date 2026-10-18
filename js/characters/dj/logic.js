@@ -7,17 +7,18 @@
 // Nốt nhạc: p.djNotes = [{ t: tick chạm tâm, hit, beat }]
 // ==========================================
 
-// Độ khó bản nhạc: interval = số tick giữa 2 nốt, approach = thời gian nốt chạy vào tâm,
-// perf = nửa cửa sổ Hoàn Hảo (tick), yel = độ dài vùng Vàng trước tâm (tick)
+// Độ khó bản nhạc: interval = số tick giữa 2 nốt, approach = thời gian nốt chạy vào tâm (lớn = nốt chạy chậm),
+// perf = nửa cửa sổ Hoàn Hảo (tick), yel = độ dài vùng Vàng trước tâm (tick),
+// dbl = cứ mỗi N nốt có 1 NỐT ĐÔI (2 nhịp bấm liên tiếp cách nhau dblGap tick), 0 = không có
 const DJ_DIFFS = [
-    { name: 'DỄ 🎵', short: 'DỄ', interval: 40, approach: 80, perf: 6, yel: 14, color: '#22d3ee' },
-    { name: 'TRUNG BÌNH 🎶', short: 'TB', interval: 40 / 1.4, approach: 68, perf: 5, yel: 12, color: '#a78bfa' }, // +40% mật độ
-    { name: 'KHÓ 🔥', short: 'KHÓ', interval: 40 / 1.8, approach: 56, perf: 4.5, yel: 10, color: '#fb7185' },      // +80% mật độ
-    { name: 'HUYỀN THOẠI 👑', short: 'HT', interval: 15, approach: 46, perf: 4, yel: 8, color: '#facc15' },          // Full Evo
+    { name: 'DỄ 🎵', short: 'DỄ', interval: 60, approach: 115, perf: 11, yel: 22, dbl: 0, dblGap: 0, color: '#22d3ee' },        // chậm, thưa, Hoàn Hảo rất dễ
+    { name: 'TRUNG BÌNH 🎶', short: 'TB', interval: 46, approach: 95, perf: 9, yel: 18, dbl: 4, dblGap: 15, color: '#a78bfa' }, // vừa phải, thỉnh thoảng Nốt Đôi
+    { name: 'KHÓ 🔥', short: 'KHÓ', interval: 34, approach: 74, perf: 6, yel: 13, dbl: 5, dblGap: 13, color: '#fb7185' },       // ≈ Dễ/TB cũ: cho người đã luyện
+    { name: 'HUYỀN THOẠI 👑', short: 'HT', interval: 17, approach: 50, perf: 4, yel: 8, dbl: 3, dblGap: 9, color: '#facc15' },  // Full Evo: rất nhanh, dày đặc
 ];
 const DJ_HOLD_TICKS = 24;    // giữ ~0.4s: đổi bản nhạc
 const DJ_LOCK_TICKS = 90;    // hết đạn vì bấm trượt: khóa xám 1.5s
-const DJ_EARLY_BONUS = 3;    // vàng sát tâm (sớm tối đa 3 tick ngoài vùng đỏ) vẫn tính Hoàn Hảo
+const DJ_EARLY_BONUS = 4;    // vàng sát tâm (sớm tối đa 4 tick ngoài vùng đỏ) vẫn tính Hoàn Hảo
 const DJ_LATE_KEEP = 14;     // nốt đã qua tâm còn hiển thị thêm bao lâu
 const DJ_COLORS = { red: '#ff1744', yellow: '#ffd60a', blue: '#2f6bff', lock: '#64748b' };
 
@@ -240,8 +241,17 @@ function djTickBeat(p) {
     if (!p.djNotes) p.djNotes = [];
     if (typeof p.djNext !== 'number' || p.djNext < tick) p.djNext = tick + diff.approach;
     while (p.djNext <= tick + diff.approach) {
-        p.djNotes.push({ t: Math.round(p.djNext), hit: false, beat: false });
-        p.djNext += diff.interval;
+        const t0 = Math.round(p.djNext);
+        p.djNoteN = (p.djNoteN || 0) + 1;
+        if (diff.dbl > 0 && p.djNoteN % diff.dbl === 0) {
+            // Nốt Đôi: 2 nhịp bấm liên tiếp sát nhau
+            p.djNotes.push({ t: t0, hit: false, beat: false, dbl: 1 });
+            p.djNotes.push({ t: t0 + diff.dblGap, hit: false, beat: false, dbl: 2 });
+            p.djNext += diff.interval + diff.dblGap;
+        } else {
+            p.djNotes.push({ t: t0, hit: false, beat: false });
+            p.djNext += diff.interval;
+        }
     }
     for (const n of p.djNotes) {
         if (!n.beat && tick >= n.t) {
@@ -265,7 +275,7 @@ function djOnBeat(p) {
 
 CharHooks.register('dj', {
     setup() {
-        this.djTick = 0; this.djNotes = []; this.djNext = undefined;
+        this.djTick = 0; this.djNotes = []; this.djNext = undefined; this.djNoteN = 0;
         if (typeof this.djDiff !== 'number') this.djDiff = 0;
         this.djDiff = Math.min(this.djDiff, djMaxDiff(this));
         this.djCombo = djFull(this) ? 30 : 0; // Full Evo: khởi đầu với 30 combo

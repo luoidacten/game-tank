@@ -149,8 +149,8 @@ const EVOLUTIONS = {
         { id: 'evo_thun_2', name: 'Rẽ Mây', desc: 'Lôi Minh kéo dài 8s; Nhận 3 lần miễn nhiễm sát thương hoàn toàn.', cost: 110, type: 'evo' }
     ],
     magnet: [
-        { id: 'evo_mag_net_1', name: 'Từ Trường Tăng Cường', desc: 'Hút gây 0.5 dame (x2); Lướt Cực Tính (Polar Dash) gây x2 dame.', cost: 90, type: 'evo' },
-        { id: 'evo_mag_net_2', name: 'Lưới Từ Cực', desc: 'Tối đa 3 Cột Từ Trường.', cost: 110, type: 'evo' }
+        { id: 'evo_mag_net_1', name: 'Từ Trường Tăng Cường', desc: 'Giật điện từ trường gây 0.5 dame (x2); Lướt Cực Tính: húc 1.5 dame, nổ cột 2 dame.', cost: 90, type: 'evo' },
+        { id: 'evo_mag_net_2', name: 'Lưới Từ Cực', desc: 'Tối đa 3 Cột Từ Trường, lực hút/đẩy x1.5. FULL EVO: 4 cột, bán kính từ trường lớn hơn, đảo cực giật kẻ địch lại gần.', cost: 110, type: 'evo' }
     ],
     evolution: [
         { id: 'evo_evo_1', name: 'Mưa Tiến Hóa', desc: 'Tăng mạnh tỉ lệ rương; Chỉ số nhận từ thùng đồ tăng +30%.', cost: 90, type: 'evo' },
@@ -194,7 +194,7 @@ const EVOLUTIONS = {
     ],
     dj: [
         { id: 'evo_dj_1', name: 'Cảm Âm Dung Sai', desc: 'Được bấm sai tối đa 3 lần mới mất chuỗi Combo. Hồi lại đủ 3 lượt bảo hộ sau mỗi 30 Combo.', cost: 90, type: 'evo' },
-        { id: 'evo_dj_2', name: 'Giai Điệu Thăng Hoa', desc: 'Sóng Âm mở khóa theo Combo: 15 Xuyên Thấu, 30 Phát Nổ, 60 để lại Vùng Âm Nhiệt (thiêu đốt + làm chậm), 120 hóa tia Hitscan. FULL EVO: vào hiệp sẵn 30 Combo, bấm chuẩn Combo x2, buff mạnh hơn; sai 6 lần, lần thứ 6 tự đánh chuẩn; 2 Loa nổi bắn sóng phụ mỗi nhịp; mở Bản Nhạc Huyền Thoại.', cost: 120, type: 'evo' }
+        { id: 'evo_dj_2', name: 'Giai Điệu Thăng Hoa', desc: 'Sóng Âm mở khóa theo Combo: 15 Xuyên Thấu, 30 Phát Nổ, 60 để lại Vùng Âm Nhiệt (thiêu đốt + làm chậm), 120 hóa tia Hitscan. FULL EVO: vào hiệp sẵn 30 Combo, bấm chuẩn Combo x2, buff mạnh hơn; sai 6 lần, lần thứ 6 tự đánh chuẩn; 2 Loa nổi bắn sóng phụ mỗi nhịp; mở Bản Nhạc Huyền Thoại (rất nhanh, dày đặc Nốt Đôi - thử thách cực hạn).', cost: 120, type: 'evo' }
     ],
     steel_hook: [
         { id: 'evo_hook_1', name: 'Tời Thủy Lực', desc: 'Đu dây & kéo nhanh hơn. Tụ lực tối đa 15 lần nảy (mạng nhện xích kín bản đồ).', cost: 125, type: 'evo' },
