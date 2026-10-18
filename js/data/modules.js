@@ -215,7 +215,7 @@ const MODULES = {
         {
             id: 'flower_shadow',
             name: 'Hoa Ảnh',
-            desc: '"Khiêu vũ nào!" HP:3 | Dame:0.5 | Thanh Hoa 100% (tự hồi) | Tốc: 1.35x. Giữ Bắn 0.25s đổi Vũ Điệu Khai → Phá → Thiên, nhấp để múa. KHAI (10%): 3 cánh hoa bay tới cuối sân, nghỉ 5s rồi trôi về (gây dame, mỗi cánh hoàn 5%). PHÁ (25%): lướt xuyên thẳng tới cuối sân rồi về, 1s sau mọi mục tiêu bị xuyên chịu 5 nhát chém. THIÊN (50%): biến mất, lái Vòng Cảnh Báo (hút & làm chậm) tối đa 5s, nhấp để đáp: 3 dame + choáng 1.5s. Mỗi 50% Hoa tiêu hao: vũ điệu kế tiếp được Cường Hóa (Bách Hoa Nở Rộ).',
+            desc: '"Khiêu vũ nào!" HP:3 | Dame:0.5 | Thanh Hoa 100% (hồi sau 0.5s không múa) | Tốc: 1.35x. Giữ Bắn 0.25s đổi Vũ Điệu Khai → Phá → Thiên, nhấp để múa. KHAI (10%): 3 cánh hoa bay tới cuối sân, nghỉ 3s rồi trôi về (gây dame, mỗi cánh về tới hoàn 5%); tối đa 12 cánh trên sân. Cánh bay ra / thu về chạm vật cản, công trình, triệu hồi, xe tiền thì gây dame rồi vỡ; cánh đang nằm trên sân địch bị xe địch lăn qua sẽ nát. PHÁ (25%): lướt xuyên thẳng tới cuối sân rồi về, 1s sau mọi mục tiêu bị xuyên chịu 5 nhát chém. THIÊN (50%): biến mất, lái Vòng Cảnh Báo (hút & làm chậm) tối đa 5s, nhấp để đáp: vòng khóa đỏ 0.5s rồi giáng 2.7 dame + choáng 1.5s. Tiêu hao 75% Hoa: vũ điệu kế tiếp được Cường Hóa (Bách Hoa Nở Rộ, cánh hoa vàng xuyên vật cản), đòn cường hóa không tính vào bộ đếm và bộ đếm về 0 sau đó.',
             type: 'body',
             role: ['Cơ Động', 'Đối Đầu', 'Kiểm Soát'],
             size: { w: 24, h: 24 },

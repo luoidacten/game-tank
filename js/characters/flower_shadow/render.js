@@ -14,14 +14,14 @@ function fsPetalPath(s) {
     ctx.closePath();
 }
 
-function fsDrawPetal(x, y, s, rot, alpha = 1, glow = true, col = FS_PINK) {
+function fsDrawPetal(x, y, s, rot, alpha = 1, glow = true, col = FS_PINK, light = FS_LIGHT) {
     ctx.save();
     ctx.translate(x, y); ctx.rotate(rot);
     ctx.globalAlpha *= alpha;
     if (glow) { ctx.shadowBlur = 10; ctx.shadowColor = col; }
     const g = ctx.createRadialGradient(0, s * 0.6, 0, 0, 0, s * 1.1);
     g.addColorStop(0, '#ffffff');
-    g.addColorStop(0.45, FS_LIGHT);
+    g.addColorStop(0.45, light);
     g.addColorStop(1, col);
     ctx.fillStyle = g;
     fsPetalPath(s); ctx.fill();
@@ -73,6 +73,29 @@ function fsDrawSlash(cx, cy, R, rot, k, col = FS_PINK, width = 0.2) {
     ctx.restore();
 }
 
+// Cánh hoa cường hóa: vàng kim + hào quang tia sáng 4 cánh (xuyên vật cản)
+function fsDrawEmpPetal(x, y, s, rot, alpha, age) {
+    ctx.save();
+    ctx.globalAlpha *= alpha;
+    ctx.globalCompositeOperation = 'lighter';
+    const pulse = 0.75 + 0.25 * Math.sin(age * 0.3);
+    const halo = ctx.createRadialGradient(x, y, 0, x, y, s * 2.4);
+    halo.addColorStop(0, 'rgba(255, 230, 140, 0.55)'); halo.addColorStop(1, 'rgba(255, 200, 60, 0)');
+    ctx.fillStyle = halo;
+    ctx.beginPath(); ctx.arc(x, y, s * 2.4, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = `rgba(255, 246, 200, ${0.8 * pulse})`; ctx.lineWidth = 1.2;
+    const L = s * 2.6 * pulse, a = age * 0.08;
+    ctx.beginPath();
+    for (let i = 0; i < 4; i++) {
+        const k = a + i * Math.PI / 2;
+        ctx.moveTo(x + Math.cos(k) * s * 0.6, y + Math.sin(k) * s * 0.6);
+        ctx.lineTo(x + Math.cos(k) * L, y + Math.sin(k) * L);
+    }
+    ctx.stroke();
+    ctx.restore();
+    fsDrawPetal(x, y, s, rot, alpha, true, FS_EMP_GOLD, FS_EMP_LIGHT);
+}
+
 function fsDrawPetalEntity(p) {
     if (!p.active) return;
     const o = p.owner;
@@ -81,12 +104,22 @@ function fsDrawPetalEntity(p) {
     // Vệt bay
     const tr = p.trail || [];
     for (let i = 2; i < tr.length; i += 2) {
-        ctx.globalAlpha = alpha * 0.28 * (1 - i / tr.length);
-        ctx.fillStyle = FS_PINK;
+        ctx.globalAlpha = alpha * (p.emp ? 0.4 : 0.28) * (1 - i / tr.length);
+        ctx.fillStyle = p.emp ? FS_EMP_GOLD : FS_PINK;
         ctx.beginPath(); ctx.arc(tr[i], tr[i + 1], p.r * (1 - i / tr.length) * 0.8, 0, Math.PI * 2); ctx.fill();
     }
     ctx.globalAlpha = 1;
-    if (p.state === 'rest') {
+    if (p.fade > 0) {
+        // Vỡ / bị đè nát: cánh hoa tan dần & rơi vụn
+        const k = p.fade / 20;
+        fsDrawPetal(p.x, p.y, p.r * (1.1 - 0.5 * k), p.rot, alpha * 0.9, false, p.emp ? FS_EMP_GOLD : FS_PINK);
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = p.emp ? FS_EMP_LIGHT : FS_LIGHT;
+        for (let i = 0; i < 4; i++) {
+            const a = i * 1.57 + p.rot;
+            ctx.beginPath(); ctx.arc(p.x + Math.cos(a) * 12 * k, p.y + Math.sin(a) * 12 * k, 1.5, 0, Math.PI * 2); ctx.fill();
+        }
+    } else if (p.state === 'rest') {
         // Nằm nghỉ: mờ, phập phồng; Evo 2 tỏa phấn
         const pulse = 0.6 + 0.25 * Math.sin(p.age * 0.12);
         if (o && fsEvo2(o)) {
@@ -103,8 +136,9 @@ function fsDrawPetalEntity(p) {
         }
         // Đồng hồ nghỉ
         ctx.strokeStyle = 'rgba(255, 214, 232, 0.5)'; ctx.lineWidth = 1.2;
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.r + 4, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (p.timer / 300)); ctx.stroke();
-        fsDrawPetal(p.x, p.y, p.r * 1.3, p.rot * 0.2, pulse + 0.15, true);
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r + 4, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (p.timer / (p.restMax || 180))); ctx.stroke();
+        if (p.emp) fsDrawEmpPetal(p.x, p.y, p.r * 1.3, p.rot * 0.2, pulse + 0.15, p.age);
+        else fsDrawPetal(p.x, p.y, p.r * 1.3, p.rot * 0.2, pulse + 0.15, true);
     } else if (p.state === 'aim' || p.state === 'seekAim') {
         // Đường cảnh báo hồng
         const k = p.state === 'aim' ? 1 - p.timer / 60 : 1 - p.timer / 36;
@@ -112,7 +146,8 @@ function fsDrawPetalEntity(p) {
         ctx.lineWidth = 1 + k * 1.5; ctx.setLineDash([7, 5]); ctx.lineDashOffset = -p.age;
         ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.tx, p.ty); ctx.stroke();
         ctx.setLineDash([]);
-        fsDrawPetal(p.x, p.y, p.r * (1.1 + 0.3 * k), p.rot, 1);
+        if (p.emp) fsDrawEmpPetal(p.x, p.y, p.r * (1.1 + 0.3 * k), p.rot, 1, p.age);
+        else fsDrawPetal(p.x, p.y, p.r * (1.1 + 0.3 * k), p.rot, 1);
     } else if (p.state === 'line') {
         const k = p.flash / 14;
         ctx.globalAlpha = 1 - k;
@@ -122,8 +157,10 @@ function fsDrawPetalEntity(p) {
         ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.tx, p.ty); ctx.stroke();
         ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.tx, p.ty); ctx.stroke();
+    } else if (p.emp) {
+        fsDrawEmpPetal(p.x, p.y, p.r * 1.25, p.rot, alpha, p.age);
     } else {
-        fsDrawPetal(p.x, p.y, p.r * (p.emp ? 1.25 : 1.05), p.rot, alpha);
+        fsDrawPetal(p.x, p.y, p.r * 1.05, p.rot, alpha);
     }
     ctx.restore();
 }
@@ -263,14 +300,48 @@ function fsDrawThienCircle(p) {
     const t = c.t;
     ctx.save();
     const landing = c.landing > 0;
-    const lk = landing ? 1 - c.landing / c.landMax : 0;
-    const R = c.r * (landing ? 1 - 0.25 * lk : 1);
+    if (landing) {
+        // RULE 11: vòng đã KHÓA — đỏ đặc, đứng yên, vòng ngoài co dần tới lúc giáng
+        const lk = 1 - c.landing / (c.landMax || 30);
+        const R = c.r;
+        const blink = 0.5 + 0.5 * Math.sin(lk * Math.PI * 10);
+        ctx.fillStyle = `rgba(255, 30, 60, ${0.28 + 0.22 * lk})`;
+        ctx.shadowBlur = 16; ctx.shadowColor = '#ff1e3c';
+        ctx.beginPath(); ctx.arc(c.x, c.y, R, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = '#ff1e3c'; ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.arc(c.x, c.y, R, 0, Math.PI * 2); ctx.stroke();
+        ctx.strokeStyle = `rgba(255, 255, 255, ${0.55 + 0.4 * blink})`; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(c.x, c.y, R + R * 1.1 * (1 - lk), 0, Math.PI * 2); ctx.stroke();
+        // Hồng tâm
+        ctx.strokeStyle = 'rgba(255, 230, 235, 0.8)'; ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(c.x - R * 0.5, c.y); ctx.lineTo(c.x + R * 0.5, c.y);
+        ctx.moveTo(c.x, c.y - R * 0.5); ctx.lineTo(c.x, c.y + R * 0.5);
+        ctx.stroke();
+        fsDrawFlower(c.x, c.y, c.emp ? 14 : 10, 0, 0.9, '#ff3d5a');
+        // 0.25s cuối: cột sáng & lưỡi kiếm rơi
+        if (lk > 0.5) {
+            const fk = (lk - 0.5) / 0.5;
+            const dir = fsDir(p);
+            const top = c.y + dir * (200 * (1 - fk));
+            ctx.globalCompositeOperation = 'lighter';
+            const lg = ctx.createLinearGradient(c.x, top, c.x, c.y);
+            lg.addColorStop(0, 'rgba(255,126,182,0)'); lg.addColorStop(1, 'rgba(255,240,247,0.85)');
+            ctx.fillStyle = lg;
+            ctx.fillRect(c.x - 6, Math.min(top, c.y), 12, Math.abs(c.y - top));
+            fsDrawPetal(c.x, top, 12, dir < 0 ? Math.PI : 0, 1);
+        }
+        ctx.restore();
+        return;
+    }
+    const R = c.r;
     const g = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, R);
-    g.addColorStop(0, `rgba(255, 61, 139, ${0.08 + 0.25 * lk})`);
-    g.addColorStop(1, `rgba(255, 61, 139, ${0.22 + 0.2 * lk})`);
+    g.addColorStop(0, 'rgba(255, 61, 139, 0.08)');
+    g.addColorStop(1, 'rgba(255, 61, 139, 0.22)');
     ctx.fillStyle = g;
     ctx.beginPath(); ctx.arc(c.x, c.y, R, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = landing ? '#ffffff' : '#ff4d8d'; ctx.lineWidth = 2;
+    ctx.strokeStyle = '#ff4d8d'; ctx.lineWidth = 2;
     ctx.setLineDash([10, 6]); ctx.lineDashOffset = -t * 0.8;
     ctx.beginPath(); ctx.arc(c.x, c.y, R, 0, Math.PI * 2); ctx.stroke();
     ctx.setLineDash([]);
@@ -283,17 +354,6 @@ function fsDrawThienCircle(p) {
         fsDrawPetal(c.x + Math.cos(a) * R * 0.66, c.y + Math.sin(a) * R * 0.66, 4, a + Math.PI / 2, 0.7, false);
     }
     fsDrawFlower(c.x, c.y, c.emp ? 14 : 10, -t * 0.04, 0.85);
-    // Đang giáng: cột sáng & lưỡi kiếm rơi
-    if (landing) {
-        const dir = fsDir(p);
-        const top = c.y + dir * (180 * (1 - lk));
-        ctx.globalCompositeOperation = 'lighter';
-        const lg = ctx.createLinearGradient(c.x, top, c.x, c.y);
-        lg.addColorStop(0, 'rgba(255,126,182,0)'); lg.addColorStop(1, 'rgba(255,240,247,0.8)');
-        ctx.fillStyle = lg;
-        ctx.fillRect(c.x - 6, Math.min(top, c.y), 12, Math.abs(c.y - top));
-        fsDrawPetal(c.x, top, 12, dir < 0 ? Math.PI : 0, 1);
-    }
     ctx.restore();
 }
 
@@ -356,11 +416,42 @@ Object.assign(CharHooks.registry.flower_shadow, {
         const g = ctx.createLinearGradient(bx, 0, bx + bw, 0);
         g.addColorStop(0, FS_DEEP); g.addColorStop(1, FS_LIGHT);
         ctx.fillStyle = g;
-        ctx.fillRect(bx, y, bw * Math.max(0, this.fsHoa) / 100, 4);
+        const hoa = Math.max(0, this.fsHoa);
+        ctx.fillRect(bx, y, bw * Math.min(100, hoa) / 100, 4);
+        // Kho Hoa > 100%: lớp 2 (100-200%) trắng hồng rực, lớp 3 (200-300%) vàng kim, chồng lên cùng thanh
+        const maxH = fsMaxHoa(this);
+        const layers = [[100, '#ffffff', FS_PINK], [200, FS_EMP_GOLD, FS_EMP_GOLD]];
+        for (const [base, col, glow] of layers) {
+            if (maxH <= base) break;
+            // Khung báo còn lớp chưa nạp
+            ctx.strokeStyle = base === 100 ? 'rgba(255,255,255,0.35)' : 'rgba(255,211,77,0.45)';
+            ctx.lineWidth = 0.8;
+            ctx.strokeRect(bx - 0.5 - (base === 200 ? 1 : 0), y - 0.5 - (base === 200 ? 1 : 0), bw + 1 + (base === 200 ? 2 : 0), 5 + (base === 200 ? 2 : 0));
+            if (hoa <= base) continue;
+            ctx.shadowBlur = 8; ctx.shadowColor = glow;
+            ctx.fillStyle = col;
+            ctx.fillRect(bx, y + 1, bw * Math.min(100, hoa - base) / 100, 2);
+            ctx.shadowBlur = 0;
+        }
+        if (hoa > 100) {
+            ctx.font = 'bold 7px "Orbitron", Arial';
+            ctx.textAlign = 'right';
+            ctx.fillStyle = hoa > 200 ? FS_EMP_GOLD : '#ffffff';
+            drawWorldText(ctx, `${Math.floor(hoa)}%`, bx - 2, y + 5);
+        }
         // Vạch giá vũ điệu hiện tại
         const cost = FS_COST[this.fsDance || 0];
         ctx.fillStyle = this.fsHoa >= cost ? '#ffffff' : '#64748b';
         ctx.fillRect(bx + bw * cost / 100 - 0.5, y - 1, 1.5, 6);
+        // Số cánh Khai trên sân / giới hạn (Full Evo: không giới hạn)
+        const cap = fsPetalCap(this);
+        if (cap !== Infinity) {
+            const n = fsKhaiCount(this);
+            ctx.font = 'bold 7px "Orbitron", Arial';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = n >= cap ? '#ff5d7a' : 'rgba(255, 214, 232, 0.75)';
+            drawWorldText(ctx, `✿${n}/${cap}`, bx + bw / 2, this.id === 1 ? y + 12 : y - 4);
+        }
         // Vũ điệu hiện tại: nhãn + 3 chấm bên cạnh xe
         const right = this.x + this.w + 44 < canvas.width;
         const lx = right ? this.x + this.w + 6 : this.x - 6;
