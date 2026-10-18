@@ -182,7 +182,10 @@ class HitscanTelegraph {
     }
     fire() {
         const enemy = this.owner === p1 ? p2 : p1;
-        if (enemy && enemy.hp > 0 && this.x > enemy.x - 4 && this.x < enemy.x + enemy.w + 4) {
+        const o = this.owner, swDir = o.id === 1 ? -1 : 1;
+        const swW = (typeof sniperWallBlockY === 'function') ? sniperWallBlockY(o, this.x, o.id === 1 ? o.y : o.y + o.h, swDir, 2, this.dmg) : null; // Tường Sniper chặn tia
+        if (swW) this.stopY = sniperWallStopY(swW, swDir);
+        else if (enemy && enemy.hp > 0 && this.x > enemy.x - 4 && this.x < enemy.x + enemy.w + 4) {
             const d = enemy.takeDamage(this.dmg, this.owner);
             if (this.onFire) BulletHooks.call({ hook: this.onFire, x: this.x, y: enemy.y + enemy.h / 2, owner: this.owner, isHitscan: true }, 'hit', this.owner, enemy, d);
         }
@@ -190,8 +193,8 @@ class HitscanTelegraph {
     }
     draw() {
         if (!this.active) return;
-        const top = this.owner.id === 1 ? 0 : this.owner.y + this.owner.h;
-        const bot = this.owner.id === 1 ? this.owner.y : canvas.height;
+        const top = this.owner.id === 1 ? (this.stopY != null ? this.stopY : 0) : this.owner.y + this.owner.h;
+        const bot = this.owner.id === 1 ? this.owner.y : (this.stopY != null ? this.stopY : canvas.height);
         ctx.save();
         if (this.delay > 0) {
             ctx.strokeStyle = 'rgba(255, 40, 60, 0.75)'; ctx.lineWidth = 1.5; ctx.setLineDash([6, 4]);

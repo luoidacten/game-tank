@@ -7,10 +7,11 @@ Object.assign(Player.prototype, {
         const isEvo = this.hasUpgrade('evo_lazer_c_1');
         const beamW = isEvo ? 30 : 10;
         const beamX = this.x + this.w / 2 - beamW / 2;
-        beams.push(new Beam(beamX, (this.id === 1 ? 0 : this.y + this.h), beamW, (this.id === 1 ? this.y : canvas.height - (this.y + this.h)), this.id, isEvo));
-
-        const bRx = beamX; const bRy = (this.id === 1 ? 0 : this.y + this.h);
-        const bRw = beamW; const bRh = (this.id === 1 ? this.y : canvas.height - (this.y + this.h));
+        const bRx = beamX; let bRy = (this.id === 1 ? 0 : this.y + this.h);
+        const bRw = beamW; let bRh = (this.id === 1 ? this.y : canvas.height - (this.y + this.h));
+        const swBlk = sniperWallClipBeam(this, bRx, bRy, bRw, bRh, this.id === 1 ? -1 : 1, 20); // Tường Sniper chặn tia
+        if (swBlk) { bRy = swBlk.y; bRh = swBlk.h; }
+        beams.push(new Beam(beamX, bRy, beamW, bRh, this.id, isEvo));
 
         const enemy = (this.id === 1) ? p2 : p1;
         // [ĐỔI] Tia lớn 20 dame (one-shot), Full Evo xuyên khiên. Đây là đòn hitscan duy nhất không cảnh báo:

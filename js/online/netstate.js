@@ -16,6 +16,7 @@ const NET_CLASSES = {
     SniperWall, NecroMinion, GhostDecoy, Turret,
     BodyZone, StoneBlock, SkyStrike, HitscanTelegraph, ThrownMecha, CrateBurst, AttackTruck, SwordSweep, LightningBolt, PortalGate, HitscanWarning,
     DjSoundZone, DjBeam,
+    BigBulletBurst,
     FsPetal, FsSlashMark, FsClone, FsShadow, FsLandStrike, FsStar,
     TzMortar, TzZone,
 };

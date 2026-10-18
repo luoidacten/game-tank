@@ -30,6 +30,8 @@ Object.assign(Player.prototype, {
             let beamX = this.x + this.w / 2 - beamW / 2;
             let beamY = (this.id === 1) ? 0 : this.y + this.h;
             let beamH = (this.id === 1) ? this.y : (canvas.height - (this.y + this.h));
+            const swBlk = sniperWallClipBeam(this, beamX, beamY, beamW, beamH, dirY, baseDmg); // Tường Sniper chặn tia
+            if (swBlk) { beamY = swBlk.y; beamH = swBlk.h; }
             beams.push(new Beam(beamX, beamY, beamW, beamH, this.id, true));
             triggerScreenShake(6, 10);
             if (typeof addFloatingText === 'function') addFloatingText(this.x + this.w / 2, this.y - 15, "SHADOW RAYCAST ⚡", "#9b59b6", 15);

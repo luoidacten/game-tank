@@ -23,8 +23,8 @@ const EVOLUTIONS = {
         { id: 'evo_ice_2', name: 'Hàn Băng', desc: 'x1.5 Dame lên kẻ bị chậm, Vùng băng gây dame', cost: 60, type: 'evo' }
     ],
     big_bullet: [
-        { id: 'evo_big_1', name: 'To Hơn Nữa', desc: 'Đạn siêu to khổng lồ', cost: 20, type: 'evo' },
-        { id: 'evo_big_2', name: 'Bóng Cao Su', desc: 'Đạn nảy lại 1 lần khi chạm tường', cost: 100, type: 'evo' }
+        { id: 'evo_big_1', name: 'To Hơn Nữa', desc: 'Đạn siêu to khổng lồ. Full Evo: sau lần nảy đầu đạn hóa Xuyên Thấu (xuyên vật cản, vẫn trúng địch), không nảy nữa mà tan ở giữa sân', cost: 20, type: 'evo' },
+        { id: 'evo_big_2', name: 'Bóng Cao Su', desc: 'Đạn nảy lại khi chạm tường. Full Evo: đạn kết thúc/bị phá sẽ nổ thành vòng mảnh đạn 360° (chỉ hại địch)', cost: 100, type: 'evo' }
     ],
     shotgun: [
         { id: 'evo_shot_1', name: 'Mưa Đạn', desc: 'Tỏa 5 tia', cost: 45, type: 'evo' },
@@ -109,7 +109,7 @@ const EVOLUTIONS = {
     ],
     // THÊM TIẾN HÓA SNIPER VÀO ĐÂY:
     sniper: [
-        { id: 'evo_sniper_1', name: 'Tường Thép', type: 'evo', desc: 'Tường HP x5. Đạn Sniper đi qua tường phe mình KHÔNG bị giảm sát thương.', cost: 80 },
+        { id: 'evo_sniper_1', name: 'Tường Thép', type: 'evo', desc: 'Tường HP x5. Đạn Sniper đi qua tường phe mình KHÔNG bị giảm sát thương. Full Evo: tường dài & cứng hơn (HP x7), không tự mục, bất tử 2s đầu, đạn phe mình không làm hại tường.', cost: 80 },
         { id: 'evo_sniper_2', name: 'Xuyên Thủng', type: 'evo', desc: '25% đạn thành tia Raycast (chạm tường/chướng ngại vật sẽ thành đạn thường).', cost: 100 }
     ],
     cung: [

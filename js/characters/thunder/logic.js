@@ -154,6 +154,8 @@ Object.assign(Player.prototype, {
         let targetY = (dirY === -1) ? 0 : canvas.height;
         let enemy = (this.id === 1) ? p2 : p1;
         let hitWidth = 24;
+        const swW = sniperWallBlockY(this, startX, startY, dirY, 6, 2.0); // Tường Sniper chặn tia
+        if (swW) { targetY = sniperWallStopY(swW, dirY); enemy = null; }
 
         if (enemy && enemy.hp > 0 && enemy.x <= startX + hitWidth && enemy.x + enemy.w >= startX - hitWidth) {
             enemy.takeDamage(2.0, this);
