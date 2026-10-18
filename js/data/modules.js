@@ -100,7 +100,7 @@ const MODULES = {
         {
             id: 'thunder',
             name: 'Sấm Chớp',
-            desc: 'HP:2 | Dame:1 | Đạn:0 (3 Lôi Phong Thương). Nhấp: Phóng thương cắm tường nổ AoE. Giữ 0.5-1s: Thu thương. Giữ >1s: Trảm Lôi. Thiên Kiếp (Lôi Minh 3/3): Nhấp = Lôi Độn (hóa sét lao tới, hút địch, chém nhanh, bất tử); kết thúc bằng Thiên Lôi Giáng (bay lên trời, lái vòng, giáng gây choáng).',
+            desc: 'HP:2 | Dame:1 | Đạn:0 (3 Lôi Phong Thương). Nhấp: Phóng thương cắm tường nổ AoE. Giữ 0.5-1s: Thu thương. Giữ >1s: Lôi Trảm (chém rộng ở từng cây thương, càng nhiều thương càng nhanh, tối đa 3s; xong được buff tốc chạy + sát thương ngắn & 1-3 thương rơi từ trời xuống địch, báo trước 3s). Mất hết thương: hồi lại sau 5s. Lôi Minh chỉ tích khi Thu thương, Lôi Trảm, hoặc thương phóng trúng địch. Thiên Kiếp (Lôi Minh 3/3): Nhấp = Lôi Độn (hóa sét lao tới, hút địch, chém nhanh, bất tử); kết thúc bằng Thiên Lôi Giáng (bay lên trời, lái vòng, giáng gây choáng).',
             type: 'body', role: ['Đối Đầu', 'Cơ Động'],
             size: { w: 26, h: 26 },
             stats: { hp: 2, dmg: 1, ammo: 0, speedMult: 1.3 }

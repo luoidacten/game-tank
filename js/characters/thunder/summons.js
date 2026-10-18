@@ -76,7 +76,9 @@ class ThunderReturnBolt {
             this.y += dy / d * step / n;
             if (!this.hit && enemy && enemy.hp > 0 && Math.hypot(enemy.x + enemy.w / 2 - this.x, enemy.y + enemy.h / 2 - this.y) < enemy.w / 2 + 14) {
                 this.hit = true;
-                enemy.takeDamage(this.dmg, o);
+                // Nhiều tia trúng cùng lúc -> sát thương giảm dần
+                const k = Math.max(0.35, 1 - 0.25 * (o.thunderRecallHits || 0));
+                if (enemy.takeDamage(this.dmg * k, o) > 0) o.thunderRecallHits = (o.thunderRecallHits || 0) + 1;
                 fxSlashHit(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, '#fff176', 20);
                 addFloatingText(enemy.x + enemy.w / 2, enemy.y - 12, 'THU THƯƠNG ⚡', '#ffff00', 13);
             }
@@ -118,12 +120,15 @@ class ThunderReturnBolt {
 }
 
 // ==========================================
-// Sét Trời (Full Evo): vòng cảnh báo 1s rồi sét giáng (chỉ trúng đối thủ)
+// Đòn có cảnh báo của Sấm Chớp (vòng cảnh báo rồi giáng, chỉ trúng đối thủ):
+//   kind 'storm' — Sét Trời (Full Evo), 'sub' — Nhát chém phụ Lôi Trảm (Evo 2),
+//   'sky' — Thương rơi từ trời sau Lôi Trảm (báo trước 3s, cắm lại thành thương trên sân)
 // ==========================================
 class ThunderStrike {
-    constructor(x, y, owner, dmg = 1.0, r = 40, delay = 60) {
+    constructor(x, y, owner, dmg = 1.0, r = 40, delay = 60, kind = 'storm', wave = 0) {
         this.x = x; this.y = y; this.owner = owner; this.dmg = dmg; this.r = r;
         this.delay = delay; this.maxDelay = delay; this.fall = 0; this.active = true;
+        this.kind = kind; this.wave = wave;
     }
     update() {
         if (!this.active) return;
@@ -131,14 +136,46 @@ class ThunderStrike {
         if (++this.fall > 16) this.active = false;
     }
     strike() {
-        const enemy = this.owner === p1 ? p2 : p1;
-        const top = this.owner.id === 1 ? -20 : canvas.height + 20; // sét từ "trời" phía đối thủ
+        const o = this.owner;
+        const enemy = o === p1 ? p2 : p1;
+        const top = o.id === 1 ? -20 : canvas.height + 20; // "trời" phía sau lưng đối thủ
+        const inR = enemy && enemy.hp > 0 && Math.hypot(enemy.x + enemy.w / 2 - this.x, enemy.y + enemy.h / 2 - this.y) < this.r + enemy.w / 2;
+        if (this.kind === 'sub') {
+            const a = Math.random() * Math.PI;
+            fxSweep(this.x, this.y, this.r * 0.9, a, a + Math.PI * 1.3, '#ffcc80', 12, 9);
+            fxBolt(this.x - this.r, this.y, this.x + this.r, this.y, '#fff176', 8, 2, 10);
+            explosions.push(new Explosion(this.x, this.y, this.r, 'rgba(255, 200, 80,', 0, o));
+            // Mỗi đợt chém phụ chỉ trúng 1 lần
+            if (inR && o.thunderSubHitWave !== this.wave) {
+                const f = o.thunderSlashFalloff ? o.thunderSlashFalloff() : 1;
+                if (enemy.takeDamage(this.dmg * f, o) > 0) {
+                    o.thunderSubHitWave = this.wave;
+                    o.thunderSlashHits = (o.thunderSlashHits || 0) + 1;
+                    fxSlashHit(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, '#ffcc80', 18);
+                }
+            }
+            if (soundSystem && !soundSystem.muted) soundSystem.playHit();
+            return;
+        }
+        if (this.kind === 'sky') {
+            fxBolt(this.x, top, this.x, this.y, '#80deea', 14, 3, 18);
+            explosions.push(new Explosion(this.x, this.y, this.r + 10, 'rgba(128, 222, 234,', 0, o));
+            spawnSparkParticles(this.x, this.y, '#80deea', 10);
+            if (inR && enemy.takeDamage(this.dmg, o) > 0) addFloatingText(enemy.x + enemy.w / 2, enemy.y - 12, 'THƯƠNG TRỜI! ⚡', '#80deea', 13);
+            // Cắm lại thành thương trên sân (không cộng vào số thương trong tay)
+            if (typeof thunderPlantedSpears !== 'undefined') {
+                thunderPlantedSpears.push({ id: Math.random(), owner: o, x: this.x, y: this.y, angle: o.id === 1 ? -Math.PI / 2 : Math.PI / 2, sky: true });
+            }
+            triggerScreenShake(3, 5);
+            if (soundSystem && !soundSystem.muted) soundSystem.playHit();
+            return;
+        }
         fxBolt(this.x + (Math.random() * 2 - 1) * 30, top, this.x, this.y, '#fff176', 16, 4, 22);
         fxBolt(this.x, top, this.x, this.y, '#80deea', 12, 2, 30);
-        explosions.push(new Explosion(this.x, this.y, this.r + 8, 'rgba(255, 255, 120,', 0, this.owner));
+        explosions.push(new Explosion(this.x, this.y, this.r + 8, 'rgba(255, 255, 120,', 0, o));
         spawnSparkParticles(this.x, this.y, '#fff176', 10);
-        if (enemy && enemy.hp > 0 && Math.hypot(enemy.x + enemy.w / 2 - this.x, enemy.y + enemy.h / 2 - this.y) < this.r + enemy.w / 2) {
-            enemy.takeDamage(this.dmg, this.owner);
+        if (inR) {
+            enemy.takeDamage(this.dmg, o);
             addFloatingText(enemy.x + enemy.w / 2, enemy.y - 12, 'SÉT TRỜI! ⚡', '#ffff00', 13);
         }
         triggerScreenShake(3, 6);
@@ -147,29 +184,47 @@ class ThunderStrike {
     draw() {
         if (!this.active) return;
         ctx.save();
+        const sub = this.kind === 'sub', sky = this.kind === 'sky';
+        const main = sub ? '255, 170, 60' : (sky ? '128, 222, 234' : '255, 235, 59');
         if (this.delay > 0) {
             const k = 1 - this.delay / this.maxDelay;
-            const pulse = 0.5 + 0.5 * Math.sin(k * 28);
-            ctx.fillStyle = `rgba(255, 235, 59, ${0.06 + 0.16 * k})`;
+            const pulse = 0.5 + 0.5 * Math.sin(k * (sky ? 40 : 28));
+            ctx.fillStyle = `rgba(${main}, ${0.06 + 0.18 * k})`;
             ctx.strokeStyle = `rgba(255, 80, 60, ${0.45 + 0.45 * k})`;
             ctx.lineWidth = 2;
             ctx.setLineDash([7, 5]); ctx.lineDashOffset = -k * 40;
             ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
             ctx.setLineDash([]);
             // Vòng co lại = thời gian còn lại
-            ctx.strokeStyle = `rgba(255, 255, 160, ${0.5 + 0.4 * pulse})`;
+            ctx.strokeStyle = `rgba(255, 255, 200, ${0.5 + 0.4 * pulse})`;
             ctx.beginPath(); ctx.arc(this.x, this.y, Math.max(2, this.r * (1 - k)), 0, Math.PI * 2); ctx.stroke();
-            // Ký hiệu tia sét ở tâm
-            ctx.fillStyle = `rgba(255, 241, 118, ${0.5 + 0.5 * k})`;
-            ctx.shadowBlur = 10; ctx.shadowColor = '#fff176';
-            ctx.beginPath();
-            ctx.moveTo(this.x + 2, this.y - 10); ctx.lineTo(this.x - 5, this.y + 1); ctx.lineTo(this.x, this.y + 1);
-            ctx.lineTo(this.x - 2, this.y + 10); ctx.lineTo(this.x + 5, this.y - 1); ctx.lineTo(this.x, this.y - 1);
-            ctx.closePath(); ctx.fill();
+            ctx.shadowBlur = 10; ctx.shadowColor = `rgb(${main})`;
+            if (sky) {
+                // Cung tiến độ + đếm ngược + cây thương rơi dần từ trời
+                ctx.strokeStyle = `rgba(${main}, 0.95)`; ctx.lineWidth = 3;
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.r + 5, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * k); ctx.stroke();
+                ctx.fillStyle = '#e0f7fa'; ctx.font = "bold 11px 'Orbitron', Arial"; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                drawWorldText(ctx, String(Math.ceil(this.delay / 60)), this.x, this.y);
+                const dir = this.owner.id === 1 ? 1 : -1;       // lao xuống từ phía giữa sân (luôn thấy được)
+                const hgt = this.r + 8 + 110 * (1 - k) * (1 - k);
+                ctx.save();
+                ctx.translate(this.x, this.y + dir * hgt);
+                ctx.rotate(dir < 0 ? Math.PI / 2 : -Math.PI / 2); // mũi thương hướng xuống vòng
+                drawThunderSpearShape(26, 0.35 + 0.65 * k, true);
+                ctx.restore();
+            } else {
+                // Ký hiệu tia sét ở tâm
+                ctx.fillStyle = `rgba(${sub ? '255, 204, 128' : '255, 241, 118'}, ${0.5 + 0.5 * k})`;
+                const s = sub ? 0.8 : 1;
+                ctx.beginPath();
+                ctx.moveTo(this.x + 2 * s, this.y - 10 * s); ctx.lineTo(this.x - 5 * s, this.y + 1 * s); ctx.lineTo(this.x, this.y + 1 * s);
+                ctx.lineTo(this.x - 2 * s, this.y + 10 * s); ctx.lineTo(this.x + 5 * s, this.y - 1 * s); ctx.lineTo(this.x, this.y - 1 * s);
+                ctx.closePath(); ctx.fill();
+            }
         } else {
             ctx.globalAlpha = 1 - this.fall / 16;
-            ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3;
-            ctx.shadowBlur = 20; ctx.shadowColor = '#fff176';
+            ctx.strokeStyle = sky ? '#e0f7fa' : '#ffffff'; ctx.lineWidth = 3;
+            ctx.shadowBlur = 20; ctx.shadowColor = `rgb(${main})`;
             ctx.beginPath(); ctx.arc(this.x, this.y, this.r * (0.6 + this.fall / 30), 0, Math.PI * 2); ctx.stroke();
         }
         ctx.restore();

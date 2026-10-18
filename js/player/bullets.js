@@ -379,26 +379,7 @@ Object.assign(Player.prototype, {
                 if (BulletHooks.call(b, 'edge', this) === 'keep') continue; // hook tự xử lý (vd. nảy tường)
                 // --- THUNDER SPEAR CẮM TƯỜNG & NỔ ---
                 if (b.isThunderSpear) {
-                    let hasEvo1 = (this.hasUpgrade && this.hasUpgrade('evo_thun_1'));
-                    let expDmg = 1.0;
-                    explosions.push(new Explosion(b.x, b.y, 45, 'rgba(255, 255, 0,', expDmg, this));
-                    let enemy = (this.id === 1) ? p2 : p1;
-                    if (enemy && enemy.hp > 0 && Math.hypot((enemy.x + enemy.w / 2) - b.x, (enemy.y + enemy.h / 2) - b.y) <= 45) {
-                        enemy.takeDamage(expDmg, this);
-                        if (hasEvo1) {
-                            enemy.freezeTimer = Math.max(enemy.freezeTimer || 0, 60);
-                            if (typeof addFloatingText === 'function') addFloatingText(enemy.x + enemy.w / 2, enemy.y - 12, "TÊ LIỆT! ⚡", "#ffff00", 14);
-                        }
-                    }
-                    let plantX = Math.max(10, Math.min(canvas.width - 10, b.x));
-                    let plantY = Math.max(10, Math.min(canvas.height - 10, b.y));
-                    thunderPlantedSpears.push({
-                        id: Math.random(),
-                        owner: this,
-                        x: plantX,
-                        y: plantY,
-                        angle: Math.atan2(b.vy, b.vx)
-                    });
+                    thunderSpearPlant(this, b);
                     this.bullets.splice(i, 1);
                     continue;
                 }

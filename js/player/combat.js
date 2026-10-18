@@ -34,8 +34,8 @@ Object.assign(Player.prototype, {
             this.chargeLevel = 7;
             if (typeof addFloatingText === 'function') addFloatingText(this.x + this.w / 2, this.y - 12, "ĐẦY KIẾM KHÍ 🗡", "#f1c40f", 12);
         } else if (this.weapon === 'thunder') {
-            this.thunderSpears = 3;
-            if (typeof addFloatingText === 'function') addFloatingText(this.x + this.w / 2, this.y - 12, "+3 LÔI PHONG THƯƠNG ⚡", "#ffff00", 12);
+            this.thunderSpears = thunderSpearCap(this); this.thunderRegenTimer = 0;
+            if (typeof addFloatingText === 'function') addFloatingText(this.x + this.w / 2, this.y - 12, `+${this.thunderSpears} LÔI PHONG THƯƠNG ⚡`, "#ffff00", 12);
         } else if (this.weapon === 'aaa') {
             this.ammo = Math.min(5, (this.ammo || 0) + 2);
             if (typeof addFloatingText === 'function') addFloatingText(this.x + this.w / 2, this.y - 12, "+2 PHÁO CỐI 💣", "#e67e22", 12);

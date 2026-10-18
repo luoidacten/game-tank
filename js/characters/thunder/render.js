@@ -3,30 +3,60 @@
 // ==========================================
 
 Object.assign(Player.prototype, {
-    // [drawUI] thunder
+    // [drawUI] thunder — Hàng ô thương (trong tay / trên sân / trống) + đếm ngược hồi thương
     drawUIForThunder(uiY, subUiY) {
-        if (this.weapon === 'thunder') {
-            let spearY = (this.id === 1) ? uiY - 14 : subUiY + 12;
-            let startX = this.x + this.w / 2 - 18;
-            // (Số giáo hiện tại được thể hiện bằng giá giáo sau lưng - xem CharHooks 'thunder'.draw)
-            void startX;
-            if (this.thunderLoiMinhTimer > 0) {
-                ctx.fillStyle = "#ffd700";
-                ctx.font = "bold 9px 'Orbitron', Arial";
-                ctx.textAlign = "center";
-                drawWorldText(ctx, `⚡ THIÊN KIẾP (${Math.ceil(this.thunderLoiMinhTimer / 60)}s)`, this.x + this.w / 2, spearY - 5);
-            } else if (this.thunderLoiMinhStacks > 0) {
-                ctx.fillStyle = "#ffffaa";
-                ctx.font = "bold 8px 'Orbitron', Arial";
-                ctx.textAlign = "center";
-                drawWorldText(ctx, `LÔI MINH: ${this.thunderLoiMinhStacks}/3`, this.x + this.w / 2, spearY - 5);
-            }
-            if (this.thunderShieldHits > 0) {
-                ctx.strokeStyle = "#ffff00";
-                ctx.lineWidth = 1.5;
-                ctx.strokeRect(this.x - 3, this.y - 3, this.w + 6, this.h + 6);
-            }
+        if (this.weapon !== 'thunder' || this.thunderSky) return;
+        const cap = thunderSpearCap(this);
+        const held = Math.min(cap, this.thunderSpears || 0);
+        const field = thunderPlantedSpears.filter(s => s.owner === this).length;
+        const cx = this.x + this.w / 2;
+        const pw = 4, gap = 2.5, rowW = cap * pw + (cap - 1) * gap;
+        const x0 = cx - rowW / 2, y0 = subUiY - 1, ph = 7;
+        const regen = (this.thunderRegenTimer || 0) > 0;
+        ctx.save();
+        ctx.fillStyle = 'rgba(10, 12, 24, 0.75)';
+        ctx.fillRect(x0 - 2, y0 - 1.5, rowW + 4, ph + 3);
+        for (let i = 0; i < cap; i++) {
+            const x = x0 + i * (pw + gap);
+            const has = i < held, onField = !has && i < held + field;
+            // Ô hình mũi thương (thoi dài)
+            ctx.beginPath();
+            ctx.moveTo(x + pw / 2, y0); ctx.lineTo(x + pw, y0 + 2.5); ctx.lineTo(x + pw / 2, y0 + ph); ctx.lineTo(x, y0 + 2.5); ctx.closePath();
+            if (has) { ctx.fillStyle = '#fff176'; ctx.shadowBlur = 6; ctx.shadowColor = '#ffeb3b'; ctx.fill(); }
+            else if (onField) { ctx.shadowBlur = 0; ctx.strokeStyle = '#80deea'; ctx.lineWidth = 1; ctx.stroke(); }
+            else { ctx.shadowBlur = 0; ctx.fillStyle = regen ? 'rgba(255, 120, 40, 0.35)' : 'rgba(255, 255, 255, 0.14)'; ctx.fill(); }
         }
+        ctx.shadowBlur = 0;
+        if (field > cap - held) { // thương thừa (rơi từ trời)
+            ctx.fillStyle = '#80deea'; ctx.font = "bold 7px 'Orbitron', Arial"; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+            drawWorldText(ctx, '+' + (field - (cap - held)), x0 + rowW + 4, y0 + ph / 2);
+        }
+        // Dòng trạng thái: phía trên xe (P1) / phía dưới xe (P2)
+        const ty = this.id === 1 ? this.y - 8 : this.y + this.h + 14;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        if (regen) {
+            const k = 1 - this.thunderRegenTimer / THUNDER_REGEN;
+            ctx.fillStyle = '#ff9100';
+            ctx.fillRect(x0, y0 + ph + 2, rowW * k, 2);
+            ctx.font = "bold 9px 'Orbitron', Arial";
+            ctx.shadowBlur = 6; ctx.shadowColor = '#ff6d00';
+            drawWorldText(ctx, `⟳ HỒI THƯƠNG ${(this.thunderRegenTimer / 60).toFixed(1)}s`, cx, ty);
+        } else if (this.thunderLoiMinhTimer > 0) {
+            ctx.fillStyle = "#ffd700"; ctx.font = "bold 9px 'Orbitron', Arial";
+            drawWorldText(ctx, `⚡ THIÊN KIẾP (${Math.ceil(this.thunderLoiMinhTimer / 60)}s)`, cx, ty);
+        } else if (this.thunderLoiMinhStacks > 0 || (this.thunderBuffTimer || 0) > 0) {
+            ctx.font = "bold 8px 'Orbitron', Arial";
+            ctx.fillStyle = "#ffffaa";
+            const lm = '⚡'.repeat(this.thunderLoiMinhStacks || 0) + '·'.repeat(3 - (this.thunderLoiMinhStacks || 0));
+            const buff = (this.thunderBuffTimer || 0) > 0 ? '  ▲TỐC' : '';
+            drawWorldText(ctx, `LÔI MINH ${lm}${buff}`, cx, ty);
+        }
+        if (this.thunderShieldHits > 0) {
+            ctx.strokeStyle = "#ffff00";
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(this.x - 3, this.y - 3, this.w + 6, this.h + 6);
+        }
+        ctx.restore();
     }
 });
 
@@ -89,7 +119,7 @@ function drawThunderSkyCircle(p) {
 // Hình ảnh đặc trưng của Lôi Thần (vẽ sau thân xe)
 CharHooks.register('thunder', {
     // Lôi Độn / Thiên Lôi Giáng: khóa di chuyển (trái/phải dùng để lái vòng cảnh báo)
-    speed(s) { return (this.thunderDashState || this.thunderSky) ? 0 : s; },
+    speed(s) { return (this.thunderDashState || this.thunderSky) ? 0 : ((this.thunderBuffTimer || 0) > 0 ? s * THUNDER_BUFF_SPD : s); },
     update(inp, effInp) { if (this.thunderSky) this.updateThunderSky(effInp || inp); },
     // Bất tử khi đang hóa sét lao đi hoặc đang ở trên trời
     beforeDamage() { return !!(this.thunderDashState || this.thunderSky); },
@@ -98,9 +128,10 @@ CharHooks.register('thunder', {
         const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
         const back = this.id === 1 ? 1 : -1; // phía sau lưng (ngược hướng địch)
         // 1. Giá giáo sau lưng: số cây = số giáo đang cầm, xòe hình quạt
-        const n = this.thunderSpears || 0;
-        for (let i = 0; i < 3; i++) {
-            const off = i - 1;                     // -1, 0, 1: xòe quạt
+        const n = Math.min(5, this.thunderSpears || 0);
+        const slots = Math.min(5, thunderSpearCap(this));
+        for (let i = 0; i < slots; i++) {
+            const off = (i - (slots - 1) / 2) * (slots > 3 ? 0.6 : 1); // xòe quạt
             const has = i < n;
             ctx.save();
             ctx.translate(cx + off * 10, cy + back * (this.h / 2 - 2));
@@ -162,6 +193,17 @@ CharHooks.register('thunder', {
             ctx.globalAlpha = a.t / 14 * 0.6;
             ctx.fillStyle = '#fff59d'; ctx.shadowBlur = 16; ctx.shadowColor = '#ffeb3b';
             ctx.fillRect(a.x - this.w / 2, a.y - this.h / 2, this.w, this.h);
+            ctx.restore();
+        }
+        // 4b. Buff Lôi Tốc sau Lôi Trảm: vệt điện xanh quanh xe
+        if ((this.thunderBuffTimer || 0) > 0 && !this.thunderIsSlashing) {
+            ctx.save();
+            ctx.globalAlpha = Math.min(1, this.thunderBuffTimer / 30) * 0.8;
+            ctx.strokeStyle = '#80deea'; ctx.lineWidth = 1.3; ctx.shadowBlur = 10; ctx.shadowColor = '#80deea';
+            for (let a = 0; a < 2; a++) {
+                const ang = -Date.now() / 90 + a * Math.PI;
+                ctx.beginPath(); ctx.arc(cx, cy, this.w * 0.78, ang, ang + 1.1); ctx.stroke();
+            }
             ctx.restore();
         }
         // 5. Đang Lôi Trảm: điện bao quanh xe
