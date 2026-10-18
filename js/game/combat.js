@@ -751,9 +751,6 @@ function checkHits(attacker, victim) {
                     let duration = (attacker.hasUpgrade('evo_ice_1') && b.isBigIceZone) ? 240 : 120;
                     iceZones.push(new IceZone(b.x, b.y, radius, duration, attacker));
                 }
-                if (attacker.hasUpgrade('evo_over_1') && b.isFullCharge) {
-                    explosions.push(new Explosion(b.x, b.y, 80, 'rgba(0, 255, 255,', 2, attacker));
-                }
                 if (b.createFireZone) {
                     explosions.push(new Explosion(b.x, b.y, 100, 'red', 3, attacker));
                     radiationZones.push(new RadiationZone(b.x, b.y));

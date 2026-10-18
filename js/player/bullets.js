@@ -448,7 +448,6 @@ Object.assign(Player.prototype, {
                     talismans.push(new Talisman(b.x, b.y, 'duong', this));
                 }
 
-                if (this.hasUpgrade('evo_over_1') && b.isFullCharge) explosions.push(new Explosion(b.x, b.y, 80, 'rgba(0, 255, 255,', 2, this));
                 if (b.createFireZone) {
                     explosions.push(new Explosion(b.x, b.y, 100, 'red', 3, this));
                     radiationZones.push(new RadiationZone(b.x, b.y)); // Để lại vùng gây dame

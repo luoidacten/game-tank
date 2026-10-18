@@ -391,9 +391,6 @@ Object.assign(Player.prototype, {
         }
         // FULL EVO OVERLOAD: Tạo vùng lửa/radiation khi nổ
         let createFireZone = false;
-        if (this.weapon === 'overload' && this.hasUpgrade('evo_over_1') && this.hasUpgrade('evo_over_2') && isFullCharge) {
-            createFireZone = true;
-        }
 
         // --- LOGIC KỸ SƯ (Evo 1: Chủ bắn -> Trụ bắn) ---
         if (this.weapon === 'engineer' && this.hasUpgrade('evo_eng_1')) {

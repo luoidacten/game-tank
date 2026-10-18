@@ -23,7 +23,7 @@ const BOT_LEVELS = [
 //   tap: nhấp liên tục | hold:N: giữ N tick rồi nhả | stream: giữ liên tục khi thẳng hàng
 //   toggle: nhấp 1 lần để bật (Bình Phun) | aaa: bắn khi thẳng hàng (tự nhắm)
 const BOT_FIRE_STYLE = {
-    overload: 'hold:95', lazer_charge: 'hold:95', lazer_auto: 'hold:95', storm: 'hold:40', van_kiem: 'stream',
+    lazer_charge: 'hold:95', lazer_auto: 'hold:95', storm: 'hold:40', van_kiem: 'stream',
     six_barrel: 'hold:40', mirror: 'hold:215', shadow_hunter: 'hold:40', shortgunATK: 'hold:40',
     necromancer: 'hold:40', genius: 'hold:40', sprayer: 'toggle',
     dj: 'beat',
@@ -272,6 +272,7 @@ class SmartBot {
             this.hold = 1; inp.s = true; return; // nạp sẵn trong lúc di chuyển
         }
         // tap
+        if (bot.weapon === 'overload' && (bot.ovMain || 0) < 1 && (bot.ammo || 0) > 0) { inp.s = false; return; } // Quá Tải: chờ thanh chính đầy
         if (this.tapCool > 0) { this.tapCool--; inp.s = this.tapCool > 6; return; }
         if (aligned) { this.tapCool = 9; inp.s = true; this.nextShot(enemy); return; }
         inp.s = false;

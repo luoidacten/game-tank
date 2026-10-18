@@ -31,8 +31,8 @@ const EVOLUTIONS = {
         { id: 'evo_shot_2', name: 'Đạn Dự Phòng', desc: 'Băng đạn 4 viên', cost: 30, type: 'evo' }
     ],
     overload: [
-        { id: 'evo_over_1', name: 'Cầu Điện', desc: 'Nổ xanh TO khi full lực chạm tường', cost: 50, type: 'evo' },
-        { id: 'evo_over_2', name: 'Năng Lượng Xanh', desc: 'Tụ lực nhanh hơn', cost: 20, type: 'evo' }
+        { id: 'evo_over_1', name: 'Thanh Năng Lượng Phụ', desc: '+1 thanh phụ, nạp sau khi thanh chính đầy. Đầy -> trữ 2 Đạn Sạc, bắn liền 2 phát.', cost: 50, type: 'evo' },
+        { id: 'evo_over_2', name: 'Vụ Nổ EMP', desc: 'Đạn Sạc nổ phát vòng EMP rộng hơn vụ nổ: không gây dame nhưng Câm Lặng địch 2s & vô hiệu trụ/drone/robot/bẫy... của địch 2s. FULL EVO (Lõi Tứ Quá Tải): +4 thanh phụ (5 thanh nạp đồng thời), vụ nổ & vòng EMP to hơn hẳn.', cost: 60, type: 'evo' }
     ],
     smg: [
         { id: 'evo_smg_1', name: 'Hỏa Lực +++', desc: 'Sấy càng lâu: Dame tăng, Tốc bắn tăng, Đạn bay nhanh.', cost: 80, type: 'evo' },
