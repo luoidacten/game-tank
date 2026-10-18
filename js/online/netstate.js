@@ -19,6 +19,7 @@ const NET_CLASSES = {
     FsPetal, FsSlashMark, FsClone, FsShadow, FsLandStrike, FsStar,
     TzMortar, TzZone, TzAirStrike,
     OvEmpRing, OvEmpMark,
+    ThunderReturnBolt, ThunderStrike, ThunderZone,
 };
 
 // Biến toàn cục cần đồng bộ: [tên, getter, setter]

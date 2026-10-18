@@ -1,6 +1,21 @@
 // ==========================================
 // thunder (thunder) — Logic (cập nhật, bắn, kỹ năng)
+// ------------------------------------------
+// Thiên Kiếp (Lôi Minh 3/3):
+//   - Nhấp: Lôi Độn — hóa tia sét lao thẳng tới làn địch (bất tử), hút địch về phía trước,
+//     cuối đường chém 1 nhát cực nhanh rồi lao về chỗ cũ.
+//   - Giữ 0.5s+: Thu Thương (thương hóa tia sét bay về rất nhanh).
+//   - Gần hết giờ: Thiên Lôi Giáng — bay lên trời, điều khiển vòng cảnh báo (trái/phải),
+//     5s hoặc nhấp Bắn để giáng; vòng KHÓA 0.5s rồi mới giáng (Luật 11).
 // ==========================================
+
+const THUNDER_DASH_WARN = 12;      // 0.2s hóa sét trước khi lao (cột cảnh báo)
+const THUNDER_DASH_SPEED = 20;     // px/tick khi lao đi
+const THUNDER_DASH_BACK = 24;      // px/tick khi lao về
+const THUNDER_DASH_CD = 24;        // hồi giữa 2 lần Lôi Độn (sau khi về)
+const THUNDER_SKY_MAX = 300;       // 5s trên trời
+const THUNDER_SKY_LOCK = 30;       // Luật 11: khóa vòng 0.5s trước khi giáng
+const THUNDER_SKY_TRIGGER = 45;    // còn 0.75s Thiên Kiếp -> tự bay lên trời
 
 Object.assign(Player.prototype, {
     triggerThunderAction(held, now) {
@@ -62,45 +77,28 @@ Object.assign(Player.prototype, {
         if (soundSystem && !soundSystem.muted) soundSystem.playPowerup();
     },
 
+    // Thu Thương: mỗi cây thương hóa thành 1 tia sét lao vút về xe (trúng địch trên đường bay)
     executeThunderRecall() {
         let mySpears = (typeof thunderPlantedSpears !== 'undefined' ? thunderPlantedSpears : []).filter(s => s.owner === this);
         if (mySpears.length === 0) return;
-        let enemy = (this.id === 1) ? p2 : p1;
-        let targetX = this.x + this.w / 2;
-        let targetY = this.y + this.h / 2;
-        let hitCount = 0;
+        const inKiep = (this.thunderLoiMinhTimer || 0) > 0;
+        const speed = inKiep ? 34 : 26;
 
-        triggerScreenShake(7, 10);
-        if (soundSystem && !soundSystem.muted) {
-            soundSystem.playLaser();
-            soundSystem.playHit();
-        }
+        triggerScreenShake(5, 8);
+        if (soundSystem && !soundSystem.muted) soundSystem.playLaser();
 
         mySpears.forEach(s => {
-            if (enemy && enemy.hp > 0) {
-                let d = distToSegment(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, s.x, s.y, targetX, targetY);
-                if (d <= enemy.w / 2 + 18) {
-                    enemy.takeDamage(1.0, this);
-                    hitCount++;
-                }
-            }
-            if (typeof explosions !== 'undefined') {
-                explosions.push(new Explosion(s.x, s.y, 35, '#ffff00', 0, this));
-            }
-            if (typeof spawnSparkParticles === 'function') {
-                spawnSparkParticles(s.x, s.y, '#ffff00', 8);
-                spawnSparkParticles(targetX, targetY, '#00ffff', 8);
-            }
+            bodyEffects.push(new ThunderReturnBolt(s.x, s.y, this, speed, 1.0));
+            explosions.push(new Explosion(s.x, s.y, 28, 'rgba(255, 255, 0,', 0, this));
+            spawnSparkParticles(s.x, s.y, '#ffff00', 6);
         });
-
-        if (hitCount > 0 && typeof addFloatingText === 'function') {
-            addFloatingText(enemy.x + enemy.w / 2, enemy.y - 12, "THU THƯƠNG -1 DMG ⚡", "#ffff00", 14);
-        }
 
         let recoveredCount = mySpears.length;
         this.thunderSpears = 3;
         this.thunderActionCooldown = 60; // 1s (60 ticks) cooldown sau khi thu thương trước khi ném lại
         this.lastShot = Date.now();
+        thunderPlantedSpears = thunderPlantedSpears.filter(s => s.owner !== this);
+        if (inKiep) return; // Đang Thiên Kiếp: không tích thêm Lôi Minh
         this.thunderConsumedSpears = (this.thunderConsumedSpears || 0) + recoveredCount;
         if (this.thunderConsumedSpears >= 3) {
             this.thunderConsumedSpears -= 3;
@@ -109,15 +107,6 @@ Object.assign(Player.prototype, {
                 this.activateThienKiep();
             }
         }
-        thunderPlantedSpears = thunderPlantedSpears.filter(s => s.owner !== this);
-    },
-
-    startThunderRaycastWarning(now) {
-        this.thunderRaycastWarningTimer = 15; // 0.25s (15 ticks) cảnh báo
-        this.thunderRaycastX = this.x + this.w / 2;
-        this.lastShot = now;
-        if (typeof addFloatingText === 'function') addFloatingText(this.thunderRaycastX, this.y - 15, "LÔI MINH ĐANG GIÁNG! ⚡", "#ffeb3b", 12);
-        if (soundSystem && !soundSystem.muted) soundSystem.playPowerup();
     },
 
     startThunderSlashSequence() {
@@ -147,35 +136,182 @@ Object.assign(Player.prototype, {
         if (soundSystem && !soundSystem.muted) soundSystem.playPowerup();
     },
 
-    fireThunderRaycast(now) {
-        let dirY = (this.id === 1) ? -1 : 1;
-        let startX = this.x + this.w / 2;
-        let startY = (this.id === 1) ? this.y : this.y + this.h;
-        let targetY = (dirY === -1) ? 0 : canvas.height;
-        let enemy = (this.id === 1) ? p2 : p1;
-        let hitWidth = 24;
+    // ---------- Lôi Độn (Thiên Kiếp - nhấp) ----------
+    startThunderDashWarning(now) {
+        this.thunderRaycastWarningTimer = THUNDER_DASH_WARN; // hóa sét + cột cảnh báo đường lao
+        this.thunderRaycastX = this.x + this.w / 2;
+        this.lastShot = now;
+        if (typeof addFloatingText === 'function') addFloatingText(this.thunderRaycastX, this.y - 15, "LÔI ĐỘN! ⚡", "#ffeb3b", 12);
+        if (soundSystem && !soundSystem.muted) soundSystem.playPowerup();
+    },
 
-        if (enemy && enemy.hp > 0 && enemy.x <= startX + hitWidth && enemy.x + enemy.w >= startX - hitWidth) {
-            enemy.takeDamage(2.0, this);
-            if (typeof addFloatingText === 'function') addFloatingText(enemy.x + enemy.w / 2, enemy.y - 14, "THIÊN KIẾP -2 DMG ⚡⚡", "#ffd700", 16);
+    startThunderDash() {
+        const enemy = (this.id === 1) ? p2 : p1;
+        const eLane = thunderLaneY(enemy);
+        this.thunderDashState = 1;
+        this.thunderDashStartY = this.y;
+        // Dừng ngay trước làn địch
+        this.thunderDashEndY = (this.id === 1) ? eLane + enemy.h + 4 : eLane - this.h - 4;
+        this.thunderDashT = 0;
+        triggerScreenShake(3, 5);
+        if (soundSystem && !soundSystem.muted) soundSystem.playDash ? soundSystem.playDash() : soundSystem.playLaser();
+    },
+
+    // Nhát chém cực nhanh ở cuối đường lao
+    thunderDashSlash() {
+        const enemy = (this.id === 1) ? p2 : p1;
+        const cx = this.x + this.w / 2;
+        const sy = thunderLaneY(enemy) + enemy.h / 2;
+        const dir = (this.id === 1) ? -1 : 1;
+        const base = dir < 0 ? -Math.PI / 2 : Math.PI / 2;
+        fxSweep(cx, this.y + this.h / 2, 62, base - 1.5, base + 1.5, '#fff176', 12, 12);
+        fxSweep(cx, this.y + this.h / 2, 48, base + 1.4, base - 1.4, '#80deea', 14, 7);
+        fxBolt(cx - 55, sy, cx + 55, sy, '#ffffff', 10, 2.5, 10);
+        triggerScreenShake(5, 7);
+        if (enemy && enemy.hp > 0 && Math.abs(enemy.x + enemy.w / 2 - cx) < this.w / 2 + enemy.w / 2 + 26 && Math.abs(enemy.y + enemy.h / 2 - sy) < 50) {
+            enemy.takeDamage(1.0 * (this.damage || 1), this);
+            fxSlashHit(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, '#fff176', 28);
+            addFloatingText(enemy.x + enemy.w / 2, enemy.y - 14, "LÔI TRẢM! ⚡", "#ffd700", 15);
+            if (this.hasUpgrade('evo_thun_1')) enemy.freezeTimer = Math.max(enemy.freezeTimer || 0, 30);
+            if (soundSystem && !soundSystem.muted) soundSystem.playHit();
         }
-        crates.forEach(c => {
-            if (c.active && c.x <= startX + 22 && c.x + c.w >= startX - 22) {
-                c.active = false;
-                crateOnBreak(c, this);
-                if (c.isMimic) triggerMimicExplosion(c, this);
-                this.onCollectAmmoCrate(c);
+    },
+
+    updateThunderDash() {
+        const st = this.thunderDashState;
+        if (!st) return;
+        const enemy = (this.id === 1) ? p2 : p1;
+        const dir = (this.id === 1) ? -1 : 1;
+        this.thunderDashT++;
+        if (st === 1) {
+            this.y += THUNDER_DASH_SPEED * dir;
+            // Hút địch về điểm phía trước mũi sét
+            const cx = this.x + this.w / 2;
+            if (enemy && enemy.hp > 0) {
+                const dx = cx - (enemy.x + enemy.w / 2);
+                if (Math.abs(dx) < 170) {
+                    const pull = 2.6;
+                    enemy.x += Math.max(-pull, Math.min(pull, dx));
+                    enemy.x = Math.max(0, Math.min(canvas.width - enemy.w, enemy.x));
+                }
+            }
+            // Phá hòm trên đường lao
+            crates.forEach(c => {
+                if (c.active && rectIntersect(this.x, this.y, this.w, this.h, c.x, c.y, c.w, c.h)) {
+                    c.active = false;
+                    crateOnBreak(c, this);
+                    if (typeof grantCrateLoot === 'function') grantCrateLoot(c, this);
+                }
+            });
+            if (this.thunderDashT % 2 === 0) spawnSparkParticles(cx, this.y + this.h / 2, '#fff176', 2);
+            if ((dir < 0 && this.y <= this.thunderDashEndY) || (dir > 0 && this.y >= this.thunderDashEndY) || this.thunderDashT > 60) {
+                this.y = this.thunderDashEndY;
+                this.thunderDashState = 2;
+                this.thunderDashT = 0;
+                this.thunderDashSlash();
+            }
+        } else if (st === 2) {
+            if (this.thunderDashT >= 6) { this.thunderDashState = 3; this.thunderDashT = 0; }
+        } else if (st === 3) {
+            this.y -= THUNDER_DASH_BACK * dir;
+            if ((dir < 0 && this.y >= this.thunderDashStartY) || (dir > 0 && this.y <= this.thunderDashStartY) || this.thunderDashT > 60) {
+                this.y = this.thunderDashStartY;
+                this.thunderDashState = 0;
+                this.thunderDashCd = THUNDER_DASH_CD;
+            }
+        }
+    },
+
+    // ---------- Thiên Lôi Giáng (kết thúc Thiên Kiếp) ----------
+    startThunderSky() {
+        const enemy = (this.id === 1) ? p2 : p1;
+        this.thunderLoiMinhTimer = 0;
+        this.thunderHoldFrames = 0;
+        this.thunderSkyHomeY = this.y;
+        this.thunderSky = {
+            x: this.x + this.w / 2, y: thunderLaneY(enemy) + enemy.h / 2,
+            r: 46, t: 0, max: THUNDER_SKY_MAX, lock: 0,
+        };
+        fxBolt(this.x + this.w / 2, this.y + this.h / 2, this.x + this.w / 2, this.id === 1 ? -20 : canvas.height + 20, '#fff176', 16, 4, 20);
+        explosions.push(new Explosion(this.x + this.w / 2, this.y + this.h / 2, 34, 'rgba(255, 241, 118,', 0, this));
+        spawnSparkParticles(this.x + this.w / 2, this.y + this.h / 2, '#fff176', 14);
+        addFloatingText(this.x + this.w / 2, this.y - 20, "⚡ THIÊN LÔI GIÁNG! ⚡", "#ffd700", 15);
+        // Biến mất khỏi mặt sàn: dời xe ra ngoài sân (không thể bị nhắm / trúng)
+        this.y = this.id === 1 ? canvas.height + 300 : -300 - this.h;
+        if (soundSystem && !soundSystem.muted) soundSystem.playPowerup();
+    },
+
+    thunderSkyLock() {
+        const c = this.thunderSky;
+        if (!c || c.lock > 0) return;
+        c.lock = THUNDER_SKY_LOCK;
+        if (soundSystem && !soundSystem.muted) soundSystem.playPowerup();
+    },
+
+    updateThunderSky(inp) {
+        const c = this.thunderSky;
+        if (!c) return;
+        if (c.lock > 0) {
+            if (--c.lock === 0) this.thunderSkyImpact();
+            return;
+        }
+        c.t++;
+        const enemy = (this.id === 1) ? p2 : p1;
+        const isBot = this.id === 2 && typeof botAI !== 'undefined' && botAI.enabled;
+        const lat = 3.4;
+        if (isBot && enemy) {
+            const dx = enemy.x + enemy.w / 2 - c.x;
+            c.x += Math.max(-lat, Math.min(lat, dx));
+            if (Math.abs(dx) < 10 && c.t > 40) this.thunderSkyLock();
+        } else {
+            if (inp && inp.l) c.x -= lat;
+            if (inp && inp.r) c.x += lat;
+        }
+        c.x = Math.max(c.r * 0.5, Math.min(canvas.width - c.r * 0.5, c.x));
+        if (enemy) c.y = thunderLaneY(enemy) + enemy.h / 2;
+        // Vòng cảnh báo: làm chậm nhẹ
+        if (enemy && enemy.hp > 0 && Math.hypot(enemy.x + enemy.w / 2 - c.x, enemy.y + enemy.h / 2 - c.y) < c.r + enemy.w / 2) addStatusSlow(enemy, 0.8);
+        if (c.t >= c.max) this.thunderSkyLock();
+    },
+
+    thunderSkyImpact() {
+        const c = this.thunderSky;
+        const enemy = (this.id === 1) ? p2 : p1;
+        const top = this.id === 1 ? -20 : canvas.height + 20;
+        fxBolt(c.x, top, c.x, c.y, '#ffffff', 20, 7, 18);
+        fxBolt(c.x - 30, top, c.x, c.y, '#fff176', 18, 4, 30);
+        fxBolt(c.x + 30, top, c.x, c.y, '#80deea', 16, 3, 30);
+        fxSweep(c.x, c.y, c.r + 10, 0, Math.PI * 2, '#fff176', 16, 6);
+        explosions.push(new Explosion(c.x, c.y, c.r + 16, 'rgba(255, 241, 118,', 0, this));
+        explosions.push(new Explosion(c.x, c.y, c.r * 0.6, 'rgba(255, 255, 255,', 0, this));
+        spawnSparkParticles(c.x, c.y, '#fff176', 20);
+        triggerScreenShake(9, 14);
+        if (soundSystem && !soundSystem.muted) soundSystem.playExplosion ? soundSystem.playExplosion() : soundSystem.playHit();
+        if (enemy && enemy.hp > 0 && Math.hypot(enemy.x + enemy.w / 2 - c.x, enemy.y + enemy.h / 2 - c.y) < c.r + enemy.w / 2) {
+            enemy.takeDamage(2.5 * (this.damage || 1), this);
+            enemy.freezeTimer = Math.max(enemy.freezeTimer || 0, 90);
+            addFloatingText(enemy.x + enemy.w / 2, enemy.y - 16, "THIÊN LÔI! CHOÁNG ⚡", "#ffd700", 16);
+        }
+        // Phá hòm trong vùng giáng
+        crates.forEach(cr => {
+            if (cr.active && Math.hypot(cr.x + cr.w / 2 - c.x, cr.y + cr.h / 2 - c.y) < c.r + cr.w / 2) {
+                cr.active = false;
+                crateOnBreak(cr, this);
+                if (typeof grantCrateLoot === 'function') grantCrateLoot(cr, this);
             }
         });
-        beams.push(new Beam(startX - 6, Math.min(startY, targetY), 12, Math.abs(targetY - startY), this.id, true));
-        // [HÌNH ẢNH] Hóa thành tia sét lao vút tới cuối sân rồi quay về chỗ cũ
-        fxBolt(startX, startY, startX, targetY, '#fff176', 16, 4, 16);
-        fxBolt(startX, startY, startX, targetY, '#80deea', 12, 2, 24);
-        this.thunderDashFx = 18; // khung hình tia sét lao đi - về (vẽ ở render)
-        this.thunderDashToY = targetY;
-        if (enemy && enemy.hp > 0 && enemy.x <= startX + hitWidth && enemy.x + enemy.w >= startX - hitWidth) fxSlashHit(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, '#fff176', 26);
-        triggerScreenShake(4, 6);
-        if (soundSystem && !soundSystem.muted) soundSystem.playLaser();
+        // Full Evo: để lại Lôi Vực
+        if (this.hasUpgrade('evo_thun_1') && this.hasUpgrade('evo_thun_2')) {
+            bodyEffects.push(new ThunderZone(c.x, c.y, 44, this, 240, 0.2));
+        }
+        // Lộn về làn của mình (tại hoành độ cú giáng)
+        this.thunderSky = null;
+        this.x = Math.max(0, Math.min(canvas.width - this.w, c.x - this.w / 2));
+        this.y = (typeof this.thunderSkyHomeY === 'number') ? this.thunderSkyHomeY : thunderLaneY(this);
+        this.invincibleTimer = Math.max(this.invincibleTimer || 0, 12);
+        this.thunderActionCooldown = 45;
+        this.thunderSpears = 3;
+        fxBolt(c.x, c.y, this.x + this.w / 2, this.y + this.h / 2, '#80deea', 12, 2.5, 16);
     },
 
     // [setupForNewRound] thunder
@@ -196,8 +332,13 @@ Object.assign(Player.prototype, {
             this.thunderConsumedSpears = 0;
             this.thunderActionCooldown = 0;
             this.thunderRaycastWarningTimer = 0;
-            this.thunderDashFx = 0;
             this.thunderAfterImage = null;
+            this.thunderDashState = 0;
+            this.thunderDashT = 0;
+            this.thunderDashCd = 0;
+            this.thunderSky = null;
+            this.thunderPrevS = false;
+            this.thunderStormTimer = 240;
         }
     },
 
@@ -208,16 +349,15 @@ Object.assign(Player.prototype, {
             if ((this.thunderActionCooldown || 0) > 0) {
                 this.thunderActionCooldown--;
             }
-            if (this.thunderDashFx > 0) this.thunderDashFx--;
+            if ((this.thunderDashCd || 0) > 0 && !this.thunderDashState) this.thunderDashCd--;
             if (this.thunderAfterImage && --this.thunderAfterImage.t <= 0) this.thunderAfterImage = null;
 
-            // Cảnh báo Lôi Minh / Thiên Kiếp trước khi bắn (0.25s)
+            // Hóa sét trước khi Lôi Độn (0.2s)
             if ((this.thunderRaycastWarningTimer || 0) > 0) {
                 this.thunderRaycastWarningTimer--;
-                if (this.thunderRaycastWarningTimer <= 0) {
-                    this.fireThunderRaycast(Date.now());
-                }
+                if (this.thunderRaycastWarningTimer <= 0) this.startThunderDash();
             }
+            this.updateThunderDash();
 
             // 1. Cảnh báo Thu Thương (15 frame ~ 0.25s)
             if (this.thunderIsRecallWarning) {
@@ -281,37 +421,33 @@ Object.assign(Player.prototype, {
                 }
             }
 
-            // 3. Thời gian Thiên Kiếp
+            // 3. Thời gian Thiên Kiếp -> gần hết giờ tự bay lên trời (Thiên Lôi Giáng)
             if (this.thunderLoiMinhTimer > 0) {
-                this.thunderLoiMinhTimer--;
+                const busy = this.thunderDashState || (this.thunderRaycastWarningTimer || 0) > 0 || this.thunderIsRecallWarning;
+                if (!busy || this.thunderLoiMinhTimer > 1) this.thunderLoiMinhTimer--;
                 if (this.thunderLoiMinhTimer % 12 === 0 && typeof spawnSparkParticles === 'function') {
                     spawnSparkParticles(this.x + Math.random() * this.w, this.y + Math.random() * this.h, "#ffd700", 2);
                 }
+                if (this.thunderLoiMinhTimer <= THUNDER_SKY_TRIGGER && !busy) this.startThunderSky();
             }
 
-            // 4. Full Evo: Bão Sấm Thịnh Nộ (2.5s sét đánh 1 lần, báo trước 0.5s)
+            // 4. Full Evo: Bão Sấm — sét ngẫu nhiên trên nửa sân đối thủ (báo trước 1s), mỗi 4-6s
             if (this.hasUpgrade('evo_thun_1') && this.hasUpgrade('evo_thun_2')) {
-                this.thunderFullEvoTimer = (this.thunderFullEvoTimer || 0) + 1;
-                if (this.thunderFullEvoTimer >= 150) {
-                    this.thunderFullEvoTimer = 0;
-                    // [FIX] Sét rơi đúng làn đối thủ (trước: ngẫu nhiên khắp sân)
-                    const lt = laneTargetPoint((this.id === 1) ? p2 : p1, 90);
-                    let rx = lt.x, ry = lt.y;
-                    let hazard = new ArtilleryHazard(rx, ry);
-                    hazard.detonateTime = 500;
-                    hazard.maxR = 50;
-                    hazard.explode = function() {
-                        this.active = false;
-                        explosions.push(new Explosion(this.x, this.y, this.maxR, 'rgba(255, 255, 0,', 1.5, null, true));
-                        [p1, p2].forEach(p => {
-                            if (p && p.hp > 0 && Math.hypot((p.x + p.w / 2) - this.x, (p.y + p.h / 2) - this.y) <= this.maxR) {
-                                p.takeDamage(1.5, null);
-                                p.freezeTimer = Math.max(p.freezeTimer || 0, 60);
-                                if (typeof addFloatingText === 'function') addFloatingText(p.x + p.w / 2, p.y - 12, "SẤM GIẬT! ⚡", "#ffff00", 14);
-                            }
-                        });
-                    };
-                    artilleryHazards.push(hazard);
+                this.thunderStormTimer = (this.thunderStormTimer || 0) - 1;
+                if (this.thunderStormTimer <= 0) {
+                    this.thunderStormTimer = 240 + Math.floor(Math.random() * 120);
+                    const enemy = (this.id === 1) ? p2 : p1;
+                    let x, y;
+                    if (Math.random() < 0.65) {
+                        // Rơi đúng làn đối thủ, lệch ngang ngẫu nhiên
+                        x = Math.max(20, Math.min(canvas.width - 20, enemy.x + enemy.w / 2 + (Math.random() * 2 - 1) * 100));
+                        y = thunderLaneY(enemy) + enemy.h / 2;
+                    } else {
+                        x = 20 + Math.random() * (canvas.width - 40);
+                        const mid = canvas.height / 2;
+                        y = (this.id === 1) ? 30 + Math.random() * (mid - 60) : mid + 30 + Math.random() * (mid - 60);
+                    }
+                    bodyEffects.push(new ThunderStrike(x, y, this, 1.0, 40, 60));
                 }
             }
 
@@ -323,24 +459,33 @@ Object.assign(Player.prototype, {
     shootThunder(inp, now) {
         if (this.weapon === 'thunder') {
             if (this.thunderIsSlashing) return true;
-            if (this.thunderLoiMinhTimer > 0) {
-                if (inp.s && now - this.lastShot > 500 && (this.thunderRaycastWarningTimer || 0) <= 0) {
-                    this.startThunderRaycastWarning(now);
-                    inp.s = false;
-                }
+            const s = !!inp.s;
+            const pressed = s && !this.thunderPrevS;
+            this.thunderPrevS = s;
+            // Trên trời: nhấp Bắn để giáng sớm
+            if (this.thunderSky) {
+                if (pressed && this.thunderSky.t > 20) this.thunderSkyLock();
+                this.thunderHoldFrames = 0;
                 return true;
             }
-            if (inp.s) {
+            if (this.thunderDashState || (this.thunderRaycastWarningTimer || 0) > 0) { this.thunderHoldFrames = 0; return true; }
+            if (s) {
                 this.thunderHoldFrames = (this.thunderHoldFrames || 0) + 1;
                 return true;
-            } else {
-                if (this.thunderHoldFrames > 0) {
-                    let held = this.thunderHoldFrames;
-                    this.thunderHoldFrames = 0;
+            }
+            if (this.thunderHoldFrames > 0) {
+                let held = this.thunderHoldFrames;
+                this.thunderHoldFrames = 0;
+                if (this.thunderLoiMinhTimer > 0) {
+                    // Thiên Kiếp: Nhấp = Lôi Độn; Giữ 0.5s+ = Thu Thương (nếu có thương đang cắm)
+                    const hasPlanted = thunderPlantedSpears.some(sp => sp.owner === this);
+                    if (held >= 30 && hasPlanted) this.startThunderRecall(false);
+                    else if ((this.thunderDashCd || 0) <= 0) this.startThunderDashWarning(now);
+                } else {
                     this.triggerThunderAction(held, now);
                 }
-                return true;
             }
+            return true;
         }
     }
 });

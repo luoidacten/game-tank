@@ -145,8 +145,8 @@ const EVOLUTIONS = {
         { id: 'evo_sg_2', name: 'Tàn Phá', desc: 'Tiêu diệt mục tiêu biến xác thành đạn pháo quán tính văng thẳng phía trước nổ AoE.', cost: 110, type: 'evo' }
     ],
     thunder: [
-        { id: 'evo_thun_1', name: 'Phá Sấm', desc: 'Nổ tường & đòn chém xoay gây Choáng 1s.', cost: 90, type: 'evo' },
-        { id: 'evo_thun_2', name: 'Rẽ Mây', desc: 'Lôi Minh kéo dài 8s; Nhận 3 lần miễn nhiễm sát thương hoàn toàn.', cost: 110, type: 'evo' }
+        { id: 'evo_thun_1', name: 'Phá Sấm', desc: 'Nổ tường & đòn chém xoay gây Choáng 1s; nhát chém cuối Lôi Độn gây Choáng 0.5s. Full Evo: Thiên Lôi Giáng để lại Lôi Vực (sát thương theo thời gian) & sét trời ngẫu nhiên đánh nửa sân địch mỗi 4-6s.', cost: 90, type: 'evo' },
+        { id: 'evo_thun_2', name: 'Rẽ Mây', desc: 'Thiên Kiếp kéo dài 8s; Nhận 3 lần miễn nhiễm sát thương hoàn toàn.', cost: 110, type: 'evo' }
     ],
     magnet: [
         { id: 'evo_mag_net_1', name: 'Từ Trường Tăng Cường', desc: 'Giật điện từ trường gây 0.5 dame (x2); Lướt Cực Tính: húc 1.5 dame, nổ cột 2 dame.', cost: 90, type: 'evo' },
