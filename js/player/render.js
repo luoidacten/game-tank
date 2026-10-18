@@ -120,7 +120,7 @@ Object.assign(Player.prototype, {
         // Vẽ Phantom (Bóng ma) - Evo 2 Ghost
         this.drawGhost2();
 
-        if ((this.weapon === 'overload' || this.weapon === 'lazer_charge') && this.chargeLevel > 0) {
+        if (this.weapon === 'lazer_charge' && this.chargeLevel > 0) {
             let cColor = (this.weapon === 'lazer_charge') ? `rgb(0, ${this.chargeLevel * 35}, 255)` : `rgb(255, ${255 - this.chargeLevel * 30}, 0)`;
             ctx.fillStyle = cColor;
             ctx.fillRect(this.x, this.y + this.h / 2 - 5, this.w * (this.chargeLevel / 7), 10);

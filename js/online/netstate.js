@@ -18,6 +18,7 @@ const NET_CLASSES = {
     DjSoundZone, DjBeam,
     FsPetal, FsSlashMark, FsClone, FsShadow, FsLandStrike, FsStar,
     TzMortar, TzZone, TzAirStrike,
+    OvEmpRing, OvEmpMark,
 };
 
 // Biến toàn cục cần đồng bộ: [tên, getter, setter]
