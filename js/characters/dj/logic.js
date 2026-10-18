@@ -393,7 +393,10 @@ class DjBeam {
     fire() {
         const enemy = this.owner === p1 ? p2 : p1;
         const half = 26;
-        if (enemy && enemy.hp > 0 && this.x > enemy.x - half && this.x < enemy.x + enemy.w + half) {
+        const o = this.owner, swDir = o.id === 1 ? -1 : 1;
+        const swW = sniperWallBlockY(o, this.x, o.id === 1 ? o.y : o.y + o.h, swDir, 4, this.dmg); // Tường Sniper chặn tia
+        if (swW) this.stopY = sniperWallStopY(swW, swDir);
+        else if (enemy && enemy.hp > 0 && this.x > enemy.x - half && this.x < enemy.x + enemy.w + half) {
             enemy.takeDamage(this.dmg, this.owner);
             enemy.djSlowT = Math.max(enemy.djSlowT || 0, 54);
             this.hitY = enemy.y + enemy.h / 2;
@@ -407,8 +410,8 @@ class DjBeam {
         if (!this.active) return;
         const o = this.owner;
         const k = this.life / 16;
-        const top = o.id === 1 ? 0 : o.y + o.h;
-        const bot = o.id === 1 ? o.y : canvas.height;
+        const top = o.id === 1 ? (this.stopY != null ? this.stopY : 0) : o.y + o.h;
+        const bot = o.id === 1 ? o.y : (this.stopY != null ? this.stopY : canvas.height);
         ctx.save();
         ctx.globalAlpha = k;
         ctx.globalCompositeOperation = 'lighter';

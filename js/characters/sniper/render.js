@@ -42,7 +42,7 @@ Object.assign(Player.prototype, {
             // Vẽ thanh hồi chiêu (Cooldown) của Tường Sniper ở bên dưới gầm xe
             if (this.sniperWallCooldown > 0) {
                 ctx.fillStyle = "cyan"; // Màu thanh hồi chiêu tường
-                ctx.fillRect(this.x, this.y + this.h + 5, this.w * (this.sniperWallCooldown / 600), 3);
+                ctx.fillRect(this.x, this.y + this.h + 5, this.w * (this.sniperWallCooldown / 300), 3);
             }
         }
     }

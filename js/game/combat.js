@@ -245,6 +245,19 @@ function checkHits(attacker, victim) {
         for (let w of allWalls) {
             if (w.active && rectIntersect(b.x, b.y, b.w, b.h, w.x, w.y, w.w, w.h)) {
                 if (b.isPiercing && b.hitIds && b.hitIds.includes(w)) continue;
+                // Tường Sniper: chặn MỌI viên đạn của đối thủ (kể cả đạn xuyên); đạn phe mình bay qua
+                if (w instanceof SniperWall && w.owner !== attacker) {
+                    BulletHooks.call(b, 'obstacle', attacker, w, 'wall');
+                    w.takeHit((b.isAcid || attacker.weapon === 'acid') ? 5 : currentFinalDmg, attacker);
+                    applyBulletEffectsToStructure(w, b.x, b.y);
+                    attacker.bullets.splice(i, 1); i--; hitWall = true; break;
+                }
+                if (w instanceof SniperWall && w.isFullEvo) { // Full Evo: đạn phe mình không làm hại tường
+                    if (!b.hitIds) b.hitIds = [];
+                    b.hitIds.push(w);
+                    if (!b.isPiercing) { attacker.bullets.splice(i, 1); i--; hitWall = true; break; }
+                    continue;
+                }
                 if (BulletHooks.call(b, 'obstacle', attacker, w, w.isStone ? 'stone' : 'wall') === 'pass') continue;
                 if (w.isStone && w.isLava) BulletHooks.call({ hook: 'kiem_su' }, 'lavaHit', w, b);
                 let isOwnEvoWall = (b.owner && w.owner === b.owner && b.owner.hasUpgrade('evo_sniper_1'));

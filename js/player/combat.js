@@ -277,6 +277,8 @@ Object.assign(Player.prototype, {
         let startY = originY || ((this.id === 1) ? this.y : this.y + this.h);
         let endY = (this.id === 1) ? 0 : canvas.height;
         let dirY = (this.id === 1) ? -1 : 1;
+        const swW = sniperWallBlockY(this, startX, startY, dirY, 4, dmg); // Tường Sniper chặn tia
+        if (swW) endY = sniperWallStopY(swW, dirY);
 
         // 1. Tạo hiệu ứng hình ảnh tia kiếm (tồn tại trong 10 frame)
         explosions.push({
@@ -311,7 +313,7 @@ Object.assign(Player.prototype, {
 
         // Gây sát thương lên Địch
         const enemy = (this.id === 1) ? p2 : p1;
-        if (checkLineHit(enemy)) { enemy.takeDamage(dmg, this);
+        if (!swW && checkLineHit(enemy)) { enemy.takeDamage(dmg, this);
 
             // Hiệu ứng chém trúng
             explosions.push(new Explosion(startX, enemy.y + enemy.h / 2, 30, color, 0, this));
@@ -595,6 +597,7 @@ Object.assign(Player.prototype, {
             isAcid: (this.weapon === 'acid'),
             createFireZone: createFireZone,
             isFullEvoBig: isFullEvoBig,
+            hook: (this.weapon === 'big_bullet' && type === 'normal') ? 'big_bullet' : undefined, // quả cầu tròn + Full Evo
             isGhost: isGhostBullet,
             isFlicker: isFlicker,
             x: this.x + this.w / 2 - size / 2,
