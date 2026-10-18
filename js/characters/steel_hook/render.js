@@ -279,9 +279,23 @@ Object.assign(CharHooks.registry.steel_hook, {
             const hasTruck = (this.shHooks || []).some(h => h.st === 'truck');
             const hasEnemy = (this.shHooks || []).some(h => h.st === 'enemy');
             ctx.fillStyle = blink ? '#ffffff' : (hasTruck ? '#ffd700' : SH_GLOW);
-            drawWorldText(ctx, hasEnemy ? 'NHẤN BẮN: LÔI XÍCH!' : (hasTruck ? 'SPAM BẮN: KÉO XE! 💰' : 'NHẤN BẮN: ĐU DÂY!'), cx, y + (this.id === 1 ? 6 : -2));
+            drawWorldText(ctx, hasEnemy ? 'NHẤP: LÔI XÍCH | GIỮ: CẮT' : (hasTruck ? 'SPAM BẮN: KÉO XE! 💰' : 'NHẤP: ĐU DÂY | GIỮ: CẮT'), cx, y + (this.id === 1 ? 6 : -2));
             ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(this.x - 4, y + (this.id === 1 ? 10 : -10), this.w + 8, 2);
             ctx.fillStyle = SH_GLOW; ctx.fillRect(this.x - 4, y + (this.id === 1 ? 10 : -10), (this.w + 8) * Math.max(0, 1 - this.shT / SH_HOLD_TIMEOUT), 2);
+            // Giữ Bắn để cắt xích: vòng tiến trình quanh xe
+            if ((this.shHoldS || 0) > 4) {
+                const k = Math.min(1, this.shHoldS / SH_BREAK_TICKS);
+                const cy = this.y + this.h / 2, R = this.w * 0.78;
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = 'rgba(0,0,0,0.55)'; ctx.lineWidth = 5;
+                ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+                ctx.shadowBlur = 12; ctx.shadowColor = '#ff5d73';
+                ctx.strokeStyle = k >= 1 ? '#ffffff' : '#ff7a8a'; ctx.lineWidth = 3;
+                ctx.beginPath(); ctx.arc(cx, cy, R, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * k); ctx.stroke();
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = '#ffd0d6'; ctx.font = 'bold 9px "Orbitron", Arial';
+                drawWorldText(ctx, 'CẮT XÍCH ✂', cx, this.id === 1 ? this.y - R + 4 : this.y + this.h + R + 2);
+            }
         }
         // Evo 2: hồi móc phụ
         if (this.hasUpgrade('evo_hook_2') && !this.shAuto) {
