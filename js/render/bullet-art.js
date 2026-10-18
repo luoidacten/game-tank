@@ -15,6 +15,8 @@ function bulletKind(b, owner) {
     if (b.type === 'shortgun_pellet' || b.isShortgun) return 'pellet';
     if (b.isRaycast || b.isSniperBullet) return 'sniper';
     if (owner && owner.weapon === 'lazer_auto') return 'laser';
+    // Đạn to (d >= 10, vd Đạn Lớn) luôn là cầu tròn thuần có quầng sáng, không đuôi
+    if (Math.min(b.w, b.h) >= 10 || (owner && owner.weapon === 'big_bullet')) return 'orb';
     if (b.isPiercing) return 'pierce';
     return 'normal';
 }
@@ -32,7 +34,28 @@ function drawBulletArt(b, color, owner) {
     ctx.rotate(ang);
     const tail = Math.min(46, 6 + sp * 3.2);
 
-    if (kind === 'normal' || kind === 'pellet') {
+    if (kind === 'orb') {
+        const R = Math.min(b.w, b.h) / 2;
+        const g = ctx.createRadialGradient(0, 0, R * 0.2, 0, 0, R * 1.9);
+        g.addColorStop(0, 'rgba(255,255,255,0.55)'); g.addColorStop(0.5, color); g.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.globalAlpha *= 0.55; ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(0, 0, R * 1.9, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha /= 0.55;
+        ctx.shadowBlur = 16; ctx.shadowColor = color;
+        ctx.fillStyle = color;
+        ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
+        const core = ctx.createRadialGradient(-R * 0.3, -R * 0.3, 0, 0, 0, R);
+        core.addColorStop(0, 'rgba(255,255,255,0.95)'); core.addColorStop(0.45, 'rgba(255,255,255,0.25)'); core.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = core;
+        ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI * 2); ctx.fill();
+        if (R >= 10) { // đạn rất to: vòng năng lượng xoay
+            ctx.rotate(t / 160);
+            ctx.strokeStyle = '#ffffff'; ctx.globalAlpha *= 0.8; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(0, 0, R + 4, 0, Math.PI * 0.7); ctx.stroke();
+            ctx.beginPath(); ctx.arc(0, 0, R + 4, Math.PI, Math.PI * 1.7); ctx.stroke();
+        }
+    } else if (kind === 'normal' || kind === 'pellet') {
         // Sao chổi: đuôi gradient + đầu sáng lõi trắng
         const L = kind === 'pellet' ? tail * 0.6 : tail;
         const g = ctx.createLinearGradient(-L, 0, 0, 0);
