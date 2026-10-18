@@ -48,14 +48,17 @@ Object.assign(Player.prototype, {
         else if (this.slowTimer > 0) drawColor = "#3399ff67"; // Bị Chậm (Xanh biển rực)
         drawColor = this.drawAmDuongSu(drawColor);
 
-        ctx.fillStyle = drawColor;
-        ctx.fillRect(this.x, this.y, this.w, this.h);
+        // Hình xe hiện đại theo từng body (js/render/tank-art*.js); body chưa có art -> khối cũ
+        if (!(typeof drawTankArt === 'function' && drawTankArt(this, drawColor))) {
+            ctx.fillStyle = drawColor;
+            ctx.fillRect(this.x, this.y, this.w, this.h);
 
-        ctx.fillStyle = "#fff";
-        let bx = this.x + this.w / 2 - 4;
-        let by = (this.id === 1) ? this.y - 15 : this.y + this.h;
-        if (this.weapon === 'smg') bx += (Math.random() - 0.5) * 8;
-        this.drawTank(bx, by);
+            ctx.fillStyle = "#fff";
+            let bx = this.x + this.w / 2 - 4;
+            let by = (this.id === 1) ? this.y - 15 : this.y + this.h;
+            if (this.weapon === 'smg') bx += (Math.random() - 0.5) * 8;
+            this.drawTank(bx, by);
+        }
 
         // Vẽ Drones của Nhà Phát Minh
         this.drawInventor();

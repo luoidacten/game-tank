@@ -21,7 +21,28 @@ function bulletKind(b, owner) {
     return 'normal';
 }
 
+// Đạn đặc trưng theo body: registerBulletArt(weaponId, fn). fn(b, color, owner, k) vẽ trong hệ toạ độ
+// đã dời về tâm viên đạn và xoay theo hướng bay (+x = hướng bay). k = { r, w, h, sp, t, team }.
+// fn trả về false -> dùng hình mặc định theo loại.
+const BULLET_ART = {};
+function registerBulletArt(id, fn) { BULLET_ART[id] = fn; }
+
 function drawBulletArt(b, color, owner) {
+    const custom = owner && BULLET_ART[owner.weapon];
+    if (custom) {
+        const cx0 = b.x + b.w / 2, cy0 = b.y + b.h / 2;
+        const sp0 = Math.hypot(b.vx || 0, b.vy || 0);
+        ctx.save();
+        ctx.translate(cx0, cy0);
+        ctx.rotate(Math.atan2(b.vy || 0, b.vx || 0));
+        let ok;
+        try {
+            ok = custom(b, color, owner, { r: Math.max(2, Math.min(b.w, b.h) / 2), w: b.w, h: b.h, sp: sp0, t: Date.now(),
+                team: owner.id === 1 ? '#3498db' : '#e74c3c' });
+        } catch (e) { ok = false; }
+        ctx.restore();
+        if (ok !== false) return;
+    }
     const kind = bulletKind(b, owner);
     const cx = b.x + b.w / 2, cy = b.y + b.h / 2;
     const vx = b.vx || 0, vy = b.vy || 0;
