@@ -20,11 +20,13 @@ function tzTintShootButton(p) {
     const r = tzLocalShootButton(p);
     if (!r || !r.el) return;
     const col = TZ_MODE_COLOR[p.tzMode] || '#22d3ee';
-    const want = p.tzFly ? '#facc15|fly' : col;
+    const cool = !p.tzFly && p.tzMode === 'thien' && (p.tzFlyCd || 0) > 0;
+    const want = p.tzFly ? '#facc15|fly' : (cool ? col + '|cd' : col);
     if (tzBtnState[r.key] === want) return;
     tzBtnState[r.key] = want;
-    r.el.style.borderColor = col;
-    r.el.style.boxShadow = `0 0 14px ${col}, inset 0 0 12px ${col}88`;
+    const c2 = cool ? '#64748b' : col;
+    r.el.style.borderColor = c2;
+    r.el.style.boxShadow = cool ? 'none' : `0 0 14px ${col}, inset 0 0 12px ${col}88`;
     r.el.style.outline = p.tzFly ? `2px dashed ${col}` : '';
 }
 
@@ -211,7 +213,27 @@ Object.assign(CharHooks.registry.t_zero, {
 
             // Tâm ngắm Thiên Luật trên làn địch
             const R = tzSlamRadius(this);
+            const lockK = (f.phase === 'lock' || f.phase === 'dive') ? Math.min(1, (f.lock || 0) / TZ_LOCK_TICKS) : -1;
+            if (lockK >= 0) {
+                // LUẬT 11: đã khóa — đỏ đặc, vòng trong co dần tới lúc đáp
+                ctx.save();
+                const bl = 0.5 + 0.5 * Math.sin(t * 30);
+                ctx.shadowBlur = 16; ctx.shadowColor = '#ff2d2d';
+                ctx.fillStyle = `rgba(255, 30, 30, ${0.18 + 0.14 * lockK + 0.06 * bl})`;
+                ctx.strokeStyle = '#ff3b3b'; ctx.lineWidth = 3;
+                ctx.beginPath(); ctx.ellipse(f.cx, f.cy, R, R * 0.75, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                ctx.strokeStyle = '#ffe4e4'; ctx.lineWidth = 2.5;
+                const q = Math.max(0.02, 1 - lockK);
+                ctx.beginPath(); ctx.ellipse(f.cx, f.cy, R * q, R * 0.75 * q, 0, 0, Math.PI * 2); ctx.stroke();
+                ctx.lineWidth = 2; ctx.strokeStyle = '#ff6b6b';
+                ctx.beginPath();
+                ctx.moveTo(f.cx - R - 8, f.cy); ctx.lineTo(f.cx + R + 8, f.cy);
+                ctx.moveTo(f.cx, f.cy - R * 0.75 - 6); ctx.lineTo(f.cx, f.cy + R * 0.75 + 6);
+                ctx.stroke();
+                ctx.restore();
+            }
             ctx.save();
+            if (lockK >= 0) ctx.globalAlpha = 0;
             const pul = 0.5 + 0.5 * Math.sin(t * 8);
             ctx.strokeStyle = `rgba(250, 204, 21, ${0.55 + 0.4 * pul})`; ctx.lineWidth = 2;
             ctx.fillStyle = 'rgba(250, 204, 21, 0.08)';
@@ -232,13 +254,14 @@ Object.assign(CharHooks.registry.t_zero, {
             const hoverY = cy + dir * 90;
             let mx = cx, my = cy, sc = 1, thrust = true;
             if (f.phase === 'up') { const k = Math.min(1, f.anim / 16); mx = cx + (f.cx - cx) * k * 0.6; my = cy + (hoverY - cy) * k; sc = 1 + 0.3 * k; }
-            else if (f.phase === 'air') { mx = cx + (f.cx - cx) * 0.6; my = hoverY + Math.sin(t * 3) * 4; sc = 1.3; }
+            else if (f.phase === 'air' || f.phase === 'lock') { mx = cx + (f.cx - cx) * 0.6; my = hoverY + Math.sin(t * 3) * 4; sc = 1.3; }
             else if (f.phase === 'dive') { const k = Math.min(1, f.anim / 12); const sx = cx + (f.cx - cx) * 0.6; mx = sx + (f.cx - sx) * k; my = hoverY + (f.cy - hoverY) * k * k; sc = 1.3 - 0.2 * k; }
             else { const k = Math.min(1, f.anim / 14); mx = f.cx + (cx - f.cx) * k; my = f.cy + (cy - f.cy) * k; sc = 1.1 - 0.1 * k; }
             // Chùm sáng radar xuống tâm ngắm
-            if (f.phase === 'air') {
+            if (f.phase === 'air' || f.phase === 'lock') {
                 ctx.save();
-                ctx.strokeStyle = 'rgba(250, 204, 21, 0.35)'; ctx.lineWidth = 1; ctx.setLineDash([3, 6]);
+                ctx.strokeStyle = f.phase === 'lock' ? 'rgba(255, 60, 60, 0.75)' : 'rgba(250, 204, 21, 0.35)';
+                ctx.lineWidth = f.phase === 'lock' ? 2 : 1; ctx.setLineDash([3, 6]);
                 ctx.beginPath(); ctx.moveTo(mx, my); ctx.lineTo(f.cx, f.cy); ctx.stroke();
                 ctx.restore();
             }
@@ -324,6 +347,29 @@ Object.assign(CharHooks.registry.t_zero, {
             ctx.beginPath(); ctx.moveTo(px, py - 3.5); ctx.lineTo(px + 3.5, py); ctx.lineTo(px, py + 3.5); ctx.lineTo(px - 3.5, py); ctx.closePath(); ctx.fill();
         }
         ctx.shadowBlur = 0;
+
+        // Hồi chiêu cất cánh (2.5s sau khi đáp): vòng quay quanh đèn THIÊN + số giây
+        if (!this.tzFly && (this.tzFlyCd || 0) > 0) {
+            const k = this.tzFlyCd / TZ_FLY_CD;
+            const py = this.y + this.h / 2 + 9 * (isP1 ? 1 : -1);
+            ctx.strokeStyle = 'rgba(100, 116, 139, 0.6)'; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.arc(px, py, 6, 0, Math.PI * 2); ctx.stroke();
+            ctx.strokeStyle = '#facc15'; ctx.shadowBlur = 6; ctx.shadowColor = '#facc15';
+            ctx.beginPath(); ctx.arc(px, py, 6, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (1 - k)); ctx.stroke();
+            ctx.shadowBlur = 0;
+            if (this.tzMode === 'thien') {
+                ctx.fillStyle = '#fde68a'; ctx.font = "bold 8px 'Orbitron', Arial"; ctx.textAlign = 'right';
+                drawWorldText(ctx, `✈${(this.tzFlyCd / 60).toFixed(1)}s`, px - 8, py + 3);
+                // Phủ xám thanh NL ở vạch chi phí: chưa cất cánh được
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.55)'; ctx.fillRect(x0, y - 1, W * k, 6);
+            }
+        }
+        // Đang bay: hiện mức tiêu hao NL/s (tăng dần theo thời gian bay)
+        if (this.tzFly && (this.tzFly.phase === 'air' || this.tzFly.phase === 'up')) {
+            const d = tzFlyDrainPerSec(this);
+            ctx.fillStyle = d > 25 ? '#ff4d4d' : '#fde68a'; ctx.font = "bold 8px 'Orbitron', Arial"; ctx.textAlign = 'center';
+            drawWorldText(ctx, `-${Math.round(d)}%/s`, this.x + this.w / 2, isP1 ? this.y - 6 : this.y + this.h + 14);
+        }
 
         // Vòng giữ nút đổi chế độ
         if (!this.tzFly && this.tzHold > 3 && this.tzHold < TZ_HOLD_TICKS) {
