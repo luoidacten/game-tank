@@ -13,29 +13,6 @@ function revStar(cx, cy, rOut, rIn, n, rot) {
     ctx.closePath();
 }
 
-// Vẽ khẩu súng lục (nòng + khung) nhô ra phía trước
-function revDrawGun(p, dx, kick) {
-    const d = revDir(p);
-    const cx = p.x + p.w / 2 + dx;
-    const baseY = d < 0 ? p.y + 2 : p.y + p.h - 2;
-    const k = -d * kick * 0.5; // giật lùi
-    ctx.save();
-    // Khung súng (đồng thau)
-    ctx.fillStyle = '#7a4a1e';
-    ctx.fillRect(cx - 4, baseY + d * 2 + k - (d < 0 ? 6 : 0), 8, 6);
-    // Nòng dài thép xanh
-    const bl = 14;
-    const by0 = d < 0 ? baseY - bl + k : baseY + k;
-    const g = ctx.createLinearGradient(cx - 2.5, 0, cx + 2.5, 0);
-    g.addColorStop(0, '#5b6577'); g.addColorStop(0.5, '#dfe7f2'); g.addColorStop(1, '#4a5263');
-    ctx.fillStyle = g;
-    ctx.fillRect(cx - 2.5, by0 - (d < 0 ? 2 : -2), 5, bl);
-    // Đầu ruồi vàng
-    ctx.fillStyle = REV_GOLD;
-    ctx.fillRect(cx - 1, d < 0 ? by0 - 4 : by0 + bl + 1, 2, 3);
-    ctx.restore();
-}
-
 Object.assign(CharHooks.registry.revolver, {
     draw() {
         const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
@@ -43,32 +20,7 @@ Object.assign(CharHooks.registry.revolver, {
         const dual = revFull(this) && this.revFanPhase;
         ctx.save();
 
-        // Súng lục (Song Lục khi Full Evo quạt cò)
-        if (dual) { revDrawGun(this, -9, this.revKick || 0); revDrawGun(this, 9, this.revKick || 0); }
-        else revDrawGun(this, 0, this.revKick || 0);
-
-        // Nón cao bồi nhìn từ trên xuống: vành nón + chóp + dây đồng
-        const rw = this.w * 0.62, rh = this.h * 0.5;
-        ctx.shadowBlur = 6; ctx.shadowColor = 'rgba(0,0,0,0.6)';
-        ctx.fillStyle = '#8b5a2b';
-        ctx.beginPath(); ctx.ellipse(cx, cy, rw, rh, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.shadowBlur = 0;
-        ctx.strokeStyle = '#4a2c12'; ctx.lineWidth = 1.2; ctx.stroke();
-        // vành cong lên 2 bên
-        ctx.strokeStyle = 'rgba(255, 220, 160, 0.35)'; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.ellipse(cx, cy, rw - 2, rh - 2, 0, Math.PI * 0.15, Math.PI * 0.85); ctx.stroke();
-        ctx.fillStyle = '#6b3f1a';
-        ctx.beginPath(); ctx.ellipse(cx, cy, rw * 0.55, rh * 0.62, 0, 0, Math.PI * 2); ctx.fill();
-        // dây nón đồng
-        ctx.strokeStyle = REV_COPPER; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.ellipse(cx, cy, rw * 0.58, rh * 0.66, 0, 0, Math.PI * 2); ctx.stroke();
-        // nếp lõm chóp nón
-        ctx.strokeStyle = '#3d220c'; ctx.lineWidth = 1.2;
-        ctx.beginPath(); ctx.moveTo(cx - rw * 0.25, cy); ctx.lineTo(cx + rw * 0.25, cy); ctx.stroke();
-        // ngôi sao cảnh sát trưởng (màu đội)
-        ctx.fillStyle = this.id === 1 ? '#7dd3fc' : '#fda4af';
-        revStar(cx, cy + (this.id === 1 ? rh * 0.82 : -rh * 0.82), 3.2, 1.4, 5, -Math.PI / 2);
-        ctx.fill();
+        // (Súng lục, nón cao bồi & sao: vẽ trong art xe - js/render/tank-art/core_small.js)
 
         // Thưởng +1 sát thương cho ổ đạn hiện tại: hào quang vàng
         if (this.revDmgBonus > 0) {

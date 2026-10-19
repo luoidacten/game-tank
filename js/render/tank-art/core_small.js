@@ -982,4 +982,97 @@
             ctx.restore();
         };
     }
+    // =====================================================================
+    // CAO BỒI (revolver) — xe da thuộc Viễn Tây, nón cao bồi trên nóc,
+    // súng lục ổ xoay phía trước (ổ hiện số đạn còn lại, viên thứ 6 bằng đồng)
+    // =====================================================================
+    registerTankArt('revolver', (p, k) => {
+        const t = k.t;
+        const GOLD = '#ffcc4d', COPPER = '#ff7a2f';
+        // Bánh xích da tối
+        TA.treads(-15.5, 5, -13, 14, (p.vx || 0) ? t : 0, '#2a1a0e', '#6b4423');
+        // Thân xe: da thuộc / gỗ sẫm, viền màu đội
+        ctx.fillStyle = TA.vgrad(-12, 13, '#b8743a', '#4a2a10');
+        TA.rr(-10.5, -12, 21, 25, 4); ctx.fill();
+        ctx.strokeStyle = k.team; ctx.lineWidth = 1.5; TA.glow(k.team, 6); ctx.stroke(); TA.noGlow();
+        // Đường chỉ khâu
+        ctx.strokeStyle = 'rgba(255,220,160,0.45)'; ctx.lineWidth = 0.7; ctx.setLineDash([1.4, 1.4]);
+        TA.rr(-8.6, -10.2, 17.2, 21.4, 3); ctx.stroke(); ctx.setLineDash([]);
+        // Đinh tán đồng thau 4 góc
+        ctx.fillStyle = GOLD;
+        [[-8, -9.5], [8, -9.5], [-8, 10.5], [8, 10.5]].forEach(([x, y]) => { ctx.beginPath(); ctx.arc(x, y, 0.9, 0, PI * 2); ctx.fill(); });
+        // Evo 2: khăn choàng sọc đỏ phía sau
+        if (k.evo2) {
+            ctx.fillStyle = '#b91c1c'; TA.rr(-9, 7.5, 18, 4.5, 1.5); ctx.fill();
+            ctx.fillStyle = '#fde68a';
+            for (let i = -7; i <= 7; i += 3.5) ctx.fillRect(i - 0.5, 7.5, 1, 4.5);
+        }
+        // Dây đạn chéo thân (Evo 1: viên vàng sáng)
+        ctx.save();
+        ctx.rotate(-0.55);
+        ctx.fillStyle = '#3b2412'; TA.rr(-13, -1.6, 26, 3.2, 1.2); ctx.fill();
+        for (let i = -10; i <= 10; i += 3) {
+            ctx.fillStyle = k.evo1 ? GOLD : '#c08a3e';
+            TA.rr(i - 0.8, -1.3, 1.6, 2.6, 0.6); ctx.fill();
+        }
+        ctx.restore();
+
+        // Súng lục ổ xoay (Song Lục khi Full Evo đang Quạt Cò)
+        const kick = (p.revKick || 0) * 0.6;
+        const dual = k.full && p.revFanPhase;
+        const ammo = Math.max(0, Math.min(6, p.ammo | 0));
+        const gun = (gx) => {
+            const y0 = kick;
+            // khung & báng
+            ctx.fillStyle = TA.metal(gx - 3, gx + 3, '#5b3a1a', '#a86b32');
+            TA.rr(gx - 2.6, -8 + y0, 5.2, 6, 1.2); ctx.fill();
+            // nòng thép xanh (nhô nhẹ khỏi thân)
+            ctx.fillStyle = TA.metal(gx - 1.7, gx + 1.7, '#4a5263', '#e2e8f0');
+            TA.rr(gx - 1.7, -24 + y0, 3.4, 13, 1); ctx.fill();
+            ctx.fillStyle = '#1e293b'; ctx.fillRect(gx - 1.9, -16 + y0, 3.8, 1);
+            ctx.fillStyle = GOLD; TA.glow(GOLD, 4); ctx.fillRect(gx - 0.6, -25.5 + y0, 1.2, 2); TA.noGlow();
+            // ổ xoay 6 viên: hiện số đạn còn trong ổ
+            const cy = -10 + y0, R = 4;
+            ctx.fillStyle = TA.metal(gx - R, gx + R, '#334155', '#cbd5e1');
+            ctx.beginPath(); ctx.arc(gx, cy, R, 0, PI * 2); ctx.fill();
+            ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 0.6; ctx.stroke();
+            const used = 6 - ammo;
+            for (let i = 0; i < 6; i++) {
+                const a = -PI / 2 + (i - used) * PI / 3;
+                const x = gx + Math.cos(a) * 2.4, y = cy + Math.sin(a) * 2.4;
+                const loaded = i >= used;
+                ctx.fillStyle = !loaded ? '#0b1120' : (i === 5 ? COPPER : GOLD);
+                ctx.beginPath(); ctx.arc(x, y, 0.95, 0, PI * 2); ctx.fill();
+            }
+            ctx.fillStyle = '#1e293b'; ctx.beginPath(); ctx.arc(gx, cy, 0.8, 0, PI * 2); ctx.fill();
+        };
+        if (dual) { gun(-6.5); gun(6.5); } else gun(0);
+
+        // Nón cao bồi nhìn từ trên: vành, chóp, dây nón màu đội, sao cảnh sát trưởng
+        const hy = 3.5;
+        ctx.fillStyle = TA.vgrad(hy - 8, hy + 8, '#a86b32', '#5c3714');
+        TA.glow('rgba(0,0,0,0.6)', 4);
+        ctx.beginPath(); ctx.ellipse(0, hy, 10.5, 7.5, 0, 0, PI * 2); ctx.fill(); TA.noGlow();
+        ctx.strokeStyle = k.evo1 ? GOLD : '#3d220c'; ctx.lineWidth = k.evo1 ? 1 : 0.8; ctx.stroke();
+        // vành cong lên hai bên
+        ctx.strokeStyle = 'rgba(255,220,160,0.4)'; ctx.lineWidth = 0.8;
+        ctx.beginPath(); ctx.ellipse(0, hy, 9, 6, 0, PI * 0.1, PI * 0.9); ctx.stroke();
+        // chóp
+        ctx.fillStyle = TA.vgrad(hy - 5, hy + 5, '#8b5a2b', '#4a2a10');
+        ctx.beginPath(); ctx.ellipse(0, hy, 5.6, 4.6, 0, 0, PI * 2); ctx.fill();
+        ctx.strokeStyle = k.full ? GOLD : k.team; ctx.lineWidth = 1.4;
+        if (k.full) TA.glow(GOLD, 6);
+        ctx.beginPath(); ctx.ellipse(0, hy, 6, 5, 0, 0, PI * 2); ctx.stroke(); TA.noGlow();
+        ctx.strokeStyle = '#2b1606'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(-2.6, hy); ctx.lineTo(2.6, hy); ctx.stroke();
+        // sao trước chóp nón (màu đội, viền vàng)
+        ctx.save();
+        ctx.translate(0, hy - 6.4);
+        ctx.beginPath();
+        for (let i = 0; i < 10; i++) { const r = i % 2 ? 1.1 : 2.6, a = -PI / 2 + i * PI / 5; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); }
+        ctx.closePath();
+        ctx.fillStyle = k.team; TA.glow(k.team, 5); ctx.fill(); TA.noGlow();
+        ctx.strokeStyle = GOLD; ctx.lineWidth = 0.6; ctx.stroke();
+        ctx.restore();
+    });
 })();
