@@ -52,12 +52,6 @@ Object.assign(Player.prototype, {
 
     // [drawUI] inventor
     drawUIForInventor() {
-        if (this.weapon === 'inventor') {
-            ctx.fillStyle = "#00ffcc";
-            ctx.font = "bold 9px 'Orbitron', Arial";
-            ctx.textAlign = "center";
-            let lkY = (this.id === 1) ? this.y - 6 : this.y + this.h + 16;
-            drawWorldText(ctx, "⚙ LK: " + (this.components || 0), this.x + this.w / 2, lkY);
-        }
+        // Số Linh Kiện: vòng cạnh xe (js/render/empower-providers.js)
     }
 });

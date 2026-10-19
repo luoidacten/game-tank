@@ -71,16 +71,38 @@ function renderFrame() {
 
     const now = Date.now();
     let timePlayed = now - gameState.roundStartTime;
-    let suddenDeathLimit = (gameState.currentMap === 'fast_shrink') ? 20000 : C.suddenDeathTime;
-    let shrinkRate = (gameState.currentMap === 'fast_shrink') ? 0.15 : 0.05;
-    if (timePlayed > suddenDeathLimit) {
-        let shrink = (timePlayed - suddenDeathLimit) * shrinkRate;
-        let zoneX = shrink;
-        let zoneW = canvas.width - shrink * 2;
-        if (zoneW < 50) { zoneW = 50; zoneX = canvas.width / 2 - 25; }
-
-        ctx.strokeStyle = 'red'; ctx.setLineDash([10, 10]); ctx.lineWidth = 2;
-        ctx.strokeRect(zoneX, 0, zoneW, canvas.height); ctx.setLineDash([]);
+    const zs = (typeof getZoneState === 'function') ? getZoneState(timePlayed) : null;
+    if (zs) {
+        const H = canvas.height, W = canvas.width;
+        const blink = 0.5 + 0.5 * Math.sin(now / 160);
+        ctx.save();
+        // Phủ đỏ mờ vùng nguy hiểm (ngoài bo)
+        ctx.fillStyle = 'rgba(255, 30, 60, 0.13)';
+        if (zs.x0 > 0) ctx.fillRect(0, 0, zs.x0, H);
+        if (zs.x1 < W) ctx.fillRect(zs.x1, 0, W - zs.x1, H);
+        // Vùng sắp tới (vàng chấm) để người chơi kịp di chuyển
+        if (zs.next && (Math.abs(zs.next.x0 - zs.x0) > 2 || Math.abs(zs.next.x1 - zs.x1) > 2)) {
+            ctx.strokeStyle = `rgba(255, 215, 64, ${0.35 + 0.35 * blink})`; ctx.lineWidth = 2;
+            ctx.setLineDash([4, 8]); ctx.lineDashOffset = -now / 40;
+            ctx.strokeRect(zs.next.x0, 2, zs.next.x1 - zs.next.x0, H - 4);
+            ctx.fillStyle = 'rgba(255, 215, 64, 0.05)';
+            ctx.fillRect(zs.next.x0, 0, zs.next.x1 - zs.next.x0, H);
+        }
+        // Viền bo hiện tại
+        ctx.setLineDash([10, 10]); ctx.lineDashOffset = 0;
+        ctx.strokeStyle = 'red'; ctx.lineWidth = 2;
+        ctx.shadowColor = '#ff1744'; ctx.shadowBlur = 8;
+        ctx.strokeRect(zs.x0, 0, zs.x1 - zs.x0, H);
+        ctx.setLineDash([]); ctx.shadowBlur = 0;
+        // Nhãn giai đoạn (giữa sân, chữ nhỏ)
+        if (zs.label) {
+            ctx.font = "bold 11px 'Orbitron', Arial"; ctx.textAlign = 'center';
+            ctx.fillStyle = zs.phase === 1.5 || zs.phase === 3 ? `rgba(255, 215, 64, ${0.6 + 0.4 * blink})` : 'rgba(255, 82, 82, 0.9)';
+            const lx = Math.max(60, Math.min(W - 60, (zs.x0 + zs.x1) / 2));
+            if (typeof drawWorldText === 'function') drawWorldText(ctx, '⚠ ' + zs.label, lx, H * 0.4);
+            else ctx.fillText('⚠ ' + zs.label, lx, H * 0.4);
+        }
+        ctx.restore();
     }
 
     if (movingObstacle && movingObstacle.active) {
@@ -176,53 +198,7 @@ function renderFrame() {
 
     p1.draw(); p2.draw();
 
-    // UI Tụ lực Sấm Chớp rõ ràng (3 giai đoạn)
-    [p1, p2].forEach(p => {
-        if (p && p.weapon === 'thunder' && (p.thunderHoldFrames || 0) > 0) {
-            ctx.save();
-            let barW = 84;
-            let barH = 7;
-            let barX = p.x + p.w / 2 - barW / 2;
-            let barY = (p.id === 1) ? p.y - 28 : p.y + p.h + 20;
-
-            // Nền thanh sạc
-            ctx.fillStyle = "rgba(15, 15, 25, 0.88)";
-            ctx.fillRect(barX - 2, barY - 2, barW + 4, barH + 4);
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
-            ctx.lineWidth = 1;
-            ctx.strokeRect(barX - 2, barY - 2, barW + 4, barH + 4);
-
-            let held = p.thunderHoldFrames;
-            let stage = held < 30 ? 1 : (held <= 60 ? 2 : 3);
-            let stageLabel = stage === 1 ? "⚡ PHÓNG THƯƠNG" : (stage === 2 ? "🧲 THU THƯƠNG" : "🌪️ TRẢM LÔI");
-            let stageColor = stage === 1 ? "#00e5ff" : (stage === 2 ? "#ffd700" : "#ff007f");
-
-            // Tiến độ thanh sạc
-            let fillPct = Math.min(1, held / 65);
-            ctx.fillStyle = stageColor;
-            ctx.fillRect(barX, barY, barW * fillPct, barH);
-
-            // Vạch phân chia 30f và 60f
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.75)";
-            ctx.lineWidth = 1.5;
-            let mark1 = barX + barW * (30 / 65);
-            let mark2 = barX + barW * (60 / 65);
-            ctx.beginPath();
-            ctx.moveTo(mark1, barY - 1); ctx.lineTo(mark1, barY + barH + 1);
-            ctx.moveTo(mark2, barY - 1); ctx.lineTo(mark2, barY + barH + 1);
-            ctx.stroke();
-
-            // Nhãn chữ kỹ năng
-            ctx.font = 'bold 10px "Orbitron", Arial, sans-serif';
-            ctx.fillStyle = stageColor;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = (p.id === 1) ? 'bottom' : 'top';
-            let textY = (p.id === 1) ? barY - 3 : barY + barH + 3;
-            ctx.fillText(stageLabel, p.x + p.w / 2, textY);
-
-            ctx.restore();
-        }
-    });
+    // Tụ lực Lôi Thần (3 giai đoạn): vòng 3 ô cạnh xe + biểu tượng trên nút Bắn (js/render/empower-providers.js)
 
     // Vẽ pháo nổ trên đầu người chơi
     mortars.forEach(m => m.draw());

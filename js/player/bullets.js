@@ -344,9 +344,10 @@ Object.assign(Player.prototype, {
             }
             if (b.x <= 0 || b.x >= canvas.width) {
                 // Check đạn lớn
-                if (this.hasUpgrade('evo_big_2') && b.bounceCount < 5) {
+                if (this.hasUpgrade('evo_big_2') && b.bounceCount < 5 && !b.bigPierce) {
                     b.vx = -b.vx;
                     b.bounceCount++;
+                    if (b.isFullEvoBig) bigOnBounce(b); // Full Evo Đạn Lớn: nảy lần đầu -> Xuyên Thấu
                     hitWall = false; // Đánh dấu là nảy, không phải đâm tường mất đạn
 
                     // FULL EVO BIG BULLET: Nảy tường phình to kích thước & tăng dame (bỏ tăng tốc đạn)
@@ -359,9 +360,10 @@ Object.assign(Player.prototype, {
                 } else hitWall = true;
             }
             if (b.y <= 0 || b.y >= canvas.height) {
-                if (this.hasUpgrade('evo_big_2') && b.bounceCount < 5) {
+                if (this.hasUpgrade('evo_big_2') && b.bounceCount < 5 && !b.bigPierce) {
                     b.vy = -b.vy;
                     b.bounceCount++;
+                    if (b.isFullEvoBig) bigOnBounce(b); // Full Evo Đạn Lớn: nảy lần đầu -> Xuyên Thấu
                     hitWall = false;
 
                     // FULL EVO BIG BULLET: Nảy tường phình to kích thước & tăng dame (bỏ tăng tốc đạn)
@@ -377,26 +379,7 @@ Object.assign(Player.prototype, {
                 if (BulletHooks.call(b, 'edge', this) === 'keep') continue; // hook tự xử lý (vd. nảy tường)
                 // --- THUNDER SPEAR CẮM TƯỜNG & NỔ ---
                 if (b.isThunderSpear) {
-                    let hasEvo1 = (this.hasUpgrade && this.hasUpgrade('evo_thun_1'));
-                    let expDmg = 1.0;
-                    explosions.push(new Explosion(b.x, b.y, 45, 'rgba(255, 255, 0,', expDmg, this));
-                    let enemy = (this.id === 1) ? p2 : p1;
-                    if (enemy && enemy.hp > 0 && Math.hypot((enemy.x + enemy.w / 2) - b.x, (enemy.y + enemy.h / 2) - b.y) <= 45) {
-                        enemy.takeDamage(expDmg, this);
-                        if (hasEvo1) {
-                            enemy.freezeTimer = Math.max(enemy.freezeTimer || 0, 60);
-                            if (typeof addFloatingText === 'function') addFloatingText(enemy.x + enemy.w / 2, enemy.y - 12, "TÊ LIỆT! ⚡", "#ffff00", 14);
-                        }
-                    }
-                    let plantX = Math.max(10, Math.min(canvas.width - 10, b.x));
-                    let plantY = Math.max(10, Math.min(canvas.height - 10, b.y));
-                    thunderPlantedSpears.push({
-                        id: Math.random(),
-                        owner: this,
-                        x: plantX,
-                        y: plantY,
-                        angle: Math.atan2(b.vy, b.vx)
-                    });
+                    thunderSpearPlant(this, b);
                     this.bullets.splice(i, 1);
                     continue;
                 }
@@ -413,7 +396,7 @@ Object.assign(Player.prototype, {
                     let plantX = Math.max(10, Math.min(canvas.width - 10, b.x));
                     let plantY = Math.max(10, Math.min(canvas.height - 10, b.y));
                     let isFullEvo = (this.hasUpgrade && this.hasUpgrade('evo_mag_net_1') && this.hasUpgrade('evo_mag_net_2'));
-                    let radius = isFullEvo ? 135 : 90;
+                    let radius = isFullEvo ? 118 : 78; // bán kính từ trường (đã thu nhỏ)
                     magnetNodes.push({
                         id: Math.random(),
                         owner: this,
@@ -421,6 +404,7 @@ Object.assign(Player.prototype, {
                         y: plantY,
                         polarity: b.polarity || this.magnetPolarity || 1,
                         radius: radius,
+                        age: 0,
                         active: true
                     });
                     explosions.push(new Explosion(plantX, plantY, 25, b.polarity === 1 ? '#ff5722' : '#00bcd4', 0, this));
@@ -448,7 +432,6 @@ Object.assign(Player.prototype, {
                     talismans.push(new Talisman(b.x, b.y, 'duong', this));
                 }
 
-                if (this.hasUpgrade('evo_over_1') && b.isFullCharge) explosions.push(new Explosion(b.x, b.y, 80, 'rgba(0, 255, 255,', 2, this));
                 if (b.createFireZone) {
                     explosions.push(new Explosion(b.x, b.y, 100, 'red', 3, this));
                     radiationZones.push(new RadiationZone(b.x, b.y)); // Để lại vùng gây dame

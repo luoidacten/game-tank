@@ -224,7 +224,7 @@ Object.assign(Player.prototype, {
         // ==========================================
         // --- LOGIC NAM CHÂM (MAGNET) ---
         // ==========================================
-        this.updateMagnet();
+        if (this.updateMagnet()) return;
 
         // Đếm lùi nhiễm từ tính trên người chơi
         if (this.infectedPolarityTimer > 0) {
@@ -445,7 +445,7 @@ Object.assign(Player.prototype, {
         if (bodyEffects.length) resolveStoneBlocking(this, prevXForStone);
 
         // Tự động hồi đạn lẻ theo thời gian (Chặn khi Shadow Hunter đang tàng hình)
-        if (this.weapon !== 'tank' && this.weapon !== 'sniper' && !(this.weapon === 'shadow_hunter' && this.stealthActive)) {
+        if (this.weapon !== 'tank' && this.weapon !== 'sniper' && this.weapon !== 'smg' && !(this.weapon === 'shadow_hunter' && this.stealthActive)) {
             if (this.ammo < this.maxAmmo && now - this.lastShot > this.reloadTime) {
                 if (now - this.lastReload > 500) { this.ammo++; this.lastReload = now; }
             }

@@ -22,7 +22,6 @@ function registerEmpowerHUD(id, fn) { EMPOWER_HUD[id] = fn; }
 
 // Body sạc chung (chargeLevel 0..7): Lazer Xuyên Phá, Cuộn Quá Tải, Phong Trảm
 const EMP_CHARGE_STYLE = {
-    lazer_charge: { color: '#ff3355', label: 'LAZER' },
     overload: { color: '#38bdf8', label: 'QUÁ TẢI' },
     wind_slash: { color: '#a7f3d0', label: 'PHONG' },
 };
@@ -33,6 +32,9 @@ function empChargeState(p) {
     return { pct, ready: pct >= 1, label: pct >= 1 ? st.label + ' MAX' : st.label, color: st.color, segments: 7, lit: Math.floor(p.chargeLevel) };
 }
 Object.keys(EMP_CHARGE_STYLE).forEach(id => registerEmpowerHUD(id, empChargeState));
+// Lazer Xuyên Phá (chế độ Tự Nạp) & Lazer Pháo (Nhiệt): provider khai báo trong file logic của body
+if (typeof lcEmpowerState === 'function') registerEmpowerHUD('lazer_charge', lcEmpowerState);
+if (typeof laEmpowerState === 'function') registerEmpowerHUD('lazer_auto', laEmpowerState);
 
 // Phong Trảm Evo 1: phát thứ 5 tự Full lực -> khi không sạc, hiện bộ đếm 5 ô
 registerEmpowerHUD('wind_slash', p => {

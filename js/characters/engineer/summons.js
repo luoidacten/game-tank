@@ -20,6 +20,9 @@ function getNonOverlappingTurretPos(owner, targetX, targetY) {
     return pos;
 }
 
+const TURRET_DECAY_DELAY = 600;   // 10s đầu không tự mất máu
+const TURRET_DECAY_TICKS = 2400;  // sau đó mất dần: hết máu sau thêm ~40s nếu không được hồi
+
 class Turret {
     constructor(owner, isSmart = false, startX = null, startY = null) {
         this.owner = owner;
@@ -98,6 +101,17 @@ class Turret {
             this.lifeTime--;
             if (this.lifeTime <= 0) {
                 this.active = false;
+                return;
+            }
+        }
+
+        // Ụ súng tồn tại quá 10s bắt đầu tự mất máu chậm (~1/40 máu tối đa mỗi giây)
+        this.age = (this.age || 0) + 1;
+        if (this.age > TURRET_DECAY_DELAY) {
+            this.hp -= this.maxHp / TURRET_DECAY_TICKS;
+            if (this.hp <= 0) {
+                this.hp = 0; this.active = false;
+                explosions.push(new Explosion(this.x + this.w / 2, this.y + this.h / 2, 25, 'gray', 0, this.owner));
                 return;
             }
         }
@@ -181,6 +195,8 @@ class Turret {
         let startX = this.x + this.w / 2 - beamW / 2;
         let startY = (this.owner.id === 1) ? 0 : this.y;
         let beamH = (this.owner.id === 1) ? this.y : canvas.height - this.y;
+        const swBlk = sniperWallClipBeam(this, startX, startY, beamW, beamH, this.owner.id === 1 ? -1 : 1, this.baseDmg * 1.5); // Tường Sniper chặn tia
+        if (swBlk) { startY = swBlk.y; beamH = swBlk.h; }
 
         beams.push(new Beam(startX, startY, beamW, beamH, this.owner.id, isEvo2));
         explosions.push(new Explosion(this.x + this.w / 2, (this.owner.id === 1) ? this.y : this.y + this.h, 30, '#00ffff', 0, this.owner));

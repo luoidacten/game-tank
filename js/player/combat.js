@@ -8,6 +8,9 @@ Object.assign(Player.prototype, {
             this.heat = Math.max(0, (this.heat || 0) - 50);
             if (this.heat <= 50) this.isOverheated = false;
             if (typeof addFloatingText === 'function') addFloatingText(this.x + this.w / 2, this.y - 12, "HẠ NHIỆT -50% ❄", "#00ffff", 12);
+        } else if (this.weapon === 'lazer_auto') {
+            this.laHeat = 0; this.laOver = 0;
+            if (typeof addFloatingText === 'function') addFloatingText(this.x + this.w / 2, this.y - 12, "HẠ NHIỆT ❄", "#00e5ff", 12);
         } else if (this.weapon === 'water_gun') {
             this.energy = Math.min(this.maxEnergy || 100, (this.energy || 0) + 50);
             if (typeof addFloatingText === 'function') addFloatingText(this.x + this.w / 2, this.y - 12, "+50 NƯỚC 💧", "#00bfff", 12);
@@ -34,8 +37,8 @@ Object.assign(Player.prototype, {
             this.chargeLevel = 7;
             if (typeof addFloatingText === 'function') addFloatingText(this.x + this.w / 2, this.y - 12, "ĐẦY KIẾM KHÍ 🗡", "#f1c40f", 12);
         } else if (this.weapon === 'thunder') {
-            this.thunderSpears = 3;
-            if (typeof addFloatingText === 'function') addFloatingText(this.x + this.w / 2, this.y - 12, "+3 LÔI PHONG THƯƠNG ⚡", "#ffff00", 12);
+            this.thunderSpears = thunderSpearCap(this); this.thunderRegenTimer = 0;
+            if (typeof addFloatingText === 'function') addFloatingText(this.x + this.w / 2, this.y - 12, `+${this.thunderSpears} LÔI PHONG THƯƠNG ⚡`, "#ffff00", 12);
         } else if (this.weapon === 'aaa') {
             this.ammo = Math.min(5, (this.ammo || 0) + 2);
             if (typeof addFloatingText === 'function') addFloatingText(this.x + this.w / 2, this.y - 12, "+2 PHÁO CỐI 💣", "#e67e22", 12);
@@ -89,8 +92,8 @@ Object.assign(Player.prototype, {
         }
 
         // Magnet Polar Dash Invulnerability
-        if (canDodge && this.weapon === 'magnet' && this.isPolarDashing) {
-            return 0; // i-frame during Polar Dash
+        if (canDodge && this.weapon === 'magnet' && this.isPolarDashing && this.polarDashPhase === 1) {
+            return 0; // i-frame khi đang lao (pha bật về thì không)
         }
 
         // Bow (Cung) - Nội tại Nhạy Bén: Tự động né 1 đòn đánh mỗi 8s (5s Full Evo)
@@ -166,6 +169,11 @@ Object.assign(Player.prototype, {
             if (!isOnline) {
                 amount *= 0.5;
             }
+        }
+
+        // Xe TANK: đang lao húc -> giảm mạnh sát thương nhận (65%, Evo 1: 80%)
+        if (this.weapon === 'tank' && this.dashState > 0) {
+            amount *= this.hasUpgrade('evo_tank_1') ? 0.2 : 0.35;
         }
 
         if (this.permanentVulnerability) {
@@ -277,6 +285,8 @@ Object.assign(Player.prototype, {
         let startY = originY || ((this.id === 1) ? this.y : this.y + this.h);
         let endY = (this.id === 1) ? 0 : canvas.height;
         let dirY = (this.id === 1) ? -1 : 1;
+        const swW = sniperWallBlockY(this, startX, startY, dirY, 4, dmg); // Tường Sniper chặn tia
+        if (swW) endY = sniperWallStopY(swW, dirY);
 
         // 1. Tạo hiệu ứng hình ảnh tia kiếm (tồn tại trong 10 frame)
         explosions.push({
@@ -311,7 +321,7 @@ Object.assign(Player.prototype, {
 
         // Gây sát thương lên Địch
         const enemy = (this.id === 1) ? p2 : p1;
-        if (checkLineHit(enemy)) { enemy.takeDamage(dmg, this);
+        if (!swW && checkLineHit(enemy)) { enemy.takeDamage(dmg, this);
 
             // Hiệu ứng chém trúng
             explosions.push(new Explosion(startX, enemy.y + enemy.h / 2, 30, color, 0, this));
@@ -357,18 +367,22 @@ Object.assign(Player.prototype, {
         let spd = C.bulletSpeed;
         if (typeof gameState !== 'undefined' && gameState.currentMap === 'overdrive') spd *= 1.5;
 
-        if (this.weapon === 'money_tank') spd *= 0.6;
+        if (this.weapon === 'money_tank') spd *= 0.6 + 0.12 * (this.upgradeLevel || 0); // Mỗi cấp: đạn bay nhanh hơn
+        if (this.weapon === 'basic') spd += 1;
+        if (this.weapon === 'shotgun') spd *= 1.4;
+        if (this.weapon === 'sniper') spd *= 3; // Đạn Sniper bay nhanh gấp 3
         if (this.weapon === 'overload') spd += (multiplier * 0.8 + 2);
         if (this.weapon === 'lazer_auto') spd += 1;
         if (this.hasUpgrade('evo_lazer_a_1')) spd += 2;
         if (this.weapon === 'rocket') spd = this.hasUpgrade('evo_rocket_1') ? 1.5 : 2;
 
         let size = 5; let hSize = 5;
-        if (this.weapon === 'big_bullet') size = 10;
-        if (this.hasUpgrade('evo_big_1')) size = 16;
+        if (this.weapon === 'big_bullet') size = 20;
+        if (this.hasUpgrade('evo_big_1')) size = 32;
         // FULL EVO BIG BULLET: Siêu to
         let isFullEvoBig = (this.weapon === 'big_bullet' && this.hasUpgrade('evo_big_1') && this.hasUpgrade('evo_big_2'));
-        if (isFullEvoBig) size = 22;
+        if (isFullEvoBig) size = 44;
+        if (this.weapon === 'big_bullet') hSize = size; // quả cầu tròn: hitbox vuông
         if (this.weapon === 'overload') size += (multiplier * 1.5);
         if (this.weapon === 'rocket') size = this.hasUpgrade('evo_rocket_2') ? 12 : 8;
         if (this.weapon === 'lazer_auto') { size = this.hasUpgrade('evo_lazer_a_2') ? 6 : 3; hSize = 18; }
@@ -391,9 +405,6 @@ Object.assign(Player.prototype, {
         }
         // FULL EVO OVERLOAD: Tạo vùng lửa/radiation khi nổ
         let createFireZone = false;
-        if (this.weapon === 'overload' && this.hasUpgrade('evo_over_1') && this.hasUpgrade('evo_over_2') && isFullCharge) {
-            createFireZone = true;
-        }
 
         // --- LOGIC KỸ SƯ (Evo 1: Chủ bắn -> Trụ bắn) ---
         if (this.weapon === 'engineer' && this.hasUpgrade('evo_eng_1')) {
@@ -468,7 +479,10 @@ Object.assign(Player.prototype, {
 
         // ... (Logic Shotgun giữ nguyên)
         if (this.weapon === 'shotgun') {
-            let angles = (this.bulletCount === 5) ? [-0.4, -0.2, 0, 0.2, 0.4] : [-0.3, 0, 0.3];
+            // Gốc: 5 viên | Evo 1: 6 viên + đợt 2 (3 viên) bắn theo sau mỗi phát
+            let angles = (type === 'shot_wave') ? [-0.15, 0, 0.15]
+                : (this.bulletCount >= 6 ? [-0.45, -0.27, -0.09, 0.09, 0.27, 0.45] : [-0.36, -0.18, 0, 0.18, 0.36]);
+            if (type !== 'shot_wave' && this.hasUpgrade('evo_shot_1')) this.shotWaveT = 8;
             angles.forEach(angle => {
                 this.bullets.push({ x: this.x + this.w / 2 - size / 2, y: startY, w: size, h: size, vx: angle * spd, vy: dirY * spd, dmg: dmg, owner: this });
             });
@@ -494,7 +508,7 @@ Object.assign(Player.prototype, {
 
             if (this.hasUpgrade('evo_smg_1') && this.smgSprayCount > 3) {
                 let bonus = this.smgSprayCount - 3;
-                dmg += bonus * 0.1; spd += bonus * 0.3; size += Math.min(bonus * 0.5, 5);
+                dmg += Math.min(bonus * 0.05, 0.5); spd += Math.min(bonus * 0.3, 4); size += Math.min(bonus * 0.5, 5); // trần: +0.5 dame
             }
         }
         // --- LOGIC PORTAL FULL EVO (MỚI) ---
@@ -546,6 +560,7 @@ Object.assign(Player.prototype, {
         // --- LOGIC SNIPER (NGẮM NÓN & RAYCAST) ---
         let isRaycast = false;
         let isSniperBullet = (this.weapon === 'sniper');
+        let sniperAng = null;
 
         if (isSniperBullet) {
             isPiercing = true; // Mặc định xuyên vật thể
@@ -553,34 +568,14 @@ Object.assign(Player.prototype, {
 
             // Raycast RNG
             let rayChance = isFullEvo ? 0.5 : (this.hasUpgrade('evo_sniper_2') ? 0.25 : 0);
+            hSize = 16; // đạn nhanh: thân dài hơn để không xuyên qua hitbox
             if (Math.random() < rayChance) {
                 isRaycast = true; spd = 40; hSize = 60;
                 dmg = Math.min(2.5, dmg); // Cân bằng Online: khống chế sát thương Raycast tối đa 2.5
             }
 
-            // [FIX 2] Bỏ `let startY` (vì ở đầu hàm bạn đã gọi rồi, khai báo lại sẽ lỗi)
-            let startX = this.x + this.w / 2;
-
-            // Ngắm nón tự động (Cone Aiming)
-            const enemy = (this.id === 1) ? p2 : p1;
-            let targetAngle = Math.atan2((enemy.y + enemy.h / 2) - startY, (enemy.x + enemy.w / 2) - startX);
-            let baseAngle = (this.id === 1) ? -Math.PI / 2 : Math.PI / 2;
-
-            let diff = targetAngle - baseAngle;
-            while (diff <= -Math.PI) diff += Math.PI * 2;
-            while (diff > Math.PI) diff -= Math.PI * 2;
-
-            let maxCone = isFullEvo ? 0.6 : 0.3; // Mở rộng góc ngắm Full Evo
-
-            let hasWallInFront = false;
-            if (typeof sniperWalls !== 'undefined') {
-                hasWallInFront = sniperWalls.some(w => rectIntersect(this.x, (this.id === 1) ? this.y - 50 : this.y + this.h, this.w, 50, w.x, w.y, w.w, w.h));
-            }
-
-            if (!hasWallInFront && Math.abs(diff) <= maxCone) {
-                vx = Math.cos(targetAngle) * spd;
-                vy = Math.sin(targetAngle) * spd; // Hợp lệ nhờ `let vy` khai báo ở trên
-            }
+            // Ngắm nón tự động: dùng chung với tia ngắm (sniperAimAngle) -> hướng bắn khớp tuyệt đối
+            sniperAng = sniperAimAngle(this);
         }
 
         // ===============================================
@@ -588,6 +583,7 @@ Object.assign(Player.prototype, {
         // ===============================================
         // Recalculate vy after weapon-specific speed modifications
         vy = dirY * spd;
+        if (sniperAng !== null) { vx = Math.cos(sniperAng) * spd; vy = Math.sin(sniperAng) * spd; }
         soundSystem.playShoot(this.weapon === 'lazer_auto' ? 'laser' : (this.weapon === 'rocket' ? 'cannon' : 'normal'));
 
         this.bullets.push({
@@ -598,6 +594,7 @@ Object.assign(Player.prototype, {
             isAcid: (this.weapon === 'acid'),
             createFireZone: createFireZone,
             isFullEvoBig: isFullEvoBig,
+            hook: (this.weapon === 'big_bullet' && type === 'normal') ? 'big_bullet' : undefined, // quả cầu tròn + Full Evo
             isGhost: isGhostBullet,
             isFlicker: isFlicker,
             x: this.x + this.w / 2 - size / 2,

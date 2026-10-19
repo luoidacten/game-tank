@@ -12,7 +12,7 @@
 // ==========================================
 
 // Body tự vẽ thanh riêng ở hàng sát xe phía P2 (dùng subUiY cũ = y-8) -> P2 dời HP ra hàng ngoài
-const HUD_P2_NEAR_ROW = { t_zero: 1, kiem_vu: 1 };
+const HUD_P2_NEAR_ROW = { t_zero: 1, kiem_vu: 1, thunder: 1 };
 // Body có thanh tài nguyên chung (vẽ ở hàng ngoài)
 const HUD_RESOURCE = {
     water_gun: p => ({ c: '#00bfff', k: p.energy / p.maxEnergy }),
@@ -23,7 +23,6 @@ const HUD_RESOURCE = {
     },
     the_strongest: p => ({ c: '#00ffff', k: p.chuLuc / p.maxChuLuc }),
     van_kiem: p => ({ c: '#9b59b6', k: Math.min(1, (p.stanceSwordsAccumulated || 0) / 8) }),
-    storm: p => ({ c: '#2ecc71', k: p.stormChargeRatio || 0 }),
 };
 
 function hudTeam(p) {
@@ -168,6 +167,7 @@ const HUD_STATUS = [
     },
     p => p.invincibleTimer > 0 ? { g: 'guard', c: '#fde68a', l: 'BẤT TỬ', t: sec(p.invincibleTimer) } : null,
     p => p.dmgBuff > 0 ? { g: 'up', c: '#facc15', l: 'ST', t: '+' + (Math.round(p.dmgBuff * 10) / 10) } : null,
+    p => (p.weapon === 'cung' && (p.bowDodgeReady || p.bowDodgeCooldown > 0)) ? { g: 'slow', c: p.bowDodgeReady ? '#00ffcc' : '#64748b', l: 'NÉ', t: p.bowDodgeReady ? '' : sec(p.bowDodgeCooldown) } : null,
     p => (p.weapon === 'sniper' && p.sniperWallCooldown > 0) ? { g: 'wall', c: '#22d3ee', l: 'TƯỜNG', t: sec(p.sniperWallCooldown) } : null,
 ];
 
@@ -291,10 +291,10 @@ function drawTankHUD(p) {
     // ---- Dải đạn ----
     const dAm = dHp + hpH + 1.5, amH = 2.5;
     if (!nearBody && p.maxAmmo > 0 && p.maxAmmo < 100) {
-        const reloading = p.weapon === 'sniper' && p.sniperReloading;
+        const reloading = (p.weapon === 'sniper' && p.sniperReloading) || p.smgReloading;
         if (reloading) {
-            const reloadMax = (p.hasUpgrade('evo_sniper_1') && p.hasUpgrade('evo_sniper_2')) ? 150 : 180;
-            const rk = Math.max(0, Math.min(1, 1 - p.sniperReloadTimer / reloadMax));
+            const reloadMax = p.sniperReloadMax || ((p.hasUpgrade('evo_sniper_1') && p.hasUpgrade('evo_sniper_2')) ? 150 : 180);
+            const rk = Math.max(0, Math.min(1, p.smgReloading ? 1 - (p.smgReloadT || 0) / Math.max(1, p.smgReloadMax || 1) : 1 - p.sniperReloadTimer / reloadMax));
             ctx.fillStyle = 'rgba(255,255,255,0.12)'; hudFill(F, bx, dAm, BW, amH);
             ctx.fillStyle = '#ff9f1a'; ctx.shadowBlur = 5; ctx.shadowColor = '#ff9f1a';
             hudFill(F, bx, dAm, BW * rk, amH); ctx.shadowBlur = 0;
@@ -359,8 +359,3 @@ function hudRowY(p, row) {
     return p.id === 1 ? p.y + p.h + d : p.y - d;
 }
 
-// Sniper: dồn lực bắn -> dùng vòng nạp chung (empower-hud) thay cho thanh cũ
-if (typeof registerEmpowerHUD === 'function') {
-    registerEmpowerHUD('sniper', p => (p.sniperChargeTimer > 0 && !p.sniperReloading)
-        ? { pct: Math.min(1, p.sniperChargeTimer / 60), ready: p.sniperChargeTimer >= 60, label: 'TỤ LỰC', color: '#fde047' } : null);
-}
