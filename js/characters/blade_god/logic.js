@@ -17,7 +17,7 @@ Object.assign(Player.prototype, {
             this.swordShieldTimer = 0;
             this.bgRandTimer = 150;   // Evo 1 / Full: kiếm tự xuất hiện
             this.bgGuardTimer = 240;  // Evo 1: Loạn Ảnh
-            this.bgDoomTimer = 300;   // Evo 2: Tuyệt Diệt
+            this.bgDoomTimer = 480;   // Evo 2: Tuyệt Diệt
         }
     },
 
@@ -82,10 +82,11 @@ Object.assign(Player.prototype, {
         }
         // Evo 2: Ám Kiếm Tuyệt Diệt
         if (e2 && --this.bgDoomTimer <= 0) {
-            this.bgDoomTimer = full ? 480 : 600;
-            const n = full ? 12 : 7;
-            for (let i = 0; i < n; i++) bodyEffects.push(new BgSkySword(this, 1 + Math.round(i * 150 / n), 30, false));
-            bodyEffects.push(new BgSkySword(this, 180, 75, true, full));
+            // Đã giảm: hồi 15s (Full 12s), ít kiếm hơn, cảnh báo lâu hơn (nhỏ 0.75s, khổng lồ 1.5s)
+            this.bgDoomTimer = full ? 720 : 900;
+            const n = full ? 6 : 4;
+            for (let i = 0; i < n; i++) bodyEffects.push(new BgSkySword(this, 1 + Math.round(i * 150 / n), 45, false));
+            bodyEffects.push(new BgSkySword(this, 190, 90, true, full));
             addFloatingText(this.x + this.w / 2, this.id === 1 ? this.y - 18 : this.y + this.h + 22, 'TUYỆT DIỆT', '#d946ef', 12);
         }
     },

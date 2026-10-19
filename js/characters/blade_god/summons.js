@@ -206,10 +206,10 @@ class BgDarkHover {
 class BgBlackHole {
     constructor(x, y, owner, big = false) {
         this.x = x; this.y = y; this.owner = owner;
-        this.r = big ? 135 : 110;
-        this.life = big ? 170 : 150; this.maxLife = this.life;
-        this.strong = 50; // tick hút mạnh đầu tiên
-        this.pullS = big ? 3.0 : 2.4; this.pullW = big ? 1.0 : 0.75;
+        this.r = big ? 95 : 80;
+        this.life = big ? 130 : 110; this.maxLife = this.life;
+        this.strong = 30; // tick hút mạnh đầu tiên (đã giảm mạnh)
+        this.pullS = big ? 1.0 : 0.8; this.pullW = big ? 0.3 : 0.2;
         this.t = 0; this.active = true;
     }
     update() {
@@ -223,7 +223,7 @@ class BgBlackHole {
         const pull = this.t <= this.strong ? this.pullS : this.pullW;
         e.x += Math.sign(dx) * Math.min(Math.abs(dx), pull);
         e.x = Math.max(0, Math.min(canvas.width - e.w, e.x));
-        if (Math.abs(dx) < 24 && this.t % 30 === 0) e.takeDamage(0.15, this.owner, { isEnvironmental: true });
+        if (Math.abs(dx) < 24 && this.t % 30 === 0) e.takeDamage(0.08, this.owner, { isEnvironmental: true });
     }
     botThreat(bot) {
         if (Math.abs(bot.y + bot.h / 2 - this.y) > 70) return null;
@@ -345,9 +345,9 @@ class BgSkySword {
         this.owner = owner; this.pre = pre; this.warn = warn; this.maxWarn = warn;
         this.giant = giant; this.big = big;
         this.r = giant ? (big ? 70 : 54) : 24;
-        this.dmg = giant ? (big ? 1.8 : 1.5) : 0.4;
+        this.dmg = giant ? (big ? 1.0 : 0.8) : 0.2;
         this.plant = giant ? 120 : 0; this.maxPlant = this.plant;
-        this.pull = big ? 2.0 : 1.5;
+        this.pull = big ? 0.5 : 0.35;
         this.x = 0; this.y = 0; this.fall = 0; this.fade = 0; this.t = 0;
         this.state = 'pre'; this.active = true;
     }
@@ -374,11 +374,11 @@ class BgSkySword {
             if (--this.plant <= 0) { this.state = 'fade'; this.fade = 15; return; }
             if (e && e.hp > 0 && Math.abs(e.y + e.h / 2 - this.y) < 70) {
                 const dx = this.x - (e.x + e.w / 2);
-                if (Math.abs(dx) < this.r * 2.4) {
+                if (Math.abs(dx) < this.r * 1.6) {
                     e.x += Math.sign(dx) * Math.min(Math.abs(dx), this.pull);
                     e.x = Math.max(0, Math.min(canvas.width - e.w, e.x));
                 }
-                if (Math.abs(dx) < this.r + e.w / 2 && this.plant % 30 === 0) e.takeDamage(0.3, this.owner);
+                if (Math.abs(dx) < this.r + e.w / 2 && this.plant % 30 === 0) e.takeDamage(0.12, this.owner);
             }
             return;
         }

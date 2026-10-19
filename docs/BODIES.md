@@ -92,7 +92,7 @@
 | Cuộn Quá Tải | Evo 1: thêm thanh năng lượng phụ (2 phát cường hóa liên tiếp); Evo 2: vòng EMP câm lặng địch + đơ vật triệu hồi 2s (chủ trúng EMP thì vật triệu hồi cũng đơ); Full Evo: +4 thanh phụ nạp cùng lúc, nổ & EMP rộng hơn; giảm dame nổ |
 | Pháo Tên Lửa | Dame 2 → 1.15 |
 | Nhà Ảo Thuật | Dame 1.5 → 1, HP 3.5 → 3. Sửa lỗi phân bóng làm mờ cả bản đồ |
-| Kiếm Tôn | Quang Kiếm lơ lửng 2s rồi tự bắn (+1 dame); Ám Kiếm thành kiếm bay; Evo 1: Quang Kiếm tự triển khai + Loạn Ảnh chém đạn; Evo 2: hố đen + Ám Kiếm Tuyệt Diệt; Full Evo: kiếm tự xuất hiện & nội tại mạnh hơn; Phá Thiên giảm còn 3.5x |
+| Kiếm Tôn | Quang Kiếm lơ lửng 2s rồi tự bắn (+1 dame); Ám Kiếm thành kiếm bay; Evo 1: Quang Kiếm tự triển khai + Loạn Ảnh chém đạn; Evo 2: hố đen + Ám Kiếm Tuyệt Diệt; Full Evo: kiếm tự xuất hiện & nội tại mạnh hơn; Phá Thiên giảm còn 3.5x • NERF Evo 2/Full: Tuyệt Diệt hồi 15s (Full 12s), 4/6 kiếm, cảnh báo 0.75s/1.5s, dame kiếm & hố đen giảm mạnh, lực hút yếu hơn rất nhiều |
 | Chiêu Hồn Sư | Linh Hồn khởi đầu 6 → 5. Lính Xạ Thủ/Cảm Tử biết ngắm; Lính Cao Cấp lao húc kiểu TANK rồi về chỗ |
 | Nam Châm | Khác dấu: lao húc như TANK + hút mục tiêu; lực từ mạnh 2s đầu rồi yếu hẳn; vùng từ nhỏ hơn |
 | Phong Trảm | Dame 1 → 0.9 |
@@ -413,7 +413,7 @@ HP:5 | Dame:1.05 | Đạn:4. Luân phiên: Quang Kiếm (lơ lửng tại chỗ,
   | Evo | Giá | Hiệu ứng |
   |---|---:|---|
   | Kiếm Thế Vô Chủ (`evo_blade_1`) | $150 | Quang Kiếm tự rải ngẫu nhiên trên sân. Nội tại Quang Kiếm Loạn Ảnh: mỗi 10s 1 Quang Kiếm VIP bay quanh xe 3s, lao tới chém tan mọi loại đạn bay. Full Evo: Quang & Ám Kiếm tự xuất hiện, lơ lửng 2s rồi tự phóng; 2 nội tại mạnh hơn. |
-  | Kiếm Thể Phòng Hộ (`evo_blade_2`) | $150 | Ám Kiếm tạo hố đen hút mạnh rồi hút yếu về tâm. Nội tại Ám Kiếm Tuyệt Diệt: mỗi 10s mưa kiếm cảnh báo 0.5s rơi xuống địch; sau 3s 1 Ám Kiếm VIP khổng lồ cảnh báo 1.25s rồi giáng, cắm 2s hút + gây sát thương. |
+  | Kiếm Thể Phòng Hộ (`evo_blade_2`) | $150 | Ám Kiếm tạo hố đen nhỏ hút nhẹ về tâm. Nội tại Ám Kiếm Tuyệt Diệt: mỗi 15s (Full Evo 12s) 4 kiếm (Full 6) cảnh báo 0.75s rơi xuống địch; sau ~3s 1 Ám Kiếm khổng lồ cảnh báo 1.5s rồi giáng, cắm 2s hút nhẹ + gây sát thương nhỏ. |
 
 - **Mã nguồn:** `js/characters/blade_god/logic.js`, `js/characters/blade_god/summons.js`
 
