@@ -4,15 +4,7 @@
 > Thứ tự = thứ tự ưu tiên. Mỗi lần chỉ làm 1 mục để tiết kiệm token.
 > Phiên mới: đọc `docs/HANDOVER.md` trước (công cụ test ở `tools/`).
 
-## 2. Đồ họa (đã làm một phần)
-- ✅ Sukuna, Gojo (2 Lãnh Địa), Âm Dương Sư, Chiêu Hồn Sư, Khóa Chết, Cổng Không Gian — XONG.
-- ✅ Kiếm (Kiếm Trận, Kiếm Sư, Kiếm Khách, Kiếm Vũ, Kiếm Tôn khung xe, Phong Trảm, Cuồng Phong) — XONG.
-- ✅ Xe nhỏ (14 body, trừ Bow đã có art riêng) — XONG.
-- ✅ Xe nặng (13 body) — XONG.
-- **Xe hỗ trợ & vật triệu hồi** (bản làm dở: `tools/wip/`) (money_tank theo cấp, engineer, magnet, sprayer, steel_hook, dj, flower_shadow, thunder; ụ súng, drone, robot Kẻ Sáng Tạo & Thiên Tài, tường…).
-- Theo đặc tả `game-tank-art-spec` (khung vuông 32×32, màu đội chỉ làm điểm nhấn, silhouette khác nhau).
-
-## 3. Body mới ưu tiên (làm SAU khi xong mục 2 — Đồ họa)
+## 1. Body mới ưu tiên (phần Đồ họa đã XONG → làm tiếp mục này)
 Đặc tả đầy đủ: **`docs/BODY_MOI_UU_TIEN.md`**. Làm lần lượt từng body (theo `tools/agents/common.md`), mỗi body xong thì gộp → smoke test → push:
 - Kazuki (`kazuki`) — song kiếm, nhịp A/B → Kiếm Thế Quyết, Nghịch Trảm, Ý Niệm & Kiếm Ý.
 - Tsukiyo (`tsukiyo`) — nhẫn giả 3 phong cách, Nhẫn Đạo theo mốc Tốc độ/Sát thương/Máu.
@@ -22,11 +14,11 @@
 - Phi Công (`jet_pilot`) — tách Chân & Phi Ảnh, chuyển điều khiển, hợp nhất.
 - Thần Bài / Quái Đạo (`joker`) — tay bài 5 lá ngẫu nhiên, Joker, Thoát Hiểm.
 
-## 4. HUD còn sót
-- DJ, Móc Thép, Thiên Tài, Tiến Hóa vẫn dùng chữ → đổi sang biểu tượng.
+## 2. HUD còn sót
+- DJ, Móc Thép, Thiên Tài (chữ BR/LK, chế độ Mecha), Tiến Hóa vẫn dùng chữ → đổi sang biểu tượng.
 - Thanh riêng của Paradox, Ghost, Mirror, Phong Trảm bị thanh máu mới che một phần.
 
-## 5. Ghi chú / cần xác nhận
+## 3. Ghi chú / cần xác nhận
 - Shotgun Evo 1: đang làm **mọi** phát bắn đều có đợt hai 3 viên.
 - Pháo Cao Xạ: **có Evo bất kỳ** là nổ lặp 1 lần, Full Evo 2 lần.
 - Tường Sniper chặn cả Đạn Lớn Full Evo (dù Đạn Lớn "xuyên mọi vật cản").

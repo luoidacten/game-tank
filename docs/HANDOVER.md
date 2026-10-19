@@ -31,4 +31,4 @@ Chromium: `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`, Playwright: `req
 - Đòn hitscan phải có cảnh báo (`scheduleHitscan`) và bị tường Sniper chặn (`sniperWallBlockY`).
 
 ## Việc kế tiếp
-Xem `docs/TODO.md` mục 2 trở đi: đồ họa **xe hỗ trợ & vật triệu hồi** — bản làm dở (chưa test, dựa trên code cũ) đã lưu ở `tools/wip/support_summons.wip.js` (+ `support_summons_other_files.patch`), KHÔNG được nạp vào game; dùng làm tham khảo khi làm tiếp với `tools/agents/art.md`, sau đó HUD còn sót và các điểm cần người dùng xác nhận.
+Đồ họa đã xong toàn bộ (art xe hỗ trợ & vật triệu hồi ở `js/render/tank-art/support_summons.js`). Tiếp theo: `docs/TODO.md` mục 1 — 7 body mới trong `docs/BODY_MOI_UU_TIEN.md`, làm lần lượt từng body theo `tools/agents/common.md`.

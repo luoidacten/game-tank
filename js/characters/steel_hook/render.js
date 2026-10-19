@@ -153,24 +153,7 @@ Object.assign(CharHooks.registry.steel_hook, {
         const scale = this.hasUpgrade('evo_hook_2') ? 1.5 : 1;
         const ph = this.shPhase;
         ctx.save();
-        // --- Thân xe: tấm thép + tời quay ---
-        ctx.strokeStyle = 'rgba(213,222,232,0.55)'; ctx.lineWidth = 1;
-        for (let i = 1; i < 4; i++) { ctx.beginPath(); ctx.moveTo(this.x + 3, this.y + this.h * i / 4); ctx.lineTo(this.x + this.w - 3, this.y + this.h * i / 4); ctx.stroke(); }
-        const spin = (ph === 'retract' || ph === 'drag' || ph === 'zip') ? Date.now() / 40 : (ph === 'fly' ? -Date.now() / 50 : 0);
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.shadowBlur = 8; ctx.shadowColor = SH_GLOW;
-        ctx.fillStyle = '#1f2833';
-        ctx.beginPath(); ctx.arc(0, 0, this.w * 0.3, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = SH_STEEL; ctx.lineWidth = 2; ctx.stroke();
-        ctx.rotate(spin);
-        ctx.lineWidth = 1.5;
-        for (let i = 0; i < 4; i++) { ctx.rotate(Math.PI / 4); ctx.beginPath(); ctx.moveTo(-this.w * 0.26, 0); ctx.lineTo(this.w * 0.26, 0); ctx.stroke(); }
-        ctx.fillStyle = SH_GLOW; ctx.beginPath(); ctx.arc(0, 0, 2.5, 0, Math.PI * 2); ctx.fill();
-        ctx.restore();
-        // Bệ móc ở mũi xe
-        ctx.fillStyle = '#3b4756';
-        ctx.fillRect(cx - 6, fwd < 0 ? this.y - 5 : this.y + this.h, 12, 5);
+        // (Thân xe, tời quay & bệ móc: vẽ trong art xe - js/render/tank-art/support_summons.js)
 
         // --- Quạt ngắm & móc đang lắc ---
         if (ph === 'ready' || ph === 'cool') {

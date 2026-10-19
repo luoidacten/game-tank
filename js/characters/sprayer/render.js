@@ -7,18 +7,12 @@ Object.assign(CharHooks.registry.sprayer, {
         const n = spNozzle(this);
         const col = SP_CHEM_COLOR[this.spChem] || '#ff6a1a';
         ctx.save();
-        // Bình chứa & nòng phun theo màu chất
-        ctx.fillStyle = col;
-        ctx.globalAlpha = 0.85;
-        ctx.fillRect(n.x - 5, n.dirY < 0 ? this.y - 10 : this.y + this.h, 10, 10);
-        ctx.globalAlpha = 1;
-        ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.5;
-        ctx.strokeRect(n.x - 5, n.dirY < 0 ? this.y - 10 : this.y + this.h, 10, 10);
+        // (Bình chứa & vòi phun đổi màu theo chất: vẽ trong art xe - js/render/tank-art/support_summons.js)
         // Luồng phun hình nón (cắt ngắn tại vật cản)
         if (this.spOn) {
             const r = Math.max(8, this.spRange || 0);
             const half = Math.max(4, spHalfWidth(r, this));
-            const y0 = n.dirY < 0 ? n.y - 10 : n.y + 10;
+            const y0 = n.y + n.dirY * 1; // miệng vòi nón ở mép trước xe
             const g = ctx.createLinearGradient(n.x, y0, n.x, y0 + n.dirY * r);
             g.addColorStop(0, col);
             g.addColorStop(1, 'rgba(255,255,255,0)');

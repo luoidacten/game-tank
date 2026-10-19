@@ -317,6 +317,7 @@ Object.assign(Player.prototype, {
             }
 
             if (b.isMagnetBullet) {
+                if (typeof drawMagnetBulletArt === 'function') { drawMagnetBulletArt(b); return; }
                 ctx.save();
                 let isPos = (b.polarity === 1);
                 ctx.fillStyle = isPos ? "#ff3300" : "#00aaff";
