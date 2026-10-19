@@ -116,42 +116,65 @@ Object.assign(Player.prototype, {
 });
 
 // ==========================================
-// [MỚI] Evo 1 "Cổng Cường Hóa": tự mở các Cổng Bắn trên sân, mỗi cổng nhắm & bắn vào kẻ thù.
-// Hồi chiêu 6s; mỗi lần đi xuyên mép màn hình (qua cổng) thì hồi chiêu ngay lập tức.
-// Full Evo: số cổng mở x3.
+// Evo 1 "Cổng Cường Hóa": tự mở Cổng Bắn trên NỬA SÂN CỦA MÌNH, mỗi cổng ngắm & bắn vào kẻ thù.
+// - Mọi lần mở cổng đi qua 1 hồi chiêu chung 5s (300 tick); đi xuyên mép màn hình KHÔNG còn hồi chiêu ngay.
+// - Giới hạn số cổng đang mở cùng lúc: 2 (Evo 1) / 3 (Full Evo). Đủ cổng -> chờ có chỗ trống mới mở.
+// - Trước mỗi phát: tia ngắm nét đứt bám theo địch, rồi KHOÁ hướng 0.4s (đỏ, nhấp nháy) -> bắn thẳng
+//   theo hướng đã khoá để đối thủ kịp né.
 // ==========================================
-const PORTAL_GATE_CD = 360;
+const PORTAL_GATE_CD = 300;     // 5s
+const PORTAL_GATE_LOCK = 24;    // 0.4s cảnh báo (khoá hướng) trước mỗi phát
+const PORTAL_GATE_GAP = 44;     // nhịp giữa các phát của 1 cổng
+
+function portalGateCap(p) { return (p.hasUpgrade('evo_portal_1') && p.hasUpgrade('evo_portal_2')) ? 3 : 2; }
+function portalActiveGates(p) {
+    let n = 0;
+    for (const g of bodyEffects) if (g instanceof PortalGate && g.active && g.owner === p) n++;
+    return n;
+}
 
 class PortalGate {
     constructor(owner, x, y, delay) {
         this.owner = owner;
         this.x = x; this.y = y;
         this.r = 17;
-        this.life = 170 + delay; this.maxLife = this.life;
+        this.age = 0;
+        this.life = 200 + delay; this.maxLife = this.life;
         this.delay = delay;           // mở lần lượt cho đẹp
         this.shots = 3;
-        this.fireTimer = 40 + delay;
+        this.fireTimer = 44;          // >= PORTAL_GATE_LOCK: phát đầu luôn có cảnh báo
+        this.aimX = x; this.aimY = y; // điểm ngắm (khoá khi fireTimer <= PORTAL_GATE_LOCK)
         this.active = true;
     }
     update() {
         if (!this.active) return;
         if (--this.life <= 0) { this.active = false; return; }
         if (this.delay > 0) { this.delay--; return; }
+        this.age++;
         const enemy = this.owner === p1 ? p2 : p1;
-        if (this.shots > 0 && --this.fireTimer <= 0 && enemy && enemy.hp > 0) {
-            this.fireTimer = 32;
-            this.shots--;
-            const v = aimVelocity(this.x, this.y, enemy, C.bulletSpeed * 1.5, true);
-            spawnBullet(this.owner, { x: this.x - 3, y: this.y - 3, vx: v.vx, vy: v.vy, dmg: this.owner.damage * 0.6, isPortalShot: true });
-            spawnSparkParticles(this.x, this.y, '#c084fc', 5);
+        if (this.shots > 0 && enemy && enemy.hp > 0) {
+            this.fireTimer--;
+            // Còn bám mục tiêu -> cập nhật điểm ngắm; vào 0.4s cuối thì khoá cứng
+            if (this.fireTimer > PORTAL_GATE_LOCK) { this.aimX = enemy.x + enemy.w / 2; this.aimY = enemy.y + enemy.h / 2; }
+            if (this.fireTimer <= 0) {
+                this.fireTimer = PORTAL_GATE_GAP;
+                this.shots--;
+                const v = aimVelocity(this.x, this.y, { x: this.aimX, y: this.aimY, w: 0, h: 0, vx: 0 }, C.bulletSpeed * 1.5, false);
+                spawnBullet(this.owner, { x: this.x - 3, y: this.y - 3, vx: v.vx, vy: v.vy, dmg: this.owner.damage * 0.6, isPortalShot: true });
+                spawnSparkParticles(this.x, this.y, '#c084fc', 6);
+            }
         }
         if (this.shots <= 0 && this.life > 20) this.life = 20; // bắn xong thì đóng dần
     }
     draw() {
-        if (!this.active) return;
-        // Cổng mở ra (phóng to) rồi thu nhỏ khi sắp đóng
-        const k = this.delay > 0 ? 0 : Math.max(0.05, Math.min(1, (170 - this.life) / 12, this.life / 20));
-        if (k <= 0) return;
+        if (!this.active || this.delay > 0) return;
+        portalGateDrawAim(this);
+        this.drawBody();
+        portalGateDrawCore(this);
+    }
+    // Thân cổng mặc định (tank-art/curse.js ghi đè bằng bản đẹp hơn)
+    drawBody() {
+        const k = Math.max(0.05, Math.min(1, this.age / 12, this.life / 20));
         const t = Date.now() / 200;
         ctx.save();
         ctx.translate(this.x, this.y);
@@ -169,29 +192,92 @@ class PortalGate {
     }
 }
 
+// Tia ngắm: nét đứt tím khi còn bám mục tiêu; khoá 0.4s cuối -> tia đỏ dày dần + vòng thu nhỏ tại điểm khoá
+function portalGateDrawAim(g) {
+    if (!(g.shots > 0) || g.life <= 20) return;
+    const locked = g.fireTimer <= PORTAL_GATE_LOCK;
+    const dx = g.aimX - g.x, dy = g.aimY - g.y;
+    const d = Math.hypot(dx, dy) || 1;
+    const L = d + 50; // kéo quá mục tiêu một chút
+    ctx.save();
+    ctx.lineCap = 'round';
+    if (locked) {
+        const blink = 0.5 + 0.5 * Math.sin(Date.now() / 45);
+        const prog = 1 - g.fireTimer / PORTAL_GATE_LOCK;
+        ctx.strokeStyle = `rgba(255, 60, 90, ${0.45 + 0.45 * blink})`;
+        ctx.shadowColor = '#ff2d55'; ctx.shadowBlur = 10;
+        ctx.lineWidth = 1.5 + prog * 2.5;
+    } else {
+        ctx.strokeStyle = 'rgba(192, 132, 252, 0.55)';
+        ctx.shadowColor = '#c084fc'; ctx.shadowBlur = 6;
+        ctx.lineWidth = 1.2;
+        ctx.setLineDash([5, 6]);
+        ctx.lineDashOffset = -Date.now() / 30;
+    }
+    ctx.beginPath(); ctx.moveTo(g.x, g.y); ctx.lineTo(g.x + dx / d * L, g.y + dy / d * L); ctx.stroke();
+    if (locked) {
+        const rr = 6 + 16 * (g.fireTimer / PORTAL_GATE_LOCK);
+        ctx.setLineDash([]); ctx.lineWidth = 1.8;
+        ctx.strokeStyle = '#ff2d55';
+        ctx.beginPath(); ctx.arc(g.aimX, g.aimY, rr, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(g.aimX - rr - 4, g.aimY); ctx.lineTo(g.aimX - rr + 3, g.aimY);
+        ctx.moveTo(g.aimX + rr + 4, g.aimY); ctx.lineTo(g.aimX + rr - 3, g.aimY);
+        ctx.stroke();
+    }
+    ctx.restore();
+}
+// Lõi đỏ phồng lên trong lòng cổng khi đang khoá bắn
+function portalGateDrawCore(g) {
+    if (!(g.shots > 0) || g.fireTimer > PORTAL_GATE_LOCK || g.life <= 20) return;
+    const prog = 1 - g.fireTimer / PORTAL_GATE_LOCK;
+    ctx.save();
+    ctx.fillStyle = '#ff2d55'; ctx.shadowColor = '#ff2d55'; ctx.shadowBlur = 14;
+    ctx.beginPath(); ctx.arc(g.x, g.y, 2 + 4 * prog, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(g.x, g.y, 1 + 1.5 * prog, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+}
+
+// Mở Cổng Bắn — điểm vào DUY NHẤT; tôn trọng hồi chiêu & giới hạn số cổng.
 function portalOpenGates(p) {
-    const enemy = p === p1 ? p2 : p1;
-    const full = p.hasUpgrade('evo_portal_1') && p.hasUpgrade('evo_portal_2');
-    const n = full ? 6 : 2;
-    const myY = p.y + p.h / 2, enY = enemy ? enemy.y + enemy.h / 2 : canvas.height / 2;
-    for (let i = 0; i < n; i++) {
-        // Rải cổng trong khoảng giữa 2 làn, lệch về phía địch
-        const y = myY + (enY - myY) * (0.35 + Math.random() * 0.4);
+    if (!p || (p.portalGateCD || 0) > 0) return false;
+    const free = portalGateCap(p) - portalActiveGates(p);
+    if (free <= 0) return false;  // đủ cổng -> chờ
+    const midY = canvas.height / 2;
+    const myY = p.y + p.h / 2;
+    for (let i = 0; i < free; i++) {
+        // Chỉ trong nửa sân của mình: từ trước mũi xe (20%) tới gần vạch giữa (85%)
+        const y = myY + (midY - myY) * (0.2 + Math.random() * 0.65);
         const x = 30 + Math.random() * (canvas.width - 60);
         bodyEffects.push(new PortalGate(p, x, y, i * 8));
     }
     p.portalGateCD = PORTAL_GATE_CD;
-    addFloatingText(p.x + p.w / 2, p.id === 1 ? p.y - 16 : p.y + p.h + 16, `MỞ CỔNG x${n}! 🌀`, '#c084fc', 13);
+    addFloatingText(p.x + p.w / 2, p.id === 1 ? p.y - 16 : p.y + p.h + 16, `MỞ CỔNG x${free}! 🌀`, '#c084fc', 13);
     if (soundSystem && !soundSystem.muted) soundSystem.playPowerup();
+    return true;
 }
 
 CharHooks.register('portal', {
     setup() { this.portalGateCD = 90; this.portalWrapCount = 0; return false; },
     update() {
         if (!this.hasUpgrade('evo_portal_1')) return;
-        // Đi xuyên mép màn hình (wrap) -> hồi chiêu mở cổng ngay
-        if ((this.portalWrapCount || 0) !== (this.portalWrapSeen || 0)) { this.portalWrapSeen = this.portalWrapCount; this.portalGateCD = 0; }
         if (this.portalGateCD > 0) { this.portalGateCD--; return; }
         portalOpenGates(this);
     },
 });
+
+// HUD: vòng hồi chiêu mở cổng + chấm = số cổng đang mở / tối đa
+function portalRegisterHUD() {
+    if (typeof registerEmpowerHUD !== 'function') return;
+    registerEmpowerHUD('portal', p => {
+        if (!p.hasUpgrade('evo_portal_1')) return null;
+        const cap = portalGateCap(p), act = portalActiveGates(p);
+        const cd = p.portalGateCD || 0;
+        const base = { color: '#c084fc', pips: act, pipMax: cap, pipColor: '#22d3ee', btnIcon: '🌀' };
+        if (cd > 0) return Object.assign(base, { pct: 1 - cd / PORTAL_GATE_CD, ready: false, label: 'CỔNG ' + (cd / 60).toFixed(1) + 's' });
+        if (act >= cap) return Object.assign(base, { pct: 1, ready: false, label: `CỔNG ĐẦY ${act}/${cap}` });
+        return Object.assign(base, { pct: 1, ready: true, label: 'MỞ CỔNG!' });
+    });
+}
+if (typeof window !== 'undefined') window.addEventListener('load', portalRegisterHUD);
