@@ -1651,9 +1651,10 @@ registerBulletArt('portal', (b, color, owner, k) => {
 });
 
 // Cổng Bắn (PortalGate): xoáy không gian 3 lớp, vành hạt hút vào, đếm số phát còn lại
-PortalGate.prototype.draw = function () {
+// (thân cổng; tia ngắm cảnh báo do PortalGate.draw trong characters/portal/logic.js vẽ quanh nó)
+PortalGate.prototype.drawBody = function () {
     if (!this.active) return;
-    const k = this.delay > 0 ? 0 : Math.max(0.05, Math.min(1, (170 - this.life) / 12, this.life / 20));
+    const k = this.delay > 0 ? 0 : Math.max(0.05, Math.min(1, (this.age || 0) / 12, this.life / 20));
     if (k <= 0) return;
     const t = Date.now() / 1000;
     const r = this.r;
