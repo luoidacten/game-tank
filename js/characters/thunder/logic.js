@@ -30,8 +30,8 @@ const THUNDER_BUFF_DMG = 1.15;
 
 // Số thương tối đa: 3 / có Evo: 5 / Full Evo: 9
 function thunderSpearCap(p) {
-    const e1 = p.hasUpgrade && p.hasUpgrade('evo_thun_1'), e2 = p.hasUpgrade && p.hasUpgrade('evo_thun_2');
-    return (e1 && e2) ? 9 : ((e1 || e2) ? 5 : 3);
+    // Số thương cầm trên tay luôn tối đa 3 (kể cả Full Evo); thương rơi từ trời trên sân không bị giới hạn
+    return 3;
 }
 function thunderDmg(p, base) {
     return base * ((p.damage || 1) + (p.dmgBuff || 0)) * ((p.thunderBuffTimer || 0) > 0 ? THUNDER_BUFF_DMG : 1);
