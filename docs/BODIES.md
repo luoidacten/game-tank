@@ -78,6 +78,7 @@
 | 55 | **Chrono & Neo** | `chrononeo` | 4.5 | 1 | 3 | 3.3 | 28×28 |  | — |
 | 56 | **Gemini** | `gemini` | 3.5 | 0.75 | 4 | 3.6 | 26×26 |  | — |
 | 57 | **Huyết Ma** | `blood_lord` | 3 | 0.25 | 6 | 4 | 28×28 |  | — |
+| 58 | **Cuồng Chiến Binh** | `berserker` | 6 | 0.25 | ∞ | 4.2 | 30×30 |  | — |
 
 > *Tỉ lệ thắng mô phỏng*: trung bình của 2 mức (chỉ có body / có Full Evo + 2 module), mỗi body đấu vòng tròn với mọi body khác, hai bên cùng một AI tự động. AI không biết chơi kinh tế hay combo phức tạp nên con số chỉ mang tính tham khảo cho độ mạnh tương đối.
 
@@ -133,6 +134,7 @@
 | Chrono & Neo | MỚI: Collab Chrono & Neo — Tham Farm tăng băng đạn vĩnh viễn (4→10 / 10→20), giữ 0.4s đổi thế Chrono (đạn đồng xuyên, sóng đẩy) ↔ Neo (2 viên, lướt tăng tốc), đồng hồ cát Thời Khắc → Liên Xạ tự tìm / Mưa Đạn Hình Nón + Ảnh Chiếu; Full Evo: AI phụ cầm thế ngược lại + bão Liên Hoa • NERF: băng đạn 3→7 / 8→14, CD đổi thế 6s (Full 4s), Liên Xạ +2, nón 6-8 viên yếu hơn, Liên Hoa 2.5s, Nở Rộ còn 3 cột có khe né |
 | Gemini | MỚI: Gemini — 2 xe song sinh (bạn + AI tự hành), gục thì có vòng cứu 2s (nhân đôi mỗi lần), chỉ thua khi cả 2 cùng gục; giữ 0.4s Chuyển Giao Ý Thức đổi quyền điều khiển; Evo 2 mạnh dần theo hiệp; Full Evo tự khởi động lại + đạn tự ngắm sau chuyển giao |
 | Huyết Ma | MỚI: Huyết Ma — Bể Máu (Max HP x2) tích từ mọi lượng máu mất trên sân, tự đổi thành HP sau 8s; giữ 0.25s xoay 4 dạng: Đạn Thường / Huyết Phá (dơi lao bất tử + Bầy Dơi 2s) / Huyết Tiễn (tia máu có cảnh báo) / Huyết Cầu (≥50% Bể Máu mở Bóng Ma Màn Đêm bay lên trời đáp xuống Đại Tiệc Máu); Evo 1 hóa dơi thoát chết; Full Evo hồi sinh 1 lần/trận |
+| Cuồng Chiến Binh | MỚI: Cuồng Chiến Binh — 3 mốc Cuồng Chiến theo % máu (thay thế nhau), ≤50% máu thì giữ bắn sấy; trúng đòn → tăng tốc + Huyết Đạn to; thanh Huyết Chiến đầy + đòn chí tử → bất tử khóa máu (bị trừ thanh, -40/s ngoài bo); Evo 2 đấu trường khóa 2 bên; Full Evo Tàn Hơi Cuối Cùng hồi sinh 0.5 HP (2 lần/hiệp) |
 
 ## Module chân (FEET)
 
@@ -965,6 +967,20 @@ HP:3.5 | Dame:0.75 | Đạn:4 | Tốc: 3.5. "Hồi Phục": 3s không mất máu
   | Huyết Thể Cường Hóa (`evo_bd_2`) | $120 | +4 Max HP (Bể Máu x2 theo). Kỹ năng mạnh hơn x1.25, chỉ tốn 0.5 HP. Tự hồi máu sau 6s với tỉ lệ 1.5 Bể Máu = 1 HP. FULL EVO: Huyết Tổ Bất Diệt — thêm +2 Max HP, kỹ năng x1.5, chỉ tốn 0.25 HP, tích Bể Máu x2 (kẻ địch hồi máu cũng nạp); Đào Thoát hồi 100% Bể Máu; tự hồi sau 4s (1 Bể Máu = 1 HP); HỒI SINH tại chỗ 1 lần/trận khi chết lúc Bể Máu đầy. |
 
 - **Mã nguồn:** `js/characters/blood_lord/logic.js`, `js/characters/blood_lord/render.js`
+
+### 58. Cuồng Chiến Binh (`berserker`)
+
+"Càng đau càng mạnh!" HP:6 | Dame:0.25 | Đạn: Vô hạn | Tốc: 4.2. CUỒNG CHIẾN (mốc thay thế nhau theo % Max HP): <=75%: +15% tốc bắn, -10% st nhận, +8% tốc chạy, +15% dame | <=50%: +30%/-20%/+15%/+30% và mở SẤY LIÊN THANH (giữ bắn càng lâu càng nhanh, toả tới 28° sau 1.5s) | <=25%: +50%/-30%/+25%/+50%. Trên 50% HP: bắn nhấp. ĐÁNH TRẢ: nhận >=0.25 st (kể cả mất Khiên) -> +25% tốc chạy 1.5s, +12 Huyết Chiến, viên kế tiếp thành HUYẾT ĐẠN (16x16, x3 dame). HUYẾT CHIẾN (0-100, +4 mỗi phát trúng): đầy mà nhận đòn chí tử -> không chết, khoá máu, giải khống chế; sát thương x10 trừ vào thanh, -12/s, +2 mỗi phát trúng, ngoài vùng an toàn của Bo -40/s; luôn mốc <=25% +35% tốc bắn, +20% tốc chạy, +30% dame. Hết thanh -> chết.
+
+- **Chỉ số thực đầu hiệp:** HP 6 · Sát thương 0.25 · Đạn ∞ · Tốc độ 4.2 · Kích thước 30×30
+- **Tiến hoá:**
+
+  | Evo | Giá | Hiệu ứng |
+  |---|---:|---|
+  | Khát Máu Cực Hạn (`evo_bers_1`) | $90 | Cuồng Chiến mạnh x1.5 (giảm st nhận tối đa 45%). Tích Huyết Chiến nhanh hơn 25%. Vừa vào Huyết Chiến: thanh giữ nguyên 100 (không tụt, không bị trừ) trong 1s đầu. |
+  | Đấu Trường Huyết Địa (`evo_bers_2`) | $110 | Khi Huyết Chiến: dựng 2 bức tường biên (vùng 260px quanh xe). Cả 2 xe không thể đi/lướt ra ngoài; Cổng Không Gian không thể mở cổng hay xuyên ra ngoài. FULL EVO: Chiến Thần Bất Tử — Cuồng Chiến x1.8 (tối đa -50% st), giữ thanh 1.5s, vùng 220px & làm chậm địch 25%; TÀN HƠI CUỐI CÙNG: hết Huyết Chiến không chết mà còn 0.5 HP (tối đa 2 lần/hiệp), sau đó mỗi phát trúng chỉ +1 Huyết Chiến. |
+
+- **Mã nguồn:** `js/characters/berserker/logic.js`, `js/characters/berserker/render.js`
 
 ## Phụ lục: cơ chế các body mới
 

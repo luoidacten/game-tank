@@ -5,7 +5,6 @@
 
 ## 1. Body mới — ƯU TIÊN (làm lần lượt từng body)
 > Đặc tả đầy đủ: `docs/BODY_MOI_DAC_TA.md`
-- **Cuồng Chiến Binh** (`berserker`) — Cuồng Chiến theo % máu, Huyết Đạn, Huyết Chiến bất tử.
 
 ## 1b. Bow (`cung`) — làm lại (sau Cuồng Chiến Binh)
 - Mưa tên phủ toàn map không giới hạn, đẹp hơn.
