@@ -95,7 +95,7 @@
 | Thiên Tài | HP 1 → 2.5, mỗi hiệp có sẵn 6 Bánh Răng. Tự Hủy: ném Robot lao tới, chạm tường mới nổ |
 | Kẻ Sáng Tạo | Sửa lỗi khiên không chặn sát thương (giờ chặn đạn, đạn xuyên và tia) |
 | Tiến Hóa | HP 1 → 5.5 |
-| Tùy Biến | HP 3 → 6 (thiết kế gốc 1), Dame 1 → 1.5 |
+| Tùy Biến | Bỏ kiểu bắn Hold (tia); thêm Loạt Đạn, Đạn Tách, Chí Mạng, Hút Máu, Song Nòng và nhóm CHỈ SỐ (Máu/Dame/Đạn/Tốc/Nạp/Khiên) để luôn tiêu được điểm; điểm CP mỗi hiệp nhiều hơn; shop chia cột, hiện cấp & trạng thái rõ, nút TỰ LẮP; sửa Gói VIP (Nảy Tường thật sự nảy, Tự Ngắm/Đạn Hút mạnh theo cấp) + nâng 1 cấp mọi tùy chọn cũ |
 | Kiếm Trận | HP 3.5 → 4.5, Dame 0.25 → 0.6 |
 | Shotgun | 5 viên bay nhanh hơn, dame 1; Evo 1: 6 viên + đợt hai 3 viên |
 | Tiểu Liên | Nạp theo băng (18/22/30 viên) có vòng nạp; Full Evo: 6 viên đầu mỗi băng xuyên |
@@ -756,7 +756,7 @@ HP:5 (+2 xe lớn) | Năng lượng. Nhấp: Bật/Tắt phun hình nón. Giữ 
 
 ### 44. Tùy Biến (`customize`) 🆕
 
-HP:6 | Dame:1.5 | Đạn:1. Xe lắp ghép: mỗi hiệp nhận Điểm Tùy Chỉnh để lắp Lối Bắn, Dạng Đạn, Tính Chất Đạn, Kích Thước. Thua liên tiếp nhận thêm điểm.
+HP:6 | Dame:1.5. Xe lắp ghép: mỗi hiệp nhận 2+ Điểm Tùy Chỉnh (thua / chuỗi thua nhận thêm) để lắp & nâng cấp Lối Bắn (Tap, Loạt, Shotgun, SMG, Tích Tụ, Tiến Công), Dạng Đạn, Tính Chất (Nổ, Xuyên, Chí Mạng, Hút Máu, Song Nòng, Vũng...), Kích Thước và Chỉ Số nâng mãi.
 
 - **Chỉ số thực đầu hiệp:** HP 6 · Sát thương 1.5 · Đạn 4 · Tốc độ 3.5 · Kích thước 30×30
 - **Vật triệu hồi / hiệu ứng:** Vũng hiệu ứng theo mô-đun
@@ -764,8 +764,8 @@ HP:6 | Dame:1.5 | Đạn:1. Xe lắp ghép: mỗi hiệp nhận Điểm Tùy Ch�
 
   | Evo | Giá | Hiệu ứng |
   |---|---:|---|
-  | Gói VIP (`evo_cu_1`) | $80 | Mở thêm mô-đun: Đạn Tự Ngắm, Đạn Hút (kéo đối thủ), Nảy Tường (+sát thương mỗi lần nảy). |
-  | Cá Nhân Hóa (`evo_cu_2`) | $110 | Mọi hiệu ứng lắp ghép mạnh hơn 30%. +1 Điểm Tùy Chỉnh mỗi hiệp. FULL EVO: chọn 1 Nội Tại Độc Quyền. |
+  | Gói VIP (`evo_cu_1`) | $80 | Mọi mô-đun đã lắp lên +1 cấp ngay, +2 Điểm Tùy Chỉnh, cấp tối đa +1. Mở mô-đun VIP: Tự Ngắm, Đạn Hút (kéo & làm chậm), Nảy Tường (bắn chéo, +dame mỗi lần nảy). |
+  | Cá Nhân Hóa (`evo_cu_2`) | $110 | Nổ, Vũng, Hút Máu, Đạn Hút, Nảy Tường, Tiến Công mạnh hơn 30%. +1 Điểm Tùy Chỉnh mỗi hiệp. FULL EVO: chọn miễn phí 1 Nội Tại Độc Quyền (Hồi Sinh, Vô Ảnh, Tập Trung, Phản Lực). |
 
 - **Mã nguồn:** `js/characters/customize/logic.js`, `js/characters/customize/render.js`
 
