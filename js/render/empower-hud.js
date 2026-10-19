@@ -69,12 +69,10 @@ registerEmpowerHUD('blade_god', p => {
     const c = p.bladeShotCount || 0;
     const n = c % 10;
     const ready = n === 9;
-    // Evo 1: mỗi 3 phát gọi kiếm nhỏ -> chấm phụ
-    const evo1 = p.hasUpgrade('evo_blade_1');
+    // Màu = kiếm kế tiếp: vàng = Quang Kiếm, tím = Ám Kiếm
     return {
-        pct: n / 10, ready, segments: 10, lit: n, color: '#facc15',
+        pct: n / 10, ready, segments: 10, lit: n, color: ready ? '#facc15' : (c % 2 === 0 ? '#ffd84d' : '#c084fc'),
         label: ready ? 'PHÁ THIÊN!' : `PHÁ THIÊN ${n}/10`,
-        pips: evo1 ? c % 3 : undefined, pipMax: evo1 ? 3 : undefined, pipColor: '#c4b5fd',
     };
 });
 

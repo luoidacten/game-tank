@@ -21,6 +21,7 @@ const NET_CLASSES = {
     TzMortar, TzZone, TzAirStrike,
     OvEmpRing, OvEmpMark,
     ThunderReturnBolt, ThunderStrike, ThunderZone,
+    BgLightSword, BgDarkHover, BgBlackHole, BgGuardian, BgSkySword,
 };
 
 // Biến toàn cục cần đồng bộ: [tên, getter, setter]

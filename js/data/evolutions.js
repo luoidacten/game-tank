@@ -80,8 +80,8 @@ const EVOLUTIONS = {
         { id: 'evo_aaa_2', name: 'Mưa Tên Lửa', desc: 'Tự bắn -> Rơi 3 bom ngẫu nhiên trên làn địch. Pháo kích nổ bồi 1 lần tại chỗ (có cảnh báo, 50% dame). FULL EVO: nổ bồi 2 lần, nổ nhanh hơn.', cost: 100, type: 'evo' }
     ],
     blade_god: [
-        { id: 'evo_blade_1', name: 'Kiếm Thế Vô Chủ', desc: 'Anh Minh xuyên thấu. Hư Vô 3 stack = Tử hình. Gọi Phá Thiên -> Bất tử 5s.', cost: 150, type: 'evo' },
-        { id: 'evo_blade_2', name: 'Kiếm Thể Phòng Hộ', desc: 'Khiên đỡ 5 hit. Khi vỡ phóng 5 kiếm tự ngắm. Nạp đạn cực nhanh.', cost: 150, type: 'evo' }
+        { id: 'evo_blade_1', name: 'Kiếm Thế Vô Chủ', desc: 'Quang Kiếm tự rải ngẫu nhiên trên sân. Nội tại Quang Kiếm Loạn Ảnh: mỗi 10s 1 Quang Kiếm VIP bay quanh xe 3s, lao tới chém tan mọi loại đạn bay. Full Evo: Quang & Ám Kiếm tự xuất hiện, lơ lửng 2s rồi tự phóng; 2 nội tại mạnh hơn.', cost: 150, type: 'evo' },
+        { id: 'evo_blade_2', name: 'Kiếm Thể Phòng Hộ', desc: 'Ám Kiếm tạo hố đen hút mạnh rồi hút yếu về tâm. Nội tại Ám Kiếm Tuyệt Diệt: mỗi 10s mưa kiếm cảnh báo 0.5s rơi xuống địch; sau 3s 1 Ám Kiếm VIP khổng lồ cảnh báo 1.25s rồi giáng, cắm 2s hút + gây sát thương.', cost: 150, type: 'evo' }
     ],
     van_kiem: [
         { id: 'evo_vk_1', name: 'Mưa Kiếm', desc: 'Tự động gọi kiếm ngẫu nhiên sau lưng. Gọi càng nhanh khi đã bắn nhiều kiếm.', cost: 150, type: 'evo' },
