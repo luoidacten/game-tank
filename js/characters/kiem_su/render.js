@@ -6,12 +6,7 @@ Object.assign(CharHooks.registry.kiem_su, {
     draw() {
         const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
         ctx.save();
-        // Lõi ngũ hành trên thân xe: viên đạn kế tiếp
-        const next = (this.ksQueue && this.ksQueue[0]) || 'white';
-        ctx.fillStyle = KS_COLOR[next];
-        ctx.shadowBlur = 8; ctx.shadowColor = KS_COLOR[next];
-        ctx.beginPath(); ctx.arc(cx, cy, 4, 0, Math.PI * 2); ctx.fill();
-        ctx.shadowBlur = 0;
+        // (Lõi ngũ hành – viên đạn kế tiếp – đã vẽ trong art xe: js/render/tank-art/swords.js)
         if (this.ksSpeedBuff > 0) {
             ctx.strokeStyle = 'rgba(34, 197, 94, 0.7)'; ctx.lineWidth = 2;
             ctx.beginPath(); ctx.arc(cx, cy, this.w * 0.85, 0, Math.PI * 2); ctx.stroke();

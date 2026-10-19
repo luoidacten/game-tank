@@ -278,9 +278,10 @@
         }
         // Nòng + ống ngắm xoay theo hướng ngắm thật
         ctx.save();
-        if (typeof coreSmallSniperAim === 'function' && p.x !== undefined) {
-            const aim = coreSmallSniperAim(p);
-            ctx.translate(0, -2); ctx.rotate(Math.atan2(aim.dx, Math.abs(aim.dy))); ctx.translate(0, 2);
+        const aimA = (typeof sniperAimAngle === 'function') ? sniperAimAngle(p) : null;
+        if (aimA !== null) { // góc lệch so với hướng thẳng (cùng công thức với tia ngắm & viên đạn)
+            const dx = Math.cos(aimA), dy = Math.abs(Math.sin(aimA));
+            ctx.translate(0, -2); ctx.rotate(Math.atan2(dx, dy)); ctx.translate(0, 2);
         }
         // Nòng dài + hãm nòng
         gun(0, -5, 11, 2.4, k, '#e5e7eb');
@@ -324,108 +325,8 @@
         }
     });
 
-    // Hướng bắn thật của Sniper (khớp fireBullet: ngắm nón tự động, vy luôn = dirY*spd, vx = cos(góc tới địch)*spd)
-    window.coreSmallSniperAim = function (p) {
-        const dirY = p.id === 1 ? -1 : 1;
-        const startX = p.x + p.w / 2, startY = p.id === 1 ? p.y - 5 : p.y + p.h;
-        const enemy = p.id === 1 ? p2 : p1;
-        let ux = 0;
-        if (enemy) {
-            const full = p.hasUpgrade('evo_sniper_1') && p.hasUpgrade('evo_sniper_2');
-            const ta = Math.atan2((enemy.y + enemy.h / 2) - startY, (enemy.x + enemy.w / 2) - startX);
-            let diff = ta - (dirY < 0 ? -PI / 2 : PI / 2);
-            while (diff <= -PI) diff += TAU;
-            while (diff > PI) diff -= TAU;
-            let wall = false;
-            if (typeof sniperWalls !== 'undefined' && typeof rectIntersect === 'function') {
-                wall = sniperWalls.some(w => rectIntersect(p.x, p.id === 1 ? p.y - 50 : p.y + p.h, p.w, 50, w.x, w.y, w.w, w.h));
-            }
-            if (!wall && Math.abs(diff) <= (full ? 0.6 : 0.3)) ux = Math.cos(ta);
-        }
-        const len = Math.hypot(ux, 1);
-        return { x: startX, y: p.id === 1 ? p.y : p.y + p.h, dx: ux / len, dy: dirY / len };
-    };
 
-    // =====================================================================
-    // 5. BOW (cung) — thân tròn, 2 nhánh cung lộ ra hai bên, mũi tên lên dây
-    // =====================================================================
-    registerTankArt('cung', (p, k) => {
-        const charge = Math.min(1, (p.bowChargeTimer || 0) / 90);
-        // Thân tròn
-        ctx.fillStyle = rad(-2, 2, 1, 10, ['#86efac', '#15803d', '#0b3d1f']);
-        circ(0, 4, 8.5); ctx.fill(); teamEdge(k, 1.7);
-        // Hoa văn lá
-        ctx.fillStyle = 'rgba(220,252,231,0.55)';
-        ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(4, 4, 0, 10); ctx.quadraticCurveTo(-4, 4, 0, 0); ctx.fill();
-        ctx.strokeStyle = 'rgba(20,83,45,0.8)'; ctx.lineWidth = 0.8; ctx.beginPath(); ctx.moveTo(0, 1); ctx.lineTo(0, 9.5); ctx.stroke();
-        // Cung: tâm (0,2), bán kính 13.6
-        const cy = 2, R = 13.6, a0 = 0.62;
-        const ex = Math.cos(a0) * R, ey = cy - Math.sin(a0) * R;
-        const nockY = ey + 1 + charge * 6.5;
-        // Dây cung
-        ctx.strokeStyle = charge > 0 ? '#ecfccb' : 'rgba(236,252,203,0.8)'; ctx.lineWidth = 0.9;
-        ctx.beginPath(); ctx.moveTo(-ex, ey); ctx.lineTo(0, nockY); ctx.lineTo(ex, ey); ctx.stroke();
-        // Nhánh cung
-        ctx.strokeStyle = lin(-ex, 0, ex, 0, ['#3f6212', '#a3e635', '#3f6212']); ctx.lineWidth = 2.6;
-        ctx.beginPath(); ctx.arc(0, cy, R, -PI + a0, -a0); ctx.stroke();
-        ctx.strokeStyle = '#1a2e05'; ctx.lineWidth = 3.2; ctx.beginPath(); ctx.arc(0, cy, R, -PI / 2 - 0.16, -PI / 2 + 0.16); ctx.stroke();
-        // Evo 2: đầu cung cong ngược (recurve)
-        if (k.evo2) {
-            ctx.strokeStyle = '#a3e635'; ctx.lineWidth = 1.8;
-            ctx.beginPath(); ctx.moveTo(ex, ey); ctx.quadraticCurveTo(ex + 3, ey + 0.5, ex + 2.4, ey + 3); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(-ex, ey); ctx.quadraticCurveTo(-ex - 3, ey + 0.5, -ex - 2.4, ey + 3); ctx.stroke();
-        }
-        lamp(ex, ey, 1.3, k.team, 7); lamp(-ex, ey, 1.3, k.team, 7);
-        // Mũi tên lên dây
-        const tip = nockY - 12.5;
-        ctx.strokeStyle = '#e7e5e4'; ctx.lineWidth = 1.3;
-        ctx.beginPath(); ctx.moveTo(0, nockY); ctx.lineTo(0, tip + 2); ctx.stroke();
-        ctx.fillStyle = '#4ade80';
-        poly([[-1.4, nockY - 0.2], [0, nockY - 2.6], [1.4, nockY - 0.2], [0, nockY + 0.8]]); ctx.fill();
-        const hot = k.evo1 || charge >= 1;
-        TA.glow(hot ? '#bbf7d0' : '#4ade80', 6 + charge * 8);
-        ctx.fillStyle = hot ? '#f0fdf4' : '#86efac';
-        poly([[0, tip - 1], [2, tip + 2.6], [0, tip + 1.6], [-2, tip + 2.6]]); ctx.fill(); TA.noGlow();
-    });
-    registerBulletArt('cung', (b, color, o, k) => {
-        if (b.isRocket || b.isExplosive) return false;
-        const green = '#4ade80';
-        const hot = !!b.isPiercing;
-        // Mũi tên đã kéo căng (bay nhanh) hoặc xuyên thủng = đòn cường hóa: xoáy gió quấn quanh thân tên
-        const charged = hot || k.sp > (typeof C !== 'undefined' ? C.bulletSpeed * 1.35 : 8);
-        if (charged) {
-            ctx.save();
-            const sp = k.t / 40;
-            ctx.strokeStyle = rgba(hot ? '#f0fdf4' : green, 0.75); ctx.lineWidth = 1;
-            for (let i = 0; i < 3; i++) {
-                const x = -4 - i * 6 + ((k.t / 18) % 6);
-                ctx.beginPath(); ctx.ellipse(x, 0, 1.4, 4.2 - i * 0.6, 0, sp + i, sp + i + PI * 1.3); ctx.stroke();
-            }
-            ctx.fillStyle = lin(-30, 0, -10, 0, [rgba(green, 0), rgba(green, 0.45)]);
-            poly([[-30, 0], [-10, -2.2], [-10, 2.2]]); ctx.fill();
-            ctx.restore();
-        }
-        // Vệt gió phía sau
-        ctx.strokeStyle = rgba(green, 0.25); ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(-14, -2.5); ctx.lineTo(-24, -2.5); ctx.moveTo(-14, 2.5); ctx.lineTo(-22, 2.5); ctx.stroke();
-        // Thân tên
-        ctx.strokeStyle = '#f5f5f4'; ctx.lineWidth = 1.3; ctx.lineCap = 'round';
-        ctx.beginPath(); ctx.moveTo(-12, 0); ctx.lineTo(5, 0); ctx.stroke();
-        // Lông đuôi (2 cặp, màu đội ở viền)
-        [[-12, 1], [-8.5, 0.85]].forEach(([x, s]) => {
-            ctx.fillStyle = rgba(green, 0.9);
-            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x - 2.5 * s, -3.4 * s); ctx.lineTo(x + 2.6 * s, -1 * s); ctx.closePath(); ctx.fill();
-            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x - 2.5 * s, 3.4 * s); ctx.lineTo(x + 2.6 * s, 1 * s); ctx.closePath(); ctx.fill();
-        });
-        ctx.strokeStyle = color; ctx.lineWidth = 0.8;
-        ctx.beginPath(); ctx.moveTo(-14.5, -3.4); ctx.lineTo(-9.4, -1); ctx.moveTo(-14.5, 3.4); ctx.lineTo(-9.4, 1); ctx.stroke();
-        // Mũi tên
-        ctx.shadowBlur = hot ? 14 : 9; ctx.shadowColor = hot ? '#ffffff' : green;
-        ctx.fillStyle = hot ? '#f0fdf4' : '#86efac';
-        poly([[10, 0], [4, -2.8], [5.4, 0], [4, 2.8]]); ctx.fill();
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = color; poly([[8, 0], [5.6, -1], [5.6, 1]]); ctx.fill();
-    });
+    // 5. BOW (cung): đã có art riêng trên nhánh chính -> không vẽ ở đây
 
     // =====================================================================
     // 6. SHADOW HUNTER (shadow_hunter) — thân nhọn bóng đêm, 2 vệt mờ phía sau
@@ -645,10 +546,10 @@
         TA.rr(-4.2, -13, 8.4, 9, 1.5); ctx.fill();
         ctx.fillStyle = TA.metal(-6, 6, '#1c1917', '#78716c');
         TA.rr(-5.8, -16, 11.6, 3.6, 1.4); ctx.fill(); stroke(k.team, 1);
-        // Họng nòng (3 hoặc 5 tia)
+        // Họng nòng (5 tia, Evo 1: 6 tia)
         ctx.fillStyle = '#0c0a09';
-        const bores = k.evo1 ? [-4, -2, 0, 2, 4] : [-3, 0, 3];
-        bores.forEach(x => { circ(x, -14.2, k.evo1 ? 0.8 : 1.1); ctx.fill(); });
+        const bores = k.evo1 ? [-4.25, -2.55, -0.85, 0.85, 2.55, 4.25] : [-4, -2, 0, 2, 4];
+        bores.forEach(x => { circ(x, -14.2, 0.75); ctx.fill(); });
         // 2 vòng khóa lớn hai bên
         [-1, 1].forEach(sd => {
             const x = sd * 9.8, y = 1;
@@ -976,7 +877,7 @@
     const CU_TRAIT_COL = { explosive: '#f97316', piercing: '#a855f7', hitscan: '#ef4444', homing: '#22d3ee', sticky: '#eab308', bounce: '#84cc16' };
     const cuTraitColor = (t) => CU_TRAIT_COL[t] || ((typeof ZONE_STYLE !== 'undefined' && ZONE_STYLE[t.slice(3)]) || [0, '#ffffff'])[1];
     registerTankArt('customize', (p, k) => {
-        const d = p.cuData || { fire: 'tap', bullet: 'round', traits: [], passive: null };
+        const d = p.cuData || { fire: 'tap', bullet: 'round', traits: {}, passive: null };
         // Bánh xích dạng khối
         [-15.5, 11].forEach(x => {
             for (let i = 0; i < 6; i++) {
@@ -985,7 +886,7 @@
             }
         });
         // Lưới khối 3×3
-        const traits = (d.traits || []).slice(0, 6);
+        const traits = (Array.isArray(d.traits) ? d.traits : Object.keys(d.traits || {})).slice(0, 6);
         const order = [6, 8, 3, 5, 0, 2]; // ô nhận mô-đun tính chất
         for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) {
             const idx = r * 3 + c, x = -10.5 + c * 7, y = -10 + r * 7.5;
@@ -1012,11 +913,10 @@
             const c = Math.min(1, (p.cuCharge || 0) / 90);
             ctx.strokeStyle = rgba('#fbbf24', 0.4 + c * 0.6); ctx.lineWidth = 1.2; TA.glow('#fbbf24', 8 * c);
             ctx.beginPath(); ctx.ellipse(0, -12, bw * 0.9 + 1, 1.2, 0, 0, TAU); ctx.stroke(); TA.noGlow();
-        } else if (d.fire === 'hold') {
-            ctx.fillStyle = '#374151'; TA.rr(-4, -15, 8, 5, 2); ctx.fill();
-            const on = p.cuBeamOn;
-            ctx.fillStyle = rad(0, -14, 0.3, 3.6, ['#ffffff', tipCol, rgba(tipCol, 0)]); TA.glow(tipCol, on ? 12 : 4);
-            ctx.beginPath(); ctx.ellipse(0, -14.5, 3.2, 1.5, 0, 0, TAU); ctx.fill(); TA.noGlow();
+        } else if (d.fire === 'burst') {
+            // Loạt Đạn: nòng có 3 khoang nạp xếp chồng
+            TA.barrel(0, -10, 6, bw + 0.6, '#d1d5db'); tip(0, -16, bw + 0.6);
+            for (let i = 0; i < 3; i++) { ctx.fillStyle = i === Math.floor(k.t * 6) % 3 ? k.team : '#4b5563'; TA.rr(-bw / 2 - 1.4, -14.5 + i * 1.9, bw + 2.8, 1.1, 0.5); ctx.fill(); }
         } else if (d.fire === 'ram') {
             ctx.fillStyle = TA.metal(-9, 9, '#4b5563', '#e5e7eb');
             poly([[-9, -10], [9, -10], [3, -15.5], [-3, -15.5]]); ctx.fill(); stroke('#1f2937', 0.8);
@@ -1030,7 +930,8 @@
             const team = o.id === 1 ? '#3498db' : '#e74c3c';
             const d = o.cuData;
             // Màu do người chơi lắp: theo tính chất đầu tiên, mặc định trắng
-            const pick = d && d.traits && d.traits[0] ? cuTraitColor(d.traits[0]) : '#ffffff';
+            const tk = d && d.traits ? (Array.isArray(d.traits) ? d.traits : Object.keys(d.traits)) : [];
+            const pick = b.cuCrit ? '#facc15' : (tk[0] ? cuTraitColor(tk[0]) : '#ffffff');
             const sp = Math.hypot(b.vx || 0, b.vy || 0);
             const t = Date.now();
             ctx.save();
@@ -1063,9 +964,21 @@
                 ctx.strokeStyle = team; ctx.lineWidth = 1.6; ctx.stroke();
                 ctx.save(); ctx.rotate(t / 150); ctx.strokeStyle = pick === '#ffffff' ? '#f97316' : pick; ctx.lineWidth = 1.2;
                 ctx.beginPath(); ctx.arc(0, 0, R * 0.6, 0, PI * 1.2); ctx.stroke(); ctx.restore();
+            } else if (b.cuKind === 'split') {
+                // Đạn Tách: hạt nhân hình thoi xoay (mảnh con nhỏ, hồng)
+                const R = W / 2 + 1, c = b.cuSplit ? '#e879f9' : pick;
+                ctx.fillStyle = lin(-R * 3, 0, 0, 0, [rgba(team, 0), rgba(team, 0.5)]); poly([[-R * 3, 0], [0, -R * 0.6], [0, R * 0.6]]); ctx.fill();
+                ctx.save(); ctx.rotate(t / 120);
+                ctx.shadowBlur = 10; ctx.shadowColor = c === '#ffffff' ? team : c;
+                ctx.fillStyle = c; poly([[R, 0], [0, -R], [-R, 0], [0, R]]); ctx.fill(); ctx.shadowBlur = 0;
+                ctx.strokeStyle = team; ctx.lineWidth = 1; ctx.stroke();
+                if (!b.cuSplit) { ctx.fillStyle = '#ffffff'; poly([[R * 0.4, 0], [0, -R * 0.4], [-R * 0.4, 0], [0, R * 0.4]]); ctx.fill(); }
+                ctx.restore();
             } else {
                 comet(Math.min(30, 8 + sp * 2.4), Math.max(2, H / 2), pick, team, { glow: pick === '#ffffff' ? team : pick, blur: 11 });
             }
+            // Chí mạng: vòng vàng xoay quanh đạn
+            if (b.cuCrit) { ctx.save(); ctx.rotate(t / 80); ctx.strokeStyle = '#facc15'; ctx.lineWidth = 1.5; ctx.shadowBlur = 8; ctx.shadowColor = '#facc15'; ctx.beginPath(); ctx.arc(0, 0, W / 2 + 3, 0, PI * 1.4); ctx.stroke(); ctx.restore(); }
             ctx.restore();
         };
     }

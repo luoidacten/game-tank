@@ -15,20 +15,22 @@
 - **Chế độ chơi:** Chơi → Chế Độ Cổ Điển → Online / Offline. Offline gồm 1v1 cùng máy, Phòng Tập (bot 5 cấp), **Giải Đấu PVE** 5 vòng (Vòng Loại → Chung Kết) với bot thông minh mạnh dần: dự đoán điểm rơi đạn & pháo để né, bắn thùng có lợi và tránh thùng nổ, bắn chặn khe né để ép góc, tự mua đồ trong shop.
 - Module chân: mỗi lần đã mua làm giá tăng thêm 50% giá gốc. **Động Cơ tối đa 3 lần** (đủ thì không xuất hiện trong shop). **Bánh Xích** x1.25 cho 3 lần đầu, sau đó giảm dần (x1.15, x1.09, x1.05…). **Lợi Tức** cộng dồn và nhân giá trị: 1/2/3/4/5 tầng = 30/72/126/192/270$ mỗi hiệp (Xe Tiền x2).
 
+- **Đạn tự tìm (homing)** của mọi body: bẻ lái kém linh hoạt; qua giữa sân hơn một chút chỉ còn bẻ rất yếu; khi tới gần mục tiêu (~110px) thì không bẻ nữa → dễ né bằng cách lách ngang.
+
 ## Bảng tổng hợp
 
 | # | Body | ID | HP | Sát thương | Đạn | Tốc độ | Kích thước | Triệu hồi | Tỉ lệ thắng mô phỏng |
 |---|------|----|---:|---:|---:|---:|:---:|:---:|---:|
-| 1 | **Cơ Bản** | `basic` | 8 | 1 | 8 | 3.5 | 30×30 |  | 60% |
+| 1 | **Cơ Bản** | `basic` | 9 | 1.2 | 8 | 3.85 | 30×30 |  | 60% |
 | 2 | **Xe Tiền** | `money_tank` | 9 | 1.5 | 2 | 3.5 | 28×28 |  | 24% |
-| 3 | **Xe TANK** | `tank` | 9.5 | 2.5 | — (năng lượng riêng) | 2.45 | 38×38 |  | 84% |
+| 3 | **Xe TANK** | `tank` | 9.5 | 2.5 | — (năng lượng riêng) | 3.32 | 38×38 |  | 84% |
 | 4 | **Pháo Băng** | `ice` | 5 | 1 | 5 | 3.5 | 30×30 |  | 43% |
 | 5 | **Đạn Lớn** | `big_bullet` | 5 | 2 | 2 | 3.5 | 30×30 |  | 53% |
-| 6 | **Shotgun** | `shotgun` | 5.5 | 0.9 | 2 | 3.5 | 26×26 |  | 36% |
+| 6 | **Shotgun** | `shotgun` | 5.5 | 1 | 2 | 3.5 | 26×26 |  | 36% |
 | 7 | **Cuộn Quá Tải** | `overload` | 4.5 | 0.7 | 6 | 3.5 | 30×30 |  | 83% |
-| 8 | **Tiểu Liên** | `smg` | 5 | 0.9 | 12 | 3.5 | 24×24 |  | 29% |
-| 9 | **Lazer Xuyên Phá** | `lazer_charge` | 4 | 0.5 | 20 | 3.5 | 30×30 |  | 66% |
-| 10 | **Lazer Pháo** | `lazer_auto` | 5 | 1 | 6 | 3.5 | 30×30 |  | 32% |
+| 8 | **Tiểu Liên** | `smg` | 5 | 0.9 | 18 | 3.5 | 24×24 |  | 29% |
+| 9 | **Lazer Xuyên Phá** | `lazer_charge` | 4 | 0.5 | 12 | 3.5 | 30×30 |  | 66% |
+| 10 | **Lazer Pháo** | `lazer_auto` | 5 | 1 | — (năng lượng riêng) | 3.5 | 30×30 |  | 32% |
 | 11 | **Pháo Tên Lửa** | `rocket` | 5 | 1.15 | 3 | 3.5 | 30×30 |  | 80% |
 | 12 | **Cổng Không Gian** | `portal` | 5 | 1 | 7 | 5 | 30×30 |  | 40% |
 | 13 | **Phong Trảm** | `wind_slash` | 4 | 0.9 | 1 | 3.5 | 30×30 | ✅ | 64% |
@@ -64,6 +66,19 @@
 | 43 | **Bình Phun** 🆕 | `sprayer` | 7 | 0 | — (năng lượng riêng) | 2.89 | 34×34 | ✅ | 56% |
 | 44 | **Tùy Biến** 🆕 | `customize` | 6 | 1.5 | 4 | 3.5 | 30×30 | ✅ | 33% |
 | 45 | **Kiếm Sư** 🆕 | `kiem_su` | 4 | 1 | 5 | 3.85 | 28×28 | ✅ | 46% |
+| 46 | **Cao Bồi** | `revolver` | 3.5 | 1.25 | 6 | 4.2 | 26×26 |  | — |
+| 47 | **DJ** | `dj` | 4 | 0.75 | 2 | 4.02 | 28×28 |  | — |
+| 48 | **Móc Thép** | `steel_hook` | 6 | 2 | 1 | 2.98 | 36×36 |  | — |
+| 49 | **Hoa Ảnh** | `flower_shadow` | 3 | 0.5 | — (năng lượng riêng) | 4.73 | 24×24 |  | — |
+| 50 | **Kiếm Vũ** | `kiem_vu` | 1.5 | 1.5 | ∞ | 3.5 | 28×28 |  | — |
+| 51 | **T-Zero** | `t_zero` | 8 | 1 | — (năng lượng riêng) | 3.15 | 34×34 |  | — |
+| 52 | **Raven - Oca** | `raven_oca` | 4 | 0.5 | 10 | 3.8 | 26×26 |  | — |
+| 53 | **Tia Lazer** | `lazer_beam` | 3 | 0.2 | — (năng lượng riêng) | 3.8 | 28×28 |  | — |
+| 54 | **Y Sư** | `healer` | 3.5 | 0.75 | 4 | 3.5 | 30×30 |  | — |
+| 55 | **Chrono & Neo** | `chrononeo` | 4.5 | 1 | 3 | 3.3 | 28×28 |  | — |
+| 56 | **Gemini** | `gemini` | 3.5 | 0.75 | 4 | 3.6 | 26×26 |  | — |
+| 57 | **Huyết Ma** | `blood_lord` | 3 | 0.25 | 6 | 4 | 28×28 |  | — |
+| 58 | **Cuồng Chiến Binh** | `berserker` | 6 | 0.25 | ∞ | 4.2 | 30×30 |  | — |
 
 > *Tỉ lệ thắng mô phỏng*: trung bình của 2 mức (chỉ có body / có Full Evo + 2 module), mỗi body đấu vòng tròn với mọi body khác, hai bên cùng một AI tự động. AI không biết chơi kinh tế hay combo phức tạp nên con số chỉ mang tính tham khảo cho độ mạnh tương đối.
 
@@ -71,36 +86,55 @@
 
 | Body | Thay đổi |
 |---|---|
-| Xe TANK | Cú lao chỉ trúng 1 lần/cú (trước trúng mỗi tick khi đi xuyên), hồi chiêu 2s, sát thương lao 3x → 1.1x, HP 10 → 4.5 (+5 xe lớn) |
+| Xe TANK | Chạy nhanh hơn; húc thùng tiếp tế không mất máu; khi lao chỉ nhận 35% sát thương (Evo 1: 20%); HUD hồi nội tại |
 | Shortgun | Mỗi viên 1x → 0.35x (bắn sát mặt nên viên nào cũng trúng), Double Tap 8 viên x2 → 7 viên x1.5, hồi chiêu 0.4s → 0.9s, HP 5 → 3.5, Dame 2 → 1.3. Sửa lỗi sập game khi hạ gục (Evo 2) |
 | Vua Đầu Bếp | Nhát chém 1 → 0.5 dmg, hồi 0.3s → 0.45s, HP 7 → 4.5, Dame 3 → 2 |
-| Pháo Cao Xạ | Pháo cối 2x → 1.5x dame, bán kính nổ 65 → 55, HP 5 → 3.5, Dame 2 → 1.15 |
-| Cuộn Quá Tải | HP 5 → 4.5, Dame 1.2 → 0.7 |
+| Pháo Cao Xạ | Sửa lỗi nổ lặp; Evo: nổ lặp 1 lần (Full 2 lần) có cảnh báo, 1/2 dame; HUD đếm ngược tự bắn |
+| Cuộn Quá Tải | Evo 1: thêm thanh năng lượng phụ (2 phát cường hóa liên tiếp); Evo 2: vòng EMP câm lặng địch + đơ vật triệu hồi 2s (chủ trúng EMP thì vật triệu hồi cũng đơ); Full Evo: +4 thanh phụ nạp cùng lúc, nổ & EMP rộng hơn; giảm dame nổ |
 | Pháo Tên Lửa | Dame 2 → 1.15 |
 | Nhà Ảo Thuật | Dame 1.5 → 1, HP 3.5 → 3. Sửa lỗi phân bóng làm mờ cả bản đồ |
-| Kiếm Tôn | Dame 1.5 → 1.05. Sửa lỗi Hư Vô gây lỗi khi trúng vật cản |
+| Kiếm Tôn | Quang Kiếm lơ lửng 2s rồi tự bắn (+1 dame); Ám Kiếm thành kiếm bay; Evo 1: Quang Kiếm tự triển khai + Loạn Ảnh chém đạn; Evo 2: hố đen + Ám Kiếm Tuyệt Diệt; Full Evo: kiếm tự xuất hiện & nội tại mạnh hơn; Phá Thiên giảm còn 3.5x • NERF Evo 2/Full: Tuyệt Diệt hồi 15s (Full 12s), 4/6 kiếm, cảnh báo 0.75s/1.5s, dame kiếm & hố đen giảm mạnh, lực hút yếu hơn rất nhiều |
 | Chiêu Hồn Sư | Linh Hồn khởi đầu 6 → 5. Lính Xạ Thủ/Cảm Tử biết ngắm; Lính Cao Cấp lao húc kiểu TANK rồi về chỗ |
-| Nam Châm | HP 5 → 4.5 |
+| Nam Châm | Khác dấu: lao húc như TANK + hút mục tiêu; lực từ mạnh 2s đầu rồi yếu hẳn; vùng từ nhỏ hơn |
 | Phong Trảm | Dame 1 → 0.9 |
-| Lazer Xuyên Phá | Đổi cơ chế: giữ 1.5s để tụ Tia Xuyên Phá (3 dmg, tốn 6 đạn), nhấp = đạn thường 1x (trước 0.25x và phải đầy đúng 20/20 đạn mới tụ được). HP 2 → 4, Dame 0.25 → 0.5 |
-| Xe Tiền | HP 1 → 7, Dame 1 → 1.5. HP 7 → 9. Cấp 3 thêm +2 HP, Cấp 4 thêm +0.5 dame, Cấp 6 "Đế Chế Tiền Tệ" (+3 HP, +2 đạn, +1 dame, 2 khiên). Tiền Tấn Công: mỗi 8s phóng 2 xe tiền lao về phía địch. Evo 2 mới Sức Mạnh Đồng Tiền (giảm 25%, mốc thưởng mỗi 100$ tiêu tới 2500$); Full Evo giảm 50%, thêm xe tiền, 3 xe tấn công mỗi 5s |
+| Lazer Xuyên Phá | Tự nạp năng lượng (giữ 0.4s bật/tắt); tắt tự nạp thì bắn đạn thường 0.01; Full Evo: phát lazer one-shot mọi lượng máu, xuyên khiên |
+| Xe Tiền | Mỗi cấp đạn bay nhanh hơn; Evo 2 Sức Mạnh Đồng Tiền (-25% giá, mốc thưởng mỗi 100$); Full Evo -50% giá |
 | Mirror | Sửa lỗi không bắn được, hồi bắn 1.5s → 0.35s, HP 4 → 5.5, Dame 1 → 1.3. Ngay sau khi dịch chuyển: 1.5s bắn ngay, nhịp bắn & tốc độ đạn x2 |
 | Nhà Phát Minh | HP 2 → 5.5, Dame 0.5 → 0.7, sát thương Drone 50% → 100% chỉ số chủ. Drone ngắm chính xác (có đón đầu) |
 | Thiên Tài | HP 1 → 2.5, mỗi hiệp có sẵn 6 Bánh Răng. Tự Hủy: ném Robot lao tới, chạm tường mới nổ |
-| Kẻ Sáng Tạo | HP 1 → 3. Robot đứng gần sân nhà, đi chậm hơn, Laser có cảnh báo & bắn ra từ Robot |
+| Kẻ Sáng Tạo | Sửa lỗi khiên không chặn sát thương (giờ chặn đạn, đạn xuyên và tia) |
 | Tiến Hóa | HP 1 → 5.5 |
-| Tùy Biến | HP 3 → 6 (thiết kế gốc 1), Dame 1 → 1.5 |
+| Tùy Biến | Bỏ kiểu bắn Hold (tia); thêm Loạt Đạn, Đạn Tách, Chí Mạng, Hút Máu, Song Nòng và nhóm CHỈ SỐ (Máu/Dame/Đạn/Tốc/Nạp/Khiên) để luôn tiêu được điểm; điểm CP mỗi hiệp nhiều hơn; shop chia cột, hiện cấp & trạng thái rõ, nút TỰ LẮP; sửa Gói VIP (Nảy Tường thật sự nảy, Tự Ngắm/Đạn Hút mạnh theo cấp) + nâng 1 cấp mọi tùy chọn cũ |
 | Kiếm Trận | HP 3.5 → 4.5, Dame 0.25 → 0.6 |
-| Shotgun | HP 3.5 → 5.5, Dame 0.5 → 0.9 |
-| Tiểu Liên | HP 4 → 5, Dame 0.5 → 0.9 |
+| Shotgun | 5 viên bay nhanh hơn, dame 1; Evo 1: 6 viên + đợt hai 3 viên |
+| Tiểu Liên | Nạp theo băng (18/22/30 viên) có vòng nạp; Full Evo: 6 viên đầu mỗi băng xuyên |
 | Trối Chết (DeathLock) | HP 5 → 6, Dame 0.5 → 0.8 |
 | Paradox | HP 5 → 6, Dame 1 → 1.2. Tua ngược chỉ cần giữ 0.2s; thêm mốc Neo Thời Không (10s, CD 20s): lần tua tới về neo (vị trí, máu, đạn) |
-| Lazer Pháo | HP 4 → 5 |
+| Lazer Pháo | Không cần đạn: giữ bắn xả lazer xuyên ngày càng nhanh, nóng ≥60% thì +35% dame, quá nhiệt khóa 1.5s |
 | Kiếm Khách | HP 2 → 3, Dame 1 → 1.2 (so với bản thiết kế). Làm 3 bài cùng lúc, +1 ô mỗi hiệp (Evo 2 +1, Full +2); đầu trận tự nhận 3 bài ngẫu nhiên |
-| Bow | Giữ nút để kéo cung, nhả để bắn (trước: nhấp để tự nạp); nạp nhanh x1.6, đầy lực không tự bắn |
+| Bow | LÀM LẠI: giữ 0.5s đổi 3 cách bắn — Tụ Lực (1 mũi tự giương, càng lâu càng to & mạnh, bắn chậm) / Liên Hoàn (loạt 5 mũi nhanh, dame yếu) / 3 Mũi (3 hướng); giữ 2.5s vào Ngắm: vòng đuổi mục tiêu thu hẹp dần (tối đa 5s) rồi Thiên Tiễn khóa 0.5s giáng xuống; Evo 1 Cung Thần, Evo 2 Mưa Tên trên vòng ngắm, Full Evo Vạn Tiễn mưa tên toàn map mỗi 12s |
 | Cuồng Phong | Giữ nút để tụ lực, nhả để xuất chiêu (trước: tự nạp 14s); đầy lực sau 3.5s |
 | 6 Nòng | Phải giữ 0.5s khởi động nòng; đã quay thì nhấp vẫn bắn (nhả >1s nòng dừng) |
-| Bình Phun | Luồng phun bay ra từ từ, chạm tầm tối đa mới mở rộng sang hai bên. Axit ăn mòn 2 dame/s mọi vật không phải body (thùng, xe tiền, triệu hồi, công trình). Full Evo: phun cả 3 chất cùng lúc, góc rộng 48 → 72, phun lâu hơn |
+| Bình Phun | Vòi phun đốt xe tiền nhanh hơn nhiều; axit gây 10x lên vật thể |
+| Sấm Chớp | Thiên Kiếp: hóa sét lao húc + hút địch, hạ màn bay lên trời điều khiển vòng (khóa 0.5s rồi đáp); Full Evo: Lôi Vực + sét trời. Mất hết thương → hồi sau 5s. Lôi Minh chỉ tích từ thu thương / Lôi Trảm / thương trúng địch. Lôi Trảm nhanh & rộng hơn, buff tốc+dame, 1-3 thương rơi từ trời (cảnh báo 3s); Evo 2 chém phụ. Thương cầm tay tối đa 3 (cả Full Evo). Giảm dame |
+| Hoa Ảnh | Giới hạn hoa trên sân 12/24/vô hạn, hoa tự thu sau 3s (Full 2s), xe địch đè lên phá hoa, hoa bay trúng vật cản thì vỡ; kho hoa 100/200/300%; hồi hoa sau 0.5s; cường hóa cần 75%/50% và reset; Khai cường hóa không bị phá, xuyên cả đi lẫn về; giảm dame |
+| Kiếm Vũ | Tâm Định chỉ hồi sau 1.25s không dùng chiêu; chỉ phóng kiếm khi kiếm ở nửa sân mình |
+| Móc Thép | Giữ càng lâu móc càng nhanh (1.25s → 0.5s hết quãng đường); giữ 0.75s khi móc đã cắm để cắt xích; xích phụ máu thấp; Evo đắt hơn |
+| DJ | Vùng bấm rộng hơn nhiều, 4 bản nhạc cân lại (Trung Bình có nốt đôi); bấm vùng vàng vẫn bắn nhưng không +combo; để lọt nốt = mất đạn + mất combo |
+| T-Zero | Tên lửa đuổi chậm hơn, bắn hạ được; thêm tên lửa không kích (cảnh báo 2s, bay vào từ trái/phải); NL tụt tăng dần khi bay; chờ 2.5s mới bay lại; khóa vòng 0.5s trước khi đáp |
+| Sniper | Tường chặn mọi đạn địch kể cả hitscan & đạn xuyên; tường tự mất máu sau 5s (nhanh hơn), Full Evo tường dài, trâu, không tự mất máu, bất tử 2s đầu; đạn nhanh x3; đường ngắm chuẩn; vòng nạp đạn |
+| Đạn Lớn | Đạn to hơn nhiều (20/32/44px); Full Evo: nảy 1 lần thì xuyên vật cản, tự biến mất giữa map rồi nổ 20 viên 360° |
+| Kỹ Sư | Ụ súng tự mất máu chậm sau 10s |
+| Cơ Bản | HP 9, dame 1.2, tốc +10%, nạp nhanh hơn 20%, đạn nhanh hơn |
+| Súng Nước | Tia nước có cảnh báo 0.5s |
+| Axit Hóa | Phát cường hóa tạo vùng ăn mòn tím (trừ máu & máu tối đa, chậm); mọi đòn axit gây 10x + 50% máu tối đa lên vật cản/xe tiền/triệu hồi |
+| Raven - Oca | MỚI: Collab Raven-Oca — giữ 0.4s đổi Tiểu Liên (loạt 3 viên, lướt né) ↔ Sniper (4 dame, bom khói né đạn), chim Oca đồng hành (tàng hình cắn làm chậm / radar khóa mục tiêu, đạn Sniper xuyên vật thể) |
+| Tia Lazer | MỚI: Tia Lazer — giữ bắn: tích 0.5s + cảnh báo 0.5s rồi chiếu tia liên tục (0.2/nhịp, chậm khi chiếu, tụt năng lượng, chớp tắt); Evo 2 tia phình to + dame tăng dần + đốt; Full Evo không chậm + tia xung kích mỗi 2s • Sửa lỗi: tia gây sát thương lên vật triệu hồi của địch |
+| Y Sư | MỚI: Y Sư — tự hồi 0.5 HP sau 3s không mất máu, đạn hấp huyết (CD 20s), thanh Năng Lượng Sinh Mệnh → đạn cường hóa 50% Max HP + dame gốc; Evo 1 giáp trắng; Evo 2 mỗi lần hồi bắn tia tự ngắm; Full Evo cướp máu hồi của địch • NERF: HP 5 → 3.5 |
+| Chrono & Neo | MỚI: Collab Chrono & Neo — Tham Farm tăng băng đạn vĩnh viễn (4→10 / 10→20), giữ 0.4s đổi thế Chrono (đạn đồng xuyên, sóng đẩy) ↔ Neo (2 viên, lướt tăng tốc), đồng hồ cát Thời Khắc → Liên Xạ tự tìm / Mưa Đạn Hình Nón + Ảnh Chiếu; Full Evo: AI phụ cầm thế ngược lại + bão Liên Hoa • NERF: băng đạn 3→7 / 8→14, CD đổi thế 6s (Full 4s), Liên Xạ +2, nón 6-8 viên yếu hơn, Liên Hoa 2.5s, Nở Rộ còn 3 cột có khe né |
+| Gemini | MỚI: Gemini — 2 xe song sinh (bạn + AI tự hành), gục thì có vòng cứu 2s (nhân đôi mỗi lần), chỉ thua khi cả 2 cùng gục; giữ 0.4s Chuyển Giao Ý Thức đổi quyền điều khiển; Evo 2 mạnh dần theo hiệp; Full Evo tự khởi động lại + đạn tự ngắm sau chuyển giao |
+| Huyết Ma | MỚI: Huyết Ma — Bể Máu (Max HP x2) tích từ mọi lượng máu mất trên sân, tự đổi thành HP sau 8s; giữ 0.25s xoay 4 dạng: Đạn Thường / Huyết Phá (dơi lao bất tử + Bầy Dơi 2s) / Huyết Tiễn (tia máu có cảnh báo) / Huyết Cầu (≥50% Bể Máu mở Bóng Ma Màn Đêm bay lên trời đáp xuống Đại Tiệc Máu); Evo 1 hóa dơi thoát chết; Full Evo hồi sinh 1 lần/trận • SỬA: hết lỗi tung Huyết Cầu/Đại Tiệc Máu liên tục; Đại Tiệc Máu hóa thân thành vùng (không bị chọn), chỉ hồi máu, khóa Bể Máu 5s; đổi máu 3:1 (Evo 2 2.5:1, Full 2:1); dame -28%; thiếu máu thì không dùng được kỹ năng |
+| Cuồng Chiến Binh | MỚI: Cuồng Chiến Binh — 3 mốc Cuồng Chiến theo % máu (thay thế nhau), ≤50% máu thì giữ bắn sấy; trúng đòn → tăng tốc + Huyết Đạn to; thanh Huyết Chiến đầy + đòn chí tử → bất tử khóa máu (bị trừ thanh, -40/s ngoài bo); Evo 2 đấu trường khóa 2 bên; Full Evo Tàn Hơi Cuối Cùng hồi sinh 0.5 HP (2 lần/hiệp) |
 
 ## Module chân (FEET)
 
@@ -115,21 +149,21 @@
 
 ### 1. Cơ Bản (`basic`)
 
-HP:8 | Dame:1 | Đạn:8
+HP:9 | Dame:1.2 | Đạn:8 | Tốc +10%. Chuẩn mực vững vàng: nạp đạn nhanh hơn 20%, đạn bay nhanh hơn.
 
-- **Chỉ số thực đầu hiệp:** HP 8 · Sát thương 1 · Đạn 8 · Tốc độ 3.5 · Kích thước 30×30
+- **Chỉ số thực đầu hiệp:** HP 9 · Sát thương 1.2 · Đạn 8 · Tốc độ 3.85 · Kích thước 30×30
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
   |---|---:|---|
-  | Công Thủ Toàn Diện (`evo_basic_1`) | $15 | HP+6, Dame ×2 |
+  | Công Thủ Toàn Diện (`evo_basic_1`) | $15 | HP +2, Dame ×1.25 |
   | Thập Tử Nhất Sinh (`evo_basic_2`) | $30 | Về 0 HP -> Hồi 1 HP + Bất tử 3s |
 
 - **Mã nguồn:** `js/characters/basic/logic.js`
 
 ### 2. Xe Tiền (`money_tank`)
 
-HP:9 | Dame:1.5 | Đạn:2. Farm tiền, mua CẤP ĐỘ trong shop (Cấp 3: Khiên +2 HP, Cấp 4: Xuyên +0.5 dame, Cấp 5: Đạn nổ, Cấp 6: Đế Chế Tiền Tệ). Lợi Tức & tiền nhặt x2.
+HP:9 | Dame:1.5 | Đạn:2. Farm tiền, mua CẤP ĐỘ trong shop (mỗi cấp đạn bay nhanh hơn; Cấp 3: Khiên +2 HP, Cấp 4: Xuyên +0.5 dame, Cấp 5: Đạn nổ, Cấp 6: Đế Chế Tiền Tệ). Lợi Tức & tiền nhặt x2.
 
 - **Chỉ số thực đầu hiệp:** HP 9 · Sát thương 1.5 · Đạn 2 · Tốc độ 3.5 · Kích thước 28×28
 - **Tiến hoá:**
@@ -143,15 +177,15 @@ HP:9 | Dame:1.5 | Đạn:2. Farm tiền, mua CẤP ĐỘ trong shop (Cấp 3: Kh
 
 ### 3. Xe TANK (`tank`)
 
-HP:4.5 (+5 máu xe lớn) | Dame:2.5 | Tốc: Chậm. Nhấn Bắn: Lao húc (1.1x dame, hồi chiêu 2s, tự hồi khiên).
+HP:4.5 (+5 máu xe lớn) | Dame:2.5 | Tốc: Khá. Nhấn Bắn: Lao húc (1.1x dame, hồi chiêu 2s; tông hòm tiếp tế không mất máu; khi lao chỉ nhận 35% sát thương). Nội tại: tự hồi 1 khiên mỗi 6s (vòng quanh xe báo tiến độ).
 
-- **Chỉ số thực đầu hiệp:** HP 9.5 · Sát thương 2.5 · Đạn — (năng lượng riêng) · Tốc độ 2.45 · Kích thước 38×38
+- **Chỉ số thực đầu hiệp:** HP 9.5 · Sát thương 2.5 · Đạn — (năng lượng riêng) · Tốc độ 3.32 · Kích thước 38×38
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
   |---|---:|---|
-  | Không Thể Cản Phá (`evo_tank_1`) | $100 | Lao xuyên vật thể, Bất tử khi lao |
-  | Tàn Phá!!! (`evo_tank_2`) | $45 | Húc nổ lan + Hồi khiên nội tại nhanh hơn |
+  | Không Thể Cản Phá (`evo_tank_1`) | $100 | Lao húc x1.5 dame, không bị phản chấn khi tông tường/vật thể, khi lao chỉ nhận 20% sát thương |
+  | Tàn Phá!!! (`evo_tank_2`) | $45 | Húc nổ lan + băng (khi còn khiên) + Hồi khiên nội tại nhanh hơn (6s -> 4s, Full Evo 2s, +15 HP) |
 
 - **Mã nguồn:** `js/characters/tank/logic.js`, `js/characters/tank/render.js`
 
@@ -171,81 +205,87 @@ HP:5 | Dame:1 | Đạn:5 (Làm chậm)
 
 ### 5. Đạn Lớn (`big_bullet`)
 
-HP:5 | Dame:2 | Đạn:2. Nảy tường phình to & tăng dame.
+HP:5 | Dame:2 | Đạn:2. Quả cầu đạn khổng lồ (gấp đôi cỡ cũ, Evo 1 & Full Evo càng to hơn). Full Evo: nảy 1 lần hóa Xuyên Thấu, tan ở giữa sân & nổ 360° mảnh đạn.
 
 - **Chỉ số thực đầu hiệp:** HP 5 · Sát thương 2 · Đạn 2 · Tốc độ 3.5 · Kích thước 30×30
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
   |---|---:|---|
-  | To Hơn Nữa (`evo_big_1`) | $20 | Đạn siêu to khổng lồ |
-  | Bóng Cao Su (`evo_big_2`) | $100 | Đạn nảy lại 1 lần khi chạm tường |
+  | To Hơn Nữa (`evo_big_1`) | $20 | Đạn siêu to khổng lồ (gấp đôi: 32px). Full Evo: sau lần nảy đầu đạn hóa Xuyên Thấu (xuyên vật cản, vẫn trúng địch), không nảy nữa mà tan ở giữa sân |
+  | Bóng Cao Su (`evo_big_2`) | $100 | Đạn nảy lại khi chạm tường. Full Evo: đạn kết thúc/bị phá sẽ nổ thành vòng mảnh đạn 360° (chỉ hại địch) |
+
+- **Mã nguồn:** `js/characters/big_bullet/logic.js`
 
 ### 6. Shotgun (`shotgun`)
 
-HP:5.5 | Dame:0.9 | Đạn:2 (3 tia)
+HP:5.5 | Dame:1 | Đạn:2. Mỗi phát tỏa 5 viên bay nhanh.
 
-- **Chỉ số thực đầu hiệp:** HP 5.5 · Sát thương 0.9 · Đạn 2 · Tốc độ 3.5 · Kích thước 26×26
+- **Chỉ số thực đầu hiệp:** HP 5.5 · Sát thương 1 · Đạn 2 · Tốc độ 3.5 · Kích thước 26×26
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
   |---|---:|---|
-  | Mưa Đạn (`evo_shot_1`) | $45 | Tỏa 5 tia |
+  | Mưa Đạn (`evo_shot_1`) | $45 | Tỏa 6 viên; ngay sau mỗi phát bắn thêm đợt 2 gồm 3 viên tụm giữa |
   | Đạn Dự Phòng (`evo_shot_2`) | $30 | Băng đạn 4 viên |
+
+- **Mã nguồn:** `js/characters/shotgun/logic.js`
 
 ### 7. Cuộn Quá Tải (`overload`)
 
-HP:4.5 | Dame:0.7-12 (Tự tụ) | Đạn:6. Đạn sạc nổ xung kích điện.
+HP:4.5 | Dame:0.7-7 (Tự tụ) | Đạn:6. Thanh năng lượng tự tụ 2.4s; đầy -> phát kế tiếp là Đạn Sạc nổ xung kích điện (vụ nổ 0.5 dame, Full Evo 1.25).
 
 - **Chỉ số thực đầu hiệp:** HP 4.5 · Sát thương 0.7 · Đạn 6 · Tốc độ 3.5 · Kích thước 30×30
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
   |---|---:|---|
-  | Cầu Điện (`evo_over_1`) | $50 | Nổ xanh TO khi full lực chạm tường |
-  | Năng Lượng Xanh (`evo_over_2`) | $20 | Tụ lực nhanh hơn |
+  | Thanh Năng Lượng Phụ (`evo_over_1`) | $50 | +1 thanh phụ, nạp sau khi thanh chính đầy. Đầy -> trữ 2 Đạn Sạc, bắn liền 2 phát. |
+  | Vụ Nổ EMP (`evo_over_2`) | $60 | Đạn Sạc nổ phát vòng EMP rộng hơn vụ nổ: không gây dame nhưng Câm Lặng địch 2s & đóng băng trụ/drone/robot/bẫy/xe... của địch 2s (đứng im, không bắn, không di chuyển). Trúng EMP vào CHỦ -> TOÀN BỘ vật triệu hồi của chủ cũng bị đóng băng. FULL EVO (Lõi Tứ Quá Tải): +4 thanh phụ (5 thanh nạp đồng thời), vụ nổ & vòng EMP to hơn hẳn. |
 
-- **Mã nguồn:** `js/characters/overload/logic.js`
+- **Mã nguồn:** `js/characters/overload/logic.js`, `js/characters/overload/render.js`
 
 ### 8. Tiểu Liên (`smg`)
 
-HP:5 | Dame:0.9 | Đạn:12 (Lắc)
+HP:5 | Dame:0.9 | Băng 18 viên (Lắc). Giữ để sấy; hết băng -> nạp nguyên băng 1.8s (vòng nạp quanh xe). Nghỉ bắn 2.5s tự thay băng.
 
-- **Chỉ số thực đầu hiệp:** HP 5 · Sát thương 0.9 · Đạn 12 · Tốc độ 3.5 · Kích thước 24×24
+- **Chỉ số thực đầu hiệp:** HP 5 · Sát thương 0.9 · Đạn 18 · Tốc độ 3.5 · Kích thước 24×24
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
   |---|---:|---|
-  | Hỏa Lực +++ (`evo_smg_1`) | $80 | Sấy càng lâu: Dame tăng, Tốc bắn tăng, Đạn bay nhanh. |
-  | Băng Đạn X (`evo_smg_2`) | $120 | Đạn: 26. Không bắn 5s -> Hồi FULL đạn. |
+  | Hỏa Lực +++ (`evo_smg_1`) | $80 | Sấy càng lâu: Dame tăng (tối đa +0.5), Tốc bắn tăng gấp đôi, Đạn bay nhanh. Băng 22 viên, dame gốc ×0.9. |
+  | Băng Đạn X (`evo_smg_2`) | $120 | Băng 30 viên, nạp băng 1.2s. FULL EVO: nạp 0.8s, 6 viên đầu mỗi băng xuyên thấu. |
 
 - **Mã nguồn:** `js/characters/smg/logic.js`
 
 ### 9. Lazer Xuyên Phá (`lazer_charge`)
 
-HP:4 | Dame:0.5 | Đạn:20. Nhấp: đạn thường. Giữ 1.5s rồi nhả: Tia Xuyên Phá 3 dmg (tốn 6 đạn).
+HP:4 | Đạn:12. Năng lượng TỰ NẠP đầy sau 5s -> nhấp phóng Tia Xuyên Phá 20 dame. Giữ 0.4s: bật/tắt Tự Nạp (tắt: nhấp bắn đạn thường 0.01 dame, năng lượng ngừng nạp). Full Evo: tia hạ gục ngay bất kể máu, xuyên khiên.
 
-- **Chỉ số thực đầu hiệp:** HP 4 · Sát thương 0.5 · Đạn 20 · Tốc độ 3.5 · Kích thước 30×30
+- **Chỉ số thực đầu hiệp:** HP 4 · Sát thương 0.5 · Đạn 12 · Tốc độ 3.5 · Kích thước 30×30
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
   |---|---:|---|
-  | Pháo Diệt Tinh (`evo_lazer_c_1`) | $150 | Tia to, tồn tại 2s gây sát thương |
-  | Năng Lượng Xanh (`evo_lazer_c_2`) | $50 | Nạp đạn nhanh hơn |
+  | Pháo Diệt Tinh (`evo_lazer_c_1`) | $150 | Tia Xuyên Phá to gấp 3, lưu ảnh 2s |
+  | Năng Lượng Xanh (`evo_lazer_c_2`) | $50 | Tự Nạp nhanh hơn (4s), đạn thường nạp 0.4s/viên. FULL EVO: Tự Nạp 3.5s, Tia Xuyên Phá HẠ GỤC NGAY bất kể máu & xuyên khiên. |
 
 - **Mã nguồn:** `js/characters/lazer_charge/logic.js`
 
 ### 10. Lazer Pháo (`lazer_auto`)
 
-HP:5 | Dame:1 | Đạn:6 (Xuyên)
+HP:5 | Dame:1 | Không cần đạn: GIỮ bắn xả dòng laser xuyên thấu, nhịp bắn tăng dần (0.43s -> 0.17s/tia). Mỗi tia +9% Nhiệt; Nhiệt >= 60%: tia Nóng Đỏ +35% dame. Đầy 100% -> QUÁ NHIỆT khóa bắn 1.5s. Nhả nút để hạ nhiệt; hòm đạn xả sạch nhiệt.
 
-- **Chỉ số thực đầu hiệp:** HP 5 · Sát thương 1 · Đạn 6 · Tốc độ 3.5 · Kích thước 30×30
+- **Chỉ số thực đầu hiệp:** HP 5 · Sát thương 1 · Đạn — (năng lượng riêng) · Tốc độ 3.5 · Kích thước 30×30
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
   |---|---:|---|
-  | Xuyên Phá (`evo_lazer_a_1`) | $30 | Đạn bay cực nhanh |
-  | Phá Hủy (`evo_lazer_a_2`) | $45 | Tăng dame, đạn to hơn |
+  | Xuyên Phá (`evo_lazer_a_1`) | $30 | Laser bay cực nhanh, nhịp bắn tối đa 0.13s/tia. FULL EVO: mỗi tia chỉ +7% Nhiệt, Quá Nhiệt chỉ 0.8s. |
+  | Phá Hủy (`evo_lazer_a_2`) | $45 | Dame ×1.5, laser to hơn, Nóng Đỏ từ 50% Nhiệt. |
+
+- **Mã nguồn:** `js/characters/lazer_auto/logic.js`
 
 ### 11. Pháo Tên Lửa (`rocket`)
 
@@ -270,7 +310,7 @@ HP:5 | Dame:1 | Đạn:7 (Dịch chuyển)
 
   | Evo | Giá | Hiệu ứng |
   |---|---:|---|
-  | Cổng Cường Hóa (`evo_portal_1`) | $55 | Dịch chuyển nhận đạn nổ |
+  | Cổng Cường Hóa (`evo_portal_1`) | $55 | Dịch chuyển nhận đạn nổ. Mỗi 6s tự mở 2 Cổng Bắn trên sân, mỗi cổng nhắm & bắn 3 viên vào kẻ thù. Đi xuyên mép màn hình -> hồi chiêu mở cổng ngay. FULL EVO: mở x3 cổng (6 cổng). |
   | Cổng Gia Tốc (`evo_portal_2`) | $40 | Dịch chuyển hồi đầy đạn + Tốc |
 
 - **Mã nguồn:** `js/characters/portal/logic.js`
@@ -307,7 +347,7 @@ HP:3.5 | Giữ nút tụ lực 3.5s, nhả -> Lao & Chém Tròn (Phản đạn)
 
 ### 15. Axit Hóa (`acid`)
 
-HP:4 | Dame:0.5 | Đạn:1. Ăn mòn Max HP (Max HP<=1 nhận 4 Dame). Đạn tạo vùng
+HP:4 | Dame:0.5 | Đạn:1. Ăn mòn Max HP (Max HP<=1 nhận 4 Dame). Mỗi viên thứ 5 (đạn cường hóa) tạo VÙNG ĂN MÒN tím: rút cả HP lẫn Max HP & làm chậm. Mọi đạn/vùng Axit gây x10 dame + 50% Max HP lên vật cản, công trình, xe tiền/phương tiện & vật triệu hồi.
 
 - **Chỉ số thực đầu hiệp:** HP 4 · Sát thương 0.5 · Đạn 1 · Tốc độ 3.5 · Kích thước 30×30
 - **Vật triệu hồi / hiệu ứng:** Vùng Axit
@@ -315,14 +355,14 @@ HP:4 | Dame:0.5 | Đạn:1. Ăn mòn Max HP (Max HP<=1 nhận 4 Dame). Đạn t�
 
   | Evo | Giá | Hiệu ứng |
   |---|---:|---|
-  | Bào Mòn (`evo_acid_1`) | $40 | Vùng Axit rộng hơn, tốc độ ăn mòn Max HP gấp đôi. |
+  | Bào Mòn (`evo_acid_1`) | $40 | Vùng Ăn Mòn rộng hơn & tồn tại lâu hơn, tốc độ rút HP / Max HP gấp đôi. |
   | Độc Hại (`evo_acid_2`) | $60 | Ngưỡng kết liễu tăng lên 2 Max HP. |
 
 - **Mã nguồn:** `js/characters/acid/summons.js`
 
 ### 16. Kỹ Sư (`engineer`)
 
-HP:3 (+2 máu xe lớn) | Dame:0.5 | Đạn:2. Tự tạo Ụ Thường. Giữ 1s đặt Ụ Thông Minh.
+HP:3 (+2 máu xe lớn) | Dame:0.5 | Đạn:2. Tự tạo Ụ Thường. Giữ 1s đặt Ụ Thông Minh. Ụ tồn tại quá 10s tự mất máu chậm.
 
 - **Chỉ số thực đầu hiệp:** HP 5 · Sát thương 0.5 · Đạn 2 · Tốc độ 3.5 · Kích thước 34×34
 - **Vật triệu hồi / hiệu ứng:** Ụ Súng thường & thông minh
@@ -352,7 +392,7 @@ HP:2.5 | Tốc: Rất Nhanh | Đạn:4. Vô Ảnh 2s (CD 3s). Tàn Ảnh phân t
 
 ### 18. Pháo Cao Xạ (`aaa`)
 
-HP:3.5 (+4 máu xe lớn) | Tốc: Chậm | Dame:1.15 Pháo Kích (1.5s nổ) + Xả nhanh khi có đạn.
+HP:3.5 (+4 máu xe lớn) | Tốc: Chậm | Dame:1.15 Pháo Kích (1.5s nổ) + Xả nhanh khi có đạn. Tự bắn mỗi 4s (vòng đếm ngược quanh xe để canh thời điểm).
 
 - **Chỉ số thực đầu hiệp:** HP 7.5 · Sát thương 1.15 · Đạn 1 · Tốc độ 2.1 · Kích thước 37×37
 - **Vật triệu hồi / hiệu ứng:** Pháo cối đánh dấu
@@ -360,24 +400,24 @@ HP:3.5 (+4 máu xe lớn) | Tốc: Chậm | Dame:1.15 Pháo Kích (1.5s nổ) + 
 
   | Evo | Giá | Hiệu ứng |
   |---|---:|---|
-  | Nhắm Đánh Dấu (`evo_aaa_1`) | $80 | Pháo kích tự ghim mục tiêu. Tự bắn thường: 3 tia liên tiếp. |
-  | Mưa Tên Lửa (`evo_aaa_2`) | $100 | Tự bắn -> Rơi 3 bom ngẫu nhiên. Pháo kích nổ bồi lần 2. |
+  | Nhắm Đánh Dấu (`evo_aaa_1`) | $80 | Pháo kích tự ghim mục tiêu. Tự bắn thường: 3 tia liên tiếp. Pháo kích nổ bồi 1 lần tại chỗ (có cảnh báo, 50% dame). FULL EVO: nổ bồi 2 lần. |
+  | Mưa Tên Lửa (`evo_aaa_2`) | $100 | Tự bắn -> Rơi 3 bom ngẫu nhiên trên làn địch. Pháo kích nổ bồi 1 lần tại chỗ (có cảnh báo, 50% dame). FULL EVO: nổ bồi 2 lần, nổ nhanh hơn. |
 
 - **Mã nguồn:** `js/characters/aaa/logic.js`, `js/characters/aaa/summons.js`
 
 ### 19. Kiếm Tôn (`blade_god`)
 
-HP:5 | Dame:1.05 | Đạn:4. Luân phiên: Anh Minh (Hitscan), Hư Vô (Nổ+Câm lặng). Nhát thứ 10: Phá Thiên Kiếm.
+HP:5 | Dame:1.05 | Đạn:4. Luân phiên: Quang Kiếm (lơ lửng tại chỗ, ngắm 2s rồi tự phóng tia sáng) / Ám Kiếm (kiếm bay, nổ + câm lặng). Nhát thứ 10: Phá Thiên Kiếm.
 
 - **Chỉ số thực đầu hiệp:** HP 5 · Sát thương 1.05 · Đạn 4 · Tốc độ 3.5 · Kích thước 30×30
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
   |---|---:|---|
-  | Kiếm Thế Vô Chủ (`evo_blade_1`) | $150 | Anh Minh xuyên thấu. Hư Vô 3 stack = Tử hình. Gọi Phá Thiên -> Bất tử 5s. |
-  | Kiếm Thể Phòng Hộ (`evo_blade_2`) | $150 | Khiên đỡ 5 hit. Khi vỡ phóng 5 kiếm tự ngắm. Nạp đạn cực nhanh. |
+  | Kiếm Thế Vô Chủ (`evo_blade_1`) | $150 | Quang Kiếm tự rải ngẫu nhiên trên sân. Nội tại Quang Kiếm Loạn Ảnh: mỗi 10s 1 Quang Kiếm VIP bay quanh xe 3s, lao tới chém tan mọi loại đạn bay. Full Evo: Quang & Ám Kiếm tự xuất hiện, lơ lửng 2s rồi tự phóng; 2 nội tại mạnh hơn. |
+  | Kiếm Thể Phòng Hộ (`evo_blade_2`) | $150 | Ám Kiếm tạo hố đen nhỏ hút nhẹ về tâm. Nội tại Ám Kiếm Tuyệt Diệt: mỗi 15s (Full Evo 12s) 4 kiếm (Full 6) cảnh báo 0.75s rơi xuống địch; sau ~3s 1 Ám Kiếm khổng lồ cảnh báo 1.5s rồi giáng, cắm 2s hút nhẹ + gây sát thương nhỏ. |
 
-- **Mã nguồn:** `js/characters/blade_god/logic.js`
+- **Mã nguồn:** `js/characters/blade_god/logic.js`, `js/characters/blade_god/summons.js`
 
 ### 20. Kiếm Trận (`van_kiem`)
 
@@ -395,7 +435,7 @@ HP:4.5 | Dame:0.6 | Đạn: Vô Hạn. Tự gọi kiếm. Giữ bắn để vào
 
 ### 21. Súng Nước (`water_gun`)
 
-HP:4 (+2 máu xe lớn) | Dame:1.5 Đạn: Nội năng (100%). Bấm: Tia nước. Giữ 1s: Laser nước.
+HP:4 (+2 máu xe lớn) | Dame:1.5 Đạn: Nội năng (100%). Bấm: Tia nước. Giữ 1s: Laser nước (hiện cột cảnh báo 0.5s rồi mới bắn).
 
 - **Chỉ số thực đầu hiệp:** HP 6 · Sát thương 1.5 · Đạn — (năng lượng riêng) · Tốc độ 3.5 · Kích thước 34×34
 - **Tiến hoá:**
@@ -466,7 +506,7 @@ HP 1. Dùng Chú Lực vô hiệu sát thương. Nhấp: Lướt (Thương). Gi�
 
 ### 26. Sniper (`sniper`)
 
-HP:3 | Dame:2 | Đạn:5. Tốc chậm. Giữ bắn tạo tường. Xuyên giảm dame. Nạp cả băng.
+HP:3 | Dame:2 | Đạn:5. Tốc chậm. Giữ bắn tạo tường chặn MỌI đòn địch (cả tia hitscan & đạn xuyên); đạn mình bay qua. Tường tự mục sau 5s. Xuyên giảm dame. Đạn bay cực nhanh, tia ngắm chỉ đúng hướng bắn. Hết đạn nạp cả băng (vòng nạp).
 
 - **Chỉ số thực đầu hiệp:** HP 3 · Sát thương 2 · Đạn 5 · Tốc độ 2.62 · Kích thước 24×24
 - **Vật triệu hồi / hiệu ứng:** Tường Sniper
@@ -474,14 +514,14 @@ HP:3 | Dame:2 | Đạn:5. Tốc chậm. Giữ bắn tạo tường. Xuyên giả
 
   | Evo | Giá | Hiệu ứng |
   |---|---:|---|
-  | Tường Thép (`evo_sniper_1`) | $80 | Tường HP x5. Đạn Sniper đi qua tường phe mình KHÔNG bị giảm sát thương. |
+  | Tường Thép (`evo_sniper_1`) | $80 | Tường HP x5. Đạn Sniper đi qua tường phe mình KHÔNG bị giảm sát thương. Full Evo: tường dài & cứng hơn (HP x7), không tự mục, bất tử 2s đầu, đạn phe mình không làm hại tường. |
   | Xuyên Thủng (`evo_sniper_2`) | $100 | 25% đạn thành tia Raycast (chạm tường/chướng ngại vật sẽ thành đạn thường). |
 
 - **Mã nguồn:** `js/characters/sniper/logic.js`, `js/characters/sniper/render.js`, `js/characters/sniper/summons.js`
 
 ### 27. Bow (`cung`)
 
-HP:3 | Dame:0.5 | Đạn:3 | Tốc: Nhanh. Giữ nút kéo cung (đầy lực ~1.5s), nhả để bắn: Tăng sát thương/Tốc đạn. Nội tại Nhạy Bén: Tự né 1 lần đạn mỗi 8s (Full Evo 5s).
+HP:3 | Dame:0.5 | Đạn:3 | Tốc: Nhanh. Nhấp: bắn theo kiểu hiện tại. Giữ 0.5s: đổi kiểu — Tụ Lực (cung tự kéo, căng càng lâu mũi càng to/mạnh, nhịp chậm) / Liên Hoàn (loạt 5 mũi nhanh, dame thấp) / Bắn 3 Mũi (3 hướng, bay nhanh). Giữ 2.5s: NGẮM — hồng tâm đuổi địch & thu hẹp (tối đa 5s), nhả: Thiên Tiễn từ trời (khóa đỏ 0.5s, x2-x5 dame, hồi 8s). Nội tại Nhạy Bén: Tự né 1 đòn mỗi 8s.
 
 - **Chỉ số thực đầu hiệp:** HP 3 · Sát thương 0.5 · Đạn 3 · Tốc độ 4.38 · Kích thước 24×24
 - **Vật triệu hồi / hiệu ứng:** Mưa Tên
@@ -489,8 +529,8 @@ HP:3 | Dame:0.5 | Đạn:3 | Tốc: Nhanh. Giữ nút kéo cung (đầy lực ~1
 
   | Evo | Giá | Hiệu ứng |
   |---|---:|---|
-  | Xuyên Thủng (`evo_cung_1`) | $80 | Tụ >2s: Đạn xuyên qua mục tiêu nhưng giảm 50% dame. |
-  | Mưa Tên (`evo_cung_2`) | $120 | Tụ >3s: Tạo hồng tâm đuổi địch. Nhả bắn rơi Mưa Tên (CD: 10s). |
+  | Cung Thần (`evo_cung_1`) | $80 | Tụ Lực kéo nhanh hơn & nhịp nhanh hơn, căng tối đa thì Xuyên Thủng. Liên Hoàn: loạt 7 mũi. Bắn 3 Mũi -> 5 mũi tỏa. |
+  | Mưa Tên (`evo_cung_2`) | $120 | Thiên Tiễn kéo theo trận Mưa Tên trút xuống hồng tâm 1.5s. Hồi Ngắm 7s. FULL EVO (Vạn Tiễn): Mưa Tên phủ KHẮP bề ngang sân mỗi 12s (số mũi tăng theo dame), Ngắm hồi 5s, Nhạy Bén hồi 5s. |
 
 - **Mã nguồn:** `js/characters/cung/logic.js`, `js/characters/cung/render.js`, `js/characters/cung/summons.js`
 
@@ -598,7 +638,7 @@ HP:3.5 | Dame:1.3 | Đạn:2. Quét 180px -> Lao áp sát (cách 40px) -> Nón b
 
 ### 35. Sấm Chớp (`thunder`)
 
-HP:2 | Dame:1 | Đạn:0 (3 Lôi Phong Thương). Nhấp: Phóng thương cắm tường nổ AoE. Giữ 0.5-1s: Thu thương. Giữ >1s: Trảm Lôi. Lôi Minh: Raycast toàn map.
+HP:2 | Dame:1 | Đạn:0 (3 Lôi Phong Thương). Nhấp: Phóng thương cắm tường nổ AoE. Giữ 0.5-1s: Thu thương. Giữ >1s: Lôi Trảm (chém rộng ở từng cây thương, càng nhiều thương càng nhanh, tối đa 3s; xong được buff tốc chạy + sát thương ngắn & 1-3 thương rơi từ trời xuống địch, báo trước 3s). Mất hết thương: hồi lại sau 5s. Lôi Minh chỉ tích khi Thu thương, Lôi Trảm, hoặc thương phóng trúng địch. Thiên Kiếp (Lôi Minh 3/3): Nhấp = Lôi Độn (hóa sét lao tới, hút địch, chém nhanh, bất tử); kết thúc bằng Thiên Lôi Giáng (bay lên trời, lái vòng, giáng gây choáng).
 
 - **Chỉ số thực đầu hiệp:** HP 2 · Sát thương 1 · Đạn — (năng lượng riêng) · Tốc độ 5.92 · Kích thước 26×26
 - **Vật triệu hồi / hiệu ứng:** Lôi Phong Thương cắm đất
@@ -606,14 +646,14 @@ HP:2 | Dame:1 | Đạn:0 (3 Lôi Phong Thương). Nhấp: Phóng thương cắm 
 
   | Evo | Giá | Hiệu ứng |
   |---|---:|---|
-  | Phá Sấm (`evo_thun_1`) | $90 | Nổ tường & đòn chém xoay gây Choáng 1s. |
-  | Rẽ Mây (`evo_thun_2`) | $110 | Lôi Minh kéo dài 8s; Nhận 3 lần miễn nhiễm sát thương hoàn toàn. |
+  | Phá Sấm (`evo_thun_1`) | $90 | Nổ tường & Lôi Trảm gây Choáng 0.75s (1 lần mỗi chuỗi); càng gom nhiều thương, nhát Lôi Trảm chính càng to & mạnh; nhát chém cuối Lôi Độn gây Choáng 0.5s. Full Evo: Thiên Lôi Giáng để lại Lôi Vực & sét trời ngẫu nhiên đánh nửa sân địch mỗi 4-6s. |
+  | Rẽ Mây (`evo_thun_2`) | $110 | Mỗi nhát Lôi Trảm, mọi cây thương còn lại trên sân chém phụ (có cảnh báo, 1/2 sát thương). Thiên Kiếp kéo dài 8s & 3 lần miễn nhiễm sát thương. Full Evo: chém phụ = sát thương nhát chính. |
 
 - **Mã nguồn:** `js/characters/thunder/logic.js`, `js/characters/thunder/render.js`, `js/characters/thunder/summons.js`
 
 ### 36. Nam Châm (`magnet`)
 
-HP:4.5 | Dame:0.5 | Đạn:6. Đổi Cực Âm/Dương (+/-). Bắn cắm Cột Từ Trường. Hút/Đẩy kẻ địch nhiễm từ. Lướt Cực Tính đâm cột.
+HP:4.5 | Dame:0.5 | Đạn:6. Giữ: Đổi Cực Âm/Dương (+/-). Bắn cắm Cột Từ Trường (từ trường cực mạnh 2s đầu rồi yếu dần). Hút/Đẩy kẻ địch nhiễm từ. Nhấp đúp khi Cột/kẻ địch nhiễm từ phía trước KHÁC CỰC: Lướt Cực Tính lao thẳng tới húc như xe TANK, vừa hút mục tiêu về phía mình.
 
 - **Chỉ số thực đầu hiệp:** HP 6.5 · Sát thương 0.5 · Đạn 6 · Tốc độ 3.5 · Kích thước 34×34
 - **Vật triệu hồi / hiệu ứng:** Nút Từ Trường
@@ -621,8 +661,8 @@ HP:4.5 | Dame:0.5 | Đạn:6. Đổi Cực Âm/Dương (+/-). Bắn cắm Cột 
 
   | Evo | Giá | Hiệu ứng |
   |---|---:|---|
-  | Từ Trường Tăng Cường (`evo_mag_net_1`) | $90 | Hút gây 0.5 dame (x2); Lướt Cực Tính (Polar Dash) gây x2 dame. |
-  | Lưới Từ Cực (`evo_mag_net_2`) | $110 | Tối đa 3 Cột Từ Trường. |
+  | Từ Trường Tăng Cường (`evo_mag_net_1`) | $90 | Giật điện từ trường gây 0.5 dame (x2); Lướt Cực Tính: húc 1.5 dame, nổ cột 2 dame. |
+  | Lưới Từ Cực (`evo_mag_net_2`) | $110 | Tối đa 3 Cột Từ Trường, lực hút/đẩy x1.5. FULL EVO: 4 cột, bán kính từ trường lớn hơn, đảo cực giật kẻ địch lại gần. |
 
 - **Mã nguồn:** `js/characters/magnet/logic.js`, `js/characters/magnet/render.js`, `js/characters/magnet/summons.js`
 
@@ -717,7 +757,7 @@ HP:3 | Dame:1.2 | Đạn:3. Bắn phi kiếm. Mất khiên -> Tập Trung 3s (n�
 
 ### 43. Bình Phun (`sprayer`) 🆕
 
-HP:5 (+2 xe lớn) | Năng lượng. Nhấp: Bật/Tắt phun hình nón. Giữ 0.5s: đổi chất Lửa/Axit/Băng. Lớp phủ đầy 100% -> Nổ / Câm Lặng / Đóng Băng. Axit ăn mòn 2 dame/s mọi vật không phải body (thùng, xe tiền, triệu hồi, công trình). Vật cản chặn luồng phun.
+HP:5 (+2 xe lớn) | Năng lượng. Nhấp: Bật/Tắt phun hình nón. Giữ 0.5s: đổi chất Lửa/Axit/Băng. Lớp phủ đầy 100% -> Nổ / Câm Lặng / Đóng Băng. Axit ăn mòn mọi vật không phải body (thùng, xe tiền, triệu hồi, công trình): x10 dame + mất 50% Max HP mỗi giây hứng luồng; xe tiền/xe bị đốt nhanh gấp 3. Vật cản chặn luồng phun.
 
 - **Chỉ số thực đầu hiệp:** HP 7 · Sát thương 0 · Đạn — (năng lượng riêng) · Tốc độ 2.89 · Kích thước 34×34
 - **Vật triệu hồi / hiệu ứng:** Vũng Lửa / Axit / Băng (Evo 2)
@@ -732,7 +772,7 @@ HP:5 (+2 xe lớn) | Năng lượng. Nhấp: Bật/Tắt phun hình nón. Giữ 
 
 ### 44. Tùy Biến (`customize`) 🆕
 
-HP:6 | Dame:1.5 | Đạn:1. Xe lắp ghép: mỗi hiệp nhận Điểm Tùy Chỉnh để lắp Lối Bắn, Dạng Đạn, Tính Chất Đạn, Kích Thước. Thua liên tiếp nhận thêm điểm.
+HP:6 | Dame:1.5. Xe lắp ghép: mỗi hiệp nhận 2+ Điểm Tùy Chỉnh (thua / chuỗi thua nhận thêm) để lắp & nâng cấp Lối Bắn (Tap, Loạt, Shotgun, SMG, Tích Tụ, Tiến Công), Dạng Đạn, Tính Chất (Nổ, Xuyên, Chí Mạng, Hút Máu, Song Nòng, Vũng...), Kích Thước và Chỉ Số nâng mãi.
 
 - **Chỉ số thực đầu hiệp:** HP 6 · Sát thương 1.5 · Đạn 4 · Tốc độ 3.5 · Kích thước 30×30
 - **Vật triệu hồi / hiệu ứng:** Vũng hiệu ứng theo mô-đun
@@ -740,8 +780,8 @@ HP:6 | Dame:1.5 | Đạn:1. Xe lắp ghép: mỗi hiệp nhận Điểm Tùy Ch�
 
   | Evo | Giá | Hiệu ứng |
   |---|---:|---|
-  | Gói VIP (`evo_cu_1`) | $80 | Mở thêm mô-đun: Đạn Tự Ngắm, Đạn Hút (kéo đối thủ), Nảy Tường (+sát thương mỗi lần nảy). |
-  | Cá Nhân Hóa (`evo_cu_2`) | $110 | Mọi hiệu ứng lắp ghép mạnh hơn 30%. +1 Điểm Tùy Chỉnh mỗi hiệp. FULL EVO: chọn 1 Nội Tại Độc Quyền. |
+  | Gói VIP (`evo_cu_1`) | $80 | Mọi mô-đun đã lắp lên +1 cấp ngay, +2 Điểm Tùy Chỉnh, cấp tối đa +1. Mở mô-đun VIP: Tự Ngắm, Đạn Hút (kéo & làm chậm), Nảy Tường (bắn chéo, +dame mỗi lần nảy). |
+  | Cá Nhân Hóa (`evo_cu_2`) | $110 | Nổ, Vũng, Hút Máu, Đạn Hút, Nảy Tường, Tiến Công mạnh hơn 30%. +1 Điểm Tùy Chỉnh mỗi hiệp. FULL EVO: chọn miễn phí 1 Nội Tại Độc Quyền (Hồi Sinh, Vô Ảnh, Tập Trung, Phản Lực). |
 
 - **Mã nguồn:** `js/characters/customize/logic.js`, `js/characters/customize/render.js`
 
@@ -759,6 +799,188 @@ HP:4 | Dame:1 | Đạn:5 | Tốc: 1.1x. Ngũ Hành: mỗi phi kiếm mang 1 nguy
   | Ngũ Hành Giao Thoa (`evo_ks_2`) | $120 | 2 phi kiếm liên tiếp tạo phản ứng: Đồng nguyên tố / Tương sinh / Tương khắc (15 phản ứng). FULL EVO: mỗi phát kèm 2 kiếm hộ tống, phản ứng mạnh hơn. |
 
 - **Mã nguồn:** `js/characters/kiem_su/logic.js`, `js/characters/kiem_su/render.js`
+
+### 46. Cao Bồi (`revolver`)
+
+HP:3.5 | Dame:1.25 | Đạn:6 (ổ cố định) | Tốc: 1.2x. "6 viên là đủ!" Chỉ nạp khi bắn cạn cả ổ (1.8s). Nhấp: đạn xuyên thủng; viên thứ 6 là đạn đồng x2 dame, xuyên khiên. Giữ 0.4s: Quạt Cò — khóa hồng tâm 1s rồi xả hết ổ (0.1s/viên).
+
+- **Chỉ số thực đầu hiệp:** HP 3.5 · Sát thương 1.25 · Đạn 6 · Tốc độ 4.2 · Kích thước 26×26
+- **Tiến hoá:**
+
+  | Evo | Giá | Hiệu ứng |
+  |---|---:|---|
+  | Đạn Độc Đắc (`evo_rev_1`) | $90 | Viên 1-5 có 50% Nổ khi trúng đích. Viên thứ 6 luôn Nổ lớn và gây Choáng. |
+  | Rút Súng Thần Tốc (`evo_rev_2`) | $110 | Nạp ổ còn 0.9s. Bắn điểm xạ trúng 6/6 -> hồi đầy ổ ngay + 1 dame cho ổ kế tiếp. Quạt Cò trúng >= 50% -> hồi đầy ổ. FULL EVO: Ổ Đạn Ngũ Sắc (viên 1-2 Chậm, 3-4 Chảy Máu, 5 Choáng 0.3s, 6 Chí Mạng x2.5), nạp nhanh hơn nữa, Quạt Cò Song Lục (gấp đôi đạn) & mọi đạn quạt đều Xuyên Thấu. |
+
+- **Mã nguồn:** `js/characters/revolver/logic.js`, `js/characters/revolver/render.js`
+
+### 47. DJ (`dj`)
+
+HP:4 | Dame:0.75 | Đạn:2 (∞ khi đúng nhịp) | Tốc: 1.15x. "Lắng nghe nhịp điệu nào!" Nút Bắn đổi màu theo nhịp Xanh -> Vàng -> Đỏ: bấm lúc ĐỎ (vùng rộng, dễ bấm trên điện thoại) = Cảm Âm Hoàn Hảo (sóng âm rộng, không tốn đạn, làm chậm, +1 Combo). Bấm lúc VÀNG = vẫn bắn sóng âm nhưng KHÔNG cộng Combo. Bấm sai = Loạn Âm (đứt combo, nửa dame, tốn đạn). Để nốt trôi qua vùng mà không bấm = LỠ NHỊP: mất phát bắn (tốn 1 đạn) & đứt Combo. Hết đạn khóa 1.5s. Giữ 0.4s: đổi bản nhạc Dễ (nốt chậm, thưa, Hoàn Hảo rất dễ) / Trung Bình (vừa phải, thỉnh thoảng Nốt Đôi: bấm 2 lần liên tiếp) / Khó (nhanh, cho người đã luyện). Combo tăng tốc & dame; mỗi 30 combo +1 Khiên, mỗi 45 combo +1 HP.
+
+- **Chỉ số thực đầu hiệp:** HP 4 · Sát thương 0.75 · Đạn 2 · Tốc độ 4.02 · Kích thước 28×28
+- **Tiến hoá:**
+
+  | Evo | Giá | Hiệu ứng |
+  |---|---:|---|
+  | Cảm Âm Dung Sai (`evo_dj_1`) | $90 | Được bấm sai / lỡ nhịp tối đa 3 lần mới mất chuỗi Combo. Hồi lại đủ 3 lượt bảo hộ sau mỗi 30 Combo. |
+  | Giai Điệu Thăng Hoa (`evo_dj_2`) | $120 | Sóng Âm mở khóa theo Combo: 15 Xuyên Thấu, 30 Phát Nổ, 60 để lại Vùng Âm Nhiệt (thiêu đốt + làm chậm), 120 hóa tia Hitscan. FULL EVO: vào hiệp sẵn 30 Combo, bấm chuẩn Combo x2, buff mạnh hơn; sai 6 lần, lần thứ 6 tự đánh chuẩn; 2 Loa nổi bắn sóng phụ mỗi nhịp; mở Bản Nhạc Huyền Thoại (rất nhanh, dày đặc Nốt Đôi - thử thách cực hạn). |
+
+- **Mã nguồn:** `js/characters/dj/logic.js`, `js/characters/dj/render.js`
+
+### 48. Móc Thép (`steel_hook`)
+
+HP:3 (+3 xe lớn) | Dame:2 | Đạn:1 | Chậm. Móc lắc trái-phải ±70° trước mũi xe. Giữ Bắn tụ lực 4 mốc (+2 lần nảy mỗi mốc, tối đa 9), nhả để phóng xích nảy tường; giữ càng lâu móc bay càng nhanh (đi hết đường xích trong 1.25s -> 0.5s). Xuyên & phá hòm, 2 dame lên triệu hồi/công trình, ghim Xe Tiền làm trụ phản xạ (hết lượt nảy: ngoạm & spam Bắn để kéo về ăn tiền). Móc dừng: Bắn lần nữa -> Đu Dây Đột Kích (lao theo xích húc mọi thứ, nổ 2 dame) hoặc Lôi Xích Hành Hình nếu trúng địch (kéo địch ngược đường xích, +1 dame mỗi vật bị đập, nổ 2 dame). Móc đã neo: giữ Bắn 0.75s để tự cắt xích và phóng lại. Đầu móc có máu = 50% máu xe: bắn trúng sẽ đứt xích.
+
+- **Chỉ số thực đầu hiệp:** HP 6 · Sát thương 2 · Đạn 1 · Tốc độ 2.98 · Kích thước 36×36
+- **Tiến hoá:**
+
+  | Evo | Giá | Hiệu ứng |
+  |---|---:|---|
+  | Tời Thủy Lực (`evo_hook_1`) | $125 | Đu dây & kéo nhanh hơn. Tụ lực tối đa 15 lần nảy (mạng nhện xích kín bản đồ). |
+  | Quặp Sắt Trọng Lực (`evo_hook_2`) | $150 | Đầu móc to gấp rưỡi. Va đập khi kéo địch x2 (+2 dame/vật thể). Mỗi 7s móc phụ tự quặp Xe Tiền/vật thể trên sân rồi ném thẳng vào địch gây nổ lớn. FULL EVO: x2 Máu tối đa, đầu móc máu 100%, tối đa 17 lần nảy, mỗi lần phóng 3 móc cùng lúc (2 móc phụ chỉ có 25% máu, dễ bắn đứt hơn). |
+
+- **Mã nguồn:** `js/characters/steel_hook/logic.js`, `js/characters/steel_hook/render.js`
+
+### 49. Hoa Ảnh (`flower_shadow`)
+
+"Khiêu vũ nào!" HP:3 | Dame:0.5 | Thanh Hoa 100% (hồi sau 0.5s không múa) | Tốc: 1.35x. Giữ Bắn 0.25s đổi Vũ Điệu Khai → Phá → Thiên, nhấp để múa. KHAI (10%): 3 cánh hoa bay tới cuối sân, nghỉ 3s rồi trôi về (gây dame, mỗi cánh về tới hoàn 5%); tối đa 12 cánh trên sân. Cánh bay ra / thu về chạm vật cản, công trình, triệu hồi, xe tiền thì gây dame rồi vỡ; cánh đang nằm trên sân địch bị xe địch lăn qua sẽ nát. PHÁ (25%): lướt xuyên thẳng tới cuối sân rồi về, 1s sau mọi mục tiêu bị xuyên chịu 5 nhát chém. THIÊN (50%): biến mất, lái Vòng Cảnh Báo (hút & làm chậm) tối đa 5s, nhấp để đáp: vòng khóa đỏ 0.5s rồi giáng 2.7 dame + choáng 1.5s. Tiêu hao 75% Hoa: vũ điệu kế tiếp được Cường Hóa (Bách Hoa Nở Rộ: cánh hoa hồng nhạt ánh kim, không thể bị chặn hay đè nát, xuyên vật cản cả lượt bay ra lẫn lượt thu về), đòn cường hóa không tính vào bộ đếm và bộ đếm về 0 sau đó.
+
+- **Chỉ số thực đầu hiệp:** HP 3 · Sát thương 0.5 · Đạn — (năng lượng riêng) · Tốc độ 4.73 · Kích thước 24×24
+- **Tiến hoá:**
+
+  | Evo | Giá | Hiệu ứng |
+  |---|---:|---|
+  | Hoa Ảnh Song Hành (`evo_flw_1`) | $100 | Thanh Hoa hồi nhanh hơn mạnh. Tối đa 24 cánh Khai trên sân. Kho Hoa mở rộng 200% (phần trên 100% chỉ nạp được bằng thu hồi cánh hoa). Bách Hoa Nở Rộ chỉ cần tiêu hao 50% Hoa. 1 Bóng Hoa đi theo đường cũ của bạn, lặp lại Vũ Điệu bạn vừa múa sau 3 giây. |
+  | Hương Sắc Tuyệt Trần (`evo_flw_2`) | $120 | Khai: cánh hoa nằm nghỉ tỏa phấn làm chậm. Phá: chém nát đạn thường của địch trên đường lướt. Thiên: hút & làm chậm mạnh hơn, +1 dame. FULL EVO: không giới hạn cánh Khai, cánh nằm nghỉ 2s rồi thu về, Kho Hoa tự hồi tới 200% và thu hồi cánh nạp được tới 300%, cánh bay ra xuyên vật cản (lượt thu về vẫn bị chặn), Bách Hoa Nở Rộ trọn vẹn (Khai 5 cánh x1.5, Phá 2 bản sao, Ngôi Sao Trảm 2s); hoa rơi khắp màn hình, định kỳ hoa tự ngắm lao vào địch, mọi Vũ Điệu mạnh hơn, thêm Bóng Hoa thứ hai trễ 5s. |
+
+- **Mã nguồn:** `js/characters/flower_shadow/logic.js`, `js/characters/flower_shadow/render.js`
+
+### 50. Kiếm Vũ (`kiem_vu`)
+
+HP:1.5 | Dame:1.5 | Đạn:1 (Bản Mệnh Kiếm). Nhấp: phóng kiếm tới trục X của địch rồi cắm xuống; nhấp lần 2: thu kiếm về (dame cả 2 lượt). Chỉ phóng được khi kiếm trên tay hoặc đã thu về nửa sân mình (đang bay về mà qua giữa sân -> nhấp để phóng lại ngay). Đứng yên tích Tâm Định (chỉ hồi sau 1.25s không dùng kỹ năng / tiêu Tâm Định): trúng đòn khi đứng yên (≥25%) -> phản đạn & Tập Trung 0.5s (đạn tiếp theo tự phản). Phản đạn tích Sát Ý; đầy 100% -> Tâm Kiếm hitscan xuyên Khiên & Tường.
+
+- **Chỉ số thực đầu hiệp:** HP 1.5 · Sát thương 1.5 · Đạn ∞ · Tốc độ 3.5 · Kích thước 28×28
+- **Tiến hoá:**
+
+  | Evo | Giá | Hiệu ứng |
+  |---|---:|---|
+  | Tâm Nhãn (`evo_kv_1`) | $100 | Tâm Định đầy nhanh hơn (0.8s, vẫn chờ 1.25s sau khi dùng kỹ năng), +50% Sát Ý mỗi lần phản đạn. Bản Mệnh Kiếm cắm trên sân địch tỏa kiếm khí làm chậm đối thủ đi ngang qua. |
+  | Lưu Thủy Phản Chiếu (`evo_kv_2`) | $120 | Tập Trung kéo dài 1.0s. Đạn phản bay thẳng chuẩn xác về phía địch. Vẫn điều khiển Bản Mệnh Kiếm khi đang Tập Trung. FULL EVO (Vạn Kiếm Quy Tâm): kiếm bay nhanh hơn, dame x1.15 + Chảy Máu; đi ngang chậm khi Tập Trung; mỗi 5 lần Điều Kiếm, lần kế tiếp triệu hồi 4 Kiếm Phụ tấn công rồi tự thu về. |
+
+- **Mã nguồn:** `js/characters/kiem_vu/logic.js`, `js/characters/kiem_vu/render.js`
+
+### 51. T-Zero (`t_zero`)
+
+HP:6 (+2 xe lớn) | Dame:1 | Năng Lượng | Tốc: 0.9x. "Hệ Thống KÍCH HOẠT: T-ZERO ON". Giữ nhẹ Bắn 0.25s đổi Thiết Luật: THỦ (ném Khiên Boomerang 5% NL; khiên trên tay phản đạn địch 15%+dame×10% NL) -> CÔNG (tăng tốc & dame, lao đấm như Xe TANK 10% NL) -> THIÊN LUẬT THỨC (bay lên 25% NL, duy trì 9%/s và GẤP ĐÔI mỗi 2.5s bay, không thể bị bắn, tự dội pháo; nhấp lần nữa -> tâm ngắm KHÓA 0.5s rồi đáp xuống nổ choáng; đáp xong chờ 2.5s mới bay lại). Mỗi lần tiêu hao khóa hồi NL 1s.
+
+- **Chỉ số thực đầu hiệp:** HP 8 · Sát thương 1 · Đạn — (năng lượng riêng) · Tốc độ 3.15 · Kích thước 34×34
+- **Tiến hoá:**
+
+  | Evo | Giá | Hiệu ứng |
+  |---|---:|---|
+  | Năng Lượng Xanh (`evo_tzero_1`) | $90 | Hồi NL nhanh hơn mạnh (sau 1s nghỉ). Giảm mọi tiêu hao: Ném khiên 3%, Phản đạn 10% + dame×7%, Đấm 7%, Bay lên 18% và duy trì 6%/s (vẫn gấp đôi mỗi 2.5s bay). |
+  | Trạng Thái Hủy Diệt (`evo_tzero_2`) | $120 | THỦ: khiên to & nhanh hơn, để lại vệt điện làm chậm. CÔNG: cú đấm tạo sóng xung kích nổ lan phía trước & phá đạn địch trên đường lao. THIÊN: dội pháo dày hơn, đáp xuống để lại vùng từ trường đốt máu & hút địch. FULL EVO: định kỳ phóng tên lửa tầm nhiệt bay RẤT chậm, rẽ nhẹ (né được; đạn địch bắn hạ được) và tên lửa KHÔNG KÍCH vút lên trời, hiện ra ở cạnh trái/phải mục tiêu rồi bay chậm dọc làn tới vòng cảnh báo (2s, thấy rõ đường bay) mới cắm xuống; THỦ: khi khiên đang bay tự xả Tiểu Liên (1% NL/s). |
+
+- **Mã nguồn:** `js/characters/t_zero/logic.js`, `js/characters/t_zero/render.js`
+
+### 52. Raven - Oca (`raven_oca`)
+
+"Cuộc săn bắt đầu, Oca tìm chúng!" HP:4 | Dame:0.5 (Tiểu Liên) / 4 (Sniper) | Đạn:10 / 4 | Tốc: 3.8. Giữ Bắn 0.4s đổi súng (hồi 4s). TIỂU LIÊN: nhấp xả loạt 3 viên; đổi sang -> lướt ngang. SNIPER: nhấp -> đứng yên ngắm 0.4s rồi bắn đạn cực nhanh; đổi sang -> thả Bom Khói 2s (đứng trong khói né mọi đạn). OCA (máu = 50% Raven, tự hồi sinh): khi cầm Tiểu Liên thì tàng hình, định kỳ lao cắn địch gây dame + làm chậm; khi cầm Sniper thì bay cao đánh dấu radar -> đạn Sniper tự khóa mục tiêu, xuyên vật thể & bay nhanh hơn.
+
+- **Chỉ số thực đầu hiệp:** HP 4 · Sát thương 0.5 · Đạn 10 · Tốc độ 3.8 · Kích thước 26×26
+- **Tiến hoá:**
+
+  | Evo | Giá | Hiệu ứng |
+  |---|---:|---|
+  | Chiến Thuật Đặc Nhiệm (`evo_raven_1`) | $100 | Đạn Răng Cưa: mọi viên đạn (cả 2 súng) gây Chảy Máu. Khói Đặc Quánh: Bom Khói +2s (4s). Bộ Pháp Xung Kích: cầm Tiểu Liên tăng mạnh tốc độ. Thay Đạn Tức Thì: đổi súng là nạp đầy băng súng mới. |
+  | Hỏa Lực Không Kích (`evo_raven_2`) | $120 | Oca máu 80% Raven & định kỳ hiện vòng cảnh báo đỏ rồi thả Bom xuống địch. Tiểu Liên xả loạt 5 viên, băng 15. Sniper bay nhanh hơn, mạnh hơn & gây Trọng Thương: máu bị mất do Sniper không thể hồi trong 10s. FULL EVO: Oca Bất Tử (không bị tiêu diệt, không chặn đạn), đổi súng hồi 2s, Oca vừa lao cắn làm chậm vừa thả mưa bom liên hoàn vừa giữ khóa mục tiêu vĩnh viễn cho cả 2 súng. |
+
+- **Mã nguồn:** `js/characters/raven_oca/logic.js`, `js/characters/raven_oca/render.js`
+
+### 53. Tia Lazer (`lazer_beam`)
+
+HP:3 | Dame:0.2/tick (6 tick/s) | Năng Lượng | Tốc: 3.8. Giữ Bắn: tích tụ 0.5s -> cảnh báo 0.5s -> chiếu tia liên tục (chậm khi chiếu, tụt Năng Lượng; nghỉ 0.5s mới hồi). Tường Sniper địch chặn tia.
+
+- **Chỉ số thực đầu hiệp:** HP 3 · Sát thương 0.2 · Đạn — (năng lượng riêng) · Tốc độ 3.8 · Kích thước 28×28
+- **Tiến hoá:**
+
+  | Evo | Giá | Hiệu ứng |
+  |---|---:|---|
+  | Năng Lượng Xanh (`evo_beam_1`) | $40 | Tích tụ khởi động chỉ 0.125s. Chiếu tia tiêu hao chậm hơn, hồi Năng Lượng nhanh hơn. |
+  | Khuếch Đại Nhiệt Quang (`evo_beam_2`) | $90 | Tia phình rộng dần khi chiếu lâu. Trúng liên tục -> sát thương tăng tiến (tới x2.5) & Thiêu Đốt. FULL EVO: Quá Tải Quang Học — không còn giảm tốc khi chiếu; mỗi 2s chiếu liên tục phóng thêm 1 Tia Bùng Nổ (1.5 dmg). |
+
+- **Mã nguồn:** `js/characters/lazer_beam/logic.js`, `js/characters/lazer_beam/render.js`
+
+### 54. Y Sư (`healer`)
+
+HP:3.5 | Dame:0.75 | Đạn:4 | Tốc: 3.5. "Hồi Phục": 3s không mất máu +0.5 HP. Đạn Hấp Huyết +0.25 HP (hồi 20s). Mọi lượng máu được hồi nạp Năng Lượng Sinh Mệnh -> đầy: phát kế tiếp là Đạn Cường Hóa (50% MaxHP + dame, nổ lan).
+
+- **Chỉ số thực đầu hiệp:** HP 3.5 · Sát thương 0.75 · Đạn 4 · Tốc độ 3.5 · Kích thước 30×30
+- **Tiến hoá:**
+
+  | Evo | Giá | Hiệu ứng |
+  |---|---:|---|
+  | Hồi Phục Vượt Ngưỡng (`evo_heal_1`) | $90 | Đầy máu: lượng hồi dư chuyển thành Giáp Trắng (tối đa 4 + 50% MaxHP), đỡ đòn trước máu. Đạn Cường Hóa mạnh hơn (65% MaxHP, nổ lan 30%). |
+  | Nghịch Lý Y Đạo (`evo_heal_2`) | $110 | Mỗi lần được hồi máu (mọi nguồn, kể cả vào Giáp Trắng) phóng 1 Tia Xung tự ngắm gây dame = lượng vừa hồi. Giảm Năng Lượng cần cho Đạn Cường Hóa. FULL EVO: Bất Tử Y Thần — Tái Tạo nhanh gấp đôi (1.5s); đạn gắn ấn Kháng Hồi Phục 5s: địch hồi máu bị cướp sang bạn; Đạn Cường Hóa = 100% MaxHP + dame. |
+
+- **Mã nguồn:** `js/characters/healer/logic.js`, `js/characters/healer/render.js`
+
+### 55. Chrono & Neo (`chrononeo`)
+
+"Hai thời đại, một dòng chảy!" HP:4.5 | Dame:1 | Đạn:3 (Chrono) / 8 (Neo) | Tốc: 3.3. THAM FARM: phá thùng, xe tiền, triệu hồi địch & qua mỗi hiệp -> băng đạn tăng vĩnh viễn (Chrono 3->7, Neo 8->14). Giữ Bắn 0.4s đổi thế (hồi 6s), 2 băng riêng (băng kia tự nạp ngầm). CHRONO: đạn đồng x1.5 xuyên vật cản, Xé Giáp; vào thế -> sóng đẩy lùi + giảm 25% sát thương 1.5s. NEO: nhấp bắn 2 viên x0.75, nhanh hơn; vào thế -> lướt ngang +40% tốc 1.5s. THỜI KHẮC: giữ 1 thế 4s -> phát kế tiếp cường hóa: Chrono radar khóa mọi mục tiêu & xả cả băng đạn tự tìm (không thể cản phá); Neo chùm 6-8 viên hình nón (Xé Giáp, chậm 35%) + Ảnh Chiếu bất tử 5s tự bắn.
+
+- **Chỉ số thực đầu hiệp:** HP 4.5 · Sát thương 1 · Đạn 3 · Tốc độ 3.3 · Kích thước 28×28
+- **Tiến hoá:**
+
+  | Evo | Giá | Hiệu ứng |
+  |---|---:|---|
+  | Bước Thời Gian (`evo_cn_1`) | $100 | Thời Khắc chỉ cần giữ thế 2.5s. Đổi Thế Hoàn Hảo: đổi thế trong 3s sau đòn Thời Khắc -> băng thế mới nạp đầy ngay; nếu đang có Ảnh Chiếu -> hoán đổi vị trí với nó. |
+  | Dòng Chảy Hội Tụ (`evo_cn_2`) | $120 | Đầu hiệp +2 đạn Chrono / +3 đạn Neo; điểm Thời Đại từ thùng & xe tiền x2. Liên Xạ +2 viên, viên cuối nổ choáng 0.5s. Mưa Đạn bắn 2 đợt, Ảnh Chiếu 8s bắn đạn làm chậm. FULL EVO: Liên Hoa Thời Gian — băng tối đa ngay (7/14), đổi thế hồi 4s; Phân Thân Nghịch Đảo (AI cầm thế ngược trên làn bạn, đổi thế đồng bộ kèm hiệu ứng); cứ 2 lần Thời Khắc -> 2.5s bão đạn Liên Hoa rồi 3 cột đại pháo Nở Rộ (có cảnh báo, có khe để né). |
+
+- **Mã nguồn:** `js/characters/chrononeo/logic.js`, `js/characters/chrononeo/render.js`
+
+### 56. Gemini (`gemini`)
+
+"Hai cá thể, một ý thức!" HP:3.5 x2 xe | Dame:0.75 | Đạn:4 | Tốc: 3.6. Làn của bạn có thêm Bản Sao AI (chỉ số 100% như bạn, kể cả module chân) tự né đạn, phá thùng/xe tiền & bắn địch. Về 0 HP -> GỤC: đồng đội đứng trong Vòng Cứu 2s để hồi sinh 50% HP (rời vòng >1s thanh tụt; mỗi lần cứu thời gian x2). Chỉ thua khi CẢ HAI cùng gục. Giữ Bắn 0.4s: Chuyển Giao Ý Thức — đổi quyền điều khiển sang xe kia (hồi 3s).
+
+- **Chỉ số thực đầu hiệp:** HP 3.5 · Sát thương 0.75 · Đạn 4 · Tốc độ 3.6 · Kích thước 26×26
+- **Tiến hoá:**
+
+  | Evo | Giá | Hiệu ứng |
+  |---|---:|---|
+  | Liên Kết Thần Kinh (`evo_gem_1`) | $90 | AI phối hợp: giữ giãn cách tránh nổ lan, bắn ép góc, ưu tiên chạy lại cứu bạn (bám vòng cứu). Chuyển Giao hồi chỉ 1.2s; thanh cứu không bị tụt khi rời vòng. Vòng cứu rộng +50%; lần cứu đầu tiên mỗi hiệp chỉ 1s và không tính nhân đôi. |
+  | Đệ Quy Vô Tận (`evo_gem_2`) | $120 | Cả 2 xe tăng dần tốc chạy & tốc bắn theo thời gian giao tranh; mỗi hiệp đã qua cộng dồn +0.25 MaxHP, +6% dame, đạn to hơn (tối đa 8 tầng). Sau Chuyển Giao: 1s cả 2 xe +50% tốc chạy, x1.8 tốc bắn, x1.3 dame. FULL EVO: Siêu Trí Tuệ Song Hành — AI tối thượng (tự cân đối cứu / kết liễu); lần gục đầu tiên của mỗi xe tự khởi động lại, các lần sau thanh cứu tự tăng tới 99% (chạm là dậy); 0.5s sau Chuyển Giao mọi đạn của 2 xe tự khoá mục tiêu. |
+
+- **Mã nguồn:** `js/characters/gemini/logic.js`, `js/characters/gemini/render.js`
+
+### 57. Huyết Ma (`blood_lord`)
+
+"Máu = sức mạnh!" HP:3 | Dame:0.25 | Đạn:6 (nghỉ 0.5s mới hồi) | Tốc: 4.0. BỂ MÁU (tối đa MaxHP x2): tăng khi bạn hồi máu, đánh trúng địch hoặc BẤT KỲ mục tiêu nào trên sân mất máu; 8s yên ổn -> rút ra hồi HP (3 Bể Máu = 1 HP). Kỹ năng tốn máu chỉ dùng được khi trừ xong vẫn còn >= 0.5 HP (THIẾU MÁU -> nút xám). Giữ Bắn 0.25s xoay 4 dạng: ĐẠN MÁU (1 đạn) | HUYẾT PHÁ (2 đạn + 1 HP): hóa dơi bất tử lao thẳng lên, chạm mục tiêu -> Bầy Dơi 2s rồi giật về (kẻ địch đứng trong đủ 2s -> +1.5 HP) | HUYẾT TIỄN (3 đạn + 1 HP): cảnh báo rồi tia máu xuyên dọc sân | HUYẾT CẦU (toàn bộ đạn + toàn bộ Bể Máu): cầu máu xuyên mọi thứ, nổ ở biên đối diện; từ 50% Bể Máu trở lên cầu to & mạnh và mở BÓNG MA MÀN ĐÊM: lần bắn kế tiếp bay lên trời (không thể bị nhắm), lái vòng cảnh báo, bấm để đáp -> hóa thành Đại Tiệc Máu 3s (ẩn, không thể bị nhắm) rồi về chỗ cũ; chỉ hồi HP (không nạp Bể Máu) và khóa tích Bể Máu 5s.
+
+- **Chỉ số thực đầu hiệp:** HP 3 · Sát thương 0.25 · Đạn 6 · Tốc độ 4 · Kích thước 28×28
+- **Tiến hoá:**
+
+  | Evo | Giá | Hiệu ứng |
+  |---|---:|---|
+  | Huyết Ảnh Đào Thoát (`evo_bd_1`) | $90 | Tích Bể Máu nhanh hơn (x1.4). Khi nhận sát thương chí tử: hóa dơi dịch chuyển sang vị trí khác, Bất Tử 2s và hồi ngay 50% Bể Máu (1 lần/hiệp). |
+  | Huyết Thể Cường Hóa (`evo_bd_2`) | $120 | +4 Max HP (Bể Máu x2 theo). Kỹ năng mạnh hơn x1.25, chỉ tốn 0.5 HP. Tự hồi máu sau 6s với tỉ lệ 2.5 Bể Máu = 1 HP. FULL EVO: Huyết Tổ Bất Diệt — thêm +2 Max HP, kỹ năng x1.5, chỉ tốn 0.25 HP, tích Bể Máu x2 (kẻ địch hồi máu cũng nạp); Đào Thoát hồi 100% Bể Máu; tự hồi sau 4s (2 Bể Máu = 1 HP); Đại Tiệc Máu không khóa tích Bể Máu sau khi tan; HỒI SINH tại chỗ 1 lần/trận khi chết lúc Bể Máu đầy. |
+
+- **Mã nguồn:** `js/characters/blood_lord/logic.js`, `js/characters/blood_lord/render.js`
+
+### 58. Cuồng Chiến Binh (`berserker`)
+
+"Càng đau càng mạnh!" HP:6 | Dame:0.25 | Đạn: Vô hạn | Tốc: 4.2. CUỒNG CHIẾN (mốc thay thế nhau theo % Max HP): <=75%: +15% tốc bắn, -10% st nhận, +8% tốc chạy, +15% dame | <=50%: +30%/-20%/+15%/+30% và mở SẤY LIÊN THANH (giữ bắn càng lâu càng nhanh, toả tới 28° sau 1.5s) | <=25%: +50%/-30%/+25%/+50%. Trên 50% HP: bắn nhấp. ĐÁNH TRẢ: nhận >=0.25 st (kể cả mất Khiên) -> +25% tốc chạy 1.5s, +12 Huyết Chiến, viên kế tiếp thành HUYẾT ĐẠN (16x16, x3 dame). HUYẾT CHIẾN (0-100, +4 mỗi phát trúng): đầy mà nhận đòn chí tử -> không chết, khoá máu, giải khống chế; sát thương x10 trừ vào thanh, -12/s, +2 mỗi phát trúng, ngoài vùng an toàn của Bo -40/s; luôn mốc <=25% +35% tốc bắn, +20% tốc chạy, +30% dame. Hết thanh -> chết.
+
+- **Chỉ số thực đầu hiệp:** HP 6 · Sát thương 0.25 · Đạn ∞ · Tốc độ 4.2 · Kích thước 30×30
+- **Tiến hoá:**
+
+  | Evo | Giá | Hiệu ứng |
+  |---|---:|---|
+  | Khát Máu Cực Hạn (`evo_bers_1`) | $90 | Cuồng Chiến mạnh x1.5 (giảm st nhận tối đa 45%). Tích Huyết Chiến nhanh hơn 25%. Vừa vào Huyết Chiến: thanh giữ nguyên 100 (không tụt, không bị trừ) trong 1s đầu. |
+  | Đấu Trường Huyết Địa (`evo_bers_2`) | $110 | Khi Huyết Chiến: dựng 2 bức tường biên (vùng 260px quanh xe). Cả 2 xe không thể đi/lướt ra ngoài; Cổng Không Gian không thể mở cổng hay xuyên ra ngoài. FULL EVO: Chiến Thần Bất Tử — Cuồng Chiến x1.8 (tối đa -50% st), giữ thanh 1.5s, vùng 220px & làm chậm địch 25%; TÀN HƠI CUỐI CÙNG: hết Huyết Chiến không chết mà còn 0.5 HP (tối đa 2 lần/hiệp), sau đó mỗi phát trúng chỉ +1 Huyết Chiến. |
+
+- **Mã nguồn:** `js/characters/berserker/logic.js`, `js/characters/berserker/render.js`
 
 ## Phụ lục: cơ chế các body mới
 
