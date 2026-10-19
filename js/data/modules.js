@@ -259,15 +259,15 @@ const MODULES = {
         {
             id: 'healer',
             name: 'Y Sư',
-            desc: 'HP:5 | Dame:0.75 | Đạn:4 | Tốc: 3.5. "Hồi Phục": 3s không mất máu +0.5 HP. Đạn Hấp Huyết +0.25 HP (hồi 20s). Mọi lượng máu được hồi nạp Năng Lượng Sinh Mệnh -> đầy: phát kế tiếp là Đạn Cường Hóa (50% MaxHP + dame, nổ lan).',
+            desc: 'HP:3.5 | Dame:0.75 | Đạn:4 | Tốc: 3.5. "Hồi Phục": 3s không mất máu +0.5 HP. Đạn Hấp Huyết +0.25 HP (hồi 20s). Mọi lượng máu được hồi nạp Năng Lượng Sinh Mệnh -> đầy: phát kế tiếp là Đạn Cường Hóa (50% MaxHP + dame, nổ lan).',
             type: 'body', role: ['Sinh Tồn', 'Kiểm Soát'],
             size: { w: 30, h: 30 },
-            stats: { hp: 5, dmg: 0.75, ammo: 4, speedMult: 1.0 }
+            stats: { hp: 3.5, dmg: 0.75, ammo: 4, speedMult: 1.0 }
         },
         {
             id: 'chrononeo',
             name: 'Chrono & Neo',
-            desc: '"Hai thời đại, một dòng chảy!" HP:4.5 | Dame:1 | Đạn:4 (Chrono) / 10 (Neo) | Tốc: 3.3. THAM FARM: phá thùng, xe tiền, triệu hồi địch & qua mỗi hiệp -> băng đạn tăng vĩnh viễn (Chrono 4->10, Neo 10->20). Giữ Bắn 0.4s đổi thế (hồi 4s), 2 băng riêng (băng kia tự nạp ngầm). CHRONO: đạn đồng x1.5 xuyên vật cản, Xé Giáp; vào thế -> sóng đẩy lùi + giảm 25% sát thương 1.5s. NEO: nhấp bắn 2 viên x0.75, nhanh hơn; vào thế -> lướt ngang +40% tốc 1.5s. THỜI KHẮC: giữ 1 thế 4s -> phát kế tiếp cường hóa: Chrono radar khóa mọi mục tiêu & xả cả băng đạn tự tìm (không thể cản phá); Neo chùm 8-12 viên hình nón (Xé Giáp, chậm 35%) + Ảnh Chiếu bất tử 5s tự bắn.',
+            desc: '"Hai thời đại, một dòng chảy!" HP:4.5 | Dame:1 | Đạn:3 (Chrono) / 8 (Neo) | Tốc: 3.3. THAM FARM: phá thùng, xe tiền, triệu hồi địch & qua mỗi hiệp -> băng đạn tăng vĩnh viễn (Chrono 3->7, Neo 8->14). Giữ Bắn 0.4s đổi thế (hồi 6s), 2 băng riêng (băng kia tự nạp ngầm). CHRONO: đạn đồng x1.5 xuyên vật cản, Xé Giáp; vào thế -> sóng đẩy lùi + giảm 25% sát thương 1.5s. NEO: nhấp bắn 2 viên x0.75, nhanh hơn; vào thế -> lướt ngang +40% tốc 1.5s. THỜI KHẮC: giữ 1 thế 4s -> phát kế tiếp cường hóa: Chrono radar khóa mọi mục tiêu & xả cả băng đạn tự tìm (không thể cản phá); Neo chùm 6-8 viên hình nón (Xé Giáp, chậm 35%) + Ảnh Chiếu bất tử 5s tự bắn.',
             type: 'body',
             role: ['Đối Đầu', 'Cơ Động', 'Sinh Tồn'],
             size: { w: 28, h: 28 },

@@ -30,15 +30,15 @@ function cnE2(p) { return p.hasUpgrade('evo_cn_2'); }
 function cnFull(p) { return cnE1(p) && cnE2(p); }
 function cnEnemy(p) { return p === p1 ? p2 : p1; }
 function cnDir(p) { return p.id === 1 ? -1 : 1; }
-function cnSwitchMax(p) { return cnFull(p) ? 120 : 240; }
+function cnSwitchMax(p) { return cnFull(p) ? 240 : 360; } // CD đổi thế 6s (Full Evo 4s)
 function cnGlassMax(p) { return cnE1(p) ? 150 : 240; }
 function cnMaxC(p) {
-    if (cnFull(p)) return 10;
-    return Math.min(10, 4 + Math.floor((p.cnEra || 0) * 0.3) + (cnE2(p) ? 3 : 0));
+    if (cnFull(p)) return 7;
+    return Math.min(7, 3 + Math.floor((p.cnEra || 0) * 0.2) + (cnE2(p) ? 2 : 0));
 }
 function cnMaxN(p) {
-    if (cnFull(p)) return 20;
-    return Math.min(20, 10 + Math.floor((p.cnEra || 0) * 0.5) + (cnE2(p) ? 6 : 0));
+    if (cnFull(p)) return 14;
+    return Math.min(14, 8 + Math.floor((p.cnEra || 0) * 0.3) + (cnE2(p) ? 3 : 0));
 }
 function cnMaxOf(p, st) { return st === 'chrono' ? cnMaxC(p) : cnMaxN(p); }
 function cnDmg(p) { return (p.damage || 1) + (p.dmgBuff || 0); }
@@ -235,7 +235,7 @@ function cnCollectTargets(p) {
 }
 
 function cnEmpowerChrono(p) {
-    const extra = cnE2(p) ? 4 : 0;
+    const extra = cnE2(p) ? 2 : 0;
     const n = Math.max(2, p.ammo) + extra;
     p.ammo = 0;
     const r = new CnRadar(p, n);
@@ -249,14 +249,14 @@ function cnEmpowerChrono(p) {
 
 function cnNeoCone(p) {
     const m = cnMuzzle(p);
-    const n = Math.min(12, 8 + Math.round((cnMaxN(p) - 10) * 0.4));
+    const n = Math.min(8, 6 + Math.round((cnMaxN(p) - 8) * 0.3));
     const spread = 1.1;
     for (let i = 0; i < n; i++) {
         const a = -spread / 2 + spread * (i / (n - 1));
         const sp = 7;
         spawnBullet(p, {
             x: m.x - 2, y: m.y - 4, w: 5, h: 8, vx: Math.sin(a) * sp, vy: cnDir(p) * Math.cos(a) * sp,
-            dmg: cnDmg(p) * 0.6, hook: 'chrononeo', cnKind: 'cone', cnShred: true, cnSlow: 90,
+            dmg: cnDmg(p) * 0.45, hook: 'chrononeo', cnKind: 'cone', cnShred: true, cnSlow: 90,
         });
     }
     cnFx(p, { k: 'cone', x: m.x, y: m.y, life: 14, max: 14 });
@@ -282,7 +282,7 @@ function cnEmpower(p) {
         p.cnEmpCount = (p.cnEmpCount || 0) + 1;
         if (p.cnEmpCount >= 2) {
             p.cnEmpCount = 0;
-            p.cnLotus = 240; p.cnLotusSpin = 0;
+            p.cnLotus = 150; p.cnLotusSpin = 0;
             addFloatingText(canvas.width / 2, canvas.height / 2, '🪷 LIÊN HOA THỜI GIAN', '#ffd1f0', 16);
         }
     }
@@ -292,7 +292,7 @@ function cnEmpower(p) {
 function cnLotusTick(p) {
     p.cnLotus--;
     p.cnLotusSpin = (p.cnLotusSpin || 0) + 1;
-    if (p.cnLotus % 10 === 0) {
+    if (p.cnLotus % 15 === 0) {
         const srcs = [{ x: p.x + p.w / 2, y: p.y + p.h / 2 }];
         if (cnFull(p) && Number.isFinite(p.cnTwX)) srcs.push({ x: p.cnTwX, y: p.y + p.h / 2 });
         srcs.forEach((s, si) => {
@@ -301,7 +301,7 @@ function cnLotusTick(p) {
                 const sp = 6.5;
                 spawnBullet(p, {
                     x: s.x - 3, y: s.y + cnDir(p) * 14 - 3, w: 6, h: 6, vx: Math.sin(a) * sp, vy: cnDir(p) * Math.cos(a) * sp,
-                    dmg: cnDmg(p) * 0.2, hook: 'chrononeo', cnKind: 'lotus',
+                    dmg: cnDmg(p) * 0.15, hook: 'chrononeo', cnKind: 'lotus',
                 });
             }
         });
@@ -309,8 +309,9 @@ function cnLotusTick(p) {
     if (p.cnLotus === 0) {
         const e = cnEnemy(p);
         const ly = e ? e.y + e.h / 2 : (p.id === 1 ? 40 : canvas.height - 40);
-        const n = 5, r = Math.ceil(canvas.width / n / 2) + 2;
-        for (let i = 0; i < n; i++) bodyEffects.push(new SkyStrike((i + 0.5) * canvas.width / n, ly, p, cnDmg(p) * 1.2, r, 40));
+        // Nở Rộ: 3 cột pháo có khe hở để né (cảnh báo 1s), không còn phủ kín cả làn
+        const off = Math.random() < 0.5 ? 0 : 1, r = 32;
+        for (let i = 0; i < 3; i++) bodyEffects.push(new SkyStrike((i * 2 + off + 0.5) * canvas.width / 6, ly, p, cnDmg(p) * 0.7, r, 60));
         addFloatingText(canvas.width / 2, ly + cnDir(p) * -30, '🪷 NỞ RỘ!', '#ffd1f0', 16);
     }
 }

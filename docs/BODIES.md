@@ -74,8 +74,8 @@
 | 51 | **T-Zero** | `t_zero` | 8 | 1 | — (năng lượng riêng) | 3.15 | 34×34 |  | — |
 | 52 | **Raven - Oca** | `raven_oca` | 4 | 0.5 | 10 | 3.8 | 26×26 |  | — |
 | 53 | **Tia Lazer** | `lazer_beam` | 3 | 0.2 | — (năng lượng riêng) | 3.8 | 28×28 |  | — |
-| 54 | **Y Sư** | `healer` | 5 | 0.75 | 4 | 3.5 | 30×30 |  | — |
-| 55 | **Chrono & Neo** | `chrononeo` | 4.5 | 1 | 4 | 3.3 | 28×28 |  | — |
+| 54 | **Y Sư** | `healer` | 3.5 | 0.75 | 4 | 3.5 | 30×30 |  | — |
+| 55 | **Chrono & Neo** | `chrononeo` | 4.5 | 1 | 3 | 3.3 | 28×28 |  | — |
 | 56 | **Gemini** | `gemini` | 3.5 | 0.75 | 4 | 3.6 | 26×26 |  | — |
 
 > *Tỉ lệ thắng mô phỏng*: trung bình của 2 mức (chỉ có body / có Full Evo + 2 module), mỗi body đấu vòng tròn với mọi body khác, hai bên cùng một AI tự động. AI không biết chơi kinh tế hay combo phức tạp nên con số chỉ mang tính tham khảo cho độ mạnh tương đối.
@@ -127,9 +127,9 @@
 | Súng Nước | Tia nước có cảnh báo 0.5s |
 | Axit Hóa | Phát cường hóa tạo vùng ăn mòn tím (trừ máu & máu tối đa, chậm); mọi đòn axit gây 10x + 50% máu tối đa lên vật cản/xe tiền/triệu hồi |
 | Raven - Oca | MỚI: Collab Raven-Oca — giữ 0.4s đổi Tiểu Liên (loạt 3 viên, lướt né) ↔ Sniper (4 dame, bom khói né đạn), chim Oca đồng hành (tàng hình cắn làm chậm / radar khóa mục tiêu, đạn Sniper xuyên vật thể) |
-| Tia Lazer | MỚI: Tia Lazer — giữ bắn: tích 0.5s + cảnh báo 0.5s rồi chiếu tia liên tục (0.2/nhịp, chậm khi chiếu, tụt năng lượng, chớp tắt); Evo 2 tia phình to + dame tăng dần + đốt; Full Evo không chậm + tia xung kích mỗi 2s |
-| Y Sư | MỚI: Y Sư — tự hồi 0.5 HP sau 3s không mất máu, đạn hấp huyết (CD 20s), thanh Năng Lượng Sinh Mệnh → đạn cường hóa 50% Max HP + dame gốc; Evo 1 giáp trắng; Evo 2 mỗi lần hồi bắn tia tự ngắm; Full Evo cướp máu hồi của địch |
-| Chrono & Neo | MỚI: Collab Chrono & Neo — Tham Farm tăng băng đạn vĩnh viễn (4→10 / 10→20), giữ 0.4s đổi thế Chrono (đạn đồng xuyên, sóng đẩy) ↔ Neo (2 viên, lướt tăng tốc), đồng hồ cát Thời Khắc → Liên Xạ tự tìm / Mưa Đạn Hình Nón + Ảnh Chiếu; Full Evo: AI phụ cầm thế ngược lại + bão Liên Hoa |
+| Tia Lazer | MỚI: Tia Lazer — giữ bắn: tích 0.5s + cảnh báo 0.5s rồi chiếu tia liên tục (0.2/nhịp, chậm khi chiếu, tụt năng lượng, chớp tắt); Evo 2 tia phình to + dame tăng dần + đốt; Full Evo không chậm + tia xung kích mỗi 2s • Sửa lỗi: tia gây sát thương lên vật triệu hồi của địch |
+| Y Sư | MỚI: Y Sư — tự hồi 0.5 HP sau 3s không mất máu, đạn hấp huyết (CD 20s), thanh Năng Lượng Sinh Mệnh → đạn cường hóa 50% Max HP + dame gốc; Evo 1 giáp trắng; Evo 2 mỗi lần hồi bắn tia tự ngắm; Full Evo cướp máu hồi của địch • NERF: HP 5 → 3.5 |
+| Chrono & Neo | MỚI: Collab Chrono & Neo — Tham Farm tăng băng đạn vĩnh viễn (4→10 / 10→20), giữ 0.4s đổi thế Chrono (đạn đồng xuyên, sóng đẩy) ↔ Neo (2 viên, lướt tăng tốc), đồng hồ cát Thời Khắc → Liên Xạ tự tìm / Mưa Đạn Hình Nón + Ảnh Chiếu; Full Evo: AI phụ cầm thế ngược lại + bão Liên Hoa • NERF: băng đạn 3→7 / 8→14, CD đổi thế 6s (Full 4s), Liên Xạ +2, nón 6-8 viên yếu hơn, Liên Hoa 2.5s, Nở Rộ còn 3 cột có khe né |
 | Gemini | MỚI: Gemini — 2 xe song sinh (bạn + AI tự hành), gục thì có vòng cứu 2s (nhân đôi mỗi lần), chỉ thua khi cả 2 cùng gục; giữ 0.4s Chuyển Giao Ý Thức đổi quyền điều khiển; Evo 2 mạnh dần theo hiệp; Full Evo tự khởi động lại + đạn tự ngắm sau chuyển giao |
 
 ## Module chân (FEET)
@@ -910,9 +910,9 @@ HP:3 | Dame:0.2/tick (6 tick/s) | Năng Lượng | Tốc: 3.8. Giữ Bắn: tíc
 
 ### 54. Y Sư (`healer`)
 
-HP:5 | Dame:0.75 | Đạn:4 | Tốc: 3.5. "Hồi Phục": 3s không mất máu +0.5 HP. Đạn Hấp Huyết +0.25 HP (hồi 20s). Mọi lượng máu được hồi nạp Năng Lượng Sinh Mệnh -> đầy: phát kế tiếp là Đạn Cường Hóa (50% MaxHP + dame, nổ lan).
+HP:3.5 | Dame:0.75 | Đạn:4 | Tốc: 3.5. "Hồi Phục": 3s không mất máu +0.5 HP. Đạn Hấp Huyết +0.25 HP (hồi 20s). Mọi lượng máu được hồi nạp Năng Lượng Sinh Mệnh -> đầy: phát kế tiếp là Đạn Cường Hóa (50% MaxHP + dame, nổ lan).
 
-- **Chỉ số thực đầu hiệp:** HP 5 · Sát thương 0.75 · Đạn 4 · Tốc độ 3.5 · Kích thước 30×30
+- **Chỉ số thực đầu hiệp:** HP 3.5 · Sát thương 0.75 · Đạn 4 · Tốc độ 3.5 · Kích thước 30×30
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
@@ -924,15 +924,15 @@ HP:5 | Dame:0.75 | Đạn:4 | Tốc: 3.5. "Hồi Phục": 3s không mất máu +
 
 ### 55. Chrono & Neo (`chrononeo`)
 
-"Hai thời đại, một dòng chảy!" HP:4.5 | Dame:1 | Đạn:4 (Chrono) / 10 (Neo) | Tốc: 3.3. THAM FARM: phá thùng, xe tiền, triệu hồi địch & qua mỗi hiệp -> băng đạn tăng vĩnh viễn (Chrono 4->10, Neo 10->20). Giữ Bắn 0.4s đổi thế (hồi 4s), 2 băng riêng (băng kia tự nạp ngầm). CHRONO: đạn đồng x1.5 xuyên vật cản, Xé Giáp; vào thế -> sóng đẩy lùi + giảm 25% sát thương 1.5s. NEO: nhấp bắn 2 viên x0.75, nhanh hơn; vào thế -> lướt ngang +40% tốc 1.5s. THỜI KHẮC: giữ 1 thế 4s -> phát kế tiếp cường hóa: Chrono radar khóa mọi mục tiêu & xả cả băng đạn tự tìm (không thể cản phá); Neo chùm 8-12 viên hình nón (Xé Giáp, chậm 35%) + Ảnh Chiếu bất tử 5s tự bắn.
+"Hai thời đại, một dòng chảy!" HP:4.5 | Dame:1 | Đạn:3 (Chrono) / 8 (Neo) | Tốc: 3.3. THAM FARM: phá thùng, xe tiền, triệu hồi địch & qua mỗi hiệp -> băng đạn tăng vĩnh viễn (Chrono 3->7, Neo 8->14). Giữ Bắn 0.4s đổi thế (hồi 6s), 2 băng riêng (băng kia tự nạp ngầm). CHRONO: đạn đồng x1.5 xuyên vật cản, Xé Giáp; vào thế -> sóng đẩy lùi + giảm 25% sát thương 1.5s. NEO: nhấp bắn 2 viên x0.75, nhanh hơn; vào thế -> lướt ngang +40% tốc 1.5s. THỜI KHẮC: giữ 1 thế 4s -> phát kế tiếp cường hóa: Chrono radar khóa mọi mục tiêu & xả cả băng đạn tự tìm (không thể cản phá); Neo chùm 6-8 viên hình nón (Xé Giáp, chậm 35%) + Ảnh Chiếu bất tử 5s tự bắn.
 
-- **Chỉ số thực đầu hiệp:** HP 4.5 · Sát thương 1 · Đạn 4 · Tốc độ 3.3 · Kích thước 28×28
+- **Chỉ số thực đầu hiệp:** HP 4.5 · Sát thương 1 · Đạn 3 · Tốc độ 3.3 · Kích thước 28×28
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
   |---|---:|---|
   | Bước Thời Gian (`evo_cn_1`) | $100 | Thời Khắc chỉ cần giữ thế 2.5s. Đổi Thế Hoàn Hảo: đổi thế trong 3s sau đòn Thời Khắc -> băng thế mới nạp đầy ngay; nếu đang có Ảnh Chiếu -> hoán đổi vị trí với nó. |
-  | Dòng Chảy Hội Tụ (`evo_cn_2`) | $120 | Đầu hiệp +3 đạn Chrono / +6 đạn Neo; điểm Thời Đại từ thùng & xe tiền x2. Liên Xạ +4 viên, viên cuối nổ choáng 0.5s. Mưa Đạn bắn 2 đợt, Ảnh Chiếu 8s bắn đạn làm chậm. FULL EVO: Liên Hoa Thời Gian — băng tối đa ngay (10/20), đổi thế hồi 2s; Phân Thân Nghịch Đảo (AI cầm thế ngược trên làn bạn, đổi thế đồng bộ kèm hiệu ứng); cứ 2 lần Thời Khắc -> 4s bão đạn Liên Hoa rồi đại pháo Nở Rộ phủ kín sân địch. |
+  | Dòng Chảy Hội Tụ (`evo_cn_2`) | $120 | Đầu hiệp +2 đạn Chrono / +3 đạn Neo; điểm Thời Đại từ thùng & xe tiền x2. Liên Xạ +2 viên, viên cuối nổ choáng 0.5s. Mưa Đạn bắn 2 đợt, Ảnh Chiếu 8s bắn đạn làm chậm. FULL EVO: Liên Hoa Thời Gian — băng tối đa ngay (7/14), đổi thế hồi 4s; Phân Thân Nghịch Đảo (AI cầm thế ngược trên làn bạn, đổi thế đồng bộ kèm hiệu ứng); cứ 2 lần Thời Khắc -> 2.5s bão đạn Liên Hoa rồi 3 cột đại pháo Nở Rộ (có cảnh báo, có khe để né). |
 
 - **Mã nguồn:** `js/characters/chrononeo/logic.js`, `js/characters/chrononeo/render.js`
 

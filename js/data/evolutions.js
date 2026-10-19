@@ -226,7 +226,7 @@ const EVOLUTIONS = {
     ],
     chrononeo: [
         { id: 'evo_cn_1', name: 'Bước Thời Gian', desc: 'Thời Khắc chỉ cần giữ thế 2.5s. Đổi Thế Hoàn Hảo: đổi thế trong 3s sau đòn Thời Khắc -> băng thế mới nạp đầy ngay; nếu đang có Ảnh Chiếu -> hoán đổi vị trí với nó.', cost: 100, type: 'evo' },
-        { id: 'evo_cn_2', name: 'Dòng Chảy Hội Tụ', desc: 'Đầu hiệp +3 đạn Chrono / +6 đạn Neo; điểm Thời Đại từ thùng & xe tiền x2. Liên Xạ +4 viên, viên cuối nổ choáng 0.5s. Mưa Đạn bắn 2 đợt, Ảnh Chiếu 8s bắn đạn làm chậm. FULL EVO: Liên Hoa Thời Gian — băng tối đa ngay (10/20), đổi thế hồi 2s; Phân Thân Nghịch Đảo (AI cầm thế ngược trên làn bạn, đổi thế đồng bộ kèm hiệu ứng); cứ 2 lần Thời Khắc -> 4s bão đạn Liên Hoa rồi đại pháo Nở Rộ phủ kín sân địch.', cost: 120, type: 'evo' }
+        { id: 'evo_cn_2', name: 'Dòng Chảy Hội Tụ', desc: 'Đầu hiệp +2 đạn Chrono / +3 đạn Neo; điểm Thời Đại từ thùng & xe tiền x2. Liên Xạ +2 viên, viên cuối nổ choáng 0.5s. Mưa Đạn bắn 2 đợt, Ảnh Chiếu 8s bắn đạn làm chậm. FULL EVO: Liên Hoa Thời Gian — băng tối đa ngay (7/14), đổi thế hồi 4s; Phân Thân Nghịch Đảo (AI cầm thế ngược trên làn bạn, đổi thế đồng bộ kèm hiệu ứng); cứ 2 lần Thời Khắc -> 2.5s bão đạn Liên Hoa rồi 3 cột đại pháo Nở Rộ (có cảnh báo, có khe để né).', cost: 120, type: 'evo' }
     ],
     gemini: [
         { id: 'evo_gem_1', name: 'Liên Kết Thần Kinh', desc: 'AI phối hợp: giữ giãn cách tránh nổ lan, bắn ép góc, ưu tiên chạy lại cứu bạn (bám vòng cứu). Chuyển Giao hồi chỉ 1.2s; thanh cứu không bị tụt khi rời vòng. Vòng cứu rộng +50%; lần cứu đầu tiên mỗi hiệp chỉ 1s và không tính nhân đôi.', cost: 90, type: 'evo' },

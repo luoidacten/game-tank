@@ -53,6 +53,16 @@ function lbTrace(p) {
     crates.forEach(c => consider(c, 'crate'));
     bodyEffects.forEach(s => { if (s.isStone && s.owner !== p) consider(s, 'stone'); });
     const e = lbEnemy(p);
+    // Vật triệu hồi / thiết bị của địch (ụ súng, drone, robot, lính, ảo ảnh...) cũng chặn & nhận sát thương từ tia
+    const isMine = o => o.owner && (o.owner === p || (o.owner.owner && o.owner.owner === p));
+    [typeof turrets !== 'undefined' ? turrets : [], typeof creatorTurrets !== 'undefined' ? creatorTurrets : [],
+        typeof creatorDrones !== 'undefined' ? creatorDrones : [], typeof creatorRobots !== 'undefined' ? creatorRobots : [],
+        typeof necroMinions !== 'undefined' ? necroMinions : [], typeof ghostDecoys !== 'undefined' ? ghostDecoys : [],
+        typeof confinementCages !== 'undefined' ? confinementCages : []]
+        .forEach(l => (l || []).forEach(o => { if (!isMine(o)) consider(o, 'summon'); }));
+    if (e && e.drones) e.drones.forEach(d => consider(d, 'summon'));
+    if (e && e.creatorDrone) consider(e.creatorDrone, 'summon');
+    bodyEffects.forEach(o => { if ((typeof AttackTruck !== 'undefined' && o instanceof AttackTruck && !isMine(o)) || (typeof GeminiTwin !== 'undefined' && o instanceof GeminiTwin && !isMine(o))) consider(o, 'summon'); });
     if (e && e.creatorShield && e.creatorShield.active) consider(e.creatorShield, 'shield');
     if (e && e.hp > 0 && !e.isInvisible) consider(e, 'enemy');
     return best;
@@ -84,6 +94,11 @@ function lbApplyTick(p, tr) {
     } else if (tr.kind === 'crate') {
         o.lbHeat = (o.lbHeat || 0) + dmg;
         if (o.lbHeat >= 0.4) { o.active = false; crateOnBreak(o, p); grantCrateLoot(o, p); explosions.push(new Explosion(o.x + o.w / 2, o.y + o.h / 2, 26, 'white', 0, p)); }
+    } else if (tr.kind === 'summon') {
+        if (typeof o.takeDamage === 'function') o.takeDamage(dmg, p);
+        else if (typeof o.takeHit === 'function') o.takeHit(dmg, p);
+        else if (typeof o.hp === 'number' && !o.isImmortal) { o.hp -= dmg; if (o.hp <= 0) o.active = false; }
+        spawnSparkParticles(n.x, tr.y, LB_COLOR, 2);
     } else if (tr.kind === 'bastion' || tr.kind === 'stone' || tr.kind === 'shield') {
         if (typeof o.takeDamage === 'function') o.takeDamage(dmg, p);
         else if (typeof o.hp === 'number' && !o.isImmortal) { o.hp -= dmg; if (o.hp <= 0) o.active = false; }
