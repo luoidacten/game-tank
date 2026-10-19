@@ -11,10 +11,18 @@ Object.assign(Player.prototype, {
                 ctx.save();
                 ctx.strokeStyle = (this.id === 1) ? "rgba(52, 152, 219, 0.3)" : "rgba(231, 76, 60, 0.3)";
                 ctx.lineWidth = 1; ctx.setLineDash([5, 5]);
+                // Tia ngắm theo ĐÚNG hướng đạn sẽ bay (ngắm nón tự động) - js/render/tank-art/core_small.js
+                const aim = (typeof coreSmallSniperAim === 'function') ? coreSmallSniperAim(this)
+                    : { x: this.x + this.w / 2, y: (this.id === 1) ? this.y : this.y + this.h, dx: 0, dy: (this.id === 1) ? -1 : 1 };
+                const L = Math.hypot(canvas.width, canvas.height);
                 ctx.beginPath();
-                ctx.moveTo(this.x + this.w / 2, (this.id === 1) ? this.y : this.y + this.h);
-                ctx.lineTo(this.x + this.w / 2, (this.id === 1) ? 0 : canvas.height);
+                ctx.moveTo(aim.x, aim.y);
+                ctx.lineTo(aim.x + aim.dx * L, aim.y + aim.dy * L);
                 ctx.stroke();
+                if (aim.dx !== 0) { // đã khoá mục tiêu: tia đỏ mảnh sáng hơn
+                    ctx.setLineDash([]); ctx.strokeStyle = 'rgba(255, 60, 60, 0.35)';
+                    ctx.beginPath(); ctx.moveTo(aim.x, aim.y); ctx.lineTo(aim.x + aim.dx * L, aim.y + aim.dy * L); ctx.stroke();
+                }
                 ctx.restore();
             }
 

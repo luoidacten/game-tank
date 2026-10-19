@@ -19,14 +19,15 @@ Object.assign(Player.prototype, {
                     ctx.globalAlpha = 1.0; // KHÔNG BAO GIỜ BỊ MỜ SAU 5 GIÂY, LUÔN ĐẬM 100%
                 }
 
-                ctx.fillStyle = this.color;
-                ctx.fillRect(ill.x, ill.y, ill.w, ill.h);
-
-                // Vẽ nòng súng giả cho phân ảnh
-                ctx.fillStyle = "#fff";
-                let cbx = ill.x + ill.w / 2 - 4;
-                let cby = (this.id === 1) ? ill.y - 20 : ill.y + ill.h;
-                ctx.fillRect(cbx, cby, 8, 20);
+                // Phân ảnh: giống hệt xe thật (art mới), fallback khối cũ
+                if (!((typeof coreSmallArtAt === 'function') && coreSmallArtAt(this, ill.x, ill.y, 1))) {
+                    ctx.fillStyle = this.color;
+                    ctx.fillRect(ill.x, ill.y, ill.w, ill.h);
+                    ctx.fillStyle = "#fff";
+                    let cbx = ill.x + ill.w / 2 - 4;
+                    let cby = (this.id === 1) ? ill.y - 20 : ill.y + ill.h;
+                    ctx.fillRect(cbx, cby, 8, 20);
+                }
 
                 // ==========================================
                 // --- VẼ THANH MÁU & ĐẠN CHO PHÂN ẢNH ---
@@ -82,9 +83,16 @@ Object.assign(Player.prototype, {
 
             // Vẽ Đạn Giả & Đạn Hù Dọa
             if (this.fakeBullets && this.fakeBullets.length > 0) {
-                ctx.fillStyle = "rgba(0, 255, 255, 0.7)"; // Đạn ảo màu cyan mờ
+                // Đạn ảo: cùng hình sao chổi tím như đạn thật nhưng mờ hơn
                 for (let fb of this.fakeBullets) {
-                    ctx.fillRect(fb.x, fb.y, fb.w, fb.h);
+                    if (typeof drawBulletArt === 'function') {
+                        ctx.save(); ctx.globalAlpha *= 0.7;
+                        drawBulletArt(fb, (this.id === 1) ? '#3498db' : '#e74c3c', this);
+                        ctx.restore();
+                    } else {
+                        ctx.fillStyle = "rgba(0, 255, 255, 0.7)";
+                        ctx.fillRect(fb.x, fb.y, fb.w, fb.h);
+                    }
                 }
             }
         }

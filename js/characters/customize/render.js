@@ -29,7 +29,8 @@ Object.assign(CharHooks.registry.customize, {
             ctx.beginPath(); ctx.arc(cx, cy, this.w * 1.0, 0, Math.PI * 2); ctx.stroke();
         }
         // Chi tiết mô-đun trên thân xe: chấm màu theo tính chất
-        const dots = d.traits.slice(0, 6);
+        // (Mô-đun tính chất giờ vẽ thành khối màu trên thân xe - js/render/tank-art/core_small.js)
+        const dots = (typeof TANK_ART !== 'undefined' && TANK_ART.customize) ? [] : d.traits.slice(0, 6);
         dots.forEach((t, i) => {
             ctx.fillStyle = { explosive: '#f97316', piercing: '#a855f7', hitscan: '#ef4444', homing: '#22d3ee', sticky: '#eab308', bounce: '#84cc16' }[t] || (ZONE_STYLE[t.slice(3)] || [0, '#fff'])[1];
             ctx.fillRect(this.x + 3 + i * 4, this.y + this.h - 5, 3, 3);

@@ -52,9 +52,12 @@ Object.assign(Player.prototype, {
         if (this.weapon === 'ghost' && this.hasPhantom && this.posHistory.length > 20) {
             let oldPos = this.posHistory[0]; // Vị trí cách đây 20 frame
             ctx.save();
-            ctx.globalAlpha = 0.4;
-            ctx.fillStyle = this.color;
-            ctx.fillRect(oldPos.x, oldPos.y, this.w, this.h);
+            // Hư Ảnh: vẽ lại chính xe Ghost mờ, phủ xanh lạnh
+            if (!((typeof coreSmallArtAt === 'function') && coreSmallArtAt(this, oldPos.x, oldPos.y, 0.4, '#7dd3fc'))) {
+                ctx.globalAlpha = 0.4;
+                ctx.fillStyle = this.color;
+                ctx.fillRect(oldPos.x, oldPos.y, this.w, this.h);
+            }
             ctx.restore();
         }
     }
