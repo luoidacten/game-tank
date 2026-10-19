@@ -112,7 +112,7 @@
 | Paradox | HP 5 → 6, Dame 1 → 1.2. Tua ngược chỉ cần giữ 0.2s; thêm mốc Neo Thời Không (10s, CD 20s): lần tua tới về neo (vị trí, máu, đạn) |
 | Lazer Pháo | Không cần đạn: giữ bắn xả lazer xuyên ngày càng nhanh, nóng ≥60% thì +35% dame, quá nhiệt khóa 1.5s |
 | Kiếm Khách | HP 2 → 3, Dame 1 → 1.2 (so với bản thiết kế). Làm 3 bài cùng lúc, +1 ô mỗi hiệp (Evo 2 +1, Full +2); đầu trận tự nhận 3 bài ngẫu nhiên |
-| Bow | Giữ nút để kéo cung, nhả để bắn (trước: nhấp để tự nạp); nạp nhanh x1.6, đầy lực không tự bắn |
+| Bow | LÀM LẠI: giữ 0.5s đổi 3 cách bắn — Tụ Lực (1 mũi tự giương, càng lâu càng to & mạnh, bắn chậm) / Liên Hoàn (loạt 5 mũi nhanh, dame yếu) / 3 Mũi (3 hướng); giữ 2.5s vào Ngắm: vòng đuổi mục tiêu thu hẹp dần (tối đa 5s) rồi Thiên Tiễn khóa 0.5s giáng xuống; Evo 1 Cung Thần, Evo 2 Mưa Tên trên vòng ngắm, Full Evo Vạn Tiễn mưa tên toàn map mỗi 12s |
 | Cuồng Phong | Giữ nút để tụ lực, nhả để xuất chiêu (trước: tự nạp 14s); đầy lực sau 3.5s |
 | 6 Nòng | Phải giữ 0.5s khởi động nòng; đã quay thì nhấp vẫn bắn (nhả >1s nòng dừng) |
 | Bình Phun | Vòi phun đốt xe tiền nhanh hơn nhiều; axit gây 10x lên vật thể |
@@ -521,7 +521,7 @@ HP:3 | Dame:2 | Đạn:5. Tốc chậm. Giữ bắn tạo tường chặn MỌI 
 
 ### 27. Bow (`cung`)
 
-HP:3 | Dame:0.5 | Đạn:3 | Tốc: Nhanh. Giữ nút kéo cung (đầy lực ~1.5s), nhả để bắn: Tăng sát thương/Tốc đạn. Nội tại Nhạy Bén: Tự né 1 lần đạn mỗi 8s (Full Evo 5s).
+HP:3 | Dame:0.5 | Đạn:3 | Tốc: Nhanh. Nhấp: bắn theo kiểu hiện tại. Giữ 0.5s: đổi kiểu — Tụ Lực (cung tự kéo, căng càng lâu mũi càng to/mạnh, nhịp chậm) / Liên Hoàn (loạt 5 mũi nhanh, dame thấp) / Bắn 3 Mũi (3 hướng, bay nhanh). Giữ 2.5s: NGẮM — hồng tâm đuổi địch & thu hẹp (tối đa 5s), nhả: Thiên Tiễn từ trời (khóa đỏ 0.5s, x2-x5 dame, hồi 8s). Nội tại Nhạy Bén: Tự né 1 đòn mỗi 8s.
 
 - **Chỉ số thực đầu hiệp:** HP 3 · Sát thương 0.5 · Đạn 3 · Tốc độ 4.38 · Kích thước 24×24
 - **Vật triệu hồi / hiệu ứng:** Mưa Tên
@@ -529,8 +529,8 @@ HP:3 | Dame:0.5 | Đạn:3 | Tốc: Nhanh. Giữ nút kéo cung (đầy lực ~1
 
   | Evo | Giá | Hiệu ứng |
   |---|---:|---|
-  | Xuyên Thủng (`evo_cung_1`) | $80 | Tụ >2s: Đạn xuyên qua mục tiêu nhưng giảm 50% dame. |
-  | Mưa Tên (`evo_cung_2`) | $120 | Tụ >3s: Tạo hồng tâm đuổi địch. Nhả bắn rơi Mưa Tên (CD: 10s). |
+  | Cung Thần (`evo_cung_1`) | $80 | Tụ Lực kéo nhanh hơn & nhịp nhanh hơn, căng tối đa thì Xuyên Thủng. Liên Hoàn: loạt 7 mũi. Bắn 3 Mũi -> 5 mũi tỏa. |
+  | Mưa Tên (`evo_cung_2`) | $120 | Thiên Tiễn kéo theo trận Mưa Tên trút xuống hồng tâm 1.5s. Hồi Ngắm 7s. FULL EVO (Vạn Tiễn): Mưa Tên phủ KHẮP bề ngang sân mỗi 12s (số mũi tăng theo dame), Ngắm hồi 5s, Nhạy Bén hồi 5s. |
 
 - **Mã nguồn:** `js/characters/cung/logic.js`, `js/characters/cung/render.js`, `js/characters/cung/summons.js`
 

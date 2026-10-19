@@ -3,15 +3,6 @@
 > Danh sách các yêu cầu **chưa làm / đang làm dở**. Làm xong mục nào thì xoá khỏi đây và ghi vào `docs/BODIES.md`.
 > Thứ tự = thứ tự ưu tiên. Mỗi lần chỉ làm 1 mục để tiết kiệm token.
 
-## 1. Body mới — ƯU TIÊN (làm lần lượt từng body)
-> Đặc tả đầy đủ: `docs/BODY_MOI_DAC_TA.md`
-
-## 1b. Bow (`cung`) — làm lại (sau Cuồng Chiến Binh)
-- Mưa tên phủ toàn map không giới hạn, đẹp hơn.
-- Giữ 0.5s đổi cách bắn: **Tụ Lực** (1 mũi, giữ càng lâu càng to & mạnh nhanh, tốc bắn rất chậm) / **Liên Hoàn** (bắn rất nhanh, dame yếu, có giới hạn) / **3 Mũi** (3 hướng, dame & tốc trung bình).
-- Giữ 2.5s vào trạng thái ngắm: vòng cảnh báo đuổi theo mục tiêu, càng lâu càng hẹp, tối đa 5s (vẫn nhận dame bình thường).
-- Làm lại hình ảnh xe & mũi tên; làm lại các Evo.
-
 ## 2. Đồ họa (đã làm một phần)
 - ✅ Sukuna, Gojo (2 Lãnh Địa), Âm Dương Sư, Chiêu Hồn Sư, Khóa Chết, Cổng Không Gian — XONG.
 - **Kiếm**: vẽ lại các thanh kiếm còn là chữ; kiếm đặc trưng từng xe phóng kiếm; đòn chém Phong Trảm.
