@@ -10,6 +10,9 @@
 //  - Evo 1: Cuồng Chiến x1.5 (giảm st tối đa 45%), tích thanh +25%, giữ thanh 100 trong 1s đầu.
 //  - Evo 2: Đấu Trường Huyết Địa (BersArena, 260px) khoá di chuyển 2 xe + cổng Portal trong vùng.
 //  - Full: x1.8 (tối đa 50%), giữ 1.5s, vùng 220px + làm chậm địch 25%, Tàn Hơi Cuối Cùng.
+//  - NHIỆT (0..100): mỗi phát +3 (Huyết Đạn +6; Huyết Chiến -25%). Luôn tự nguội 5/s; ngừng bắn 0.4s -> nguội thêm
+//    35/s khi vẫn giữ nút, 55/s khi thả (Evo 1 x1.25, Full x1.5). Đủ 100 -> QUÁ NHIỆT: khoá bắn 90 tick (Full 72),
+//    thanh tụt dần về 40. Sấy liên thanh tốc tối đa ~3-4s là quá nhiệt; bắn nhấp gần như không bao giờ.
 // Mọi trạng thái là số/boolean trên player hoặc BersArena (có trong NET_CLASSES) -> đồng bộ online được.
 // ==========================================
 
@@ -20,6 +23,13 @@ const BERS_TIERS = [null,
     { fr: 0.50, red: 0.30, spd: 0.25, dmg: 0.50 },
 ];
 const BERS_RAMP = 90; // 1.5s để sấy đạt tốc tối đa & toả 28°
+// Nhiệt
+const BERS_HEAT_SHOT = 3;           // nhiệt mỗi phát (Huyết Đạn x2)
+const BERS_HEAT_HC = 0.75;          // Huyết Chiến: -25% nhiệt
+const BERS_HEAT_PASSIVE = 5 / 60;   // luôn tự nguội
+const BERS_HEAT_DELAY = 24;         // 0.4s không bắn mới nguội nhanh
+const BERS_HEAT_COOL_HOLD = 35 / 60, BERS_HEAT_COOL_FREE = 55 / 60;
+const BERS_HEAT_WARN = 70, BERS_OH_END = 40;
 
 function bersE1(p) { return p.hasUpgrade('evo_bers_1'); }
 function bersE2(p) { return p.hasUpgrade('evo_bers_2'); }
@@ -43,6 +53,42 @@ function bersStats(p) {
     if (p.bersHC) { o.fr += 0.35; o.spd += 0.20; o.dmg += 0.30; }
     return o;
 }
+function bersCoolMult(p) { return bersFull(p) ? 1.5 : (bersE1(p) ? 1.25 : 1); }
+function bersOHTicks(p) { return bersFull(p) ? 72 : 90; }
+
+function bersAddHeat(p, blood) {
+    if (p.bersOH > 0) return;
+    p.bersHeat = (p.bersHeat || 0) + BERS_HEAT_SHOT * (blood ? 2 : 1) * (p.bersHC ? BERS_HEAT_HC : 1);
+    p.bersHeatIdle = 0;
+    if (p.bersHeat >= 100) bersOverheat(p);
+}
+function bersOverheat(p) {
+    p.bersHeat = 100;
+    p.bersOHMax = bersOHTicks(p);
+    p.bersOH = p.bersOHMax;
+    p.bersHold = 0; p.bersQueued = 0;
+    const cx = p.x + p.w / 2, cy = p.y + p.h / 2;
+    explosions.push(new Explosion(cx, cy, 34, 'rgba(255, 110, 40,', 0, p));
+    spawnSparkParticles(cx, cy, '#ffb38a', 12);
+    addFloatingText(cx, p.id === 1 ? p.y - 22 : p.y + p.h + 24, 'QUÁ NHIỆT!', '#ff6a2a', 15);
+    if (typeof soundSystem !== 'undefined' && soundSystem && !soundSystem.muted && soundSystem.playTone) {
+        soundSystem.playTone(260, 'sawtooth', 0.45, 0.09);   // xì hơi
+        soundSystem.playTone(70, 'square', 0.35, 0.12);      // ực máy
+    }
+}
+function bersHeatTick(p, holding) {
+    if (p.bersOH > 0) { // khoá bắn, nguội tuyến tính 100 -> 40
+        p.bersOH--;
+        p.bersHeat = BERS_OH_END + (100 - BERS_OH_END) * (p.bersOH / (p.bersOHMax || 90));
+        if (p.bersOH <= 0) { p.bersHeat = BERS_OH_END; p.bersHeatIdle = BERS_HEAT_DELAY; }
+        return;
+    }
+    p.bersHeatIdle = (p.bersHeatIdle || 0) + 1;
+    let cool = BERS_HEAT_PASSIVE;
+    if (p.bersHeatIdle >= BERS_HEAT_DELAY) cool += (holding ? BERS_HEAT_COOL_HOLD : BERS_HEAT_COOL_FREE) * bersCoolMult(p);
+    p.bersHeat = Math.max(0, (p.bersHeat || 0) - cool);
+}
+
 function bersSpray(p) { return !!p.bersHC || bersHpFrac(p) <= 0.5; }
 
 // Giảm sát thương nhận vào qua permanentVulnerability (giữ nguyên phần cộng thêm từ body khác)
@@ -136,6 +182,7 @@ function bersFire(p, angDeg, st) {
     });
     p.lastShot = Date.now();
     p.bersRecoil = blood ? 6 : 3;
+    bersAddHeat(p, blood);
     if (blood) {
         spawnSparkParticles(p.x + p.w / 2, p.id === 1 ? p.y : p.y + p.h, BERS_RED, 6);
         bersSfx('playExplosion');
@@ -221,10 +268,12 @@ CharHooks.register('berserker', {
         this.bersQueued = 0; this.bersRevives = 0; this.bersLastBreath = false; this.bersRecoil = 0;
         this.bersPvBase = this.permanentVulnerability || 0; this.bersPvSet = this.bersPvBase;
         this.bersTick = 0; this.bersLastTier = 0; this.bersOut = false;
+        this.bersHeat = 0; this.bersHeatIdle = BERS_HEAT_DELAY; this.bersOH = 0; this.bersOHMax = bersOHTicks(this);
         bersSyncPv(this);
     },
-    update() {
+    update(inp) {
         this.bersTick++;
+        bersHeatTick(this, !!(inp && inp.s));
         if (this.bersRageT > 0) this.bersRageT--;
         if (this.bersCd > 0) this.bersCd--;
         if (this.bersQueued > 0) this.bersQueued--;
@@ -256,6 +305,7 @@ CharHooks.register('berserker', {
         const s = !!inp.s;
         const pressed = s && !this.bersPrevS;
         this.bersPrevS = s;
+        if (this.bersOH > 0) { this.bersHold = 0; this.bersQueued = 0; return true; } // QUÁ NHIỆT: khoá bắn
         const st = bersStats(this);
         const rate = 1 + st.fr;
         if (!bersSpray(this)) {

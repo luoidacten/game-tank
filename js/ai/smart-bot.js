@@ -249,6 +249,7 @@ class SmartBot {
     // ---- Bắn theo kiểu của body ----
     fire(bot, enemy, aligned, inp) {
         const style = (bot.weapon === 'customize' && typeof cuBotFireStyle === 'function') ? cuBotFireStyle(bot) : (BOT_FIRE_STYLE[bot.weapon] || 'tap');
+        if (bot.weapon === 'berserker' && ((bot.bersOH || 0) > 0 || (bot.bersHeat || 0) > 80)) { inp.s = false; this.tapCool = 0; return; } // Cuồng Chiến Binh: nhả cò cho nguội
         if (style === 'toggle') { // Bình Phun: bật khi thẳng hàng, tắt khi lệch lâu
             if (this.tapCool > 0) { this.tapCool--; inp.s = this.tapCool > 3; return; }
             if ((aligned && !bot.spOn) || (!aligned && bot.spOn && this.t % 60 === 0)) { this.tapCool = 7; inp.s = true; return; }
