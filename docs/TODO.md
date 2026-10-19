@@ -5,7 +5,6 @@
 
 ## 1. Body mới — ƯU TIÊN (làm lần lượt từng body)
 > Đặc tả đầy đủ: `docs/BODY_MOI_DAC_TA.md`
-- **Chrono & Neo** (`chrononeo`) — 2 thế súng, Tham Farm, Thời Khắc.
 - **Gemini** (`gemini`) — 2 xe song sinh, gục & cứu, chuyển giao ý thức.
 - **Huyết Ma** (`blood_lord`) — Bể Máu, Tứ Huyết Thức, Bóng Ma Màn Đêm.
 - **Cuồng Chiến Binh** (`berserker`) — Cuồng Chiến theo % máu, Huyết Đạn, Huyết Chiến bất tử.
