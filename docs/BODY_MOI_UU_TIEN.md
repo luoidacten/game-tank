@@ -644,7 +644,7 @@ Khi đã tách ra, bạn có thể linh hoạt chuyển đổi quyền điều k
 
 ---
 
-# 🃏 2. THẦN BÀI MA THUẬT / QUÁI ĐẠO (`joker` — Tướng Collab)
+# 🃏 2. Joker (`joker` — Tướng Collab)
 
 > *"Lá bài của ta là Joker!"*
 
