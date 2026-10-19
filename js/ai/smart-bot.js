@@ -23,7 +23,7 @@ const BOT_LEVELS = [
 //   tap: nhấp liên tục | hold:N: giữ N tick rồi nhả | stream: giữ liên tục khi thẳng hàng
 //   toggle: nhấp 1 lần để bật (Bình Phun) | aaa: bắn khi thẳng hàng (tự nhắm)
 const BOT_FIRE_STYLE = {
-    lazer_charge: 'hold:95', lazer_auto: 'hold:95', storm: 'hold:40', van_kiem: 'stream',
+    lazer_auto: 'stream', storm: 'hold:40', van_kiem: 'stream',
     six_barrel: 'hold:40', mirror: 'hold:215', shadow_hunter: 'hold:40', shortgunATK: 'hold:40',
     necromancer: 'hold:40', genius: 'hold:40', sprayer: 'toggle',
     dj: 'beat',
@@ -260,6 +260,7 @@ class SmartBot {
         }
         if (style === 'stream') {
             if (bot.weapon === 'six_barrel' && (bot.heat || 0) > 82) { inp.s = false; return; }
+            if (bot.weapon === 'lazer_auto' && ((bot.laOver || 0) > 0 || (bot.laHeat || 0) > 88)) { inp.s = false; return; }
             inp.s = aligned || (bot.weapon === 'six_barrel' && (bot.sbSpin || 0) >= 30 && this.t % 3 !== 0 && Math.random() < 0.3);
             return;
         }
@@ -272,6 +273,12 @@ class SmartBot {
             }
             if (this.tapCool > 0) { this.tapCool--; inp.s = false; return; }
             this.hold = 1; inp.s = true; return; // nạp sẵn trong lúc di chuyển
+        }
+        // Lazer Xuyên Phá: giữ 0.4s bật Tự Nạp; nạp đầy rồi mới nhấp khi thẳng hàng
+        if (bot.weapon === 'lazer_charge') {
+            if (this.hold > 0) { this.hold++; inp.s = this.hold <= 28; if (this.hold > 32) this.hold = 0; return; }
+            if (!bot.lcAuto) { this.hold = 1; inp.s = true; return; }
+            if ((bot.lcEnergy || 0) < 100) { inp.s = false; return; }
         }
         // tap
         if (bot.weapon === 'overload' && (bot.ovMain || 0) < 1 && (bot.ammo || 0) > 0) { inp.s = false; return; } // Quá Tải: chờ thanh chính đầy
