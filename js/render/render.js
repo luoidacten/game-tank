@@ -71,16 +71,38 @@ function renderFrame() {
 
     const now = Date.now();
     let timePlayed = now - gameState.roundStartTime;
-    let suddenDeathLimit = (gameState.currentMap === 'fast_shrink') ? 20000 : C.suddenDeathTime;
-    let shrinkRate = (gameState.currentMap === 'fast_shrink') ? 0.15 : 0.05;
-    if (timePlayed > suddenDeathLimit) {
-        let shrink = (timePlayed - suddenDeathLimit) * shrinkRate;
-        let zoneX = shrink;
-        let zoneW = canvas.width - shrink * 2;
-        if (zoneW < 50) { zoneW = 50; zoneX = canvas.width / 2 - 25; }
-
-        ctx.strokeStyle = 'red'; ctx.setLineDash([10, 10]); ctx.lineWidth = 2;
-        ctx.strokeRect(zoneX, 0, zoneW, canvas.height); ctx.setLineDash([]);
+    const zs = (typeof getZoneState === 'function') ? getZoneState(timePlayed) : null;
+    if (zs) {
+        const H = canvas.height, W = canvas.width;
+        const blink = 0.5 + 0.5 * Math.sin(now / 160);
+        ctx.save();
+        // Phủ đỏ mờ vùng nguy hiểm (ngoài bo)
+        ctx.fillStyle = 'rgba(255, 30, 60, 0.13)';
+        if (zs.x0 > 0) ctx.fillRect(0, 0, zs.x0, H);
+        if (zs.x1 < W) ctx.fillRect(zs.x1, 0, W - zs.x1, H);
+        // Vùng sắp tới (vàng chấm) để người chơi kịp di chuyển
+        if (zs.next && (Math.abs(zs.next.x0 - zs.x0) > 2 || Math.abs(zs.next.x1 - zs.x1) > 2)) {
+            ctx.strokeStyle = `rgba(255, 215, 64, ${0.35 + 0.35 * blink})`; ctx.lineWidth = 2;
+            ctx.setLineDash([4, 8]); ctx.lineDashOffset = -now / 40;
+            ctx.strokeRect(zs.next.x0, 2, zs.next.x1 - zs.next.x0, H - 4);
+            ctx.fillStyle = 'rgba(255, 215, 64, 0.05)';
+            ctx.fillRect(zs.next.x0, 0, zs.next.x1 - zs.next.x0, H);
+        }
+        // Viền bo hiện tại
+        ctx.setLineDash([10, 10]); ctx.lineDashOffset = 0;
+        ctx.strokeStyle = 'red'; ctx.lineWidth = 2;
+        ctx.shadowColor = '#ff1744'; ctx.shadowBlur = 8;
+        ctx.strokeRect(zs.x0, 0, zs.x1 - zs.x0, H);
+        ctx.setLineDash([]); ctx.shadowBlur = 0;
+        // Nhãn giai đoạn (giữa sân, chữ nhỏ)
+        if (zs.label) {
+            ctx.font = "bold 11px 'Orbitron', Arial"; ctx.textAlign = 'center';
+            ctx.fillStyle = zs.phase === 1.5 || zs.phase === 3 ? `rgba(255, 215, 64, ${0.6 + 0.4 * blink})` : 'rgba(255, 82, 82, 0.9)';
+            const lx = Math.max(60, Math.min(W - 60, (zs.x0 + zs.x1) / 2));
+            if (typeof drawWorldText === 'function') drawWorldText(ctx, '⚠ ' + zs.label, lx, H * 0.4);
+            else ctx.fillText('⚠ ' + zs.label, lx, H * 0.4);
+        }
+        ctx.restore();
     }
 
     if (movingObstacle && movingObstacle.active) {

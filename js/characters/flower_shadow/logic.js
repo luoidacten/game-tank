@@ -15,6 +15,7 @@ const FS_HOLD_TICKS = 15;   // giữ 0.25s để đổi vũ điệu
 const FS_REGEN_DELAY = 30;  // Hoa chỉ bắt đầu hồi sau 0.5s không dùng vũ điệu
 const FS_LAND_LOCK = 30;    // Thiên: vòng khóa 0.5s trước khi giáng (RULE 11)
 const FS_EMP_GOLD = '#ffd34d', FS_EMP_LIGHT = '#fff6c8';
+const FS_EMP_PINK = '#ffc4dd', FS_EMP_PINK_LIGHT = '#fff1f7'; // [ĐỔI] cánh Khai cường hóa: hồng nhạt + ánh vàng mờ
 
 function fsEvo1(p) { return p.hasUpgrade('evo_flw_1'); }
 function fsEvo2(p) { return p.hasUpgrade('evo_flw_2'); }
@@ -159,11 +160,12 @@ class FsPetal {
         return false;
     }
     shatter() {
-        spawnSparkParticles(this.x, this.y, this.emp ? FS_EMP_GOLD : FS_PINK, 6);
+        spawnSparkParticles(this.x, this.y, this.emp ? FS_EMP_PINK : FS_PINK, 6);
         this.trail = []; this.fade = 1;
     }
     // Cánh hoa nằm trên sân địch: xe địch lăn qua -> nát ngay (không thu về được nữa)
     crushedByEnemy() {
+        if (this.emp) return false; // [ĐỔI] cánh cường hóa không thể bị đè nát
         const e = this.enemy();
         if (!e || e.hp <= 0) return false;
         if (this.x > e.x - this.r && this.x < e.x + e.w + this.r && this.y > e.y - 12 && this.y < e.y + e.h + 12) {

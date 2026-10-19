@@ -225,13 +225,12 @@ class SmartBot {
     }
 
     safeZone(aheadSec) {
-        const limit = (gameState.currentMap === 'fast_shrink') ? 20000 : C.suddenDeathTime;
-        const rate = (gameState.currentMap === 'fast_shrink') ? 0.15 : 0.05;
         const tp = Date.now() - gameState.roundStartTime + aheadSec * 1000;
-        if (tp <= limit - 1500) return null;
-        const shrink = Math.max(0, (tp - limit) * rate);
-        let x0 = shrink, x1 = canvas.width - shrink;
-        if (x1 - x0 < 50) { x0 = canvas.width / 2 - 25; x1 = canvas.width / 2 + 25; }
+        const z = (typeof getZoneState === 'function') ? getZoneState(tp + 1500) : null;
+        if (!z) return null;
+        // Vùng an toàn tại thời điểm dự đoán (bo 2 giai đoạn, vùng cuối dời trái/phải)
+        const cur = getZoneState(tp) || z;
+        let x0 = cur.x0, x1 = cur.x1;
         return { x0, x1 };
     }
 

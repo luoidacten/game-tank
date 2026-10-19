@@ -15,8 +15,8 @@ const EVOLUTIONS = {
         { id: 'evo_money_2', name: 'Sức Mạnh Đồng Tiền', desc: 'Mọi nâng cấp giảm 25%. Mỗi 100$ tiêu (tối đa 2500$, tính từ lúc mua) nhận 1 mốc thưởng vĩnh viễn: HP, Dame, Đạn, Tốc, Khiên. FULL EVO: mọi mặt hàng giảm 50%, thêm xe tiền trên sân, 3 xe tấn công mỗi 5s (mạnh hơn).', cost: 120, type: 'evo' }
     ],
     tank: [
-        { id: 'evo_tank_1', name: 'Không Thể Cản Phá', desc: 'Lao xuyên vật thể, Bất tử khi lao', cost: 100, type: 'evo' }, // UPDATE COST
-        { id: 'evo_tank_2', name: 'Tàn Phá!!!', desc: 'Húc nổ lan + Hồi khiên nội tại nhanh hơn', cost: 45, type: 'evo' } // UPDATE DESC
+        { id: 'evo_tank_1', name: 'Không Thể Cản Phá', desc: 'Lao húc x1.5 dame, không bị phản chấn khi tông tường/vật thể, khi lao chỉ nhận 20% sát thương', cost: 100, type: 'evo' }, // UPDATE COST
+        { id: 'evo_tank_2', name: 'Tàn Phá!!!', desc: 'Húc nổ lan + băng (khi còn khiên) + Hồi khiên nội tại nhanh hơn (6s -> 4s, Full Evo 2s, +15 HP)', cost: 45, type: 'evo' } // UPDATE DESC
     ],
     ice: [
         { id: 'evo_ice_1', name: 'Bão Tuyết', desc: 'Mỗi 3 lần kích hoạt -> Tạo vùng Băng Cực Đại', cost: 100, type: 'evo' }, // UPDATE DESC
@@ -76,8 +76,8 @@ const EVOLUTIONS = {
         { id: 'evo_ghost_2', name: 'Ảo Ảnh', desc: 'Chu kỳ Vô ảnh nhanh hơn. Mỗi 12s triệu hồi Hư Ảnh bắn phụ.', cost: 120, type: 'evo' }
     ],
     aaa: [
-        { id: 'evo_aaa_1', name: 'Nhắm Đánh Dấu', desc: 'Pháo kích tự ghim mục tiêu. Tự bắn thường: 3 tia liên tiếp.', cost: 80, type: 'evo' },
-        { id: 'evo_aaa_2', name: 'Mưa Tên Lửa', desc: 'Tự bắn -> Rơi 3 bom ngẫu nhiên. Pháo kích nổ bồi lần 2.', cost: 100, type: 'evo' }
+        { id: 'evo_aaa_1', name: 'Nhắm Đánh Dấu', desc: 'Pháo kích tự ghim mục tiêu. Tự bắn thường: 3 tia liên tiếp. Pháo kích nổ bồi 1 lần tại chỗ (có cảnh báo, 50% dame). FULL EVO: nổ bồi 2 lần.', cost: 80, type: 'evo' },
+        { id: 'evo_aaa_2', name: 'Mưa Tên Lửa', desc: 'Tự bắn -> Rơi 3 bom ngẫu nhiên trên làn địch. Pháo kích nổ bồi 1 lần tại chỗ (có cảnh báo, 50% dame). FULL EVO: nổ bồi 2 lần, nổ nhanh hơn.', cost: 100, type: 'evo' }
     ],
     blade_god: [
         { id: 'evo_blade_1', name: 'Kiếm Thế Vô Chủ', desc: 'Anh Minh xuyên thấu. Hư Vô 3 stack = Tử hình. Gọi Phá Thiên -> Bất tử 5s.', cost: 150, type: 'evo' },
@@ -210,6 +210,6 @@ const EVOLUTIONS = {
     ],
     t_zero: [
         { id: 'evo_tzero_1', name: 'Năng Lượng Xanh', desc: 'Hồi NL nhanh hơn mạnh (sau 1s nghỉ). Giảm mọi tiêu hao: Ném khiên 3%, Phản đạn 10% + dame×7%, Đấm 7%, Bay lên 18% và duy trì 6%/s (vẫn gấp đôi mỗi 2.5s bay).', cost: 90, type: 'evo' },
-        { id: 'evo_tzero_2', name: 'Trạng Thái Hủy Diệt', desc: 'THỦ: khiên to & nhanh hơn, để lại vệt điện làm chậm. CÔNG: cú đấm tạo sóng xung kích nổ lan phía trước & phá đạn địch trên đường lao. THIÊN: dội pháo dày hơn, đáp xuống để lại vùng từ trường đốt máu & hút địch. FULL EVO: định kỳ phóng tên lửa tầm nhiệt bay chậm, rẽ nhẹ (né được; đạn địch bắn hạ được) và tên lửa KHÔNG KÍCH vút lên trời rồi cắm thẳng xuống làn địch sau vòng cảnh báo; THỦ: khi khiên đang bay tự xả Tiểu Liên (1% NL/s).', cost: 120, type: 'evo' }
+        { id: 'evo_tzero_2', name: 'Trạng Thái Hủy Diệt', desc: 'THỦ: khiên to & nhanh hơn, để lại vệt điện làm chậm. CÔNG: cú đấm tạo sóng xung kích nổ lan phía trước & phá đạn địch trên đường lao. THIÊN: dội pháo dày hơn, đáp xuống để lại vùng từ trường đốt máu & hút địch. FULL EVO: định kỳ phóng tên lửa tầm nhiệt bay RẤT chậm, rẽ nhẹ (né được; đạn địch bắn hạ được) và tên lửa KHÔNG KÍCH vút lên trời, hiện ra ở cạnh trái/phải mục tiêu rồi bay chậm dọc làn tới vòng cảnh báo (2s, thấy rõ đường bay) mới cắm xuống; THỦ: khi khiên đang bay tự xả Tiểu Liên (1% NL/s).', cost: 120, type: 'evo' }
     ]
 };
