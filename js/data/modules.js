@@ -264,6 +264,15 @@ const MODULES = {
             size: { w: 30, h: 30 },
             stats: { hp: 5, dmg: 0.75, ammo: 4, speedMult: 1.0 }
         },
+        {
+            id: 'chrononeo',
+            name: 'Chrono & Neo',
+            desc: '"Hai thời đại, một dòng chảy!" HP:4.5 | Dame:1 | Đạn:4 (Chrono) / 10 (Neo) | Tốc: 3.3. THAM FARM: phá thùng, xe tiền, triệu hồi địch & qua mỗi hiệp -> băng đạn tăng vĩnh viễn (Chrono 4->10, Neo 10->20). Giữ Bắn 0.4s đổi thế (hồi 4s), 2 băng riêng (băng kia tự nạp ngầm). CHRONO: đạn đồng x1.5 xuyên vật cản, Xé Giáp; vào thế -> sóng đẩy lùi + giảm 25% sát thương 1.5s. NEO: nhấp bắn 2 viên x0.75, nhanh hơn; vào thế -> lướt ngang +40% tốc 1.5s. THỜI KHẮC: giữ 1 thế 4s -> phát kế tiếp cường hóa: Chrono radar khóa mọi mục tiêu & xả cả băng đạn tự tìm (không thể cản phá); Neo chùm 8-12 viên hình nón (Xé Giáp, chậm 35%) + Ảnh Chiếu bất tử 5s tự bắn.',
+            type: 'body',
+            role: ['Đối Đầu', 'Cơ Động', 'Sinh Tồn'],
+            size: { w: 28, h: 28 },
+            stats: { hp: 4.5, dmg: 1, ammo: 4, speedMult: 0.943 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 30 },

@@ -224,4 +224,8 @@ const EVOLUTIONS = {
         { id: 'evo_heal_1', name: 'Hồi Phục Vượt Ngưỡng', desc: 'Đầy máu: lượng hồi dư chuyển thành Giáp Trắng (tối đa 4 + 50% MaxHP), đỡ đòn trước máu. Đạn Cường Hóa mạnh hơn (65% MaxHP, nổ lan 30%).', cost: 90, type: 'evo' },
         { id: 'evo_heal_2', name: 'Nghịch Lý Y Đạo', desc: 'Mỗi lần được hồi máu (mọi nguồn, kể cả vào Giáp Trắng) phóng 1 Tia Xung tự ngắm gây dame = lượng vừa hồi. Giảm Năng Lượng cần cho Đạn Cường Hóa. FULL EVO: Bất Tử Y Thần — Tái Tạo nhanh gấp đôi (1.5s); đạn gắn ấn Kháng Hồi Phục 5s: địch hồi máu bị cướp sang bạn; Đạn Cường Hóa = 100% MaxHP + dame.', cost: 110, type: 'evo' }
     ],
+    chrononeo: [
+        { id: 'evo_cn_1', name: 'Bước Thời Gian', desc: 'Thời Khắc chỉ cần giữ thế 2.5s. Đổi Thế Hoàn Hảo: đổi thế trong 3s sau đòn Thời Khắc -> băng thế mới nạp đầy ngay; nếu đang có Ảnh Chiếu -> hoán đổi vị trí với nó.', cost: 100, type: 'evo' },
+        { id: 'evo_cn_2', name: 'Dòng Chảy Hội Tụ', desc: 'Đầu hiệp +3 đạn Chrono / +6 đạn Neo; điểm Thời Đại từ thùng & xe tiền x2. Liên Xạ +4 viên, viên cuối nổ choáng 0.5s. Mưa Đạn bắn 2 đợt, Ảnh Chiếu 8s bắn đạn làm chậm. FULL EVO: Liên Hoa Thời Gian — băng tối đa ngay (10/20), đổi thế hồi 2s; Phân Thân Nghịch Đảo (AI cầm thế ngược trên làn bạn, đổi thế đồng bộ kèm hiệu ứng); cứ 2 lần Thời Khắc -> 4s bão đạn Liên Hoa rồi đại pháo Nở Rộ phủ kín sân địch.', cost: 120, type: 'evo' }
+    ],
 };

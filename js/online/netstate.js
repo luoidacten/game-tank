@@ -21,6 +21,7 @@ const NET_CLASSES = {
     TzMortar, TzZone, TzAirStrike,
     OvEmpRing, OvEmpMark,
     ThunderReturnBolt, ThunderStrike, ThunderZone,
+    CnRing, CnRadar, CnEcho,
     BgLightSword, BgDarkHover, BgBlackHole, BgGuardian, BgSkySword,
 };
 
