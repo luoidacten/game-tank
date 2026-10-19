@@ -42,4 +42,4 @@
 - Súng Nước khi có vồi rồng sẻ phung như tia lazer (phát đầu to mạnh sao đó thành vồi rồng sẻ phung như lazer)
 - Bow: (Mưa tên (từ nội tại) các điểm cảnh báo xuất toàn map (không bị giới hạn) để người chơi có thể né (còn mưa tên nhất giữa để vậy được rồi)
 - Các tướng Collap rất mạnh nên phân biệt với tương thường ở phần chọn tướng. NẾU bạn chọn **tướng Collap** đối thủ sẻ được bù 100-200 tiền đầu game tùy tướng.
-- 
+- Cơ Bản ----> Nhân Vật Chính (MAIN)
