@@ -23,6 +23,7 @@ const NET_CLASSES = {
     ThunderReturnBolt, ThunderStrike, ThunderZone,
     CnRing, CnRadar, CnEcho,
     BgLightSword, BgDarkHover, BgBlackHole, BgGuardian, BgSkySword,
+    GeminiTwin,
 };
 
 // Biến toàn cục cần đồng bộ: [tên, getter, setter]

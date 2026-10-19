@@ -148,6 +148,7 @@ class SkyStrike {
         if (enemy && Math.hypot(enemy.x + enemy.w / 2 - this.x, enemy.y + enemy.h / 2 - this.y) < this.r + enemy.w / 2) {
             enemy.takeDamage(this.dmg, this.owner);
         }
+        if (typeof gmZoneHitTwin === 'function') gmZoneHitTwin(this.owner, this.x, this.y, this.r, this.dmg); // Gemini: Bản Sao AI
         explosions.push(new Explosion(this.x, this.y, this.r + 10, 'gold', 0, this.owner));
         triggerScreenShake(5, 8);
     }
