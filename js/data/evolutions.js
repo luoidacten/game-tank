@@ -244,4 +244,8 @@ const EVOLUTIONS = {
         { id: 'evo_kaz_1', name: 'Vô Niệm Lưu Thủy', desc: 'Hồi Ý Niệm +10/s, mọi thức kiếm tốn ít hơn 25%. Kiếm Thế Quyết +2 Kiếm Ý. Nghịch Trảm hồi 10s, thủ thế 0.8s, đỡ hụt không bị khựng.', cost: 100, type: 'evo' },
         { id: 'evo_kaz_2', name: 'Bách Biến Kiếm Thế', desc: 'AA: lốc kiếm to gấp rưỡi & phản đạn nhỏ. AB: xuyên mọi vật cản & 100% Khiên. BA: để lại vệt kiếm 3s (Làm Chậm + Cấm Hồi Máu). BB: để lại 1 Hư Ảnh chém bồi 1 nhát nổ. Loạn Vũ Hư Ảnh: bản thân Bất Tử. FULL EVO (Vạn Cảnh Trảm Vực): vào hiệp sẵn 5 Kiếm Ý, Tốc 4.2; Loạn Vũ / Nghịch Trảm thành công mở Trảm Vực 4s quanh địch (sát thương liên tục, hút về tâm, cấm lướt/dịch chuyển).', cost: 140, type: 'evo' }
     ],
+    tsukiyo: [
+        { id: 'evo_tsu_1', name: 'Thích Ứng Sắc Bén', desc: 'Nội Năng tối đa 150, mọi kỹ năng tốn ít hơn 25%, đổi phong cách chỉ cần giữ 0.5s, Phi Tiêu ném trượt vẫn hồi +2 Nội Năng.', cost: 100, type: 'evo' },
+        { id: 'evo_tsu_2', name: 'Nhẫn Đạo Hoàn Chỉnh', desc: 'Yêu cầu Nhẫn Đạo giảm 50% (1 cấp mỗi loại, bản thân Evo cũng tính 1 cấp), +1 Max HP, +0.25 Tốc, +25% Dame, Phi Tiêu trúng hồi +12 Nội Năng, mọi nhánh Nhẫn Đạo mạnh hơn. FULL EVO (Đỉnh Cao Nhẫn Giả): Nội Năng 200, thêm 1 bậc chỉ số; Phi Tiêu +40% tốc, xuyên 1 mục tiêu, trúng +15 / trượt +4; Kết Ấn 0.25s, Hỏa Cầu nhanh +35%, nổ rộng +30% & Vũng Lửa 2.5s; lướt nhanh +50%, chém vỡ đạn, Chảy Máu 3s & xuyên 50% Khiên; 9 nhánh Nhẫn Đạo lên bản Tuyệt Đỉnh.', cost: 180, type: 'evo' },
+    ],
 };

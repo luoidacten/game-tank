@@ -210,6 +210,8 @@ function renderFrame() {
     if (typeof curseFxOver === 'function') curseFxOver();
     // Lớp phủ kết liễu Hoa Ảnh (chớp màn hình, nhát chém ngang) - js/characters/flower_shadow/render.js
     if (typeof fsFxOver === 'function') fsFxOver();
+    // Lớp phủ kết liễu Tsukiyo (Nguyệt Trảm) - js/characters/tsukiyo/render.js
+    if (typeof tsFxOver === 'function') tsFxOver();
 
     // Particles & Floating Numbers
     updateAndDrawParticles();

@@ -305,6 +305,14 @@ const MODULES = {
             size: { w: 28, h: 28 },
             stats: { hp: 5, dmg: 1, ammo: 0, speedMult: 1.086 }
         },
+        {
+            id: 'tsukiyo',
+            name: 'Tsukiyo',
+            desc: '"Nhận Lệnh!" Nhẫn Giả Thích Ứng. HP:4 | Dame:0.25 | Nội Năng 100 (tự hồi chậm) | Tốc: 3.4. Giữ Bắn 0.75s: đổi 3 PHONG CÁCH. ✦ KỸ THUẬT: nhấp ném Phi Tiêu (3 NN, trúng +8 NN, trượt 0). 🔥 BÍ THUẬT: nhấp (25 NN) đứng yên 0.5s Kết Ấn rồi phun Hỏa Cầu nổ lớn. ⚔ TẤT SÁT: nhấp (30 NN) lướt vút lên chém xuyên mục tiêu (Bất Tử khi lướt). NHẪN ĐẠO: đủ 2 cấp Động Cơ / Bánh Xích / Giáp Thép (Evo 2: 1 cấp; Evo 2 & Full Evo tính thêm 1 cấp mỗi loại) -> chọn 1 trong 3 nhánh (Kỹ Thuật / Bí Thuật / Tất Sát) cho mốc đó trong nút NHẪN ĐẠO ở shop. Hạ gục địch -> kết liễu NGUYỆT TRẢM.',
+            type: 'body', role: ['Cơ Động', 'Đối Đầu', 'Kiểm Soát'],
+            size: { w: 26, h: 26 },
+            stats: { hp: 4, dmg: 0.25, ammo: 0, speedMult: 0.971 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 30 },
