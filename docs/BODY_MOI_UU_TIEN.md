@@ -697,3 +697,65 @@ Giảm Nội tại THoát Hiểm có Cd là 60s(chỉ tính khi bị kịch ho�
 | **FULL EVO: Sòng Bạc Hoàng Gia (All-In Joker)** | *(Mua đủ 2 Evo)* | Mỗi lần tráo bài tỉ lến bốc Joker tăng bạn • Khi nạp đạn có tỉ lệ 10% **Bộ Bài Toàn Joker:** Cứ **CẢ 10/10 LÁ BÀI TRONG TAY ĐỀU HÓA THÀNH LÁ JOKER**!<br> (Tẩu Thoát tích được 2 cộng dồn mới ngừng tính hồi chiêu Cd giảm 45s) (hiệu ứng các lá bài mạnh hơn)
 
 <br>• **Phán Quyết Joker:*(Cd skill này là 25s)* Khi bắn trúng địch đủ **5 lá Joker** (lưu phải bắn trúng nổ không tính), trên đầu kẻ địch hiện lên lá bài khổng lồ phát nổ **Showdown**: Rút phăng **50% máu hiện tại của địch**, xóa sạch Khiên của địch và hiệu ứng buff và Tẩu Thoát công 1 điểm tích trữ điểm này sẻ cộng dồn quá mức (nghĩa là bạn bạn có thể tầu thoát 3 lần trong điều kiện lý tưởng) 
+
+
+Bản thiết kế làm lại (Rework / Upgrade) cực cháy cho Body **Cơ Bản** biến thành **"Main" (Nhân Vật Chính)** đậm chất Anime/Shounen:
+
+---
+
+### Cơ Bản $\rightarrow$ Thức Tỉnh: "MAIN"
+
+* **Tên hiển thị:** Khi chọn Body Cơ Bản, có **tỉ lệ nhỏ (Easter Egg)** tên xe sẽ đổi thành **MAIN** cùng dòng khẩu hiệu rực cháy: *"Chiến đấu đến khi lửa tàn!!"*.
+* **Nội tại khởi đầu - Thiên Phú Bẩm Sinh:**
+* Ngay khi vừa vào trận (Round 1), xe tự động được **mở khóa sẵn Full Evo** mà không cần mua trong Shop (sở hữu cả `evo_basic_1` và `evo_basic_2` ngay lập tức).
+
+
+
+
+
+---
+
+### Nội Tại Thức Tỉnh: HỒI ỨC (Dạng MAIN)
+
+* **Kích hoạt:** Lần đầu tiên trong trận đấu bị đối thủ hạ gục (HP về 0).
+
+
+* **Hiệu ứng Thức Tỉnh:**
+* **Hồi sinh tức thì với 100% Máu tối đa** và chuyển vĩnh viễn sang **Dạng MAIN**.
+
+
+* Kích hoạt sóng xung kích nổ đẩy lùi đối thủ, nhận **3s bất tử** để tạo khoảng trống.
+
+
+* **Hệ thống phát nhạc:** Kích hoạt trigger đổi nhạc nền sang bài nhạc chiến đấu (Boss/Awakening Theme).
+
+
+* **Chỉ số dạng MAIN:**
+* **Máu (HP):** Tăng gấp đôi ($\times 2$ Max HP và đầy bình máu).
+* **Sát thương (DMG):** Tăng thêm $+1$ Dame thẳng vào mỗi viên đạn.
+* **Băng đạn (Ammo):** Tăng vọt lên **10 viên**.
+* **Hiệu ứng hình ảnh:** Thân xe phủ hào quang lửa cháy rực, đạn đổi sang màu vàng ánh kim hoặc đỏ rực.
+
+
+
+---
+
+### Tuyệt Kỹ: CƠ HỘI CUỐI (Trận Chiến Định Mệnh)
+
+* **Điều kiện kích hoạt:** Khi trận đấu bước vào **Round quyết định cuối cùng** (Match Point / Round cuối của thể thức BO5 khi đối thủ đang chạm điểm thắng hoặc tỉ số hòa 2-2).
+* **Hiệu ứng Siêu Thần (Vang danh Nhân Vật Chính):**
+* **Chuyển nhạc lần 2:** Hệ thống phát nhạc kích hoạt đổi bài nhạc sang bài "Final Climax Theme" (Nhạc cao trào đỉnh điểm).
+* **Siêu cộng dồn chỉ số:** Tăng cực mạnh toàn bộ chỉ số thực chiến (Tốc chạy, Tốc bắn, Max HP, Giáp).
+* **Sức Mạnh Hợp Nhất (Tất Cả Trong Một):** Đạn và đòn đánh của MAIN nhận được đặc tính buff từ **tất cả các Body khác trong game**:
+
+
+* *Đạn Lớn + Xuyên Phá:* Đạn siêu to khổng lồ và xuyên qua mọi vật cản.
+
+
+* *Đóng Băng & Thiêu Đốt:* Đạn vừa làm chậm/đóng băng vừa kích nổ thiêu đốt DoT.
+
+
+* *Pháo Kích & Nổ Lan:* Mỗi phát bắn chạm đích kèm vụ nổ AoE của Pháo Tên Lửa.
+
+
+* *Lướt Tốc Biến:* Thừa hưởng khả năng lướt né đòn cơ động của Cung và Shadow Hunter.
