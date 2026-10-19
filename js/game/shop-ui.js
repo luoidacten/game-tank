@@ -179,15 +179,15 @@ function renderShop(playerId, keepItems = false) {
             let cost = Math.round(15 * Math.pow(2, player.upgradeLevel) * mtPriceMult(player));
             let nextLvl = player.upgradeLevel + 1;
             let bonusText = "";
-            if (nextLvl === 3) bonusText = "<br>(Mở khóa: KHIÊN + 1 HP)";
+            if (nextLvl === 3) bonusText = "<br>(Mở khóa: KHIÊN + 2 HP)";
             if (nextLvl === 4) bonusText = "<br>(Mở khóa: ĐẠN XUYÊN + 0.5 DAME)";
             if (nextLvl === 5) bonusText = "<br>(Mở khóa: ĐẠN NỔ)";
-            if (nextLvl === 6) bonusText = "<br>(ĐẾ CHẾ TIỀN TỆ: +2 HP, +2 Đạn, +1 Dame, 2 Khiên)";
+            if (nextLvl === 6) bonusText = "<br>(ĐẾ CHẾ TIỀN TỆ: +3 HP, +2 Đạn, +1 Dame, 2 Khiên)";
 
             let upgradeBtn = document.createElement('div');
             upgradeBtn.className = 'card';
             upgradeBtn.style.border = '2px solid gold';
-            upgradeBtn.innerHTML = `<h4>CẤP ĐỘ ${nextLvl}</h4><p>+0.5 HP, Dame, Đạn, Tốc.${bonusText}</p><p style="color:#f1c40f;">$${cost}</p>`;
+            upgradeBtn.innerHTML = `<h4>CẤP ĐỘ ${nextLvl}</h4><p>+1 HP, Dame, Đạn, Tốc.${bonusText}</p><p style="color:#f1c40f;">$${cost}</p>`;
             upgradeBtn.onclick = () => {
                 let curMoney = (playerId === 'p1') ? gameState.p1Coins : gameState.p2Coins;
                 if (curMoney >= cost) {

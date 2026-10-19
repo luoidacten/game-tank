@@ -6,11 +6,9 @@
 
 ## 0. Chỉnh sửa gấp (làm TRƯỚC mục 1)
 - Nhà Phát Minh: drone chưa có art mới.
-- Cổng Không Gian: skill mở Cổng Bắn có CD 5s, giới hạn số cổng, chỉ mở bên sân mình (đối thủ né được); tăng giá Evo 2.
 - Cuồng Chiến Binh: thêm thanh Nhiệt — sấy/bắn nhanh & nhiều thì nóng, quá nhiệt phải nghỉ.
 - Nhà Ảo Thuật: tạo phân thân có khiên CD riêng 10s; Thoát Chết dịch chuyển chỗ khác, để lại 1 phân thân (1 lần/hiệp, Full Evo 2 lần); hiệu ứng mũ ảo thuật rơi từ trời khi phân thân & thoát chết.
 - Nam Châm: không bị hiệu ứng từ của chính mình hút/đẩy; tách Nhiễm Từ (chạm vùng từ, chỉ là dấu) và Ấn Từ (bắn trúng trực tiếp, tồn tại lâu, tạo vùng từ quanh địch); bấm bắn khi phía trước có mục tiêu khác cực: Cột → lao tới húc nổ như TANK rồi về chỗ cũ; địch có Ấn Từ → cả hai bị hút vào giữa map va chạm gây sát thương rồi rơi về chỗ cũ.
-- Xe tiền và tiến hóa xuồng còn 2 máu ở cấp 1.
 - Hoa Ảnh cải thiện hiệu ứng hơn nữa đặc biệt là rút về vị trí cũ (hóa thành 1 tìa sáng hồng ra giật về vị trí cũng) (các hiệu ứng khác cũng mượt và đẹp hơn) (đặc biệt thêm hiệu ứng kết liễu)
 - Phong trảm: lưỡi kiếm gió xấu quá giống cái mong quá (1 hình bán nguyệt xoay tròn thêm hiệu ứng được rồi
 
