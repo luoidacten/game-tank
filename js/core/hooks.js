@@ -108,3 +108,17 @@ function spawnBullet(owner, o) {
     owner.bullets.push(b);
     return b;
 }
+
+// ==========================================
+// Đạn tự tìm (homing) — luật chung cho mọi body:
+//  - Trước khi qua giữa sân: bẻ lái bình thường (đã giảm độ linh hoạt).
+//  - Qua giữa sân hơn 40px: chỉ còn bẻ rất yếu (25%).
+//  - Gần mục tiêu (< 110px): không bẻ lái nữa -> dễ né bằng cách lách ngang.
+// ==========================================
+function homingTurnScale(b, ownerId, tx, ty) {
+    const cx = b.x + (b.w || 0) / 2, cy = b.y + (b.h || 0) / 2;
+    if (Math.hypot(tx - cx, ty - cy) < 110) return 0;
+    const mid = canvas.height / 2;
+    const past = ownerId === 1 ? (mid - cy) : (cy - mid);
+    return past > 40 ? 0.25 : 1;
+}

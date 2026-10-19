@@ -17,15 +17,11 @@ function tickPhysics() {
         screenShake.duration--;
     }
 
-    // 2. Sudden Death Damage
-    let suddenDeathLimit = (gameState.currentMap === 'fast_shrink') ? 20000 : C.suddenDeathTime;
-    let shrinkRate = (gameState.currentMap === 'fast_shrink') ? 0.15 : 0.05;
+    // 2. Sudden Death Damage (Bo 2 giai đoạn — xem getZoneState)
     let timePlayed = now - gameState.roundStartTime;
-    if (timePlayed > suddenDeathLimit) {
-        let shrink = (timePlayed - suddenDeathLimit) * shrinkRate;
-        let zoneX = shrink;
-        let zoneW = canvas.width - shrink * 2;
-        if (zoneW < 50) { zoneW = 50; zoneX = canvas.width / 2 - 25; }
+    const zs = getZoneState(timePlayed);
+    if (zs) {
+        let zoneX = zs.x0, zoneW = zs.x1 - zs.x0;
 
         [p1, p2].forEach(p => {
             if (p.x < zoneX || p.x + p.w > zoneX + zoneW) {
@@ -115,10 +111,14 @@ function tickPhysics() {
     }
 
     let curMagnetTime = Date.now();
+    const MAGNET_STRONG_TICKS = 120;
     magnetNodes.forEach(node => {
         if (!node.active) return;
         let speedMult = (node.owner && node.owner.hasUpgrade && node.owner.hasUpgrade('evo_mag_net_2')) ? 1.5 : 1.0;
-        let baseForce = 2.8 * speedMult;
+        // Từ trường suy yếu theo thời gian: 2s đầu cực mạnh, sau đó yếu hẳn (tránh khóa đối thủ mãi)
+        node.age = (node.age || 0) + 1;
+        let strongField = node.age <= MAGNET_STRONG_TICKS;
+        let baseForce = (strongField ? 4.2 : 1.0) * speedMult;
         [p1, p2].forEach(p => {
             if (!p || p.hp <= 0) return;
             let dist = Math.hypot((p.x + p.w / 2) - node.x, (p.y + p.h / 2) - node.y);
@@ -147,7 +147,7 @@ function tickPhysics() {
                             p.x = Math.max(0, Math.min(canvas.width - p.w, p.x + dirX * baseForce));
                         }
                         if (Math.abs(dx) <= 30 && p !== node.owner) {
-                            p.freezeTimer = Math.max(p.freezeTimer || 0, 30);
+                            if (strongField) p.freezeTimer = Math.max(p.freezeTimer || 0, 30);
                             if (!node.lastDmgTime || curMagnetTime - node.lastDmgTime >= 1000) {
                                 node.lastDmgTime = curMagnetTime;
                                 let shockDmg = (node.owner && node.owner.hasUpgrade && node.owner.hasUpgrade('evo_mag_net_1')) ? 0.5 : 0.25;
@@ -256,6 +256,7 @@ function tickPhysics() {
             const enemy = (b.ownerId === 1) ? p2 : p1;
 
             if (rectIntersect(b.x, b.y, b.w, b.h, enemy.x, enemy.y, enemy.w, enemy.h)) { enemy.takeDamage(1, (b.ownerId === 1 ? p1 : p2)); }
+            if (enemy.weapon === 'gemini' && typeof gmRectHitTwin === 'function') gmRectHitTwin(enemy, b.x, b.y, b.w, b.h, 1, owner); // Gemini: Bản Sao AI
 
             crates.forEach(c => {
                 if (c.active && rectIntersect(b.x, b.y, b.w, b.h, c.x, c.y, c.w, c.h)) {
@@ -345,4 +346,57 @@ function tickPhysics() {
     if (typeof onlineManager !== 'undefined' && onlineManager.isOnline) {
         onlineManager.onTickEnd();
     }
+}
+
+// ==========================================
+// BO (vùng an toàn thu hẹp cuối round) — 2 giai đoạn
+//  GĐ1: thu từ toàn sân về 50% bề ngang, tâm KHÔNG ở giữa sân (lệch ngẫu nhiên gameState.zoneOff)
+//  Nghỉ: giữ nguyên, hiện trước vùng GĐ2
+//  GĐ2: thu tiếp về vùng nhỏ cuối cùng
+//  Cuối: vùng nhỏ dời trái/phải mỗi vài giây (hiện trước điểm đến) -> chống cắm trại
+// tp: thời gian đã chơi (ms). Trả về null khi chưa vào bo.
+// ==========================================
+function getZoneState(tp) {
+    const fast = gameState.currentMap === 'fast_shrink';
+    const limit = fast ? 20000 : C.suddenDeathTime;
+    if (tp <= limit) return null;
+    const W = canvas.width;
+    const rate = fast ? 0.15 : 0.05;           // px/ms mỗi bên (như cũ)
+    const t = tp - limit;
+    const off = (typeof gameState.zoneOff === 'number' ? gameState.zoneOff : 0.18) * W;
+    const W1 = W * 0.5, WF = 84;
+    const c0 = W / 2, c1 = Math.max(W1 / 2 + 6, Math.min(W - W1 / 2 - 6, W / 2 + off));
+    const SIDE = Math.min(55, W / 2 - WF / 2 - 10);
+    const sgn = off >= 0 ? 1 : -1;
+    const cF = (i) => W / 2 + (i % 2 === 0 ? sgn : -sgn) * SIDE; // vị trí thứ i của vùng cuối
+    const D1 = (W - W1) / 2 / rate, HOLD = fast ? 3000 : 5000, D2 = (W1 - WF) / 2 / rate;
+    const MOVE = 3000, STAY = 2000, SEG = MOVE + STAY;
+    const lerp = (a, b, k) => a + (b - a) * k;
+    const mk = (c, w) => ({ x0: c - w / 2, x1: c + w / 2 });
+    let c, w, phase, next = null, label;
+    if (t < D1) {
+        const k = t / D1; c = lerp(c0, c1, k); w = lerp(W, W1, k); phase = 1; label = 'BO GIAI ĐOẠN 1';
+        next = mk(c1, W1);
+    } else if (t < D1 + HOLD) {
+        c = c1; w = W1; phase = 1.5; next = mk(cF(0), WF);
+        label = 'BO GIAI ĐOẠN 2 SAU ' + Math.ceil((D1 + HOLD - t) / 1000) + 's';
+    } else if (t < D1 + HOLD + D2) {
+        const k = (t - D1 - HOLD) / D2; c = lerp(c1, cF(0), k); w = lerp(W1, WF, k); phase = 2; label = 'BO GIAI ĐOẠN 2';
+        next = mk(cF(0), WF);
+    } else {
+        const tf = t - D1 - HOLD - D2;
+        const i = Math.floor(tf / SEG), r = tf - i * SEG;
+        w = WF; phase = 3;
+        if (r < STAY) {
+            c = cF(i); next = mk(cF(i + 1), WF);
+            label = 'BO DỜI SAU ' + Math.ceil((STAY - r) / 1000) + 's';
+        } else {
+            const k = (r - STAY) / MOVE; c = lerp(cF(i), cF(i + 1), k * k * (3 - 2 * k)); next = mk(cF(i + 1), WF);
+            label = 'BO ĐANG DỜI';
+        }
+    }
+    const z = mk(c, w);
+    z.x0 = Math.max(0, z.x0); z.x1 = Math.min(W, z.x1);
+    z.phase = phase; z.next = next; z.label = label;
+    return z;
 }

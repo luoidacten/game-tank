@@ -20,9 +20,11 @@ Object.assign(Player.prototype, {
                     }
                 } else if (this.energyChargeTimer === 60) {
                     // Cấp thường: Đủ 1s -> Xả HitScan
+                    // Laser nước: cột cảnh báo khoá 0.5s rồi mới bắn (đối thủ kịp né)
                     if (this.energy >= 50) {
                         this.energy -= 50;
-                        this.fireAnhMinhHitscan(this.damage * 3, this.hasUpgrade('evo_water_2'), "#3498db");
+                        const dmg = this.damage * 3, pierce = this.hasUpgrade('evo_water_2');
+                        scheduleHitscan(this, 30, '#00bfff', 30, () => this.fireAnhMinhHitscan(dmg, pierce, "#3498db"));
                         this.lastShot = now;
                     }
                 } else if (this.energyChargeTimer > 60 && hasEvo1) {

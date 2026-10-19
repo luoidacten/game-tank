@@ -18,7 +18,7 @@ const TZ_DASH_SPEED = 16, TZ_DASH_BACK = 11;
 const TZ_FLY_CD = 150;             // đáp đất xong phải chờ 2.5s mới được cất cánh lại
 const TZ_LOCK_TICKS = 30;          // LUẬT 11: tâm ngắm khóa 0.5s rồi mới đáp xuống
 const TZ_DIVE_TICKS = 12;          // 12 tick cuối của thời gian khóa là pha lao xuống
-const TZ_MISSILE_SPEED = 2.8, TZ_MISSILE_MAX = 4.4, TZ_MISSILE_TURN = 0.032;
+const TZ_MISSILE_SPEED = 1.8, TZ_MISSILE_MAX = 2.7, TZ_MISSILE_TURN = 0.028; // [ĐỔI] bay chậm hơn nữa
 const TZ_AIRSTRIKE_EVERY = 210;    // FULL EVO: chu kỳ tên lửa không kích (dưới đất)
 
 function tzEvo1(p) { return p.hasUpgrade('evo_tzero_1'); }
@@ -369,7 +369,7 @@ function tzUpdateMissiles(p) {
         const b = p.bullets[i];
         if (b.hook !== 'tz_missile') continue;
         b.tzLife = (b.tzLife || 0) + 1;
-        if (b.tzLife > 260) { explosions.push(new Explosion(b.x, b.y, 18, 'rgba(255, 140, 60,', 0, p)); p.bullets.splice(i, 1); continue; }
+        if (b.tzLife > 420) { explosions.push(new Explosion(b.x, b.y, 18, 'rgba(255, 140, 60,', 0, p)); p.bullets.splice(i, 1); continue; }
         // Có thể bị bắn hạ: đạn địch chạm tên lửa -> đạn bị nuốt, tên lửa mất máu (1 HP)
         if (enemy && enemy.bullets && enemy.bullets.length) {
             const mx = b.x + b.w / 2, my = b.y + b.h / 2;
@@ -397,8 +397,8 @@ function tzUpdateMissiles(p) {
         let ca = Math.atan2(b.vy, b.vx), d = ta - ca;
         while (d <= -Math.PI) d += Math.PI * 2;
         while (d > Math.PI) d -= Math.PI * 2;
-        ca += Math.sign(d) * Math.min(Math.abs(d), TZ_MISSILE_TURN);
-        const sp = Math.min(TZ_MISSILE_MAX, Math.hypot(b.vx, b.vy) + 0.03);
+        ca += Math.sign(d) * Math.min(Math.abs(d), TZ_MISSILE_TURN * homingTurnScale(b, p.id, enemy.x + enemy.w / 2, enemy.y + enemy.h / 2));
+        const sp = Math.min(TZ_MISSILE_MAX, Math.hypot(b.vx, b.vy) + 0.02);
         b.vx = Math.cos(ca) * sp; b.vy = Math.sin(ca) * sp;
     }
 }
@@ -418,8 +418,11 @@ class TzAirStrike {
         this.dir = owner.id === 1 ? -1 : 1;
         this.sx = owner.x + owner.w / 2; this.sy = this.dir < 0 ? owner.y : owner.y + owner.h;
         this.x = this.sx; this.y = this.sy; this.tx = this.sx; this.ty = this.sy;
+        this.fx = this.sx; // [MỚI] điểm xuất hiện của tên lửa (bên trái / phải mục tiêu)
         this.phase = 'rise'; this.t = 0; this.r = 42;
-        this.RISE = 26; this.WARN = 62; this.BOOM = 14;
+        // [ĐỔI] Cảnh báo dài hơn (62 -> 120 tick): tên lửa hiện ra ở cạnh trái/phải mục tiêu,
+        // bay chậm dọc làn tới điểm rơi (thấy rõ đường bay) rồi mới cắm xuống.
+        this.RISE = 26; this.WARN = 120; this.DIVE = 18; this.BOOM = 14;
     }
     update() {
         if (!this.active) return;
@@ -432,9 +435,21 @@ class TzAirStrike {
                 const enemy = this.owner === p1 ? p2 : p1;
                 const pt = enemy ? laneTargetPoint(enemy, 55) : { x: this.sx, y: canvas.height / 2 };
                 this.tx = pt.x; this.ty = pt.y;
+                // Chọn phía xuất hiện: ngẫu nhiên trái/phải, đổi phía nếu sát mép (đường bay quá ngắn)
+                const OFF = 170;
+                let side = Math.random() < 0.5 ? -1 : 1;
+                if (side < 0 && this.tx - 14 < OFF * 0.6) side = 1;
+                else if (side > 0 && canvas.width - 14 - this.tx < OFF * 0.6) side = -1;
+                this.fx = Math.max(14, Math.min(canvas.width - 14, this.tx + side * OFF));
+                this.x = this.fx; this.y = this.ty;
                 this.phase = 'warn'; this.t = 0;
             }
         } else if (this.phase === 'warn') {
+            // Bay ngang chậm từ điểm xuất hiện tới điểm rơi (đến nơi khi hết DIVE cuối)
+            const k = Math.min(1, this.t / (this.WARN - this.DIVE));
+            const e = k * k * (3 - 2 * k) * 0.85 + k * 0.15;
+            this.x = this.fx + (this.tx - this.fx) * e;
+            this.y = this.ty;
             if (this.t >= this.WARN) {
                 explosions.push(new Explosion(this.tx, this.ty, this.r, 'rgba(255, 90, 40,', this.dmg, this.owner, true));
                 explosions.push(new Explosion(this.tx, this.ty, this.r * 0.5, 'rgba(255, 240, 200,', 0, this.owner));
@@ -472,11 +487,17 @@ class TzAirStrike {
         if (this.phase !== 'warn') return;
         const k = this.t / this.WARN;
         const x = this.tx, y = this.ty, R = this.r;
-        const blink = 0.5 + 0.5 * Math.sin(now * (10 + 20 * k));
+        const blink = 0.5 + 0.5 * Math.sin(now * (8 + 18 * k));
+        const travelEnd = this.WARN - this.DIVE;
+        const diving = this.t > travelEnd;
+        const q = diving ? (this.t - travelEnd) / this.DIVE : 0; // tiến độ cắm xuống
+        // Tên lửa bay "trên trời": lệch về phía giữa sân một đoạn, hạ dần khi cắm xuống
+        const ALT = 46;
+        const mx = this.x, my = y - this.dir * ALT * (1 - q * q);
         ctx.save();
         // Vòng cảnh báo (neon cam -> đỏ dần)
         ctx.shadowBlur = 10; ctx.shadowColor = '#f97316';
-        ctx.fillStyle = `rgba(255, 70, 30, ${0.06 + 0.2 * k})`;
+        ctx.fillStyle = `rgba(255, 70, 30, ${0.05 + 0.2 * k})`;
         ctx.strokeStyle = `rgba(255, ${Math.round(160 - 110 * k)}, 40, ${0.6 + 0.4 * blink})`;
         ctx.lineWidth = 2;
         ctx.setLineDash([7, 5]); ctx.lineDashOffset = -now * 40;
@@ -490,28 +511,48 @@ class TzAirStrike {
         ctx.moveTo(x - R - 6, y); ctx.lineTo(x - R * 0.4, y); ctx.moveTo(x + R * 0.4, y); ctx.lineTo(x + R + 6, y);
         ctx.moveTo(x, y - R - 6); ctx.lineTo(x, y - R * 0.4); ctx.moveTo(x, y + R * 0.4); ctx.lineTo(x, y + R + 6);
         ctx.stroke();
+        // Đường bay còn lại (vạch đứt chạy về điểm rơi) + vệt đã bay qua mờ dần
+        if (!diving) {
+            ctx.shadowBlur = 6; ctx.shadowColor = '#fb923c';
+            ctx.strokeStyle = `rgba(253, 186, 116, ${0.45 + 0.35 * blink})`;
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([4, 6]); ctx.lineDashOffset = (this.tx > this.fx ? -1 : 1) * now * 30;
+            ctx.beginPath(); ctx.moveTo(mx, my); ctx.lineTo(x, y - this.dir * ALT); ctx.lineTo(x, y); ctx.stroke();
+            ctx.setLineDash([]);
+            const tg = ctx.createLinearGradient(this.fx, 0, mx, 0);
+            tg.addColorStop(0, 'rgba(255, 140, 60, 0)'); tg.addColorStop(1, 'rgba(255, 170, 90, 0.55)');
+            ctx.strokeStyle = tg; ctx.lineWidth = 3; ctx.shadowBlur = 0;
+            ctx.beginPath(); ctx.moveTo(this.fx, my); ctx.lineTo(mx, my); ctx.stroke();
+        }
         ctx.font = "bold 9px 'Orbitron', Arial"; ctx.textAlign = 'center'; ctx.fillStyle = `rgba(254, 215, 170, ${0.6 + 0.4 * blink})`;
         ctx.shadowBlur = 0;
         drawWorldText(ctx, '⚠ KHÔNG KÍCH', x, y + (this.dir < 0 ? R + 15 : -R - 9));
-        ctx.restore();
-        // Tên lửa cắm thẳng đứng từ trên trời xuống (to dần)
-        if (k > 0.35) {
-            const q = (k - 0.35) / 0.65;
-            const my = y - this.dir * (1 - q * q) * 150; // lao xuống từ phía giữa sân (luôn nằm trong màn hình)
-            const sc = 0.6 + 0.7 * q;
-            ctx.save();
-            // Bóng đổ
-            ctx.fillStyle = `rgba(0, 0, 0, ${0.15 + 0.3 * q})`;
-            ctx.beginPath(); ctx.ellipse(x, y, 4 + 10 * q, 2 + 4 * q, 0, 0, Math.PI * 2); ctx.fill();
-            ctx.translate(x, my); if (this.dir < 0) ctx.rotate(Math.PI); ctx.scale(sc, sc);
-            ctx.strokeStyle = 'rgba(255, 200, 120, 0.5)'; ctx.lineWidth = 3;
-            ctx.beginPath(); ctx.moveTo(0, -12); ctx.lineTo(0, -40); ctx.stroke();
-            ctx.shadowBlur = 12; ctx.shadowColor = '#f97316';
-            ctx.fillStyle = '#e2e8f0'; ctx.fillRect(-3, -12, 6, 14);
-            ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.moveTo(-3, 2); ctx.lineTo(0, 8); ctx.lineTo(3, 2); ctx.fill();
-            ctx.fillStyle = '#f97316'; ctx.fillRect(-5, -12, 2, 4); ctx.fillRect(3, -12, 2, 4);
-            ctx.restore();
+        // Bóng đổ của tên lửa trên làn
+        ctx.fillStyle = `rgba(0, 0, 0, ${0.18 + 0.25 * q})`;
+        ctx.beginPath(); ctx.ellipse(mx, y, 7 + 6 * q, 3 + 2 * q, 0, 0, Math.PI * 2); ctx.fill();
+        // Thân tên lửa: nằm ngang khi bay, xoay dần cắm xuống khi tới nơi
+        const flyAng = this.tx >= this.fx ? 0 : Math.PI;        // hướng bay ngang
+        const downAng = this.dir < 0 ? Math.PI / 2 : -Math.PI / 2; // hướng xuống làn địch
+        let ang = flyAng;
+        if (diving) {
+            let d = downAng - flyAng;
+            while (d > Math.PI) d -= Math.PI * 2;
+            while (d < -Math.PI) d += Math.PI * 2;
+            ang = flyAng + d * Math.min(1, q * 1.6);
         }
+        const sc = 1.0 + 0.3 * q;
+        ctx.translate(mx, my); ctx.rotate(ang); ctx.scale(sc, sc);
+        // Lửa đuôi (phía sau = -x)
+        const fl = 8 + Math.random() * 6;
+        const g = ctx.createLinearGradient(-8, 0, -8 - fl, 0);
+        g.addColorStop(0, '#ffffff'); g.addColorStop(0.35, '#fb923c'); g.addColorStop(1, 'rgba(255,80,0,0)');
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.moveTo(-8, -2.5); ctx.lineTo(-8, 2.5); ctx.lineTo(-8 - fl, 0); ctx.closePath(); ctx.fill();
+        ctx.shadowBlur = 12; ctx.shadowColor = '#f97316';
+        ctx.fillStyle = '#e2e8f0'; ctx.fillRect(-8, -3, 14, 6);
+        ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.moveTo(6, -3); ctx.lineTo(11, 0); ctx.lineTo(6, 3); ctx.fill();
+        ctx.fillStyle = '#f97316'; ctx.fillRect(-8, -5, 4, 2); ctx.fillRect(-8, 3, 4, 2);
+        ctx.restore();
     }
 }
 

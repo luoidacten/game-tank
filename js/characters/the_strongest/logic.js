@@ -34,11 +34,15 @@ Object.assign(Player.prototype, {
         const beamX = this.x + this.w / 2 - beamW / 2;
 
         // Tọa độ Y và Chiều cao của tia (Bắn thẳng về phía đối diện)
-        const bRy = (this.id === 1) ? 0 : this.y + this.h;
-        const bRh = (this.id === 1) ? this.y : canvas.height - (this.y + this.h);
+        let bRy = (this.id === 1) ? 0 : this.y + this.h;
+        let bRh = (this.id === 1) ? this.y : canvas.height - (this.y + this.h);
+        const swBlk = sniperWallClipBeam(this, beamX, bRy, beamW, bRh, this.id === 1 ? -1 : 1, this.damage / 2); // Tường Sniper chặn tia
+        if (swBlk) { bRy = swBlk.y; bRh = swBlk.h; }
 
         // 2. Vẽ tia (Tận dụng array beams của bạn)
-        beams.push(new Beam(beamX, bRy, beamW, bRh, this.id, isEvo2));
+        const redBeam = new Beam(beamX, bRy, beamW, bRh, this.id, isEvo2);
+        redBeam.isGojoRed = true; // hình tia Đỏ riêng (curse.js)
+        beams.push(redBeam);
 
         // Thêm một vụ nổ nhỏ ngay họng súng để tạo cảm giác "Bắn Đỏ"
         explosions.push(new Explosion(this.x + this.w / 2, (this.id === 1) ? this.y : this.y + this.h, beamW + 20, 'rgba(255, 0, 0, 0.7)', 0, this));
@@ -120,6 +124,7 @@ Object.assign(Player.prototype, {
             this.chuLucRegenCooldown = 0;
 
             this.gojoChargeTimer = 0;
+            this.gojoDomainTimer = 0;
             this.usedBlue = false;
             this.usedRed = false;
             this.canshotActive = true;
@@ -137,6 +142,7 @@ Object.assign(Player.prototype, {
     // [handleShooting] Kẻ Mạnh Nhất — trả về true nếu cần dừng handleShooting()
     shootTheStrongest(inp) {
         if (this.weapon === 'the_strongest') {
+            if (this.gojoDomainTimer > 0) this.gojoDomainTimer--; // thời gian hiển thị Vô Lượng Không Xứ
             if (this.silenceTimer > 0) return true; // Đang câm lặng (do xài Domain) thì nghỉ
 
             let hasSixEyes = this.hasUpgrade('evo_strongest_2');
@@ -151,7 +157,7 @@ Object.assign(Player.prototype, {
                     explosions.push(new Explosion(this.x + this.w / 2, this.y + this.h / 2, 40, 'rgba(255, 0, 0, 0.4)', 0, this));
                 } else if (this.gojoChargeTimer === 300 && hasPurple) {
                     // Mốc 2: Đủ gồng Lãnh Địa (Bỏ ctx.fillText để tránh lỗi chớp nháy, dùng hiệu ứng nổ đen báo hiệu)
-                    explosions.push(new Explosion(this.x + this.w / 2, this.y + this.h / 2, 100, 'rgba(0, 0, 0, 0.8)', 0, this));
+                    explosions.push(new Explosion(this.x + this.w / 2, this.y + this.h / 2, 100, 'rgba(147, 197, 253,', 0, this));
                 }
             } else {
                 if (this.gojoChargeTimer > 0) {
@@ -164,7 +170,8 @@ Object.assign(Player.prototype, {
                         this.silenceTimer = 60;
                         enemy.silenceTimer = 90; // Câm lặng 1.5s (cũ 3s)
                         enemy.freezeTimer = 60; // Choáng 1s (cũ 2s)
-                        explosions.push(new Explosion(canvas.width / 2, canvas.height / 2, 350, 'rgba(0,0,0,0.8)', 0, this));
+                        this.gojoDomainTimer = 100; // hiệu ứng Lãnh Địa Vô Lượng Không Xứ (chỉ để vẽ)
+                        // (Hình ảnh Lãnh Địa: curse.js vẽ theo gojoDomainTimer - bỏ vụ nổ đen che giữa màn hình)
 
                         this.usedBlue = false;
                         this.usedRed = false;
@@ -176,7 +183,8 @@ Object.assign(Player.prototype, {
                         this.canshotActive = false;
 
                         // Cảnh báo 0.5s (khoá cột) rồi mới bắn tia Đỏ hitscan
-                        scheduleHitscan(this, 30, '#ff3b3b', hasSixEyes ? 30 : 20, () => this.fireGojoRed(hasSixEyes, enemy));
+                        const redWarn = scheduleHitscan(this, 30, '#ff3b3b', hasSixEyes ? 30 : 20, () => this.fireGojoRed(hasSixEyes, enemy));
+                        if (redWarn) redWarn.isGojoRed = true;
 
                         setTimeout(() => { this.canshotActive = true; }, 1000);
                     }
