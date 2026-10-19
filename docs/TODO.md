@@ -5,7 +5,6 @@
 > Phiên mới: đọc `docs/HANDOVER.md` trước (công cụ test ở `tools/`).
 
 ## 0. Chỉnh sửa gấp (làm TRƯỚC mục 1)
-- Nam Châm: không bị hiệu ứng từ của chính mình hút/đẩy; tách Nhiễm Từ (chạm vùng từ, chỉ là dấu) và Ấn Từ (bắn trúng trực tiếp, tồn tại lâu, tạo vùng từ quanh địch); bấm bắn khi phía trước có mục tiêu khác cực: Cột → lao tới húc nổ như TANK rồi về chỗ cũ; địch có Ấn Từ → cả hai bị hút vào giữa map va chạm gây sát thương rồi rơi về chỗ cũ.
 - Hoa Ảnh cải thiện hiệu ứng hơn nữa đặc biệt là rút về vị trí cũ (hóa thành 1 tìa sáng hồng ra giật về vị trí cũng) (các hiệu ứng khác cũng mượt và đẹp hơn) (đặc biệt thêm hiệu ứng kết liễu)
 - Phong trảm: lưỡi kiếm gió xấu quá giống cái mong quá (1 hình bán nguyệt xoay tròn thêm hiệu ứng được rồi
 
