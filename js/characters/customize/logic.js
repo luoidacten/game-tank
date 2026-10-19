@@ -314,7 +314,7 @@ CharHooks.register('customize', {
                 while (df <= -Math.PI) df += Math.PI * 2;
                 while (df > Math.PI) df -= Math.PI * 2;
                 const toward = (b.vy < 0) === (enemy.y < b.y); // chỉ bẻ khi địch còn ở phía trước
-                if (toward) { ca += Math.sign(df) * Math.min(Math.abs(df), b.cuHome); const s = Math.hypot(b.vx, b.vy); b.vx = Math.cos(ca) * s; b.vy = Math.sin(ca) * s; }
+                if (toward) { ca += Math.sign(df) * Math.min(Math.abs(df), b.cuHome * homingTurnScale(b, this.id, enemy.x + enemy.w / 2, enemy.y + enemy.h / 2)); const s = Math.hypot(b.vx, b.vy); b.vx = Math.cos(ca) * s; b.vy = Math.sin(ca) * s; }
             }
             // Đạn Tách: qua giữa sân thì tách thành nhiều mảnh tỏa
             if (b.cuSplit && ((b.vy < 0 && b.y < midY) || (b.vy > 0 && b.y > midY))) {

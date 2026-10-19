@@ -382,7 +382,7 @@ function cnSteer(p) {
         let d = want - cur;
         while (d <= -Math.PI) d += Math.PI * 2;
         while (d > Math.PI) d -= Math.PI * 2;
-        cur += Math.sign(d) * Math.min(Math.abs(d), 0.2);
+        cur += Math.sign(d) * Math.min(Math.abs(d), 0.08 * homingTurnScale(b, p.id, tx, ty));
         const sp = Math.min(9, Math.hypot(b.vx, b.vy) + 0.12);
         b.vx = Math.cos(cur) * sp; b.vy = Math.sin(cur) * sp;
     }

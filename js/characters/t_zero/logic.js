@@ -397,7 +397,7 @@ function tzUpdateMissiles(p) {
         let ca = Math.atan2(b.vy, b.vx), d = ta - ca;
         while (d <= -Math.PI) d += Math.PI * 2;
         while (d > Math.PI) d -= Math.PI * 2;
-        ca += Math.sign(d) * Math.min(Math.abs(d), TZ_MISSILE_TURN);
+        ca += Math.sign(d) * Math.min(Math.abs(d), TZ_MISSILE_TURN * homingTurnScale(b, p.id, enemy.x + enemy.w / 2, enemy.y + enemy.h / 2));
         const sp = Math.min(TZ_MISSILE_MAX, Math.hypot(b.vx, b.vy) + 0.02);
         b.vx = Math.cos(ca) * sp; b.vy = Math.sin(ca) * sp;
     }

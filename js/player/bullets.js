@@ -184,7 +184,7 @@ Object.assign(Player.prototype, {
                 while (diff <= -Math.PI) diff += Math.PI * 2;
                 while (diff > Math.PI) diff -= Math.PI * 2;
 
-                currentAngle += Math.sign(diff) * Math.min(Math.abs(diff), 0.05);
+                currentAngle += Math.sign(diff) * Math.min(Math.abs(diff), 0.035 * homingTurnScale(b, this.id, enemy.x + enemy.w / 2, enemy.y + enemy.h / 2));
 
                 let speed = Math.hypot(b.vx, b.vy);
                 b.vx = Math.cos(currentAngle) * speed;
