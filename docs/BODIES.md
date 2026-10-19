@@ -76,6 +76,7 @@
 | 53 | **Tia Lazer** | `lazer_beam` | 3 | 0.2 | — (năng lượng riêng) | 3.8 | 28×28 |  | — |
 | 54 | **Y Sư** | `healer` | 5 | 0.75 | 4 | 3.5 | 30×30 |  | — |
 | 55 | **Chrono & Neo** | `chrononeo` | 4.5 | 1 | 4 | 3.3 | 28×28 |  | — |
+| 56 | **Gemini** | `gemini` | 3.5 | 0.75 | 4 | 3.6 | 26×26 |  | — |
 
 > *Tỉ lệ thắng mô phỏng*: trung bình của 2 mức (chỉ có body / có Full Evo + 2 module), mỗi body đấu vòng tròn với mọi body khác, hai bên cùng một AI tự động. AI không biết chơi kinh tế hay combo phức tạp nên con số chỉ mang tính tham khảo cho độ mạnh tương đối.
 
@@ -129,6 +130,7 @@
 | Tia Lazer | MỚI: Tia Lazer — giữ bắn: tích 0.5s + cảnh báo 0.5s rồi chiếu tia liên tục (0.2/nhịp, chậm khi chiếu, tụt năng lượng, chớp tắt); Evo 2 tia phình to + dame tăng dần + đốt; Full Evo không chậm + tia xung kích mỗi 2s |
 | Y Sư | MỚI: Y Sư — tự hồi 0.5 HP sau 3s không mất máu, đạn hấp huyết (CD 20s), thanh Năng Lượng Sinh Mệnh → đạn cường hóa 50% Max HP + dame gốc; Evo 1 giáp trắng; Evo 2 mỗi lần hồi bắn tia tự ngắm; Full Evo cướp máu hồi của địch |
 | Chrono & Neo | MỚI: Collab Chrono & Neo — Tham Farm tăng băng đạn vĩnh viễn (4→10 / 10→20), giữ 0.4s đổi thế Chrono (đạn đồng xuyên, sóng đẩy) ↔ Neo (2 viên, lướt tăng tốc), đồng hồ cát Thời Khắc → Liên Xạ tự tìm / Mưa Đạn Hình Nón + Ảnh Chiếu; Full Evo: AI phụ cầm thế ngược lại + bão Liên Hoa |
+| Gemini | MỚI: Gemini — 2 xe song sinh (bạn + AI tự hành), gục thì có vòng cứu 2s (nhân đôi mỗi lần), chỉ thua khi cả 2 cùng gục; giữ 0.4s Chuyển Giao Ý Thức đổi quyền điều khiển; Evo 2 mạnh dần theo hiệp; Full Evo tự khởi động lại + đạn tự ngắm sau chuyển giao |
 
 ## Module chân (FEET)
 
@@ -933,6 +935,20 @@ HP:5 | Dame:0.75 | Đạn:4 | Tốc: 3.5. "Hồi Phục": 3s không mất máu +
   | Dòng Chảy Hội Tụ (`evo_cn_2`) | $120 | Đầu hiệp +3 đạn Chrono / +6 đạn Neo; điểm Thời Đại từ thùng & xe tiền x2. Liên Xạ +4 viên, viên cuối nổ choáng 0.5s. Mưa Đạn bắn 2 đợt, Ảnh Chiếu 8s bắn đạn làm chậm. FULL EVO: Liên Hoa Thời Gian — băng tối đa ngay (10/20), đổi thế hồi 2s; Phân Thân Nghịch Đảo (AI cầm thế ngược trên làn bạn, đổi thế đồng bộ kèm hiệu ứng); cứ 2 lần Thời Khắc -> 4s bão đạn Liên Hoa rồi đại pháo Nở Rộ phủ kín sân địch. |
 
 - **Mã nguồn:** `js/characters/chrononeo/logic.js`, `js/characters/chrononeo/render.js`
+
+### 56. Gemini (`gemini`)
+
+"Hai cá thể, một ý thức!" HP:3.5 x2 xe | Dame:0.75 | Đạn:4 | Tốc: 3.6. Làn của bạn có thêm Bản Sao AI (chỉ số 100% như bạn, kể cả module chân) tự né đạn, phá thùng/xe tiền & bắn địch. Về 0 HP -> GỤC: đồng đội đứng trong Vòng Cứu 2s để hồi sinh 50% HP (rời vòng >1s thanh tụt; mỗi lần cứu thời gian x2). Chỉ thua khi CẢ HAI cùng gục. Giữ Bắn 0.4s: Chuyển Giao Ý Thức — đổi quyền điều khiển sang xe kia (hồi 3s).
+
+- **Chỉ số thực đầu hiệp:** HP 3.5 · Sát thương 0.75 · Đạn 4 · Tốc độ 3.6 · Kích thước 26×26
+- **Tiến hoá:**
+
+  | Evo | Giá | Hiệu ứng |
+  |---|---:|---|
+  | Liên Kết Thần Kinh (`evo_gem_1`) | $90 | AI phối hợp: giữ giãn cách tránh nổ lan, bắn ép góc, ưu tiên chạy lại cứu bạn (bám vòng cứu). Chuyển Giao hồi chỉ 1.2s; thanh cứu không bị tụt khi rời vòng. Vòng cứu rộng +50%; lần cứu đầu tiên mỗi hiệp chỉ 1s và không tính nhân đôi. |
+  | Đệ Quy Vô Tận (`evo_gem_2`) | $120 | Cả 2 xe tăng dần tốc chạy & tốc bắn theo thời gian giao tranh; mỗi hiệp đã qua cộng dồn +0.25 MaxHP, +6% dame, đạn to hơn (tối đa 8 tầng). Sau Chuyển Giao: 1s cả 2 xe +50% tốc chạy, x1.8 tốc bắn, x1.3 dame. FULL EVO: Siêu Trí Tuệ Song Hành — AI tối thượng (tự cân đối cứu / kết liễu); lần gục đầu tiên của mỗi xe tự khởi động lại, các lần sau thanh cứu tự tăng tới 99% (chạm là dậy); 0.5s sau Chuyển Giao mọi đạn của 2 xe tự khoá mục tiêu. |
+
+- **Mã nguồn:** `js/characters/gemini/logic.js`, `js/characters/gemini/render.js`
 
 ## Phụ lục: cơ chế các body mới
 

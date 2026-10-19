@@ -12,7 +12,7 @@
 // - Evo1 Liên Kết Thần Kinh: AI giỏi hơn (giữ giãn cách, ép góc, ưu tiên cứu), hồi chuyển giao 1.2s, thanh cứu
 //   không tụt, vòng cứu rộng +50%, lần cứu đầu 1s và không tính nhân đôi.
 // - Evo2 Đệ Quy Vô Tận: tốc chạy / tốc bắn tăng dần theo thời gian giao tranh; mỗi hiệp đã qua cộng dồn
-//   +0.25 MaxHP, +6% dame, đạn to hơn (tối đa 8 tầng). Sau chuyển giao: 1s cả 2 xe +50% tốc, x1.8 tốc bắn, x1.5 dame.
+//   +0.25 MaxHP, +6% dame, đạn to hơn (tối đa 8 tầng). Sau chuyển giao: 1s cả 2 xe +50% tốc, x1.8 tốc bắn, x1.3 dame.
 // - Full Evo: AI tối thượng (cân đối cứu / kết liễu), lần gục đầu tiên của mỗi xe tự tái khởi động (1.5s),
 //   các lần sau thanh cứu tự tăng tới 99% (chạm là dậy); 0.5s sau chuyển giao mọi đạn của 2 xe tự khoá mục tiêu.
 // Mọi state là dữ liệu thuần trên player / GeminiTwin (đồng bộ online); bộ não AI chỉ chạy trên host.
@@ -59,7 +59,7 @@ function gmRamp(p) {
 }
 function gmSpeedMult(p) { return (1 + gmRamp(p)) * (p.gmBurst > 0 ? 1.5 : 1); }
 function gmRateMult(p) { return (1 + gmRamp(p)) * (p.gmBurst > 0 ? 1.8 : 1); }
-function gmDmgMult(p) { return p.gmBurst > 0 ? 1.5 : 1; }
+function gmDmgMult(p) { return p.gmBurst > 0 ? 1.3 : 1; }
 
 // ---- Bắn (dùng chung cho bản thể & Bản Sao) ----
 function gmFire(p, cx, tag) {
@@ -230,7 +230,7 @@ triggerFatalCinematic = function (winnerId, victim) {
 // ==========================================
 const GM_BRAIN = {};
 function gmBrain(p) {
-    const lvl = gmFull(p) ? 5 : (gmE1(p) ? 3 : 1);
+    const lvl = gmFull(p) ? 4 : (gmE1(p) ? 3 : 1);
     let b = GM_BRAIN[p.id];
     if (!b) { b = GM_BRAIN[p.id] = new SmartBot(lvl); }
     if (b.levelIdx !== lvl) b.setLevel(lvl);

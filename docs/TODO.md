@@ -5,7 +5,6 @@
 
 ## 1. Body mới — ƯU TIÊN (làm lần lượt từng body)
 > Đặc tả đầy đủ: `docs/BODY_MOI_DAC_TA.md`
-- **Gemini** (`gemini`) — 2 xe song sinh, gục & cứu, chuyển giao ý thức.
 - **Huyết Ma** (`blood_lord`) — Bể Máu, Tứ Huyết Thức, Bóng Ma Màn Đêm.
 - **Cuồng Chiến Binh** (`berserker`) — Cuồng Chiến theo % máu, Huyết Đạn, Huyết Chiến bất tử.
 
@@ -26,4 +25,5 @@
 - Pháo Cao Xạ: **có Evo bất kỳ** là nổ lặp 1 lần, Full Evo 2 lần.
 - Tường Sniper chặn cả Đạn Lớn Full Evo (dù Đạn Lớn "xuyên mọi vật cản").
 - Bot Sấm Chớp chưa biết dùng Lôi Trảm; bot DJ có thể mất đạn khi bấm hụt nốt.
+- Gemini Full Evo từng thắng 95% trong mô phỏng → đã giảm (AI cấp 4, bùng nổ x1.3); cần chơi thử. Một số đòn đặc biệt (tia riêng của body, Gojo...) chưa trúng xe AI của Gemini.
 - Chưa thử thật chế độ Online cho các thay đổi gần đây.
