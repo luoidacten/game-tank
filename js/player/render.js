@@ -120,7 +120,8 @@ Object.assign(Player.prototype, {
         // Vẽ Phantom (Bóng ma) - Evo 2 Ghost
         this.drawGhost2();
 
-        if ((this.weapon === 'overload' || this.weapon === 'lazer_charge') && this.chargeLevel > 0) {
+        // Cuộn Quá Tải / Lazer Xuyên Phá: mức tụ lực đã hiện trên hình xe (cuộn dây / thanh tụ lực) + HUD cường hóa
+        if ((this.weapon === 'overload' || this.weapon === 'lazer_charge') && this.chargeLevel > 0 && !(typeof TANK_ART !== 'undefined' && TANK_ART[this.weapon])) {
             let cColor = (this.weapon === 'lazer_charge') ? `rgb(0, ${this.chargeLevel * 35}, 255)` : `rgb(255, ${255 - this.chargeLevel * 30}, 0)`;
             ctx.fillStyle = cColor;
             ctx.fillRect(this.x, this.y + this.h / 2 - 5, this.w * (this.chargeLevel / 7), 10);
@@ -155,6 +156,8 @@ Object.assign(Player.prototype, {
             if (b.hook && BulletHooks.registry[b.hook] && BulletHooks.registry[b.hook].draw) { BulletHooks.call(b, 'draw'); return; }
             // --- VẼ TIA SÁNG NEON (NƯỚC / LỬA) ---
             if (b.isWater || b.isFurnace) {
+                // Art riêng (js/render/tank-art/heavy.js): cầu lửa / giọt nước / tia phun
+                if (typeof BULLET_ART !== 'undefined' && BULLET_ART[b.owner.weapon]) { drawBulletArt(b, (b.owner.id === 1) ? '#3498db' : '#e74c3c', b.owner); return; }
                 ctx.save();
                 ctx.globalCompositeOperation = "lighter";
 
