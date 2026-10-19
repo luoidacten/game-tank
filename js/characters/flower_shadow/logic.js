@@ -394,6 +394,7 @@ class FsClone {
         if (this.phase > 0) {
             if (fsDashStep(this, o, fsLaneY(o), fsEvo2(o))) {
                 this.phase = 0; fsPhaFinish(o, this.hits, 3, 1); this.hits = [];
+                bodyEffects.push(new FsBloom(this.x + this.w / 2, this.y + this.h / 2, 18, 16));
                 this.cd = 105;
             }
             return;
@@ -532,6 +533,54 @@ class FsStar {
 // Thanh Hoa & thi triển
 // ==========================================
 // recall=true: hoa thu hồi -> nạp tới trần kho; nguồn khác chỉ tới mức tự hồi
+// ==========================================
+// Hiệu ứng thuần hình ảnh (dữ liệu thường, có trong NET_CLASSES)
+// ==========================================
+// Vệt sáng hồng: xe hóa thành sao chổi lao từ (x1,y1) về (x2,y2), tới nơi nở hoa
+class FsStreak {
+    constructor(x1, y1, x2, y2, dur = 12, bloom = 30) {
+        this.x1 = x1; this.y1 = y1; this.x2 = x2; this.y2 = y2;
+        this.dur = dur; this.bloom = bloom; this.t = 0;
+        this.seed = Math.round(Math.random() * 1000) / 100;
+        this.active = true;
+    }
+    update() {
+        this.t++;
+        if (this.t === this.dur && this.bloom > 0) {
+            bodyEffects.push(new FsBloom(this.x2, this.y2, this.bloom, 24));
+            spawnSparkParticles(this.x2, this.y2, FS_LIGHT, 10);
+        }
+        if (this.t > this.dur + 28) this.active = false;
+    }
+    draw() { fsDrawStreak(this); }
+}
+
+// Bùng nở hoa: chớp sáng + vòng sóng + tia + bông hoa mở
+class FsBloom {
+    constructor(x, y, r, dur = 24) {
+        this.x = x; this.y = y; this.r = r; this.dur = dur; this.t = 0;
+        this.rot = Math.round(Math.random() * 628) / 100;
+        this.active = true;
+    }
+    update() { if (++this.t >= this.dur) this.active = false; }
+    draw() { fsDrawBloom(this); }
+}
+
+// Kết liễu: đòn của Hoa Ảnh hạ gục đối thủ -> hoa anh đào bùng nổ + nhát chém ngang màn hình
+class FsFinisher {
+    constructor(owner, victim) {
+        this.team = owner.id;
+        this.x = victim.x + victim.w / 2; this.y = victim.y + victim.h / 2;
+        this.ang = Math.round((-0.5 + (Math.random() - 0.5) * 0.5) * 100) / 100;
+        this.seed = Math.round(Math.random() * 1000) / 100;
+        this.t = 0; this.dur = 90;
+        this.active = true;
+    }
+    update() { if (++this.t >= this.dur) this.active = false; }
+    draw() { fsDrawFinisher(this); }
+    drawOver() { fsDrawFinisherOver(this); }
+}
+
 function fsGainHoa(p, amt, x, y, recall = false) {
     const cap = recall ? fsMaxHoa(p) : fsRegenCap(p);
     const cur = p.fsHoa || 0;
@@ -624,6 +673,8 @@ function fsThienStart(p, emp) {
     };
     explosions.push(new Explosion(p.x + p.w / 2, p.y + p.h / 2, 34, 'rgba(255, 126, 182,', 0, p));
     spawnSparkParticles(p.x + p.w / 2, p.y + p.h / 2, FS_PINK, 14);
+    // Hóa vệt sáng vút lên trời
+    bodyEffects.push(new FsStreak(p.x + p.w / 2, p.y + p.h / 2, p.x + p.w / 2, p.y + p.h / 2 + fsDir(p) * 150, 10, 0));
     // Biến mất khỏi mặt sàn: dời xe ra ngoài sân (không thể bị nhắm / trúng)
     p.y = p.id === 1 ? canvas.height + 300 : -300 - p.h;
     fsSfx('playDash');
@@ -680,6 +731,7 @@ function fsThienImpact(p) {
     for (const ob of fsObjects(p)) if (Math.hypot(ob.x + ob.w / 2 - c.x, ob.y + ob.h / 2 - c.y) < c.r + ob.w / 2) fsHitObject(p, ob, dmg);
     explosions.push(new Explosion(c.x, c.y, c.r + 14, 'rgba(255, 61, 139,', 0, p));
     explosions.push(new Explosion(c.x, c.y, c.r * 0.6, 'rgba(255, 240, 247,', 0, p));
+    bodyEffects.push(new FsBloom(c.x, c.y, c.r * 1.5, 28));
     spawnSparkParticles(c.x, c.y, FS_PINK, 18);
     triggerScreenShake(7, 10);
     fsSfx('playExplosion');
@@ -688,23 +740,27 @@ function fsThienImpact(p) {
         // Full Evo: Ngôi Sao Trảm nguyên bản (2s, kết liễu x5); Base / Evo 1: 1.5s, x3.5
         const full = fsFull(p);
         bodyEffects.push(new FsStar(p, c.x, c.y, c.r * 1.25, full ? 120 : 90, full ? 5 : 3.5));
-        p.fsMode = 'star'; p.fsStarT = full ? 120 : 90; p.fsLandX = c.x;
+        p.fsMode = 'star'; p.fsStarT = full ? 120 : 90; p.fsLandX = c.x; p.fsLandY = c.y;
         p.fsCircle = null;
     } else {
         p.fsCircle = null;
-        fsReturn(p, c.x);
+        fsReturn(p, c.x, c.y);
     }
 }
 
 // Lộn về làn ngang của mình (tại hoành độ cú đáp)
-function fsReturn(p, cx) {
+// fromY: tung độ điểm đáp -> xe hóa vệt sáng hồng lao vụt về làn cũ (thuần hình ảnh)
+function fsReturn(p, cx, fromY) {
     p.fsHidden = false;
     p.fsMode = 'idle';
     p.fsCircle = null;
     p.x = Math.max(0, Math.min(canvas.width - p.w, cx - p.w / 2));
     p.y = fsLaneY(p);
     p.invincibleTimer = Math.max(p.invincibleTimer || 0, 12);
-    spawnSparkParticles(p.x + p.w / 2, p.y + p.h / 2, FS_LIGHT, 10);
+    if (typeof fromY === 'number') {
+        bodyEffects.push(new FsStreak(cx, fromY, p.x + p.w / 2, p.y + p.h / 2, 12, 34));
+        p.fsArriveT = 22;
+    } else spawnSparkParticles(p.x + p.w / 2, p.y + p.h / 2, FS_LIGHT, 10);
 }
 
 // Full Evo: định kỳ vài cánh hoa tự khóa mục tiêu
@@ -719,6 +775,20 @@ function fsAutoPetals(p) {
         bodyEffects.push(new FsPetal(p, sx, sy, 0, 0, p.damage * fsPow(p) * FS_PETAL_NERF, { state: 'seekAim', timer: 36, tx: ex, ty: ey, refund: false }));
     }
 }
+
+// Kết liễu: đòn của Hoa Ảnh làm máu đối thủ về 0 -> hiệu ứng hoa anh đào (không đổi logic dame)
+(function () {
+    const orig = Player.prototype.takeDamage;
+    Player.prototype.takeDamage = function (amount, attacker) {
+        const before = this.hp;
+        const r = orig.apply(this, arguments);
+        if (before > 0 && this.hp <= 0 && attacker && attacker !== this && attacker.weapon === 'flower_shadow'
+            && !bodyEffects.some(e => e instanceof FsFinisher)) {
+            bodyEffects.push(new FsFinisher(attacker, this));
+        }
+        return r;
+    };
+})();
 
 // Hòm đạn: +40% Hoa
 (function () {
@@ -739,11 +809,12 @@ CharHooks.register('flower_shadow', {
         this.fsHoa = 100; this.fsDance = 0; this.fsHold = 0; this.fsPrevS = false; this.fsHoldValid = false;
         this.fsSpent = 0; this.fsEmpowered = false; this.fsCd = 0; this.fsWarnCd = 0; this.fsRegenWait = 0;
         this.fsMode = 'idle'; this.fsHidden = false; this.fsHomeX = 0; this.fsCircle = null;
-        this.fsStarT = 0; this.fsLandX = 0; this.fsTick = 0; this.fsBotT = 0;
+        this.fsStarT = 0; this.fsLandX = 0; this.fsLandY = 0; this.fsArriveT = 0; this.fsTick = 0; this.fsBotT = 0;
         this.phase = 0; this.hits = []; this.trail = [];
     },
     update(inp, effInp) {
         this.fsTick++;
+        if (this.fsArriveT > 0) this.fsArriveT--;
         if (this.fsCd > 0) this.fsCd--;
         if (this.fsWarnCd > 0) this.fsWarnCd--;
         // Hồi Hoa: chỉ hồi sau 0.5s không dùng vũ điệu (đang múa Phá/Thiên cũng tính là đang dùng)
@@ -766,13 +837,15 @@ CharHooks.register('flower_shadow', {
         if (this.fsMode === 'pha') {
             if (fsDashStep(this, this, fsLaneY(this), fsEvo2(this))) {
                 this.fsMode = 'idle'; this.phase = 0;
+                this.fsArriveT = 14;
+                bodyEffects.push(new FsBloom(this.x + this.w / 2, this.y + this.h / 2, 26, 20));
                 fsPhaFinish(this, this.hits, 5, 1);
                 this.hits = [];
             }
         } else if (this.fsMode === 'thien') {
             fsThienUpdate(this, effInp || inp);
         } else if (this.fsMode === 'star') {
-            if (--this.fsStarT <= 0) fsReturn(this, this.fsLandX);
+            if (--this.fsStarT <= 0) fsReturn(this, this.fsLandX, this.fsLandY);
         }
 
         // Bot phòng tập: tự chọn vũ điệu theo lượng Hoa

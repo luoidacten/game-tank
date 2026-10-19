@@ -671,6 +671,18 @@
         const t = k.t;
         const emp = !!p.fsEmpowered;
         const pink = '#ff7eb6', light = '#ffd1e6', deep = '#c2185b';
+        // Phá lộn về: thân xe hóa thành khối sáng hồng (sao chổi, đầu hướng về chỗ cũ = +y)
+        if (p.fsMode === 'pha' && p.phase === 2) {
+            ctx.save();
+            ctx.globalCompositeOperation = 'lighter';
+            const hg = ctx.createRadialGradient(0, 3, 0, 0, 3, 15);
+            hg.addColorStop(0, 'rgba(255,255,255,1)'); hg.addColorStop(0.35, 'rgba(255,190,222,0.9)'); hg.addColorStop(1, 'rgba(255,61,139,0)');
+            ctx.fillStyle = hg; circle(0, 3, 15); ctx.fill();
+            ctx.strokeStyle = k.team; ctx.lineWidth = 1.6; TA.glow(k.team, 8);
+            ctx.beginPath(); ctx.arc(0, 3, 9, 0.25, Math.PI - 0.25); ctx.stroke(); TA.noGlow();
+            ctx.restore();
+            return;
+        }
         // Quầng hồng
         const ag = ctx.createRadialGradient(0, 0, 6, 0, 0, 16);
         ag.addColorStop(0, 'rgba(255,126,182,0)'); ag.addColorStop(0.75, `rgba(255,126,182,${emp ? 0.35 : 0.18})`); ag.addColorStop(1, 'rgba(255,126,182,0)');
@@ -713,6 +725,16 @@
             ctx.strokeStyle = 'rgba(255,240,170,0.85)'; ctx.lineWidth = 0.9;
             ctx.setLineDash([1.2, 2]); ctx.lineDashOffset = -t * 6; circle(0, 0, 9.2); ctx.stroke(); ctx.setLineDash([]);
         }
+        // Vừa hóa vệt sáng về chỗ cũ: thân còn rực sáng rồi tan dần thành hình xe
+        if (p.fsArriveT > 0) {
+            const a = Math.min(1, p.fsArriveT / 14);
+            ctx.save();
+            ctx.globalCompositeOperation = 'lighter';
+            const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 15);
+            g.addColorStop(0, `rgba(255,255,255,${0.95 * a})`); g.addColorStop(0.5, `rgba(255,170,210,${0.6 * a})`); g.addColorStop(1, 'rgba(255,61,139,0)');
+            ctx.fillStyle = g; circle(0, 0, 15); ctx.fill();
+            ctx.restore();
+        }
     });
     // Hoa to cũ vẽ đè lên thân -> bỏ riêng bông hoa ở tâm xe (giữ các hiệu ứng khác của hook)
     if (typeof CharHooks !== 'undefined' && CharHooks.registry && CharHooks.registry.flower_shadow && typeof CharHooks.registry.flower_shadow.draw === 'function' && typeof fsDrawFlower === 'function') {
@@ -737,7 +759,10 @@
             ctx.save();
             const col = isShadow ? '#a96eff' : FS_PINK;
             const tr = c.trail || [];
-            for (let i = 0; i < tr.length; i++) {
+            if (c.phase === 2 && tr.length > 1 && !isShadow && typeof fsDrawLightStreak === 'function') {
+                const cy2 = c.y + c.h / 2, d2 = fsDir(o), far2 = d2 < 0 ? 2 + c.h / 2 : canvas.height - c.h / 2 - 2;
+                fsDrawLightStreak(c.x + c.w / 2, cy2 + d2 * Math.min(110, Math.abs(cy2 - far2) + 10), c.x + c.w / 2, cy2, c.w * 0.32, 0.8);
+            } else for (let i = 0; i < tr.length; i++) {
                 ctx.fillStyle = hexA(col, 0.18 * (1 - i / tr.length));
                 circle(c.x + c.w / 2, tr[i] + c.h / 2, c.w * 0.42); ctx.fill();
             }
