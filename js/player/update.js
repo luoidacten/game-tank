@@ -77,6 +77,8 @@ Object.assign(Player.prototype, {
             effectiveInp.s = false; // Bị câm lặng -> ép nút bắn thành false
         }
         // -------------------------------------------------------------
+        // Nam Châm: Ấn Từ đếm lùi + đang bị hút ra giữa sân (mất điều khiển)
+        if (typeof magnetStatusTick === 'function' && magnetStatusTick(this)) return;
 
         if (this.freezeTimer > 0) {
             this.freezeTimer--;

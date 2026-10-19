@@ -149,8 +149,8 @@ const EVOLUTIONS = {
         { id: 'evo_thun_2', name: 'Rẽ Mây', desc: 'Mỗi nhát Lôi Trảm, mọi cây thương còn lại trên sân chém phụ (có cảnh báo, 1/2 sát thương). Thiên Kiếp kéo dài 8s & 3 lần miễn nhiễm sát thương. Full Evo: chém phụ = sát thương nhát chính.', cost: 110, type: 'evo' }
     ],
     magnet: [
-        { id: 'evo_mag_net_1', name: 'Từ Trường Tăng Cường', desc: 'Giật điện từ trường gây 0.5 dame (x2); Lướt Cực Tính: húc 1.5 dame, nổ cột 2 dame.', cost: 90, type: 'evo' },
-        { id: 'evo_mag_net_2', name: 'Lưới Từ Cực', desc: 'Tối đa 3 Cột Từ Trường, lực hút/đẩy x1.5. FULL EVO: 4 cột, bán kính từ trường lớn hơn, đảo cực giật kẻ địch lại gần.', cost: 110, type: 'evo' }
+        { id: 'evo_mag_net_1', name: 'Từ Trường Tăng Cường', desc: 'Giật điện từ trường gây 0.5 dame (x2); Lướt Cực Tính: húc 1.5 dame, nổ cột 2 dame, va chạm giữa sân 2 dame.', cost: 90, type: 'evo' },
+        { id: 'evo_mag_net_2', name: 'Lưới Từ Cực', desc: 'Tối đa 3 Cột Từ Trường, lực hút/đẩy x1.5, Ấn Từ kéo dài 8s. FULL EVO: 4 cột, bán kính từ trường & vùng Ấn Từ lớn hơn, nổ va chạm to hơn, đảo cực giật kẻ địch lại gần.', cost: 110, type: 'evo' }
     ],
     evolution: [
         { id: 'evo_evo_1', name: 'Mưa Tiến Hóa', desc: 'Tăng mạnh tỉ lệ rương; Chỉ số nhận từ thùng đồ tăng +30%.', cost: 90, type: 'evo' },

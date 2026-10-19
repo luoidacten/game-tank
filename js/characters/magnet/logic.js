@@ -50,28 +50,35 @@ Object.assign(Player.prototype, {
             this.magnetHoldFrames = 0;
             this.isPolarDashing = false;
             this.polarDashTarget = null;
-            this.polarDashKind = null;   // 'node' (Cột Từ Trường) | 'enemy' (kẻ địch nhiễm từ)
-            this.polarDashPhase = 0;     // 1 = lao lên, 2 = bật về
+            this.polarDashKind = null;   // 'node' (Cột Từ Trường) | 'enemy' (kẻ địch mang Ấn Từ)
+            this.polarDashPhase = 0;     // 1 = lao tới, 2 = bay về
+            this.polarDashHomeX = 0;
             this.polarDashHomeY = 0;
+            this.polarDashMX = 0; this.polarDashMY = 0; // điểm va chạm giữa sân (kiểu 'enemy')
             this.polarDashHit = false;
             this.polarDashCd = 0;
             this.polarDashT = 0;
+            // Xoá trạng thái từ tính còn sót trên đối thủ từ hiệp trước
+            const enemy = (this.id === 1) ? p2 : p1;
+            if (enemy) magnetClearStatus(enemy);
+            magnetClearStatus(this);
         }
     },
 
-    // Tìm mục tiêu KHÁC CỰC ở phía trước (cột từ trường hoặc kẻ địch nhiễm từ) để Lướt Cực Tính
+    // Tìm mục tiêu KHÁC CỰC ở phía trước: Cột Từ Trường CỦA MÌNH hoặc kẻ địch mang ẤN TỪ
+    // (Nhiễm Từ do chạm vùng từ trường KHÔNG đủ điều kiện)
     findPolarDashTarget() {
         const cx = this.x + this.w / 2;
-        const range = 170;
+        const range = MAG_DASH_RANGE;
         const fwd = (y) => (this.id === 1) ? (y < this.y) : (y > this.y + this.h);
         let best = null, bestDx = 1e9, kind = null;
         const enemy = (this.id === 1) ? p2 : p1;
-        if (enemy && enemy.hp > 0 && enemy.infectedPolarityTimer > 0 && enemy.infectedPolarity && enemy.infectedPolarity !== this.magnetPolarity) {
+        if (enemy && enemy.hp > 0 && enemy.magSealTimer > 0 && enemy.magSealPol && enemy.magSealPol !== this.magnetPolarity && !enemy.magPullPhase) {
             const dx = Math.abs(enemy.x + enemy.w / 2 - cx);
             if (dx <= range) { best = enemy; bestDx = dx - 20; kind = 'enemy'; } // ưu tiên kẻ địch
         }
-        for (const m of magnetNodes) {
-            if (!m.active || m.polarity === this.magnetPolarity || !fwd(m.y)) continue;
+        if (typeof magnetNodes !== 'undefined') for (const m of magnetNodes) {
+            if (!m.active || m.owner !== this || m.polarity === this.magnetPolarity || !fwd(m.y)) continue;
             const dx = Math.abs(m.x - cx);
             if (dx <= range && dx < bestDx) { best = m; bestDx = dx; kind = 'node'; }
         }
@@ -83,14 +90,33 @@ Object.assign(Player.prototype, {
         this.polarDashTarget = found.t;
         this.polarDashKind = found.kind;
         this.polarDashPhase = 1;
+        this.polarDashHomeX = Math.max(0, Math.min(canvas.width - this.w, this.x));
         this.polarDashHomeY = (this.id === 1) ? canvas.height - this.h - 22 : 20;
         this.polarDashHit = false;
         this.polarDashT = 0;
-        if (typeof addFloatingText === 'function') addFloatingText(this.x + this.w / 2, this.y - 15, found.kind === 'enemy' ? "HÚT & HÚC! 🧲💥" : "LƯỚT CỰC TÍNH! 🧲💨", "#00ffff", 14);
+        this.polarDashCd = MAG_DASH_CD;
+        this.magnetHoldFrames = 0;
+        if (found.kind === 'enemy') {
+            const e = found.t;
+            const eHomeY = (e.id === 1) ? canvas.height - e.h - 22 : 20;
+            // Điểm gặp: giữa hai làn, trung điểm theo phương ngang
+            this.polarDashMX = Math.max(30, Math.min(canvas.width - 30, ((this.x + this.w / 2) + (e.x + e.w / 2)) / 2));
+            this.polarDashMY = ((this.polarDashHomeY + this.h / 2) + (eHomeY + e.h / 2)) / 2;
+            e.magPullPhase = 1;
+            e.magPullT = 0;
+            e.magPullHX = Math.max(0, Math.min(canvas.width - e.w, e.x));
+            e.magPullHY = eHomeY;
+            e.magPullMX = this.polarDashMX;
+            e.magPullMY = this.polarDashMY;
+            e.magPullBy = this.id;
+            e.magSealTimer = 0; e.magSealPol = 0; // tiêu hao Ấn Từ
+            addFloatingText(e.x + e.w / 2, e.y - 15, "BỊ HÚT! 🧲", "#ffffff", 13);
+        }
+        if (typeof addFloatingText === 'function') addFloatingText(this.x + this.w / 2, this.y - 15, found.kind === 'enemy' ? "TỪ CỰC VA CHẠM! 🧲💥" : "LƯỚT CỰC TÍNH! 🧲💨", "#00ffff", 14);
         if (soundSystem && !soundSystem.muted) soundSystem.playDash();
     },
 
-    // Kết thúc pha lao: nổ từ tính tại điểm húc, bật về
+    // Kết thúc pha lao tới Cột: nổ từ tính tại cột, rồi bay về
     polarDashImpact(x, y) {
         let dmg = this.hasUpgrade('evo_mag_net_1') ? 2.0 : 1.0;
         let radius = 60;
@@ -104,7 +130,25 @@ Object.assign(Player.prototype, {
         this.polarDashPhase = 2;
     },
 
-    // Va chạm khi đang lao (giống xe TANK): húc địch 1 lần, phá thùng đồ
+    // Va chạm GIỮA SÂN với kẻ địch mang Ấn Từ
+    polarClashImpact(enemy) {
+        const full = this.hasUpgrade('evo_mag_net_1') && this.hasUpgrade('evo_mag_net_2');
+        const dmg = this.hasUpgrade('evo_mag_net_1') ? 2.0 : 1.5;
+        const x = ((this.x + this.w / 2) + (enemy.x + enemy.w / 2)) / 2, y = ((this.y + this.h / 2) + (enemy.y + enemy.h / 2)) / 2;
+        const col = this.magnetPolarity === 1 ? 'rgba(255, 60, 0,' : 'rgba(0, 180, 255,';
+        explosions.push(new Explosion(x, y, full ? 85 : 65, col, 0, this));
+        explosions.push(new Explosion(x, y, 35, 'rgba(255, 255, 255,', 0, this));
+        if (typeof spawnSparkParticles === 'function') { spawnSparkParticles(x, y, '#ff4422', 14); spawnSparkParticles(x, y, '#1ea7ff', 14); }
+        if (enemy.hp > 0) enemy.takeDamage(dmg, this);
+        addFloatingText(x, y - 26, "VA CHẠM TỪ CỰC! 💥", "#ffffff", 16);
+        triggerScreenShake(10, 16);
+        if (soundSystem && !soundSystem.muted && soundSystem.playExplosion) soundSystem.playExplosion();
+        this.polarDashHit = true;
+        this.polarDashPhase = 2;
+        if (enemy.magPullPhase === 1) { enemy.magPullPhase = 2; }
+    },
+
+    // Va chạm khi đang lao tới Cột (giống xe TANK): húc địch 1 lần, phá thùng đồ
     polarDashCollide() {
         let enemy = (this.id === 1) ? p2 : p1;
         if (!this.polarDashHit && enemy && enemy.hp > 0 && rectIntersect(this.x, this.y, this.w, this.h, enemy.x, enemy.y, enemy.w, enemy.h)) {
@@ -114,7 +158,6 @@ Object.assign(Player.prototype, {
             enemy.kbX = ((enemy.x + enemy.w / 2) >= (this.x + this.w / 2) ? 1 : -1) * 6;
             explosions.push(new Explosion(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, 50, this.magnetPolarity === 1 ? 'rgba(255, 60, 0,' : 'rgba(0, 180, 255,', 0, this));
             triggerScreenShake(6, 10);
-            if (this.polarDashKind === 'enemy') { this.polarDashPhase = 2; return; }
         }
         if (typeof crates !== 'undefined') {
             for (let c of crates) {
@@ -128,70 +171,65 @@ Object.assign(Player.prototype, {
         }
     },
 
+    endPolarDash() {
+        this.x = Math.max(0, Math.min(canvas.width - this.w, this.polarDashHomeX));
+        this.y = this.polarDashHomeY;
+        this.isPolarDashing = false;
+        this.polarDashPhase = 0;
+        this.polarDashTarget = null;
+    },
+
     // [update] magnet — trả về true nếu cần dừng update() (đang Lướt Cực Tính)
     updateMagnet() {
         if (this.weapon === 'magnet') {
-            if (this.polarDashCd > 0 && !this.isPolarDashing) this.polarDashCd--;
-            // Lướt Cực Tính: lao THẲNG lên phía trước (như xe TANK) về phía mục tiêu khác cực, đồng thời hút mục tiêu lại
+            if (this.polarDashCd > 0) this.polarDashCd--;
             if (this.isPolarDashing) {
                 let t = this.polarDashTarget;
                 let dir = (this.id === 1) ? -1 : 1;
                 let cx = this.x + this.w / 2;
+                const enemy = (this.id === 1) ? p2 : p1;
                 this.polarDashT++;
+                // Chốt an toàn: quá lâu -> về làn ngay
+                if (this.polarDashT > 150 || this.hp <= 0) { this.endPolarDash(); return true; }
+                if (this.polarDashPhase === 1 && this.polarDashKind === 'enemy') {
+                    // HAI XE HÚT NHAU: bay về điểm giữa sân
+                    if (this.polarDashT > 60 || !enemy || enemy.hp <= 0 || enemy.magPullPhase !== 1) { this.polarDashPhase = 2; return true; }
+                    magMoveToward(this, this.polarDashMX - this.w / 2, this.polarDashMY - this.h / 2, MAG_FLY_SPEED);
+                    const d = Math.hypot((this.x + this.w / 2) - (enemy.x + enemy.w / 2), (this.y + this.h / 2) - (enemy.y + enemy.h / 2));
+                    if (d <= (this.w + enemy.w) / 2 + 2) this.polarClashImpact(enemy);
+                    return true;
+                }
                 if (this.polarDashPhase === 1) {
-                    let alive = t && (this.polarDashKind === 'enemy' ? t.hp > 0 : t.active);
-                    if (!alive) { this.polarDashPhase = 2; return true; }
-                    let tx = (this.polarDashKind === 'enemy') ? t.x + t.w / 2 : t.x;
-                    let ty = (this.polarDashKind === 'enemy') ? t.y + t.h / 2 : t.y;
-                    // Bẻ lái ngang về phía mục tiêu
-                    let sdx = tx - cx;
+                    // Lao THẲNG tới Cột của mình (như xe TANK), vừa hút địch quanh cột
+                    if (!t || !t.active) { this.polarDashPhase = 2; return true; }
+                    let sdx = t.x - cx;
                     this.x = Math.max(0, Math.min(canvas.width - this.w, this.x + Math.max(-7, Math.min(7, sdx))));
                     cx = this.x + this.w / 2;
                     this.y += dir * 18;
-                    // Hút mục tiêu về phía mình
-                    let enemy = (this.id === 1) ? p2 : p1;
-                    if (enemy && enemy.hp > 0) {
-                        let pullX = null, force = 0;
-                        if (this.polarDashKind === 'enemy') { pullX = cx; force = 7; }
-                        else if (Math.abs(enemy.x + enemy.w / 2 - t.x) <= t.radius * 1.5) { pullX = t.x; force = 5; }
-                        if (pullX !== null) {
-                            let edx = pullX - (enemy.x + enemy.w / 2);
-                            enemy.x = Math.max(0, Math.min(canvas.width - enemy.w, enemy.x + Math.max(-force, Math.min(force, edx))));
-                        }
+                    if (enemy && enemy.hp > 0 && !enemy.magPullPhase && Math.abs(enemy.x + enemy.w / 2 - t.x) <= t.radius * 1.5) {
+                        let edx = t.x - (enemy.x + enemy.w / 2);
+                        enemy.x = Math.max(0, Math.min(canvas.width - enemy.w, enemy.x + Math.max(-5, Math.min(5, edx))));
                     }
                     this.polarDashCollide();
-                    if (this.polarDashPhase !== 1) return true;
                     let myY = this.y + this.h / 2;
-                    if (this.polarDashKind === 'node' && (dir < 0 ? myY <= t.y + 14 : myY >= t.y - 14)) {
+                    if (dir < 0 ? myY <= t.y + 14 : myY >= t.y - 14) {
                         t.active = false;
                         this.polarDashImpact(t.x, t.y);
-                    } else if (this.polarDashKind === 'enemy' && (dir < 0 ? myY < ty - 30 : myY > ty + 30)) {
-                        this.polarDashPhase = 2;
                     }
                     if (this.y < 0 || this.y > canvas.height - this.h) {
                         this.y = Math.max(0, Math.min(canvas.height - this.h, this.y));
                         if (this.polarDashPhase === 1) this.polarDashImpact(this.x + this.w / 2, this.y + this.h / 2);
                     }
                 } else {
-                    // Bật về làn của mình
-                    let home = this.polarDashHomeY;
-                    let step = 13;
-                    if (Math.abs(home - this.y) <= step) {
-                        this.y = home;
-                        this.isPolarDashing = false;
-                        this.polarDashPhase = 0;
-                        this.polarDashTarget = null;
-                        this.polarDashCd = 60;
-                    } else {
-                        this.y += (home > this.y ? 1 : -1) * step;
-                    }
+                    // Bay về đúng vị trí cũ trên làn của mình
+                    if (magMoveToward(this, this.polarDashHomeX, this.polarDashHomeY, MAG_FLY_SPEED)) this.endPolarDash();
                 }
                 return true;
-            } else {
+            } else if (!this.magPullPhase) {
                 this.y = (this.id === 1) ? canvas.height - this.h - 22 : 20;
             }
 
-            // Visual vòng tụ lực đảo cực
+    // Visual vòng tụ lực đảo cực
             if (this.magnetHoldFrames > 0) {
                 ctx.save();
                 ctx.strokeStyle = this.magnetHoldFrames >= 25 ? (this.magnetPolarity === 1 ? "#00aaff" : "#ff3300") : "#ffffff";
@@ -221,11 +259,8 @@ Object.assign(Player.prototype, {
                         this.toggleMagnetPolarity();
                         return true;
                     } else {
-                        let nowTap = Date.now();
-                        let isDoubleTap = (nowTap - (this.lastMagnetTapTime || 0) < 320);
-                        this.lastMagnetTapTime = nowTap;
-
-                        let found = (isDoubleTap && this.polarDashCd <= 0) ? this.findPolarDashTarget() : null;
+                        // Nhấp 1 lần: có mục tiêu KHÁC CỰC phía trước & hết hồi -> Lướt Cực Tính thay cho bắn
+                        let found = (this.polarDashCd <= 0) ? this.findPolarDashTarget() : null;
                         if (found) {
                             this.startPolarDash(found);
                             return true;
@@ -244,3 +279,66 @@ Object.assign(Player.prototype, {
         }
     }
 });
+
+// ==========================================
+// Trạng thái từ tính trên kẻ địch (trường thường trên player -> đồng bộ online)
+//   NHIỄM TỪ (infectedPolarity/Timer): chạm vùng từ trường -> chỉ bị hút/đẩy, KHÔNG dùng cho Lướt Cực Tính
+//   ẤN TỪ (magSealPol/Timer/Max): đạn Nam Châm bắn TRÚNG -> mang cực của đạn, tự toả vùng từ nhỏ,
+//                                  là mục tiêu của Lướt Cực Tính (hút hai xe va chạm giữa sân)
+//   magPullPhase: 1 = đang bị hút ra giữa sân, 2 = đang bay về làn
+// ==========================================
+const MAG_DASH_CD = 180;     // 3s hồi Lướt Cực Tính
+const MAG_DASH_RANGE = 170;  // lệch ngang tối đa để coi là "phía trước"
+const MAG_FLY_SPEED = 14;    // px/tick khi bay tới điểm va chạm / bay về
+const MAG_SEAL_TICKS = 360;  // Ấn Từ 6s (Evo 2: 8s)
+
+function magSealAuraR(owner) {
+    return (owner && owner.hasUpgrade && owner.hasUpgrade('evo_mag_net_1') && owner.hasUpgrade('evo_mag_net_2')) ? 44 : 34;
+}
+
+function magnetClearStatus(p) {
+    if (!p) return;
+    p.magSealTimer = 0; p.magSealPol = 0; p.magSealMax = 0; p.magSealAura = 0;
+    p.magPullPhase = 0; p.magPullT = 0;
+    p.infectedPolarityTimer = 0; p.infectedPolarity = 0;
+}
+
+// Đạn Nam Châm trúng trực tiếp -> ẤN TỪ (làm mới khi trúng lại)
+function magnetApplySeal(victim, attacker, pol) {
+    if (!victim || victim === attacker) return;
+    const dur = (attacker && attacker.hasUpgrade && attacker.hasUpgrade('evo_mag_net_2')) ? 480 : MAG_SEAL_TICKS;
+    victim.magSealPol = pol || 1;
+    victim.magSealTimer = dur;
+    victim.magSealMax = dur;
+    victim.magSealAura = magSealAuraR(attacker);
+    victim.infectedPolarity = 0; victim.infectedPolarityTimer = 0; // Ấn Từ thay thế Nhiễm Từ
+    if (typeof addFloatingText === 'function') addFloatingText(victim.x + victim.w / 2, victim.y - 15, victim.magSealPol === 1 ? "ẤN TỪ (+)" : "ẤN TỪ (−)", victim.magSealPol === 1 ? "#ff5533" : "#33aaff", 15);
+}
+
+// Di chuyển (góc trên-trái) về (tx, ty) với tốc độ sp; trả về true khi đã tới
+function magMoveToward(p, tx, ty, sp) {
+    const dx = tx - p.x, dy = ty - p.y, d = Math.hypot(dx, dy);
+    if (d <= sp) { p.x = tx; p.y = ty; return true; }
+    p.x += dx / d * sp; p.y += dy / d * sp;
+    p.x = Math.max(0, Math.min(canvas.width - p.w, p.x));
+    return false;
+}
+
+// Gọi mỗi tick ở đầu Player.update() cho MỌI xe: đếm lùi Ấn Từ + điều khiển việc bị hút ra giữa sân.
+// Trả về true khi xe đang bị hút (mất điều khiển -> dừng update()).
+function magnetStatusTick(p) {
+    if (p.magSealTimer > 0) { p.magSealTimer--; if (p.magSealTimer <= 0) p.magSealPol = 0; }
+    if (!p.magPullPhase) return false;
+    p.magPullT = (p.magPullT || 0) + 1;
+    const homeX = Math.max(0, Math.min(canvas.width - p.w, p.magPullHX || 0));
+    const homeY = p.magPullHY;
+    const snapHome = () => { p.x = homeX; p.y = homeY; p.magPullPhase = 0; p.magPullT = 0; };
+    // Chốt an toàn: chết / quá lâu / kẻ hút đã thôi lướt -> về làn ngay
+    const puller = (p.magPullBy === 1) ? p1 : p2;
+    if (p.hp <= 0 || p.magPullT > 150 || typeof homeY !== 'number') { snapHome(); return false; }
+    if (p.magPullPhase === 1 && (p.magPullT > 60 || !puller || puller === p || !puller.isPolarDashing)) p.magPullPhase = 2;
+    p.kbX = 0;
+    if (p.magPullPhase === 1) magMoveToward(p, p.magPullMX - p.w / 2, p.magPullMY - p.h / 2, MAG_FLY_SPEED);
+    else if (magMoveToward(p, homeX, homeY, MAG_FLY_SPEED)) { snapHome(); return false; }
+    return true;
+}

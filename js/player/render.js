@@ -370,24 +370,8 @@ Object.assign(Player.prototype, {
         this.drawUIForThunder(uiY, subUiY);
         this.drawUIForMagnet(uiY, subUiY);
 
-        // Huy hiệu cực tính bị nhiễm (Magnet)
-        if (this.infectedPolarityTimer > 0) {
-            let infY = (this.id === 1) ? this.y - 20 : this.y + this.h + 20;
-            let isPos = (this.infectedPolarity === 1);
-            ctx.fillStyle = isPos ? "rgba(255, 60, 0, 0.85)" : "rgba(0, 180, 255, 0.85)";
-            ctx.beginPath();
-            ctx.arc(this.x + this.w / 2, infY, 9, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = "#fff";
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-            ctx.fillStyle = "#ffffff";
-            ctx.font = "bold 12px Arial";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText(isPos ? "+" : "-", this.x + this.w / 2, infY);
-            ctx.textBaseline = "alphabetic";
-        }
+        // Nhiễm Từ / Ấn Từ (Nam Châm) — js/characters/magnet/render.js
+        if (typeof drawMagnetStatus === 'function') drawMagnetStatus(this);
 
         this.drawUIForEvolution();
 

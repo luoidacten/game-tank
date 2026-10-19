@@ -120,18 +120,22 @@ function tickPhysics() {
         let strongField = node.age <= MAGNET_STRONG_TICKS;
         let baseForce = (strongField ? 4.2 : 1.0) * speedMult;
         [p1, p2].forEach(p => {
-            if (!p || p.hp <= 0) return;
+            // Nam Châm KHÔNG bị chính từ trường của mình hút/đẩy; xe đang bị hút ra giữa sân cũng bỏ qua
+            if (!p || p.hp <= 0 || p === node.owner || p.magPullPhase) return;
             let dist = Math.hypot((p.x + p.w / 2) - node.x, (p.y + p.h / 2) - node.y);
             let dx = (p.x + p.w / 2) - node.x;
-            let inRange = (dist <= node.radius) || (Math.abs(dx) <= node.radius * 1.5);
+            // Ấn Từ: xe tự toả vùng từ nhỏ -> vùng của nó chạm vùng của cột cũng tính là trong từ trường
+            let sealed = p.magSealTimer > 0 && p.magSealPol;
+            let aura = sealed ? (p.magSealAura || 34) : 0;
+            let inRange = (dist <= node.radius + aura) || (Math.abs(dx) <= node.radius * 1.5 + aura);
             if (inRange) {
-                if (node.owner && p !== node.owner) {
+                if (node.owner && !sealed) {
                     if (!p.infectedPolarity || p.infectedPolarityTimer <= 0) {
                         p.infectedPolarity = node.polarity;
                         p.infectedPolarityTimer = 180;
                     }
                 }
-                let targetPolarity = (p === node.owner) ? p.magnetPolarity : p.infectedPolarity;
+                let targetPolarity = sealed ? p.magSealPol : p.infectedPolarity;
                 if (targetPolarity) {
                     // HÚT / ĐẨY CHỈ TÁC ĐỘNG THEO TRỤC NGANG (X), KHÔNG ĐƯỢC TÁC ĐỘNG THEO CHIỀU DỌC (Y)
                     if (targetPolarity === node.polarity) {
