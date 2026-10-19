@@ -2,8 +2,8 @@
 // Xe Tiền (money_tank) — Logic (cập nhật, bắn, kỹ năng)
 // ------------------------------------------
 // Body "farm tiền": đầu trận yếu, mua CẤP ĐỘ trong shop để mạnh dần.
-//  - Cấp 3: Khiên + 2 HP | Cấp 4: Đạn xuyên + 0.5 dame | Cấp 5: Đạn nổ
-//  - Cấp 6 (cuối) "Đế Chế Tiền Tệ": +3 HP, +2 đạn, +1 dame, 2 khiên đầu hiệp
+//  - Cấp 3: Khiên + 1 HP | Cấp 4: Đạn xuyên + 0.5 dame | Cấp 5: Đạn nổ
+//  - Cấp 6 (cuối) "Đế Chế Tiền Tệ": +2 HP, +2 đạn, +1 dame, 2 khiên đầu hiệp
 //  - Evo 1 Tiền Tấn Công: định kỳ phóng 2 xe tiền từ làn mình lao thẳng về phía địch, nổ khi chạm tường
 //  - Evo 2 Sức Mạnh Đồng Tiền: mọi nâng cấp -25%; mỗi 100$ tiêu (tối đa 2500$) nhận 1 mốc thưởng vĩnh viễn
 //  - Full Evo: mọi mặt hàng -50%, nhiều xe tiền trên sân hơn, phóng xe tấn công dày hơn
@@ -64,14 +64,15 @@ Object.assign(Player.prototype, {
         if (this.weapon !== 'money_tank') return;
         const lv = this.upgradeLevel || 0;
         if (lv > 0) {
-            this.maxHp += 1 * lv;
+            this.maxHp += 0.5 * lv; // [CÂN BẰNG] 1 -> 0.5 HP/cấp
             this.damage += 1.125 * lv;
             this.maxAmmo += 1 * lv;
             this.speed += 0.5;
         }
-        if (lv >= 3) this.maxHp += 2;
+        if (lv >= 3) this.maxHp += 1; // [CÂN BẰNG] 2 -> 1
         if (lv >= 4) this.damage += 0.5;
-        if (lv >= 6) { this.maxHp += 3; this.maxAmmo += 2; this.damage += 1; }
+        if (lv >= 6) { this.maxHp += 2; // [CÂN BẰNG] 3 -> 2
+            this.maxAmmo += 2; this.damage += 1; }
         const b = this.mtSpend && this.mtSpend.bonus;
         if (b) { this.maxHp += b.hp; this.damage += b.dmg; this.maxAmmo += b.ammo; this.speed += b.speed; }
     }
