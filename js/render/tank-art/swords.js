@@ -595,16 +595,20 @@ function drawAmKiem(x, y, ang, scale = 1, alpha = 1, opts = {}) {
     ctx.restore();
 }
 
-// ---------- 3. Phong Trảm: lưỡi gió trăng khuyết ----------
-// Đường lưỡi liềm trong hệ +x = hướng bay; W = bề ngang, D = độ sâu (bụng cung)
-function swCrescentPath(W, D, thick) {
-    const hw = W / 2;
+// ---------- 3. Phong Trảm: lưỡi gió bán nguyệt xoay tròn ----------
+// Hình bán nguyệt (lưỡi liềm) đơn: mép ngoài là cung tròn bán kính R (lồi về +x),
+// mép trong là cung của đường tròn lệch tâm ra sau -> một lưỡi duy nhất, hai đầu nhọn.
+const SW_BLADE_A = Math.PI * 0.64;  // nửa góc mở của lưỡi (~115°)
+const SW_BLADE_O = 0.32;            // độ lệch tâm cung trong (theo R) -> độ dày lưỡi
+function swCrescentInner(R) {
+    const tx = R * Math.cos(SW_BLADE_A), ty = R * Math.sin(SW_BLADE_A), o = R * SW_BLADE_O;
+    return { o, ri: Math.hypot(tx + o, ty), ai: Math.atan2(ty, tx + o) };
+}
+function swCrescentPath(R) {
+    const c = swCrescentInner(R);
     ctx.beginPath();
-    ctx.moveTo(-D * 0.5, -hw);
-    ctx.quadraticCurveTo(D * 1.25, -hw * 0.55, D * 0.62, 0);   // mép ngoài (trước) nửa trên
-    ctx.quadraticCurveTo(D * 1.25, hw * 0.55, -D * 0.5, hw);
-    ctx.quadraticCurveTo(D * (0.9 - thick), hw * 0.45, D * (0.62 - thick * 0.9), 0); // mép trong
-    ctx.quadraticCurveTo(D * (0.9 - thick), -hw * 0.45, -D * 0.5, -hw);
+    ctx.arc(0, 0, R, -SW_BLADE_A, SW_BLADE_A, false);   // mép ngoài (lưỡi sắc)
+    ctx.arc(-c.o, 0, c.ri, c.ai, -c.ai, true);           // mép trong
     ctx.closePath();
 }
 
@@ -612,99 +616,112 @@ function swDrawWindBlade(b) {
     const cx = b.x + b.w / 2, cy = b.y + b.h / 2;
     const dirY = b.vy < 0 ? -1 : 1;
     const ang = dirY < 0 ? -Math.PI / 2 : Math.PI / 2;
-    const W = b.w, D = Math.max(8, b.h);
-    const ratio = Math.max(0, Math.min(1.5, (b.w - 20) / 40));   // 0 = nhát nhẹ, 1 = full lực, 1.75 = auto-full
+    const ratio = Math.max(0, Math.min(1.75, (b.w - 20) / 40)); // 0 = nhát nhẹ, 1 = full lực, 1.75 = auto-full
     const big = b.w >= 58;
+    const R = b.w * 0.42;
     const t = Date.now() / 1000;
     const team = b.owner && b.owner.id === 2 ? '#e74c3c' : '#3498db';
     const acc = b.isAccelerated;
+    const spin = t * (13 - ratio * 3);           // lưỡi to xoay chậm, nặng hơn
     ctx.save();
     ctx.translate(cx, cy);
-    ctx.rotate(ang);
+    ctx.rotate(ang);                             // +x = hướng bay
     ctx.lineJoin = 'round'; ctx.lineCap = 'round';
     ctx.globalCompositeOperation = 'lighter';
-    // 1. Vệt gió kéo dài phía sau (các sợi gió mảnh, chạy ngược)
-    const nStreak = 5 + Math.round(ratio * 6);
+
+    // 1. Sợi gió cuộn phía sau (cung mảnh trôi ngược hướng bay)
+    const nStreak = 4 + Math.round(ratio * 4);
     for (let i = 0; i < nStreak; i++) {
-        const lane = ((i * 0.618) % 1) * 2 - 1;                 // -1..1 dọc bề ngang
-        const ph = (t * (2.4 + ratio) + i * 0.37) % 1;
-        const y = lane * W * 0.42;
-        const x0 = -D * 0.3 - ph * D * (1.6 + ratio);
-        const L = D * (0.5 + 0.6 * (1 - Math.abs(lane))) * (1 + ratio * 0.6);
-        ctx.globalAlpha = (1 - ph) * 0.55;
+        const ph = (t * (1.8 + ratio * 0.5) + i / nStreak) % 1;
+        const lane = ((i * 0.618) % 1) * 2 - 1;
+        const x0 = -R * 0.4 - ph * R * (2.2 + ratio * 0.6);
+        const y0 = lane * R * 0.8;
+        const L = R * (0.7 + 0.5 * (1 - Math.abs(lane)));
+        const curl = (i % 2 ? 1 : -1) * R * 0.18;
+        ctx.globalAlpha = (1 - ph) * 0.45;
         ctx.strokeStyle = i % 3 === 0 ? '#ffffff' : '#a5f3fc';
-        ctx.lineWidth = 1.1 + ratio * 0.6;
-        ctx.beginPath(); ctx.moveTo(x0, y); ctx.quadraticCurveTo(x0 - L * 0.5, y + Math.sin(t * 9 + i) * 2.5, x0 - L, y); ctx.stroke();
+        ctx.lineWidth = 1 + ratio * 0.5;
+        ctx.beginPath(); ctx.moveTo(x0, y0);
+        ctx.quadraticCurveTo(x0 - L * 0.5, y0 + curl, x0 - L, y0 + curl * 0.3);
+        ctx.stroke();
     }
-    // 2. Bóng mờ lưỡi gió (ghost trail)
-    const ghosts = 3 + (big ? 2 : 0);
+    // 2. Vòng xoáy gió mờ quanh lưỡi (cung xoay ngược chiều)
+    ctx.lineWidth = 1 + ratio * 0.4;
+    ctx.strokeStyle = '#cffafe';
+    for (let i = 0; i < 2 + (big ? 1 : 0); i++) {
+        const a0 = -spin * 0.6 + i * 2.1;
+        ctx.globalAlpha = 0.3 - i * 0.07;
+        ctx.beginPath(); ctx.arc(-i * R * 0.15, 0, R * (1.08 + i * 0.16), a0, a0 + 1.6); ctx.stroke();
+    }
+    // 3. Quầng sáng tròn
+    ctx.globalAlpha = 0.3 + 0.12 * Math.min(1, ratio);
+    const rg = ctx.createRadialGradient(0, 0, R * 0.2, 0, 0, R * 1.35);
+    rg.addColorStop(0, 'rgba(165, 243, 252, 0.35)'); rg.addColorStop(1, 'rgba(34, 211, 238, 0)');
+    ctx.fillStyle = rg; ctx.beginPath(); ctx.arc(0, 0, R * 1.35, 0, Math.PI * 2); ctx.fill();
+
+    // 4. Lưỡi xoay quanh tâm: bóng xoay (motion blur) + thân
+    ctx.save();
+    ctx.rotate(spin);
+    const ghosts = 2 + (big ? 1 : 0);
     for (let g = ghosts; g >= 1; g--) {
         ctx.save();
-        ctx.translate(-g * D * (0.42 + ratio * 0.12), 0);
-        const sc = 1 - g * 0.07;
-        ctx.scale(1, sc);
-        ctx.globalAlpha = 0.28 * (ghosts + 1 - g) / ghosts;
-        ctx.fillStyle = g % 2 ? 'rgba(103, 232, 249, 0.8)' : 'rgba(186, 230, 253, 0.8)';
-        swCrescentPath(W, D, 0.5); ctx.fill();
+        ctx.rotate(-g * 0.32);                   // các vị trí quay trước đó
+        ctx.globalAlpha = 0.16 * (ghosts + 1 - g) / ghosts;
+        ctx.fillStyle = g % 2 ? 'rgba(103, 232, 249, 0.85)' : 'rgba(186, 230, 253, 0.85)';
+        swCrescentPath(R * (1 - g * 0.03)); ctx.fill();
         ctx.restore();
     }
-    // 3. Quầng sáng
-    ctx.globalAlpha = 0.5 + 0.2 * ratio;
-    const rg = ctx.createRadialGradient(D * 0.3, 0, 0, D * 0.3, 0, W * 0.65);
-    rg.addColorStop(0, 'rgba(165, 243, 252, 0.6)'); rg.addColorStop(1, 'rgba(34, 211, 238, 0)');
-    ctx.fillStyle = rg; ctx.beginPath(); ctx.ellipse(D * 0.3, 0, D * 1.1, W * 0.62, 0, 0, Math.PI * 2); ctx.fill();
-    // 4. Thân lưỡi gió: gradient từ mép trong (lam) ra mép ngoài (trắng)
+    // thân: gradient tỏa tròn — trong mờ lam, ra mép ngoài trắng sáng
     ctx.globalAlpha = 0.95;
-    const g1 = ctx.createLinearGradient(-D * 0.5, 0, D * 0.62, 0);
-    g1.addColorStop(0, 'rgba(14, 165, 233, 0.15)'); g1.addColorStop(0.55, 'rgba(103, 232, 249, 0.85)'); g1.addColorStop(1, '#ffffff');
+    const g1 = ctx.createRadialGradient(-R * SW_BLADE_O, 0, R * 0.45, 0, 0, R);
+    g1.addColorStop(0, 'rgba(14, 165, 233, 0.1)');
+    g1.addColorStop(0.55, 'rgba(103, 232, 249, 0.75)');
+    g1.addColorStop(1, 'rgba(255, 255, 255, 0.95)');
     ctx.fillStyle = g1;
-    ctx.shadowColor = acc ? '#ffffff' : '#22d3ee'; ctx.shadowBlur = 14 + ratio * 14;
-    swCrescentPath(W, D, 0.55); ctx.fill();
+    ctx.shadowColor = acc ? '#ffffff' : '#22d3ee'; ctx.shadowBlur = 10 + ratio * 10;
+    swCrescentPath(R); ctx.fill();
     ctx.shadowBlur = 0;
-    // 5. Lưỡi sắc trắng ở mép trước + lõi
-    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.6 + ratio * 1.4;
-    ctx.beginPath();
-    ctx.moveTo(-D * 0.45, -W / 2 * 0.97);
-    ctx.quadraticCurveTo(D * 1.22, -W / 2 * 0.55, D * 0.6, 0);
-    ctx.quadraticCurveTo(D * 1.22, W / 2 * 0.55, -D * 0.45, W / 2 * 0.97);
-    ctx.stroke();
-    // lưỡi trong thứ 2 (nhát lực)
-    if (ratio > 0.35) {
-        ctx.globalAlpha = 0.75;
-        ctx.strokeStyle = '#cffafe'; ctx.lineWidth = 1.2 + ratio;
-        ctx.beginPath();
-        ctx.moveTo(-D * 0.35, -W * 0.32);
-        ctx.quadraticCurveTo(D * 0.7, -W * 0.18, D * 0.3, 0);
-        ctx.quadraticCurveTo(D * 0.7, W * 0.18, -D * 0.35, W * 0.32);
-        ctx.stroke();
+    // mép ngoài sắc trắng
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5 + ratio * 1.1;
+    ctx.beginPath(); ctx.arc(0, 0, R - ctx.lineWidth * 0.4, -Math.PI * 0.58, Math.PI * 0.58); ctx.stroke();
+    // nhấn màu đội ở mép trong
+    const c = swCrescentInner(R);
+    ctx.globalAlpha = 0.7;
+    ctx.strokeStyle = team; ctx.lineWidth = 1.2 + ratio * 0.4;
+    ctx.beginPath(); ctx.arc(-c.o, 0, c.ri + 0.6, c.ai * 0.55, -c.ai * 0.55, true); ctx.stroke();
+    // viền gió thứ 2 ôm sát mép ngoài (nhát lực / auto-full)
+    if (ratio > 0.45) {
+        ctx.globalAlpha = 0.6;
+        ctx.strokeStyle = '#e0f2fe'; ctx.lineWidth = 1 + ratio * 0.5;
+        ctx.beginPath(); ctx.arc(R * 0.08, 0, R * 1.04, -Math.PI * 0.42, Math.PI * 0.42); ctx.stroke();
     }
-    // 6. Lốc xoáy nhỏ ở hai đầu lưỡi
-    ctx.globalAlpha = 0.8;
-    ctx.strokeStyle = '#e0f2fe'; ctx.lineWidth = 1.1 + ratio * 0.5;
-    for (const sg of [-1, 1]) {
-        const ex = -D * 0.45, ey = sg * W * 0.5;
-        const rr = 2.5 + ratio * 3.5;
-        ctx.beginPath(); ctx.arc(ex - rr * 0.4, ey - sg * rr * 0.3, rr, t * 10 * sg, t * 10 * sg + 4); ctx.stroke();
+    ctx.restore();
+
+    // 5. Hạt gió nhỏ văng ra phía sau
+    const nP = 5 + Math.round(ratio * 5);
+    ctx.fillStyle = '#ecfeff';
+    for (let i = 0; i < nP; i++) {
+        const ph = (t * 1.6 + i * 0.37) % 1;
+        const a = i * 2.39996 + t * 2;
+        const rr = R * (0.6 + 0.5 * ((i * 0.31) % 1));
+        const px = -R * 0.55 + Math.cos(a) * rr * 0.25 - ph * R * 1.8;
+        const py = Math.sin(a) * rr * 0.9;
+        ctx.globalAlpha = (1 - ph) * 0.8;
+        ctx.beginPath(); ctx.arc(px, py, (1 + ratio * 0.5) * (1 - ph * 0.5), 0, Math.PI * 2); ctx.fill();
     }
-    // 7. Full lực: tia sét gió + điểm nhấn màu đội
+    // 6. Full lực / auto-full: tâm lốc sáng + tia gió nhọn phía trước
     if (big || ratio >= 0.95) {
-        ctx.globalAlpha = 0.6 + 0.3 * Math.sin(t * 20);
-        ctx.strokeStyle = team; ctx.lineWidth = 1.6;
-        ctx.beginPath();
-        ctx.moveTo(-D * 0.2, -W * 0.36);
-        ctx.quadraticCurveTo(D * 0.85, -W * 0.22, D * 0.42, 0);
-        ctx.quadraticCurveTo(D * 0.85, W * 0.22, -D * 0.2, W * 0.36);
-        ctx.stroke();
-        // tia gió nhọn bắn ra phía trước
-        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.2; ctx.globalAlpha = 0.7;
+        ctx.globalAlpha = 0.3 + 0.15 * Math.sin(t * 18);
+        const cg = ctx.createRadialGradient(0, 0, 0, 0, 0, R * 0.35);
+        cg.addColorStop(0, '#ffffff'); cg.addColorStop(1, 'rgba(165, 243, 252, 0)');
+        ctx.fillStyle = cg; ctx.beginPath(); ctx.arc(0, 0, R * 0.35, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.2; ctx.globalAlpha = 0.6;
         for (let i = 0; i < 4; i++) {
-            const a = -0.9 + i * 0.6 + Math.sin(t * 7 + i) * 0.1;
-            const r0 = D * 0.7, r1 = D * (0.95 + 0.25 * ((t * 3 + i * 0.3) % 1));
-            ctx.beginPath(); ctx.moveTo(Math.cos(a) * r0, Math.sin(a) * W * 0.45); ctx.lineTo(Math.cos(a) * r1, Math.sin(a) * W * 0.52); ctx.stroke();
+            const a = -0.75 + i * 0.5 + Math.sin(t * 7 + i) * 0.08;
+            const k1 = (t * 3 + i * 0.3) % 1;
+            const r0 = R * 1.12, r1 = R * (1.3 + 0.3 * k1);
+            ctx.beginPath(); ctx.moveTo(Math.cos(a) * r0, Math.sin(a) * r0); ctx.lineTo(Math.cos(a) * r1, Math.sin(a) * r1); ctx.stroke();
         }
-    } else {
-        ctx.globalAlpha = 0.85; ctx.fillStyle = team;
-        ctx.beginPath(); ctx.arc(D * 0.55, 0, 1.6, 0, Math.PI * 2); ctx.fill();
     }
     ctx.restore();
 }
