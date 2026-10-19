@@ -36,21 +36,27 @@
         return { pct: Math.min(1, p.sniperChargeTimer / 60), ready: p.sniperChargeTimer >= 60, label: 'DỰNG TƯỜNG', color: '#fde047', icon: 'wall' };
     });
 
-    // Cung: giữ nút -> kiểu bắn (vòng chia ô + biểu tượng trên nút)
+    // Cung: biểu tượng kiểu bắn trên nút; giữ nút -> tiến độ đổi kiểu (0.5s) / vào Ngắm (2.5s)
     reg('cung', p => {
-        if (!(p.bowChargeTimer > 0)) return null;
-        const s = p.bowChargeTimer / 60;
-        const rain = p.hasUpgrade('evo_cung_2');
-        const stages = [
-            { label: '1 MŨI', color: '#ffffff', icon: '➶' },
-            { label: '3 LIÊN', color: '#a3e635', icon: '⋮' },
-            { label: '3 TỎA', color: '#22d3ee', icon: '⋰' },
-        ];
-        if (rain) stages.push({ label: p.rainCD > 0 ? 'MƯA ⌛' : 'MƯA TÊN', color: p.rainCD > 0 ? '#64748b' : '#ff3355', icon: '☔' });
-        let st = s >= 1 ? 2 : (s >= 0.5 ? 1 : 0);
-        if (rain && s >= 2 && p.rainCD <= 0) st = 3;
-        const S = stages[st];
-        return { pct: Math.min(1, p.bowChargeTimer / 120), segments: stages.length, lit: st + 1, ready: st === stages.length - 1, color: S.color, label: S.label, btnIcon: S.icon };
+        const M = BOW_MODES[p.bowMode || 0] || BOW_MODES[0];
+        if (p.bowAiming) {
+            const k = Math.min(1, (p.bowAimT || 0) / BOW_AIM_MAX);
+            return { pct: k, ready: true, color: '#ff3355', label: 'NGẮM x' + (2 + 3 * k).toFixed(1), btnIcon: '🎯' };
+        }
+        const h = p.bowHold || 0;
+        if (h > 6 && h < BOW_CYCLE_T) {
+            const N = BOW_MODES[((p.bowMode || 0) + 1) % 3];
+            return { pct: h / BOW_CYCLE_T, segments: 2, lit: 0, color: N.color, label: '→ ' + N.name, btnIcon: M.icon };
+        }
+        if (h >= BOW_CYCLE_T && h < BOW_AIM_T) {
+            const cd = p.bowAimCD > 0;
+            return { pct: (h - BOW_CYCLE_T) / (BOW_AIM_T - BOW_CYCLE_T), segments: 2, lit: 1, color: cd ? '#64748b' : '#ff3355', label: cd ? 'NGẮM ⌛' + Math.ceil(p.bowAimCD / 60) + 's' : M.name + ' · GIỮ → NGẮM', btnIcon: M.icon };
+        }
+        if (p.bowMode === 0) {
+            const c = p.bowDraw || 0;
+            return { pct: c, ready: c >= 1, color: M.color, label: c >= 1 ? 'TỤ LỰC MAX' : '', btnIcon: M.icon, idle: true };
+        }
+        return { pct: p.bowCD > 0 ? 1 - p.bowCD / 40 : 1, ready: false, color: M.color, label: '', btnIcon: M.icon, idle: true };
     });
 
     // Cuồng Phong: tự tụ lực bão

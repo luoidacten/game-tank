@@ -10,7 +10,7 @@
 const NET_CLASSES = {
     Player, Crate, MoneyTruck, MovingObstacle, BastionWall, ArtilleryHazard,
     Explosion, IceZone, Beam, FloatingSword, AcidZone, StormSlash,
-    ArrowRain, ArrowDropMarker, MortarMarker, VoidZone, Talisman, SpellZone, RadiationZone,
+    ArrowRain, ArrowDropMarker, BowSkyShot, MortarMarker, VoidZone, Talisman, SpellZone, RadiationZone,
     ShadowTrap, ShortgunFireZone, FireZone, WindWall, InventorDrone, ConfinementCage,
     CreatorTurret, CreatorShield, CreatorDrone, CreatorRobot,
     SniperWall, NecroMinion, GhostDecoy, Turret,

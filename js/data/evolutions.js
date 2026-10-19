@@ -113,8 +113,8 @@ const EVOLUTIONS = {
         { id: 'evo_sniper_2', name: 'Xuyên Thủng', type: 'evo', desc: '25% đạn thành tia Raycast (chạm tường/chướng ngại vật sẽ thành đạn thường).', cost: 100 }
     ],
     cung: [
-        { id: 'evo_cung_1', name: 'Xuyên Thủng', desc: 'Tụ >2s: Đạn xuyên qua mục tiêu nhưng giảm 50% dame.', cost: 80, type: 'evo' },
-        { id: 'evo_cung_2', name: 'Mưa Tên', desc: 'Tụ >3s: Tạo hồng tâm đuổi địch. Nhả bắn rơi Mưa Tên (CD: 10s).', cost: 120, type: 'evo' }
+        { id: 'evo_cung_1', name: 'Cung Thần', desc: 'Tụ Lực kéo nhanh hơn & nhịp nhanh hơn, căng tối đa thì Xuyên Thủng. Liên Hoàn: loạt 7 mũi. Bắn 3 Mũi -> 5 mũi tỏa.', cost: 80, type: 'evo' },
+        { id: 'evo_cung_2', name: 'Mưa Tên', desc: 'Thiên Tiễn kéo theo trận Mưa Tên trút xuống hồng tâm 1.5s. Hồi Ngắm 7s. FULL EVO (Vạn Tiễn): Mưa Tên phủ KHẮP bề ngang sân mỗi 12s (số mũi tăng theo dame), Ngắm hồi 5s, Nhạy Bén hồi 5s.', cost: 120, type: 'evo' }
     ],
     mirror: [
         { id: 'evo_mirror_1', name: 'Tái Lập', desc: 'CD Đổi còn 3s. Sau khi đổi: Tăng Tốc, Dame và Bất tử 0.5s.', cost: 80, type: 'evo' },

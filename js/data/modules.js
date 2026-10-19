@@ -36,7 +36,7 @@ const MODULES = {
         {
             id: 'cung',
             name: 'Bow',
-            desc: 'HP:3 | Dame:0.5 | Đạn:3 | Tốc: Nhanh. Giữ nút kéo cung (đầy lực ~1.5s), nhả để bắn: Tăng sát thương/Tốc đạn. Nội tại Nhạy Bén: Tự né 1 lần đạn mỗi 8s (Full Evo 5s).',
+            desc: 'HP:3 | Dame:0.5 | Đạn:3 | Tốc: Nhanh. Nhấp: bắn theo kiểu hiện tại. Giữ 0.5s: đổi kiểu — Tụ Lực (cung tự kéo, căng càng lâu mũi càng to/mạnh, nhịp chậm) / Liên Hoàn (loạt 5 mũi nhanh, dame thấp) / Bắn 3 Mũi (3 hướng, bay nhanh). Giữ 2.5s: NGẮM — hồng tâm đuổi địch & thu hẹp (tối đa 5s), nhả: Thiên Tiễn từ trời (khóa đỏ 0.5s, x2-x5 dame, hồi 8s). Nội tại Nhạy Bén: Tự né 1 đòn mỗi 8s.',
             type: 'body', role: ['Cơ Động', 'Đối Đầu'],
             size: { w: 24, h: 24 },
             stats: { hp: 3, dmg: 0.5, ammo: 3, speedMult: 1.25 }
