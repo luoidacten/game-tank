@@ -77,6 +77,7 @@
 | 54 | **Y Sư** | `healer` | 3.5 | 0.75 | 4 | 3.5 | 30×30 |  | — |
 | 55 | **Chrono & Neo** | `chrononeo` | 4.5 | 1 | 3 | 3.3 | 28×28 |  | — |
 | 56 | **Gemini** | `gemini` | 3.5 | 0.75 | 4 | 3.6 | 26×26 |  | — |
+| 57 | **Huyết Ma** | `blood_lord` | 3 | 0.25 | 6 | 4 | 28×28 |  | — |
 
 > *Tỉ lệ thắng mô phỏng*: trung bình của 2 mức (chỉ có body / có Full Evo + 2 module), mỗi body đấu vòng tròn với mọi body khác, hai bên cùng một AI tự động. AI không biết chơi kinh tế hay combo phức tạp nên con số chỉ mang tính tham khảo cho độ mạnh tương đối.
 
@@ -131,6 +132,7 @@
 | Y Sư | MỚI: Y Sư — tự hồi 0.5 HP sau 3s không mất máu, đạn hấp huyết (CD 20s), thanh Năng Lượng Sinh Mệnh → đạn cường hóa 50% Max HP + dame gốc; Evo 1 giáp trắng; Evo 2 mỗi lần hồi bắn tia tự ngắm; Full Evo cướp máu hồi của địch • NERF: HP 5 → 3.5 |
 | Chrono & Neo | MỚI: Collab Chrono & Neo — Tham Farm tăng băng đạn vĩnh viễn (4→10 / 10→20), giữ 0.4s đổi thế Chrono (đạn đồng xuyên, sóng đẩy) ↔ Neo (2 viên, lướt tăng tốc), đồng hồ cát Thời Khắc → Liên Xạ tự tìm / Mưa Đạn Hình Nón + Ảnh Chiếu; Full Evo: AI phụ cầm thế ngược lại + bão Liên Hoa • NERF: băng đạn 3→7 / 8→14, CD đổi thế 6s (Full 4s), Liên Xạ +2, nón 6-8 viên yếu hơn, Liên Hoa 2.5s, Nở Rộ còn 3 cột có khe né |
 | Gemini | MỚI: Gemini — 2 xe song sinh (bạn + AI tự hành), gục thì có vòng cứu 2s (nhân đôi mỗi lần), chỉ thua khi cả 2 cùng gục; giữ 0.4s Chuyển Giao Ý Thức đổi quyền điều khiển; Evo 2 mạnh dần theo hiệp; Full Evo tự khởi động lại + đạn tự ngắm sau chuyển giao |
+| Huyết Ma | MỚI: Huyết Ma — Bể Máu (Max HP x2) tích từ mọi lượng máu mất trên sân, tự đổi thành HP sau 8s; giữ 0.25s xoay 4 dạng: Đạn Thường / Huyết Phá (dơi lao bất tử + Bầy Dơi 2s) / Huyết Tiễn (tia máu có cảnh báo) / Huyết Cầu (≥50% Bể Máu mở Bóng Ma Màn Đêm bay lên trời đáp xuống Đại Tiệc Máu); Evo 1 hóa dơi thoát chết; Full Evo hồi sinh 1 lần/trận |
 
 ## Module chân (FEET)
 
@@ -949,6 +951,20 @@ HP:3.5 | Dame:0.75 | Đạn:4 | Tốc: 3.5. "Hồi Phục": 3s không mất máu
   | Đệ Quy Vô Tận (`evo_gem_2`) | $120 | Cả 2 xe tăng dần tốc chạy & tốc bắn theo thời gian giao tranh; mỗi hiệp đã qua cộng dồn +0.25 MaxHP, +6% dame, đạn to hơn (tối đa 8 tầng). Sau Chuyển Giao: 1s cả 2 xe +50% tốc chạy, x1.8 tốc bắn, x1.3 dame. FULL EVO: Siêu Trí Tuệ Song Hành — AI tối thượng (tự cân đối cứu / kết liễu); lần gục đầu tiên của mỗi xe tự khởi động lại, các lần sau thanh cứu tự tăng tới 99% (chạm là dậy); 0.5s sau Chuyển Giao mọi đạn của 2 xe tự khoá mục tiêu. |
 
 - **Mã nguồn:** `js/characters/gemini/logic.js`, `js/characters/gemini/render.js`
+
+### 57. Huyết Ma (`blood_lord`)
+
+"Máu = sức mạnh!" HP:3 | Dame:0.25 | Đạn:6 (nghỉ 0.5s mới hồi) | Tốc: 4.0. BỂ MÁU (tối đa MaxHP x2): tăng khi bạn hồi máu, đánh trúng địch hoặc BẤT KỲ mục tiêu nào trên sân mất máu; 8s yên ổn -> rút ra hồi HP (2 Bể Máu = 1 HP). Kỹ năng tự trừ máu không làm HP tụt dưới 0.5. Giữ Bắn 0.25s xoay 4 dạng: ĐẠN MÁU (1 đạn) | HUYẾT PHÁ (2 đạn + 1 HP): hóa dơi bất tử lao thẳng lên, chạm mục tiêu -> Bầy Dơi 2s rồi giật về (kẻ địch đứng trong đủ 2s -> +2 HP) | HUYẾT TIỄN (3 đạn + 1 HP): cảnh báo rồi tia máu xuyên dọc sân | HUYẾT CẦU (toàn bộ đạn + toàn bộ Bể Máu): cầu máu xuyên mọi thứ, nổ ở biên đối diện; từ 50% Bể Máu trở lên cầu to & mạnh và mở BÓNG MA MÀN ĐÊM: lần bắn kế tiếp bay lên trời (không thể bị nhắm), lái vòng cảnh báo, bấm để đáp -> Đại Tiệc Máu, nạp đầy Bể Máu & hồi nhiều HP.
+
+- **Chỉ số thực đầu hiệp:** HP 3 · Sát thương 0.25 · Đạn 6 · Tốc độ 4 · Kích thước 28×28
+- **Tiến hoá:**
+
+  | Evo | Giá | Hiệu ứng |
+  |---|---:|---|
+  | Huyết Ảnh Đào Thoát (`evo_bd_1`) | $90 | Tích Bể Máu nhanh hơn (x1.4). Khi nhận sát thương chí tử: hóa dơi dịch chuyển sang vị trí khác, Bất Tử 2s và hồi ngay 50% Bể Máu (1 lần/hiệp). |
+  | Huyết Thể Cường Hóa (`evo_bd_2`) | $120 | +4 Max HP (Bể Máu x2 theo). Kỹ năng mạnh hơn x1.25, chỉ tốn 0.5 HP. Tự hồi máu sau 6s với tỉ lệ 1.5 Bể Máu = 1 HP. FULL EVO: Huyết Tổ Bất Diệt — thêm +2 Max HP, kỹ năng x1.5, chỉ tốn 0.25 HP, tích Bể Máu x2 (kẻ địch hồi máu cũng nạp); Đào Thoát hồi 100% Bể Máu; tự hồi sau 4s (1 Bể Máu = 1 HP); HỒI SINH tại chỗ 1 lần/trận khi chết lúc Bể Máu đầy. |
+
+- **Mã nguồn:** `js/characters/blood_lord/logic.js`, `js/characters/blood_lord/render.js`
 
 ## Phụ lục: cơ chế các body mới
 

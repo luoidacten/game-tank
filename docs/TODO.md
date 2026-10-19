@@ -5,7 +5,6 @@
 
 ## 1. Body mới — ƯU TIÊN (làm lần lượt từng body)
 > Đặc tả đầy đủ: `docs/BODY_MOI_DAC_TA.md`
-- **Huyết Ma** (`blood_lord`) — Bể Máu, Tứ Huyết Thức, Bóng Ma Màn Đêm.
 - **Cuồng Chiến Binh** (`berserker`) — Cuồng Chiến theo % máu, Huyết Đạn, Huyết Chiến bất tử.
 
 ## 2. Đồ họa (đã làm một phần)
