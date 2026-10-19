@@ -54,6 +54,9 @@ function renderFrame() {
     // VẼ TRỜI MƯA NẾU CÓ STORM FULL EVO
     if (isRaining) drawRain();
 
+    // Nền BÀNH TRƯỚNG LÃNH ĐỊA (Sukuna / Gojo) - js/render/tank-art/curse.js
+    if (typeof curseFxUnder === 'function') curseFxUnder();
+
     // VẼ SÀN TỐI & ĐÈN PHA NEON NẾU CÓ SHADOW HUNTER FULL EVO
     let hasFullEvoShadow = (p1 && p1.weapon === 'shadow_hunter' && p1.hasUpgrade('evo_sh_1') && p1.hasUpgrade('evo_sh_2')) ||
                            (p2 && p2.weapon === 'shadow_hunter' && p2.hasUpgrade('evo_sh_1') && p2.hasUpgrade('evo_sh_2'));
@@ -226,6 +229,9 @@ function renderFrame() {
 
     // Vẽ pháo nổ trên đầu người chơi
     mortars.forEach(m => m.draw());
+
+    // Lớp phủ Lãnh địa & ấn Ràng Buộc - js/render/tank-art/curse.js
+    if (typeof curseFxOver === 'function') curseFxOver();
 
     // Particles & Floating Numbers
     updateAndDrawParticles();

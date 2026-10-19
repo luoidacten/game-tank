@@ -153,6 +153,8 @@ Object.assign(Player.prototype, {
 
         this.bullets.forEach(b => {
             if (b.hook && BulletHooks.registry[b.hook] && BulletHooks.registry[b.hook].draw) { BulletHooks.call(b, 'draw'); return; }
+            // Đòn đặc biệt Sukuna / Gojo (js/render/tank-art/curse.js)
+            if (typeof curseBulletDraw === 'function' && curseBulletDraw(b, this)) return;
             // --- VẼ TIA SÁNG NEON (NƯỚC / LỬA) ---
             if (b.isWater || b.isFurnace) {
                 ctx.save();

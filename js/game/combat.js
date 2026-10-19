@@ -489,7 +489,7 @@ function checkHits(attacker, victim) {
         if (hitReal) {
             // [HÌNH ẢNH] Đòn chém (Sukuna, Kiếm Khí, Kiếm Tôn, Lôi Phong Thương...) trúng địch -> nhát chém chéo
             if (b.isSukunaSlash || b.isWindBlade || b.isThunderSpear || b.type === 'hu_vo' || b.isFloatingSwordGraphic || b.hook === 'kiem_khach' || b.hook === 'kiem_su') {
-                if (!b._slashFx) { b._slashFx = true; fxSlashHit(victim.x + victim.w / 2, victim.y + victim.h / 2, b.isSukunaSlash ? '#ff5252' : (b.isThunderSpear ? '#fff176' : '#7dd3fc'), 22); }
+                if (!b._slashFx) { b._slashFx = true; if (b.isSukunaSlash && typeof fxSukunaHit === 'function') fxSukunaHit(victim.x + victim.w / 2, victim.y + victim.h / 2); else fxSlashHit(victim.x + victim.w / 2, victim.y + victim.h / 2, b.isSukunaSlash ? '#ff5252' : (b.isThunderSpear ? '#fff176' : '#7dd3fc'), 22); }
             }
             // Am Duong Su effects
             if (b.isAmChu) {
