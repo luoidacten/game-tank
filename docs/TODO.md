@@ -11,21 +11,24 @@
 - Nhà Ảo Thuật: tạo phân thân có khiên CD riêng 10s; Thoát Chết dịch chuyển chỗ khác, để lại 1 phân thân (1 lần/hiệp, Full Evo 2 lần); hiệu ứng mũ ảo thuật rơi từ trời khi phân thân & thoát chết.
 - Nam Châm: không bị hiệu ứng từ của chính mình hút/đẩy; tách Nhiễm Từ (chạm vùng từ, chỉ là dấu) và Ấn Từ (bắn trúng trực tiếp, tồn tại lâu, tạo vùng từ quanh địch); bấm bắn khi phía trước có mục tiêu khác cực: Cột → lao tới húc nổ như TANK rồi về chỗ cũ; địch có Ấn Từ → cả hai bị hút vào giữa map va chạm gây sát thương rồi rơi về chỗ cũ.
 - Xe tiền và tiến hóa xuồng còn 2 máu ở cấp 1.
+- Hoa Ảnh cải thiện hiệu ứng hơn nữa đặc biệt là rút về vị trí cũ (hóa thành 1 tìa sáng hồng ra giật về vị trí cũng) (các hiệu ứng khác cũng mượt và đẹp hơn)
 
 ## 1. Body mới ưu tiên (phần Đồ họa đã XONG → làm tiếp mục này)
 Đặc tả đầy đủ: **`docs/BODY_MOI_UU_TIEN.md`**. Làm lần lượt từng body (theo `tools/agents/common.md`), mỗi body xong thì gộp → smoke test → push:
 - Kazuki (`kazuki`) — song kiếm, nhịp A/B → Kiếm Thế Quyết, Nghịch Trảm, Ý Niệm & Kiếm Ý.
 - Tsukiyo (`tsukiyo`) — nhẫn giả 3 phong cách, Nhẫn Đạo theo mốc Tốc độ/Sát thương/Máu.
+- Joker (`joker`) — tay bài 5 lá ngẫu nhiên, Joker, Thoát Hiểm.
 - Juggernaut(`juggernaut`) — miễn nhiễm khống chế (Bá Thể).
 - Pháo Phân Mảnh (`cluster_gun`) — 2 chế độ đạn Phân Mảnh / Dễ Vỡ.
 - Nhân Bản (`clone`) — nhân bản không giới hạn + nội tại Gánh Chịu.
 - Phi Công (`jet_pilot`) — tách Chân & Phi Ảnh, chuyển điều khiển, hợp nhất.
-- Joker (`joker`) — tay bài 5 lá ngẫu nhiên, Joker, Thoát Hiểm.
+
 
 ## 2. HUD còn sót
 - DJ, Móc Thép, Thiên Tài (chữ BR/LK, chế độ Mecha), Tiến Hóa vẫn dùng chữ → đổi sang biểu tượng.
 - Thanh riêng của Paradox, Ghost, Mirror, Phong Trảm bị thanh máu mới che một phần.
-
+- UI shop đẹp hơn và (đặc biệt là các shop đặc trường từng xe) phải đẹp hơn
+- Thêm UI thông báo Ghép nhanh đạn có ai đang ghép không
 ## 2.1 Hoạt Ảnh các vụ nổ và màu
 - các vụ nổ cần có màu đặc trương và đẹp hơn
 
