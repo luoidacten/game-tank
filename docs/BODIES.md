@@ -71,6 +71,8 @@
 | 50 | **Kiếm Vũ** | `kiem_vu` | 1.5 | 1.5 | ∞ | 3.5 | 28×28 |  | — |
 | 51 | **T-Zero** | `t_zero` | 8 | 1 | — (năng lượng riêng) | 3.15 | 34×34 |  | — |
 | 52 | **Raven - Oca** | `raven_oca` | 4 | 0.5 | 10 | 3.8 | 26×26 |  | — |
+| 53 | **Tia Lazer** | `lazer_beam` | 3 | 0.2 | — (năng lượng riêng) | 3.8 | 28×28 |  | — |
+| 54 | **Y Sư** | `healer` | 5 | 0.75 | 4 | 3.5 | 30×30 |  | — |
 
 > *Tỉ lệ thắng mô phỏng*: trung bình của 2 mức (chỉ có body / có Full Evo + 2 module), mỗi body đấu vòng tròn với mọi body khác, hai bên cùng một AI tự động. AI không biết chơi kinh tế hay combo phức tạp nên con số chỉ mang tính tham khảo cho độ mạnh tương đối.
 
@@ -121,6 +123,8 @@
 | Súng Nước | Tia nước có cảnh báo 0.5s |
 | Axit Hóa | Phát cường hóa tạo vùng ăn mòn tím (trừ máu & máu tối đa, chậm); mọi đòn axit gây 10x + 50% máu tối đa lên vật cản/xe tiền/triệu hồi |
 | Raven - Oca | MỚI: Collab Raven-Oca — giữ 0.4s đổi Tiểu Liên (loạt 3 viên, lướt né) ↔ Sniper (4 dame, bom khói né đạn), chim Oca đồng hành (tàng hình cắn làm chậm / radar khóa mục tiêu, đạn Sniper xuyên vật thể) |
+| Tia Lazer | MỚI: Tia Lazer — giữ bắn: tích 0.5s + cảnh báo 0.5s rồi chiếu tia liên tục (0.2/nhịp, chậm khi chiếu, tụt năng lượng, chớp tắt); Evo 2 tia phình to + dame tăng dần + đốt; Full Evo không chậm + tia xung kích mỗi 2s |
+| Y Sư | MỚI: Y Sư — tự hồi 0.5 HP sau 3s không mất máu, đạn hấp huyết (CD 20s), thanh Năng Lượng Sinh Mệnh → đạn cường hóa 50% Max HP + dame gốc; Evo 1 giáp trắng; Evo 2 mỗi lần hồi bắn tia tự ngắm; Full Evo cướp máu hồi của địch |
 
 ## Module chân (FEET)
 
@@ -883,6 +887,34 @@ HP:6 (+2 xe lớn) | Dame:1 | Năng Lượng | Tốc: 0.9x. "Hệ Thống KÍCH 
   | Hỏa Lực Không Kích (`evo_raven_2`) | $120 | Oca máu 80% Raven & định kỳ hiện vòng cảnh báo đỏ rồi thả Bom xuống địch. Tiểu Liên xả loạt 5 viên, băng 15. Sniper bay nhanh hơn, mạnh hơn & gây Trọng Thương: máu bị mất do Sniper không thể hồi trong 10s. FULL EVO: Oca Bất Tử (không bị tiêu diệt, không chặn đạn), đổi súng hồi 2s, Oca vừa lao cắn làm chậm vừa thả mưa bom liên hoàn vừa giữ khóa mục tiêu vĩnh viễn cho cả 2 súng. |
 
 - **Mã nguồn:** `js/characters/raven_oca/logic.js`, `js/characters/raven_oca/render.js`
+
+### 53. Tia Lazer (`lazer_beam`)
+
+HP:3 | Dame:0.2/tick (6 tick/s) | Năng Lượng | Tốc: 3.8. Giữ Bắn: tích tụ 0.5s -> cảnh báo 0.5s -> chiếu tia liên tục (chậm khi chiếu, tụt Năng Lượng; nghỉ 0.5s mới hồi). Tường Sniper địch chặn tia.
+
+- **Chỉ số thực đầu hiệp:** HP 3 · Sát thương 0.2 · Đạn — (năng lượng riêng) · Tốc độ 3.8 · Kích thước 28×28
+- **Tiến hoá:**
+
+  | Evo | Giá | Hiệu ứng |
+  |---|---:|---|
+  | Năng Lượng Xanh (`evo_beam_1`) | $40 | Tích tụ khởi động chỉ 0.125s. Chiếu tia tiêu hao chậm hơn, hồi Năng Lượng nhanh hơn. |
+  | Khuếch Đại Nhiệt Quang (`evo_beam_2`) | $90 | Tia phình rộng dần khi chiếu lâu. Trúng liên tục -> sát thương tăng tiến (tới x2.5) & Thiêu Đốt. FULL EVO: Quá Tải Quang Học — không còn giảm tốc khi chiếu; mỗi 2s chiếu liên tục phóng thêm 1 Tia Bùng Nổ (1.5 dmg). |
+
+- **Mã nguồn:** `js/characters/lazer_beam/logic.js`, `js/characters/lazer_beam/render.js`
+
+### 54. Y Sư (`healer`)
+
+HP:5 | Dame:0.75 | Đạn:4 | Tốc: 3.5. "Hồi Phục": 3s không mất máu +0.5 HP. Đạn Hấp Huyết +0.25 HP (hồi 20s). Mọi lượng máu được hồi nạp Năng Lượng Sinh Mệnh -> đầy: phát kế tiếp là Đạn Cường Hóa (50% MaxHP + dame, nổ lan).
+
+- **Chỉ số thực đầu hiệp:** HP 5 · Sát thương 0.75 · Đạn 4 · Tốc độ 3.5 · Kích thước 30×30
+- **Tiến hoá:**
+
+  | Evo | Giá | Hiệu ứng |
+  |---|---:|---|
+  | Hồi Phục Vượt Ngưỡng (`evo_heal_1`) | $90 | Đầy máu: lượng hồi dư chuyển thành Giáp Trắng (tối đa 4 + 50% MaxHP), đỡ đòn trước máu. Đạn Cường Hóa mạnh hơn (65% MaxHP, nổ lan 30%). |
+  | Nghịch Lý Y Đạo (`evo_heal_2`) | $110 | Mỗi lần được hồi máu (mọi nguồn, kể cả vào Giáp Trắng) phóng 1 Tia Xung tự ngắm gây dame = lượng vừa hồi. Giảm Năng Lượng cần cho Đạn Cường Hóa. FULL EVO: Bất Tử Y Thần — Tái Tạo nhanh gấp đôi (1.5s); đạn gắn ấn Kháng Hồi Phục 5s: địch hồi máu bị cướp sang bạn; Đạn Cường Hóa = 100% MaxHP + dame. |
+
+- **Mã nguồn:** `js/characters/healer/logic.js`, `js/characters/healer/render.js`
 
 ## Phụ lục: cơ chế các body mới
 
