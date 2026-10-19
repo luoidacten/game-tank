@@ -2,6 +2,73 @@
 // magician (magician) — Logic (cập nhật, bắn, kỹ năng)
 // ==========================================
 
+const MAG_CLONE_CD = 600; // hồi chiêu Phân Ảnh Khiên: 10s
+
+// ------------------------------------------
+// THOÁT CHẾT: sắp nhận đòn chí mạng -> huỷ cái chết, dịch chuyển tới chỗ khác trên làn,
+// để lại 1 phân ảnh mồi ở chỗ cũ. 1 lần/hiệp (Full Evo: 2 lần).
+// ------------------------------------------
+function magEscapeTargetX(p) {
+    const enemy = p.id === 1 ? p2 : p1;
+    const minX = 6, maxX = canvas.width - p.w - 6;
+    const ox = p.x;
+    let best = null, bestScore = -1e9;
+    for (let x = minX; x <= maxX; x += 8) {
+        const far = Math.abs(x - ox);
+        let score = Math.min(far, 220) + Math.random() * 40;
+        if (far < 110) score -= 400; // phải đi đủ xa
+        // tránh cột có đạn địch đang lao tới
+        if (enemy && enemy.bullets) {
+            for (const b of enemy.bullets) {
+                const towards = p.id === 1 ? b.vy > 0 : b.vy < 0;
+                if (towards && Math.abs(b.x + (b.w || 0) / 2 - (x + p.w / 2)) < p.w) score -= 60;
+            }
+        }
+        // tránh đứng thẳng hàng nòng địch
+        if (enemy && Math.abs(enemy.x + enemy.w / 2 - (x + p.w / 2)) < 30) score -= 50;
+        if (score > bestScore) { bestScore = score; best = x; }
+    }
+    return Math.max(0, Math.min(canvas.width - p.w, best === null ? ox : best));
+}
+
+function magTryEscape(p) {
+    if (p.weapon !== 'magician' || !((p.magEscapeLeft || 0) > 0)) return false;
+    p.magEscapeLeft--;
+    const oldX = p.x, oldY = p.y;
+    // Phân ảnh mồi đứng ở chỗ cũ (rõ nét, ăn đạn ngay -> kích hoạt Bẫy Nổ)
+    if (!p.illusions) p.illusions = [];
+    if (p.illusions.length >= 2) p.illusions.shift();
+    const now = Date.now();
+    p.illusions.push({
+        x: oldX, y: oldY, w: p.w, h: p.h,
+        hp: Math.max(p.hp, 1), maxHp: p.maxHp || 1,
+        type: 'dash', vx: 0, decoy: true,
+        spawnTime: now, lifeTime: 20000, invisTimer: 0,
+        ammo: p.ammo, maxAmmo: p.maxAmmo || 7,
+        lastShot: now, behaviorTimer: 0
+    });
+    p.x = magEscapeTargetX(p);
+    p.hp = Math.min(p.maxHp, Math.max(p.hp, 1));
+    p.invincibleTimer = Math.max(p.invincibleTimer || 0, 60); // 1s bất tử
+    p.invisTimer = Math.max(p.invisTimer || 0, 60);
+    p.bleedTimer = 0; p.burnTimer = 0; p.acidBurnTimer = 0; // không chết lại ngay vì sát thương theo thời gian
+    p.kbX = 0;
+    const cy = oldY + p.h / 2;
+    magHatRain(p, oldX + p.w / 2, 4, 34, true);
+    magHatRain(p, p.x + p.w / 2, 3, 22);
+    explosions.push(new Explosion(oldX + p.w / 2, cy, 70, 'rgba(160, 150, 190, 0.75)', 0, p));
+    explosions.push(new Explosion(p.x + p.w / 2, p.y + p.h / 2, 40, 'magenta', 0, p));
+    addFloatingText(oldX + p.w / 2, oldY + (p.id === 1 ? -26 : p.h + 30), 'THOÁT CHẾT!', '#e056fd', 18);
+    triggerScreenShake(5, 12);
+    if (typeof soundSystem !== 'undefined' && soundSystem && !soundSystem.muted && soundSystem.playRevive) soundSystem.playRevive();
+    return true;
+}
+
+CharHooks.register('magician', {
+    beforeLethal() { return magTryEscape(this); },
+    drawUI() { if (typeof magDrawEscapeHats === 'function') magDrawEscapeHats(this); },
+});
+
 Object.assign(Player.prototype, {
     // [setupForNewRound] magician
     setupMagician() {
@@ -22,6 +89,12 @@ Object.assign(Player.prototype, {
 
             this.fakeCrates = []; // Hòm ảo
             this.fakeBullets = []; // Đạn ảo
+
+            // Phân Ảnh Khiên (giữ 0.5s): hồi chiêu riêng 10s (tick)
+            this.magCloneCd = 0;
+            // Thoát Chết: 1 lần/hiệp, Full Evo 2 lần
+            this.magEscapeMax = (this.hasUpgrade('evo_mag_1') && this.hasUpgrade('evo_mag_2')) ? 2 : 1;
+            this.magEscapeLeft = this.magEscapeMax;
         }
     },
 
@@ -37,6 +110,7 @@ Object.assign(Player.prototype, {
 
             // Xử lý Tàng hình & Vô địch
             if (this.invisTimer > 0) this.invisTimer--;
+            if (this.magCloneCd > 0) this.magCloneCd--;
 
             // Cập nhật tốc độ lướt (Ghi đè logic di chuyển cơ bản nếu cần, hoặc cộng thêm vào vx)
             if (effectiveInp.l) this.x -= (baseSpd - C.baseSpeed); // Bù thêm phần chênh lệch tốc độ
@@ -210,8 +284,18 @@ Object.assign(Player.prototype, {
 
                             explosions.push(new Explosion(this.x + this.w / 2, this.y + this.h / 2, 40, 'magenta', 0, this));
                         }                        
-                        // MỐC 2: TẨU THOÁT & ĐÁNH LẠC HƯỚNG (Giữ >= 30 frames ~ 0.5s)
+                        // MỐC 2 đang hồi chiêu (10s): không tạo phân ảnh/khiên -> nhả thành 1 phát bắn thường
+                        else if (this.magicianCharge >= 30 && this.magCloneCd > 0) {
+                            addFloatingText(this.x + this.w / 2, this.y - 15, `PHÂN ẢNH ⌛ ${Math.ceil(this.magCloneCd / 60)}s`, "#b98cff", 12);
+                            if (this.ammo > 0 && now - this.lastShot > 500) {
+                                this.fireBullet(1);
+                                this.ammo--;
+                                this.lastShot = now;
+                            }
+                        }
+                        // MỐC 2: TẨU THOÁT & ĐÁNH LẠC HƯỚNG (Giữ >= 30 frames ~ 0.5s) — hồi chiêu riêng 10s
                         else if (this.magicianCharge >= 30) {
+                            this.magCloneCd = MAG_CLONE_CD;
                             let isMoving = inp.l || inp.r;
 
                             // Xác định máu và đạn tối đa an toàn
@@ -245,6 +329,7 @@ Object.assign(Player.prototype, {
 
                                 // Full Evo cường hóa: Hồi đầy đạn (Hồi cho bản thể thật sau khi lướt)
                                 if (isFullEvo) this.ammo = myMaxAmmo;
+                                magHatRain(this, this.illusions[this.illusions.length - 1].x + this.w / 2, 3, 26);
 
                             } else {
                                 // NỘI TẠI 3: MÀN TRÌNH DIỄN ĐÁNH LẠC HƯỚNG (Đứng yên)
@@ -270,6 +355,7 @@ Object.assign(Player.prototype, {
                                 this.invincibleTimer = isFullEvo ? 30 : 15;
                                 this.shield = (this.shield || 0) + 1;
                                 addFloatingText(this.x + this.w / 2, this.y - 15, "+1 SHIELD", "#e056fd", 13);
+                                magHatRain(this, ghostX + this.w / 2, 3, 26);
                             }
                         }
                         // MỐC 1: BẮN THƯỜNG (< 0.5s)

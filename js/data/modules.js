@@ -68,7 +68,7 @@ const MODULES = {
         {
             id: 'magician',
             name: 'Nhà Ảo Thuật',
-            desc: 'HP:3 | Dame:1 | Rất Nhanh | Đạn:7. Giữ bắn+Đi: Lướt, Khiên, Tàng hình. Giữ bắn+Đứng: Khiên & Vô địch. Giữ 1s: Hoán đổi & Khiên.',
+            desc: 'HP:3 | Dame:1 | Rất Nhanh | Đạn:7. Giữ bắn 0.5s tạo Phân Ảnh + Khiên (CD riêng 10s): +Đi = Lướt & Tàng hình, Đứng = Vô địch. Thoát Chết: đòn chí mạng -> dịch chuyển đi chỗ khác, để lại phân ảnh mồi (1 lần/hiệp). Mưa mũ ảo thuật khi tạo bóng.',
             type: 'body', role: ['Cơ Động', 'Sinh Tồn'],
             size: { w: 26, h: 26 },
             stats: { hp: 3, dmg: 1.0, ammo: 7, speedMult: 1.35 }
