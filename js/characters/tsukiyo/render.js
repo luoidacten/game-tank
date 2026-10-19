@@ -378,7 +378,7 @@ function tsDrawLoan(o) {
     const t = o.t, now = tsNow();
     ctx.save();
     const a = o.final > 0 ? Math.max(0, 1 - o.final / 24) : Math.min(1, t / 8);
-    const rx = o.r * 1.15, ry = o.r * 0.8;
+    const rx = o.r, ry = o.r; // vùng tròn
     ctx.fillStyle = `rgba(46, 16, 101, ${0.35 * a})`;
     ctx.beginPath(); ctx.ellipse(o.x, o.y, rx, ry, 0, 0, Math.PI * 2); ctx.fill();
     ctx.strokeStyle = `rgba(192, 132, 252, ${0.8 * a})`; ctx.lineWidth = o.big ? 2 : 1.2;

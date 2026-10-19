@@ -20,7 +20,7 @@ const TS_BR_NAME = {
     h: ['Ảo Thân & Đại Phong Ma Tiêu', 'Thổ Lưu Bích', 'Tâm Nhãn Phản Đòn'],
 };
 const TS_BR_DESC = {
-    s: ['Ném phi tiêu -> lướt ngang, để lại Hư Ảnh bắn theo sau 1s.', 'Đầu hiệp gọi 1 Phân Thân (50% chỉ số) sao chép mọi chiêu; bị hạ hồi sinh sau 20s.', 'Lướt trúng địch -> hóa vùng Loạn Trảm 2s (Bất Tử), đủ 50% sát thương vùng -> Choáng; Thu Kiếm -> chém chẻ đôi nổ lớn.'],
+    s: ['Ném phi tiêu -> lướt ngang, để lại Hư Ảnh bắn theo sau 1s.', 'Đầu hiệp gọi 1 Phân Thân (50% chỉ số) sao chép mọi chiêu; bị hạ hồi sinh sau 20s.', 'Lướt trúng địch HOẶC chạm tường bên kia -> hóa vùng Loạn Trảm tròn 4s (Bất Tử); lướt trúng địch -> Choáng ngay; giây thứ 3 giật về chỗ cũ; Thu Kiếm -> chém chẻ đôi nổ lớn.'],
     d: ['Bắn 3 phi tiêu hình quạt, bay nhanh & mạnh hơn.', 'Hỏa Cầu to hơn. Giữ kết ấn: 1s Đại Hỏa Cầu | 2s +2 Phân Thân ôm Hỏa Cầu lao tới | 3s bản thể hóa Hắc Nguyệt (vùng Hút + Câm Lặng). Mỗi bậc +15 Nội Năng.', 'Tăng mạnh sát thương & tốc độ lướt kiếm.'],
     h: ['Mỗi lần ném kèm 2 đợt phi tiêu phụ. Né Đòn (8s) -> phát kế tiếp là Đại Phi Tiêu.', 'Niệm Hỏa Cầu tự dựng tường chắn đạn (3 HP, +8 Nội Năng).', 'Thế Tất Sát đứng yên 2s -> Cảnh Giác: phản đạn & Tập Trung 1s (làm mới khi phản tiếp). Hồi 18s.'],
 };
@@ -272,11 +272,11 @@ class TsVoid {
 
 // ---------- Entity: Loạn Trảm ----------
 class TsLoan {
-    constructor(owner, x, y) {
+    constructor(owner, x, y, stunNow = false) {
         const big = tsBr(owner, 'd') === 3;
         this.owner = owner; this.x = x; this.y = y;
-        this.r = big ? 52 : 34; this.big = big;
-        this.life = 120; this.t = 0; this.hits = 0; this.total = 15; this.stunned = false;
+        this.r = big ? 74 : 54; this.big = big; // vùng tròn, lớn hơn
+        this.life = 240; this.t = 0; this.hits = 0; this.total = 30; this.stunned = stunNow; // chém 4s
         this.pull = big && tsFull(owner);
         this.seed = Math.round(Math.random() * 600) / 100; this.final = 0; this.active = true;
     }
@@ -285,13 +285,13 @@ class TsLoan {
         this.t++;
         const o = this.owner, e = tsEnemy(o);
         if (this.final > 0) { if (++this.final > 24) this.active = false; return; }
-        const inside = e && tsAlive(e) && tsOverlap(this.x, this.y, this.r, this.r * 0.75, e);
+        const inside = e && tsAlive(e) && Math.hypot(e.x + e.w / 2 - this.x, e.y + e.h / 2 - this.y) < this.r + Math.min(e.w, e.h) / 2;
         if (this.pull && e && tsAlive(e) && Math.abs(e.x + e.w / 2 - this.x) < this.r * 1.8) {
             e.x += Math.sign(this.x - (e.x + e.w / 2)) * 0.8;
         }
         if (this.t % 8 === 0) {
             if (inside) {
-                e.takeDamage(0.12 * o.damage * tsPow(o), o);
+                e.takeDamage(0.06 * o.damage * tsPow(o), o); // 4s: giữ tổng sát thương như cũ (2s x 0.12)
                 this.hits++;
                 fxSlashHit(e.x + e.w / 2 + (Math.random() - 0.5) * 16, e.y + e.h / 2 + (Math.random() - 0.5) * 10, this.big ? '#e9d5ff' : TS_VIO, 16);
                 const need = Math.ceil(this.total * (tsFull(o) ? 0.35 : 0.5));
@@ -301,7 +301,7 @@ class TsLoan {
                     addFloatingText(e.x + e.w / 2, e.y - 16, 'CHOÁNG!', TS_VIO, 13);
                 }
             }
-            tsBreakCrates(o, this.x, this.y, this.r, this.r * 0.75);
+            tsBreakCrates(o, this.x, this.y, this.r, this.r);
             tsSfx('playHit');
         }
         if (this.t >= this.life) { // Hắc Ảnh nhập thể -> chém chẻ đôi + nổ
@@ -521,6 +521,18 @@ function tsSwordHit(p, e) {
     spawnSparkParticles(e.x + e.w / 2, e.y + e.h / 2, '#ffffff', 10);
     triggerScreenShake(4, 6);
 }
+// Loạn Trảm: vùng chém tròn 4s; trúng địch trực tiếp -> choáng ngay; giây thứ 3 giật về chỗ cũ
+function tsStartLoan(p, x, y, hitEnemy) {
+    bodyEffects.push(new TsLoan(p, x, y, !!hitEnemy));
+    if (hitEnemy) {
+        hitEnemy.freezeTimer = Math.max(hitEnemy.freezeTimer || 0, tsFull(p) ? 75 : 60);
+        addFloatingText(hitEnemy.x + hitEnemy.w / 2, hitEnemy.y - 16, 'CHOÁNG!', TS_VIO, 13);
+    }
+    p.tsMode = 'loan'; p.tsT = 180; p.tsLoanX = x; p.tsLoanY = y;
+    p.tsHomeX = p.x; p.y = tsHideY(p); p.tsTrail = [];
+    p.invincibleTimer = Math.max(p.invincibleTimer || 0, 182);
+    addFloatingText(x, y - 28, 'LOẠN TRẢM!', TS_VIO, 15);
+}
 function tsDashStep(p) {
     const dir = tsDir(p), moon = p.tsMode === 'moon';
     const spd = moon ? 13 : tsDashSpeed(p);
@@ -548,14 +560,13 @@ function tsDashStep(p) {
         if (touch) {
             p.tsDashHit = true;
             tsSwordHit(p, e);
-            if (tsBr(p, 's') === 3) { // Loạn Trảm: hóa thành vùng chém
-                bodyEffects.push(new TsLoan(p, e.x + e.w / 2, e.y + e.h / 2));
-                p.tsMode = 'loan'; p.tsT = 60; p.tsLoanX = e.x + e.w / 2; p.tsLoanY = e.y + e.h / 2;
-                p.tsHomeX = p.x; p.y = tsHideY(p); p.tsTrail = [];
-                p.invincibleTimer = Math.max(p.invincibleTimer || 0, 62);
-                addFloatingText(e.x + e.w / 2, e.y - 28, 'LOẠN TRẢM!', TS_VIO, 15);
-                return;
-            }
+            if (tsBr(p, 's') === 3) { tsStartLoan(p, e.x + e.w / 2, e.y + e.h / 2, e); return; }
+        }
+        // Loạn Trảm: chạm tường bên kia cũng hóa vùng chém (không cần trúng địch)
+        if (far && tsBr(p, 's') === 3 && !p.tsDashHit) {
+            p.tsDashHit = true;
+            tsStartLoan(p, cx, dir < 0 ? Math.max(cy, 40) : Math.min(cy, canvas.height - 40), null);
+            return;
         }
         if (far) { p.y = dir < 0 ? 2 : canvas.height - p.h - 2; p.tsPhase = 2; }
         return;
