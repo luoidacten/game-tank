@@ -70,6 +70,7 @@
 | 49 | **Hoa Ảnh** | `flower_shadow` | 3 | 0.5 | — (năng lượng riêng) | 4.73 | 24×24 |  | — |
 | 50 | **Kiếm Vũ** | `kiem_vu` | 1.5 | 1.5 | ∞ | 3.5 | 28×28 |  | — |
 | 51 | **T-Zero** | `t_zero` | 8 | 1 | — (năng lượng riêng) | 3.15 | 34×34 |  | — |
+| 52 | **Raven - Oca** | `raven_oca` | 4 | 0.5 | 10 | 3.8 | 26×26 |  | — |
 
 > *Tỉ lệ thắng mô phỏng*: trung bình của 2 mức (chỉ có body / có Full Evo + 2 module), mỗi body đấu vòng tròn với mọi body khác, hai bên cùng một AI tự động. AI không biết chơi kinh tế hay combo phức tạp nên con số chỉ mang tính tham khảo cho độ mạnh tương đối.
 
@@ -119,6 +120,7 @@
 | Cơ Bản | HP 9, dame 1.2, tốc +10%, nạp nhanh hơn 20%, đạn nhanh hơn |
 | Súng Nước | Tia nước có cảnh báo 0.5s |
 | Axit Hóa | Phát cường hóa tạo vùng ăn mòn tím (trừ máu & máu tối đa, chậm); mọi đòn axit gây 10x + 50% máu tối đa lên vật cản/xe tiền/triệu hồi |
+| Raven - Oca | MỚI: Collab Raven-Oca — giữ 0.4s đổi Tiểu Liên (loạt 3 viên, lướt né) ↔ Sniper (4 dame, bom khói né đạn), chim Oca đồng hành (tàng hình cắn làm chậm / radar khóa mục tiêu, đạn Sniper xuyên vật thể) |
 
 ## Module chân (FEET)
 
@@ -867,6 +869,20 @@ HP:6 (+2 xe lớn) | Dame:1 | Năng Lượng | Tốc: 0.9x. "Hệ Thống KÍCH 
   | Trạng Thái Hủy Diệt (`evo_tzero_2`) | $120 | THỦ: khiên to & nhanh hơn, để lại vệt điện làm chậm. CÔNG: cú đấm tạo sóng xung kích nổ lan phía trước & phá đạn địch trên đường lao. THIÊN: dội pháo dày hơn, đáp xuống để lại vùng từ trường đốt máu & hút địch. FULL EVO: định kỳ phóng tên lửa tầm nhiệt bay RẤT chậm, rẽ nhẹ (né được; đạn địch bắn hạ được) và tên lửa KHÔNG KÍCH vút lên trời, hiện ra ở cạnh trái/phải mục tiêu rồi bay chậm dọc làn tới vòng cảnh báo (2s, thấy rõ đường bay) mới cắm xuống; THỦ: khi khiên đang bay tự xả Tiểu Liên (1% NL/s). |
 
 - **Mã nguồn:** `js/characters/t_zero/logic.js`, `js/characters/t_zero/render.js`
+
+### 52. Raven - Oca (`raven_oca`)
+
+"Cuộc săn bắt đầu, Oca tìm chúng!" HP:4 | Dame:0.5 (Tiểu Liên) / 4 (Sniper) | Đạn:10 / 4 | Tốc: 3.8. Giữ Bắn 0.4s đổi súng (hồi 4s). TIỂU LIÊN: nhấp xả loạt 3 viên; đổi sang -> lướt ngang. SNIPER: nhấp -> đứng yên ngắm 0.4s rồi bắn đạn cực nhanh; đổi sang -> thả Bom Khói 2s (đứng trong khói né mọi đạn). OCA (máu = 50% Raven, tự hồi sinh): khi cầm Tiểu Liên thì tàng hình, định kỳ lao cắn địch gây dame + làm chậm; khi cầm Sniper thì bay cao đánh dấu radar -> đạn Sniper tự khóa mục tiêu, xuyên vật thể & bay nhanh hơn.
+
+- **Chỉ số thực đầu hiệp:** HP 4 · Sát thương 0.5 · Đạn 10 · Tốc độ 3.8 · Kích thước 26×26
+- **Tiến hoá:**
+
+  | Evo | Giá | Hiệu ứng |
+  |---|---:|---|
+  | Chiến Thuật Đặc Nhiệm (`evo_raven_1`) | $100 | Đạn Răng Cưa: mọi viên đạn (cả 2 súng) gây Chảy Máu. Khói Đặc Quánh: Bom Khói +2s (4s). Bộ Pháp Xung Kích: cầm Tiểu Liên tăng mạnh tốc độ. Thay Đạn Tức Thì: đổi súng là nạp đầy băng súng mới. |
+  | Hỏa Lực Không Kích (`evo_raven_2`) | $120 | Oca máu 80% Raven & định kỳ hiện vòng cảnh báo đỏ rồi thả Bom xuống địch. Tiểu Liên xả loạt 5 viên, băng 15. Sniper bay nhanh hơn, mạnh hơn & gây Trọng Thương: máu bị mất do Sniper không thể hồi trong 10s. FULL EVO: Oca Bất Tử (không bị tiêu diệt, không chặn đạn), đổi súng hồi 2s, Oca vừa lao cắn làm chậm vừa thả mưa bom liên hoàn vừa giữ khóa mục tiêu vĩnh viễn cho cả 2 súng. |
+
+- **Mã nguồn:** `js/characters/raven_oca/logic.js`, `js/characters/raven_oca/render.js`
 
 ## Phụ lục: cơ chế các body mới
 

@@ -5,7 +5,6 @@
 
 ## 1. Body mới — ƯU TIÊN (làm lần lượt từng body)
 > Đặc tả đầy đủ: `docs/BODY_MOI_DAC_TA.md`
-- **Raven - Oca** (`raven_oca`) — đổi Tiểu Liên/Sniper, chim Oca đồng hành.
 - **Tia Lazer** (`lazer_beam`) — giữ bắn tia liên tục.
 - **Y Sư** (`healer`) — hồi máu, đạn hấp huyết, phát cường hóa theo Max HP.
 - **Chrono & Neo** (`chrononeo`) — 2 thế súng, Tham Farm, Thời Khắc.
