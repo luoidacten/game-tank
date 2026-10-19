@@ -6,6 +6,8 @@ Object.assign(Player.prototype, {
     // [setupForNewRound] Cơ Bản
     setupBasic() {
         if (this.weapon === 'basic') {
+            // Nội tại: nạp đạn nhanh hơn 20% (đạn bay nhanh hơn: xem fireBullet)
+            this.reloadTime *= 0.8;
             // 1. Luôn cộng chỉ số cứng của Evo 1 trước (nếu có)
             if (this.hasUpgrade('evo_basic_1')) {
                 this.maxHp += 2;

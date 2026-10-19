@@ -13,10 +13,7 @@ Object.assign(Player.prototype, {
             ctx.beginPath();
             ctx.arc(this.x + this.w / 2, this.y + this.h / 2, Math.max(this.w / 2 + 8, 20 + progress * 16), 0, Math.PI * 2);
             ctx.stroke();
-            if (progress >= 0.95) {
-                ctx.fillStyle = "#ff0055"; ctx.font = "bold 9px 'Orbitron', Arial"; ctx.textAlign = "center";
-                drawWorldText(ctx, "⚡ STORM READY", this.x + this.w / 2, this.y - 18);
-            }
+            // Sẵn sàng: vòng nạp + mũi tên trên nòng (js/render/empower-providers.js)
             ctx.restore();
         }
     }

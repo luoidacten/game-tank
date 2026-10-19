@@ -224,7 +224,7 @@ Object.assign(Player.prototype, {
         // ==========================================
         // --- LOGIC NAM CHÂM (MAGNET) ---
         // ==========================================
-        this.updateMagnet();
+        if (this.updateMagnet()) return;
 
         // Đếm lùi nhiễm từ tính trên người chơi
         if (this.infectedPolarityTimer > 0) {
@@ -257,7 +257,7 @@ Object.assign(Player.prototype, {
             this.shield--; // Chuyển hóa 1 lớp khiên thường thành Kiếm Thể
             this.swordShieldActive = true;
             this.swordShieldTimer = 60; // 5s
-            this.swordShieldHits = (this.weapon === 'blade_god' && this.hasUpgrade('evo_blade_2')) ? 5 : 1;
+            this.swordShieldHits = 1;
         }
 
         if (this.swordShieldActive) {
@@ -265,8 +265,8 @@ Object.assign(Player.prototype, {
             if (this.swordShieldTimer <= 0 || this.swordShieldHits <= 0) {
                 // Đổi xong hoặc hết giờ -> Bắn trả kiếm
                 this.swordShieldActive = false;
-                let count = (this.weapon === 'blade_god' && this.hasUpgrade('evo_blade_2')) ? 5 : 3;
-                let isHoming = (this.weapon === 'blade_god' && this.hasUpgrade('evo_blade_2'));
+                let count = 3;
+                let isHoming = false;
                 let dirY = (this.id === 1) ? -1 : 1;
 
                 for (let k = 0; k < count; k++) {
@@ -299,102 +299,7 @@ Object.assign(Player.prototype, {
         // --- GIẢM TỐC ĐỘ SUKUNA KHI CẠN CHÚ LỰC ---
         // ==========================================
         currentSpeed = this.updateSukuna2(currentSpeed);
-        // ==========================================
-        // --- LOGIC CUNG (BODY TỤ LỰC & MƯA TÊN) ---
-        // ==========================================
-        // Thêm vào đầu phần logic Cung trong Player.update()
-        if (this.weapon === 'cung') {
-            let isFullEvo = this.hasUpgrade('evo_cung_1') && this.hasUpgrade('evo_cung_2');
-            let inp = effectiveInp;
-            let enemy = (this.id === 1) ? p2 : p1;
-
-            // Mưa toàn màn hình lặp lại mỗi 8 giây (Full Evo)
-            if (isFullEvo) {
-                if (this.globalRainTimer === undefined) this.globalRainTimer = 0;
-                this.globalRainTimer++;
-                if (this.globalRainTimer >= 480) { // 8 giây * 60fps
-                    arrowRains.push(new ArrowRain(this, 0, 0, 0, true)); // Gọi mưa global
-                    this.globalRainTimer = 0;
-                }
-            }
-
-            // Giảm CD Mưa Tên (Full Evo giảm 8s -> còn 2s, mặc định 10s)
-            let maxRainCD = isFullEvo ? 2000 : 10000;
-            if (this.rainCD > 0) this.rainCD -= 1000 / 60;
-
-            // Nội tại Nhạy Bén: Đếm ngược hồi chiêu né đạn (8s = 480 frames, Full Evo 5s = 300 frames)
-            if (this.bowDodgeCooldown > 0) {
-                this.bowDodgeCooldown--;
-                if (this.bowDodgeCooldown <= 0) {
-                    this.bowDodgeReady = true;
-                    if (typeof addFloatingText === 'function') addFloatingText(this.x + this.w / 2, this.y - 10, "⚡ NHẠY BÉN SẴN SÀNG", "#00ffcc", 13);
-                }
-            }
-
-            // 1. LOGIC LƯỚT (DASH) - Nội tại Cơ Động
-            if (this.isDashing) {
-                let dx = this.dashTargetX - this.x;
-                let dy = this.dashTargetY - this.y;
-                let dist = Math.hypot(dx, dy);
-
-                if (dist < 5 || this.x <= 0 || this.x + this.w >= canvas.width || this.y <= 0 || this.y + this.h >= canvas.height) {
-                    this.isDashing = false;
-                    // Full Evo: Lướt xong hồi Full đạn
-                    if (isFullEvo) this.ammo = this.maxAmmo;
-                } else {
-                    // Tốc độ lướt một quãng ngắn
-                    this.x += (dx / dist) * 15;
-                    this.y += (dy / dist) * 15;
-                }
-                return; // Đang lướt thì không làm hành động khác
-            }
-
-            // 2. TỤ LỰC CUNG: GIỮ NÚT ĐỂ KÉO (nạp nhanh x1.6), NHẢ RA ĐỂ BẮN
-            this.prevInpS = !!inp.s;
-            if (inp.s && !this.bowIsCharging && this.ammo > 0) {
-                this.bowIsCharging = true;
-                this.bowChargeTimer = 0;
-                this.crosshairX = enemy.x + enemy.w / 2;
-                this.crosshairY = enemy.y + enemy.h / 2;
-            } else if (!inp.s && this.bowIsCharging) {
-                let chargeSec = this.bowChargeTimer / 60;
-                this.fireBow(chargeSec, isFullEvo);
-                this.triggerBowDodgeDash(inp);
-                this.bowIsCharging = false;
-                this.bowChargeTimer = 0;
-            }
-
-            // Trong lúc đang tụ lực (đầy lực thì giữ nguyên tới khi nhả nút)
-            if (this.bowIsCharging) {
-                this.bowChargeTimer = Math.min(150, this.bowChargeTimer + 1.6);
-                let chargeSec = this.bowChargeTimer / 60;
-
-                // Tốc độ di chuyển chỉ bị giảm 15% (currentSpeed *= 0.85)
-                currentSpeed *= 0.85;
-
-                // Cập nhật hồng tâm đuổi theo địch khi chargeSec >= 2s
-                if (chargeSec >= 2 && this.hasUpgrade('evo_cung_2')) {
-                    let dx = (enemy.x + enemy.w / 2) - this.crosshairX;
-                    let dy = (enemy.y + enemy.h / 2) - this.crosshairY;
-                    this.crosshairX += dx * 0.1;
-                    this.crosshairY += dy * 0.1;
-                    let shrinkRatio = Math.min((chargeSec - 2) / 1.5, 1);
-                    this.crosshairRadius = 150 - (shrinkRatio * 120);
-                }
-            }
-
-            // Vẽ vùng hồng tâm cảnh báo
-            if (this.bowChargeTimer / 60 >= 2 && this.hasUpgrade('evo_cung_2')) {
-                ctx.save();
-                ctx.beginPath();
-                ctx.arc(this.crosshairX, this.crosshairY, this.crosshairRadius, 0, Math.PI * 2);
-                ctx.strokeStyle = "rgba(255, 0, 0, 0.5)";
-                ctx.lineWidth = 2;
-                ctx.stroke();
-                ctx.restore();
-            }
-        }
-
+        // Cung (Bow): logic nằm trong js/characters/cung/logic.js (CharHooks)
         // ==========================================
         // --- LOGIC SHADOW HUNTER UPDATE ---
         // ==========================================
@@ -445,7 +350,7 @@ Object.assign(Player.prototype, {
         if (bodyEffects.length) resolveStoneBlocking(this, prevXForStone);
 
         // Tự động hồi đạn lẻ theo thời gian (Chặn khi Shadow Hunter đang tàng hình)
-        if (this.weapon !== 'tank' && this.weapon !== 'sniper' && !(this.weapon === 'shadow_hunter' && this.stealthActive)) {
+        if (this.weapon !== 'tank' && this.weapon !== 'sniper' && this.weapon !== 'smg' && !(this.weapon === 'shadow_hunter' && this.stealthActive)) {
             if (this.ammo < this.maxAmmo && now - this.lastShot > this.reloadTime) {
                 if (now - this.lastReload > 500) { this.ammo++; this.lastReload = now; }
             }
@@ -461,7 +366,6 @@ Object.assign(Player.prototype, {
     },
 
     handleShooting(inp, now) {
-        if (this.weapon === 'cung') return;
         if (CharHooks.call(this, 'shoot', inp, now) === true) return;
 
         // ==========================================

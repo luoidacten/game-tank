@@ -111,6 +111,10 @@ Object.assign(CharHooks.registry.kiem_vu, {
             const k = this.kvSlashFx / 30;
             const x = this.kvSlashX;
             ctx.save();
+            if (this.kvSlashStopY != null) { // bị Tường Sniper chặn -> chỉ vẽ tới tường
+                const y0 = Math.min(this.kvSlashStopY, this.y), y1 = Math.max(this.kvSlashStopY, this.y + this.h);
+                ctx.beginPath(); ctx.rect(0, y0, canvas.width, y1 - y0); ctx.clip();
+            }
             ctx.globalCompositeOperation = 'lighter';
             const w = 34 * k + 4;
             const gr = ctx.createLinearGradient(x - w, 0, x + w, 0);

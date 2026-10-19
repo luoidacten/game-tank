@@ -17,9 +17,12 @@ Object.assign(Player.prototype, {
             if (this.paradoxHistory && this.paradoxHistory.length > 0) {
                 let pShadow = this.paradoxHistory[0];
                 ctx.save();
+                if (!((typeof coreSmallArtAt === 'function') && coreSmallArtAt(this, pShadow.x, pShadow.y, 0.4, '#00ffff'))) {
+                    ctx.globalAlpha = 0.4;
+                    ctx.fillStyle = "cyan";
+                    ctx.fillRect(pShadow.x, pShadow.y, this.w, this.h);
+                }
                 ctx.globalAlpha = 0.4;
-                ctx.fillStyle = "cyan";
-                ctx.fillRect(pShadow.x, pShadow.y, this.w, this.h);
                 ctx.fillStyle = "white"; ctx.textAlign = "center"; ctx.font = "bold 10px Arial";
                 ctx.fillText("3s", pShadow.x + this.w / 2, pShadow.y - 5);
                 ctx.restore();
@@ -77,9 +80,13 @@ Object.assign(Player.prototype, {
             // 2. VẼ BÓNG ĐỨNG YÊN CỦA ĐỊCH (EVO 1 - DẤU ẤN)
             if (this.enemyStationaryShadow) {
                 ctx.save();
+                const sh = this.enemyStationaryShadow;
+                if (!((typeof coreSmallArtAt === 'function') && coreSmallArtAt(enemy, sh.x + (this.w - enemy.w) / 2, sh.y + (this.h - enemy.h) / 2, 0.6, '#ff00ff'))) {
+                    ctx.globalAlpha = 0.6;
+                    ctx.fillStyle = "magenta";
+                    ctx.fillRect(sh.x, sh.y, this.w, this.h);
+                }
                 ctx.globalAlpha = 0.6;
-                ctx.fillStyle = "magenta";
-                ctx.fillRect(this.enemyStationaryShadow.x, this.enemyStationaryShadow.y, this.w, this.h);
 
                 // Viền nhấp nháy cho bóng điểm đánh dấu
                 ctx.strokeStyle = (Math.floor(Date.now() / 100) % 2 === 0) ? "white" : "magenta";
@@ -103,9 +110,12 @@ Object.assign(Player.prototype, {
                 let eShadow = this.enemyHistory[0];
 
                 ctx.save();
+                if (!((typeof coreSmallArtAt === 'function') && coreSmallArtAt(enemy, eShadow.x, eShadow.y, 0.3, '#a020f0'))) {
+                    ctx.globalAlpha = 0.3;
+                    ctx.fillStyle = enemy.color; // Bóng màu của địch
+                    ctx.fillRect(eShadow.x, eShadow.y, this.w, this.h);
+                }
                 ctx.globalAlpha = 0.3;
-                ctx.fillStyle = enemy.color; // Bóng màu của địch
-                ctx.fillRect(eShadow.x, eShadow.y, this.w, this.h);
 
                 ctx.strokeStyle = "purple";
                 ctx.lineWidth = 2;

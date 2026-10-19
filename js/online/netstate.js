@@ -10,14 +10,22 @@
 const NET_CLASSES = {
     Player, Crate, MoneyTruck, MovingObstacle, BastionWall, ArtilleryHazard,
     Explosion, IceZone, Beam, FloatingSword, AcidZone, StormSlash,
-    ArrowRain, ArrowDropMarker, MortarMarker, VoidZone, Talisman, SpellZone, RadiationZone,
+    ArrowRain, ArrowDropMarker, BowSkyShot, MortarMarker, VoidZone, Talisman, SpellZone, RadiationZone,
     ShadowTrap, ShortgunFireZone, FireZone, WindWall, InventorDrone, ConfinementCage,
     CreatorTurret, CreatorShield, CreatorDrone, CreatorRobot,
     SniperWall, NecroMinion, GhostDecoy, Turret,
     BodyZone, StoneBlock, SkyStrike, HitscanTelegraph, ThrownMecha, CrateBurst, AttackTruck, SwordSweep, LightningBolt, PortalGate, HitscanWarning,
     DjSoundZone, DjBeam,
+    BigBulletBurst,
     FsPetal, FsSlashMark, FsClone, FsShadow, FsLandStrike, FsStar,
     TzMortar, TzZone, TzAirStrike,
+    OvEmpRing, OvEmpMark,
+    ThunderReturnBolt, ThunderStrike, ThunderZone,
+    CnRing, CnRadar, CnEcho,
+    BgLightSword, BgDarkHover, BgBlackHole, BgGuardian, BgSkySword,
+    GeminiTwin,
+    BdBatZone, BdLaser, BdOrb,
+    BersArena,
 };
 
 // Biến toàn cục cần đồng bộ: [tên, getter, setter]
@@ -62,7 +70,7 @@ const NET_ROOTS = [
 const NET_PLAIN_LISTS = new Set(['thunderPlantedSpears', 'magnetNodes']);
 
 // Trường của gameState được host quyết định
-const NET_GAMESTATE_KEYS = ['round', 'p1Score', 'p2Score', 'p1Coins', 'p2Coins', 'phase', 'currentMap', 'winScore', 'lastObstacleSpawn', 'lastArtillerySpawn'];
+const NET_GAMESTATE_KEYS = ['round', 'p1Score', 'p2Score', 'p1Coins', 'p2Coins', 'phase', 'currentMap', 'winScore', 'lastObstacleSpawn', 'lastArtillerySpawn', 'zoneOff'];
 
 // Trang bị / ví của người chơi (đồng bộ ở màn hình shop)
 const NET_LOADOUT_KEYS = ['upgrades', 'rerollCount', 'upgradeLevel', 'invUpgrades', 'boughtInvShopItems', 'boughtShopItems', 'isFullEvoInventor',

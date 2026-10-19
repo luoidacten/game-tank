@@ -23,12 +23,13 @@ const BOT_LEVELS = [
 //   tap: nhấp liên tục | hold:N: giữ N tick rồi nhả | stream: giữ liên tục khi thẳng hàng
 //   toggle: nhấp 1 lần để bật (Bình Phun) | aaa: bắn khi thẳng hàng (tự nhắm)
 const BOT_FIRE_STYLE = {
-    overload: 'hold:95', lazer_charge: 'hold:95', lazer_auto: 'hold:95', storm: 'hold:40', van_kiem: 'stream',
+    lazer_auto: 'stream', storm: 'hold:40', van_kiem: 'stream',
     six_barrel: 'hold:40', mirror: 'hold:215', shadow_hunter: 'hold:40', shortgunATK: 'hold:40',
     necromancer: 'hold:40', genius: 'hold:40', sprayer: 'toggle',
     dj: 'beat',
 };
 BOT_FIRE_STYLE.steel_hook = 'hold:30'; // Móc Thép: tụ 1 mốc rồi nhả; nhấp lại để kích hoạt giai đoạn 2
+BOT_FIRE_STYLE.lazer_beam = 'stream'; // Tia Lazer: giữ liên tục khi thẳng hàng
 
 const BOT_CRATE_VALUE = { coin: 0.7, hp: 0.6, ammo: 0.45, shield: 0.85, dmg: 0.75, gear: 0.5, boom: -2, bullets: -0.4 };
 
@@ -95,7 +96,7 @@ class SmartBot {
                 out.push({ t, x: ix, half: (b.w || 6) / 2 + bot.w / 2 + 4, w: 1 + Math.min(2, (b.dmg || 1) * 0.3) });
             }
         }
-        // Tia sét Lôi Minh (hitscan có cảnh báo 0.25s)
+        // Lôi Độn (cột cảnh báo đường lao của Sấm Chớp)
         if (enemy.thunderRaycastWarningTimer > 0) out.push({ t: enemy.thunderRaycastWarningTimer, x: enemy.thunderRaycastX, half: 24 + bot.w / 2 + 4, w: 3 });
         const now = Date.now();
         const zoneAt = (x, y, r, tLeft, w, obj) => {
@@ -105,12 +106,15 @@ class SmartBot {
             const half = Math.sqrt(Math.max(0, r * r - Math.max(0, dy - bot.h / 2) ** 2)) + bot.w / 2;
             out.push({ t: Math.max(1, tLeft), x, half, w });
         };
+        if (enemy.thunderSky) zoneAt(enemy.thunderSky.x, enemy.thunderSky.y, enemy.thunderSky.r, enemy.thunderSky.lock > 0 ? enemy.thunderSky.lock : 60, 3);
         mortars.forEach(m => { if (m.active && m.owner !== bot) zoneAt(m.x, m.y, m.maxR || 55, (m.detonateTime - (now - m.spawnTime)) / 16.7, 2, m); });
         artilleryHazards.forEach(h => { if (h.active) zoneAt(h.x, h.y, h.maxR || 60, (h.detonateTime - (now - h.spawnTime)) / 16.7, 2, h); });
         arrowDrops.forEach(a => { if (a.active !== false && a.owner !== bot) zoneAt(a.x, a.y, 30, (a.delay - (now - a.spawnTime)) / 16.7, 1.5, a); });
         bodyEffects.forEach(e => {
             if (!e.active || e.owner === bot) return;
             if (e instanceof SkyStrike) zoneAt(e.x, e.y, e.r || 48, e.delay || 1, 2, e);
+            else if (e instanceof ThunderStrike) zoneAt(e.x, e.y, e.r, e.delay || 1, 1.5, e);
+            else if (typeof e.botThreat === 'function') { const th = e.botThreat(bot); if (th && this.perceive(e)) out.push(th); }
             else if (e instanceof HitscanWarning) { if (e.delay > 0 && e.owner !== bot && (!e.owner || e.owner.owner !== bot) && this.perceive(e)) out.push({ t: Math.max(1, e.delay), x: e.x, half: e.width / 2 + bot.w / 2 + 4, w: 3 }); }
             else if (e instanceof HitscanTelegraph) { if (this.perceive(e)) out.push({ t: Math.max(1, e.delay), x: e.x, half: bot.w / 2 + 8, w: 2 }); }
             else if (e instanceof BodyZone) this.zoneRect(out, bot, e.x, e.y, e.r, 0.5);
@@ -223,13 +227,12 @@ class SmartBot {
     }
 
     safeZone(aheadSec) {
-        const limit = (gameState.currentMap === 'fast_shrink') ? 20000 : C.suddenDeathTime;
-        const rate = (gameState.currentMap === 'fast_shrink') ? 0.15 : 0.05;
         const tp = Date.now() - gameState.roundStartTime + aheadSec * 1000;
-        if (tp <= limit - 1500) return null;
-        const shrink = Math.max(0, (tp - limit) * rate);
-        let x0 = shrink, x1 = canvas.width - shrink;
-        if (x1 - x0 < 50) { x0 = canvas.width / 2 - 25; x1 = canvas.width / 2 + 25; }
+        const z = (typeof getZoneState === 'function') ? getZoneState(tp + 1500) : null;
+        if (!z) return null;
+        // Vùng an toàn tại thời điểm dự đoán (bo 2 giai đoạn, vùng cuối dời trái/phải)
+        const cur = getZoneState(tp) || z;
+        let x0 = cur.x0, x1 = cur.x1;
         return { x0, x1 };
     }
 
@@ -245,7 +248,7 @@ class SmartBot {
 
     // ---- Bắn theo kiểu của body ----
     fire(bot, enemy, aligned, inp) {
-        const style = BOT_FIRE_STYLE[bot.weapon] || 'tap';
+        const style = (bot.weapon === 'customize' && typeof cuBotFireStyle === 'function') ? cuBotFireStyle(bot) : (BOT_FIRE_STYLE[bot.weapon] || 'tap');
         if (style === 'toggle') { // Bình Phun: bật khi thẳng hàng, tắt khi lệch lâu
             if (this.tapCool > 0) { this.tapCool--; inp.s = this.tapCool > 3; return; }
             if ((aligned && !bot.spOn) || (!aligned && bot.spOn && this.t % 60 === 0)) { this.tapCool = 7; inp.s = true; return; }
@@ -258,6 +261,7 @@ class SmartBot {
         }
         if (style === 'stream') {
             if (bot.weapon === 'six_barrel' && (bot.heat || 0) > 82) { inp.s = false; return; }
+            if (bot.weapon === 'lazer_auto' && ((bot.laOver || 0) > 0 || (bot.laHeat || 0) > 88)) { inp.s = false; return; }
             inp.s = aligned || (bot.weapon === 'six_barrel' && (bot.sbSpin || 0) >= 30 && this.t % 3 !== 0 && Math.random() < 0.3);
             return;
         }
@@ -271,7 +275,14 @@ class SmartBot {
             if (this.tapCool > 0) { this.tapCool--; inp.s = false; return; }
             this.hold = 1; inp.s = true; return; // nạp sẵn trong lúc di chuyển
         }
+        // Lazer Xuyên Phá: giữ 0.4s bật Tự Nạp; nạp đầy rồi mới nhấp khi thẳng hàng
+        if (bot.weapon === 'lazer_charge') {
+            if (this.hold > 0) { this.hold++; inp.s = this.hold <= 28; if (this.hold > 32) this.hold = 0; return; }
+            if (!bot.lcAuto) { this.hold = 1; inp.s = true; return; }
+            if ((bot.lcEnergy || 0) < 100) { inp.s = false; return; }
+        }
         // tap
+        if (bot.weapon === 'overload' && (bot.ovMain || 0) < 1 && (bot.ammo || 0) > 0) { inp.s = false; return; } // Quá Tải: chờ thanh chính đầy
         if (this.tapCool > 0) { this.tapCool--; inp.s = this.tapCool > 6; return; }
         if (aligned) { this.tapCool = 9; inp.s = true; this.nextShot(enemy); return; }
         inp.s = false;

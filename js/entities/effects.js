@@ -51,6 +51,7 @@ class Explosion {
         };
 
         checkTarget(p1); checkTarget(p2);
+        if (typeof gmExtraTargets === 'function') gmExtraTargets(this.owner).forEach(checkTarget); // Gemini: Bản Sao AI
 
         moneyTrucks.forEach(t => {
             if (t.active) {

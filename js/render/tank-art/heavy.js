@@ -195,7 +195,7 @@
         }
     });
     // Đạn Lớn: CẦU TRÒN THUẦN đúng đường kính b.w, không đuôi, quầng sáng; to (>=22) có vòng xoay
-    registerBulletArt('big_bullet', (b, color, o, k) => {
+    const bigOrb = (b, color, o, k) => {
         const R = Math.max(3, Math.max(b.w || 0, b.h || 0) / 2);
         // khử xoay để vân sáng luôn ở góc trên-trái (cầu tròn không có hướng)
         ctx.rotate(-Math.atan2(b.vy || 0, b.vx || 0));
@@ -230,13 +230,38 @@
             ctx.beginPath(); ctx.arc(0, 0, g2, Math.PI * 1.5, Math.PI * 1.95); ctx.stroke();
             ctx.restore();
         }
-    });
+        // Xuyên Thấu: vành tím nhấp nháy (vẫn là hình tròn thuần)
+        if (b.bigPierce) {
+            ctx.save(); TA.glow('#c084fc', 14);
+            ctx.strokeStyle = `rgba(233,213,255,${0.6 + 0.35 * Math.sin(k.t / 60)})`; ctx.lineWidth = Math.max(2, R * 0.1);
+            H.circle(0, 0, R + Math.max(2.5, R * 0.12)); ctx.stroke();
+            ctx.restore();
+        }
+    };
+    registerBulletArt('big_bullet', bigOrb);
+    // Đạn Lớn dùng BulletHooks 'big_bullet' để vẽ -> chuyển sang quả cầu art (giữ hit/obstacle của logic)
+    const hookDraw = (id, fn) => {
+        if (typeof BulletHooks === 'undefined' || !BulletHooks.registry[id]) return;
+        const prev = BulletHooks.registry[id].draw;
+        BulletHooks.registry[id].draw = function (b) {
+            const o = b.owner;
+            ctx.save();
+            ctx.translate(b.x + b.w / 2, b.y + b.h / 2);
+            ctx.rotate(Math.atan2(b.vy || 0, b.vx || 0));
+            let ok;
+            try { ok = fn(b, H.teamOf(o), o, { r: Math.max(2, Math.min(b.w, b.h) / 2), w: b.w, h: b.h, sp: Math.hypot(b.vx || 0, b.vy || 0), t: Date.now(), team: H.teamOf(o) }); }
+            catch (e) { ok = false; }
+            ctx.restore();
+            if (ok === false && prev) prev.call(this, b);
+        };
+    };
+    hookDraw('big_bullet', bigOrb);
 
     // ==========================================
     // CUỘN QUÁ TẢI (overload) — cuộn dây quấn quanh nòng, tia điện nhỏ
     // ==========================================
     registerTankArt('overload', (p, k) => {
-        const c = Math.min(1, (p.chargeLevel || 0) / 7);
+        const c = Math.min(1, p.ovMain !== undefined ? (p.ovMain || 0) : (p.chargeLevel || 0) / 7);
         const elec = '#22d3ee';
         H.treads(-15, 3.8, -9, 14, k.t, '#0b1726', '#25506b');
         // thân lục giác
@@ -290,9 +315,9 @@
         }
         ctx.restore();
     });
-    registerBulletArt('overload', (b, color, o, k) => {
-        const R = Math.max(2.5, (b.w || 5) / 2);
-        const elec = '#22d3ee';
+    const ovOrb = (b, color, o, k) => {
+        const R = Math.max(b.hook === 'overload' ? 5 : 2.5, (b.w || 5) / 2);
+        const elec = b.ovFull ? '#a78bfa' : '#22d3ee';
         ctx.rotate(-Math.atan2(b.vy || 0, b.vx || 0));
         const sp = Math.hypot(b.vx || 0, b.vy || 0) || 1;
         // vệt điện mờ phía sau
@@ -328,7 +353,17 @@
         if (b.isFullCharge) {
             H.circle(0, 0, R * (0.45 + 0.1 * Math.sin(k.t / 40))); ctx.fillStyle = '#ffffff'; ctx.fill();
         }
-    });
+        // Đạn sạc đầy (Full): vòng plasma tím xoay
+        if (b.ovFull) {
+            ctx.save(); ctx.rotate(k.t / 120); TA.glow('#a78bfa', 10);
+            ctx.strokeStyle = 'rgba(221,214,254,0.9)'; ctx.lineWidth = Math.max(1.2, R * 0.12);
+            ctx.beginPath(); ctx.arc(0, 0, R * 1.55, 0, 1.9); ctx.stroke();
+            ctx.beginPath(); ctx.arc(0, 0, R * 1.55, Math.PI, Math.PI + 1.9); ctx.stroke();
+            ctx.restore();
+        }
+    };
+    registerBulletArt('overload', ovOrb);
+    hookDraw('overload', ovOrb);
 
     // ==========================================
     // LAZER XUYÊN PHÁ (lazer_charge) — nòng dài mảnh, thanh tụ lực chạy dọc thân
@@ -459,13 +494,13 @@
         ctx.fillStyle = H.lin(0, -6, 0, 14, [[0, '#2851a8'], [0.5, '#1a347a'], [1, '#0c1838']]);
         ctx.fill(); H.rim(k);
         // khe làm mát (đèn xanh nhịp nhàng)
-        const since = Date.now() - (p.lastShot || 0);
-        const heat = Math.max(0, 1 - since / 600);
+        const over = (p.laOver || 0) > 0;
+        const heat = Math.min(1, (p.laHeat || 0) / 100);
         for (let i = 0; i < 4; i++) {
             const y = -1.5 + i * 3;
             const a = 0.45 + 0.35 * Math.sin(k.t * 5 + i) + heat * 0.4;
             ctx.save(); TA.glow('#60a5fa', 4 + heat * 8);
-            ctx.fillStyle = `rgba(${Math.round(96 + heat * 150)},${Math.round(165 + heat * 60)},250,${Math.min(1, a)})`;
+            ctx.fillStyle = over ? `rgba(255,59,48,${Math.min(1, a)})` : `rgba(${Math.round(96 + heat * 159)},${Math.round(165 - heat * 45)},${Math.round(250 - heat * 210)},${Math.min(1, a)})`;
             TA.rr(-10.5, y, 4.2, 1.5, 0.7); ctx.fill();
             TA.rr(6.3, y, 4.2, 1.5, 0.7); ctx.fill();
             ctx.restore();
@@ -485,9 +520,17 @@
             ctx.fillStyle = k.team; TA.rr(x - bw / 2 - 0.4, -16, bw + 0.8, 1.8, 0.8); ctx.fill();
             ctx.restore();
         });
-        // lõi phát năng lượng giữa thân
+        // lõi phát năng lượng giữa thân (nóng đỏ khi nhiệt cao)
         H.circle(0, 6, 3.6);
-        ctx.fillStyle = H.rad(0, 6, 0.3, 3.6, [[0, '#ffffff'], [0.5, '#60a5fa'], [1, '#1e3a8a']]); ctx.fill();
+        ctx.fillStyle = H.rad(0, 6, 0.3, 3.6, [[0, '#ffffff'], [0.5, heat > 0.55 ? '#ff7a00' : '#60a5fa'], [1, over ? '#7f1d1d' : '#1e3a8a']]); ctx.fill();
+        // quá nhiệt: khói bốc từ khe làm mát
+        if (over) {
+            for (let i = 0; i < 4; i++) {
+                const ph = (k.t * 1.3 + i / 4) % 1, sd = i % 2 ? 1 : -1;
+                ctx.fillStyle = `rgba(200,200,210,${0.5 * (1 - ph)})`;
+                H.circle(sd * (8.5 + ph * 3), 2 + (i >> 1) * 4 - ph * 3, 1.2 + ph * 2); ctx.fill();
+            }
+        }
         ctx.strokeStyle = k.team; ctx.lineWidth = 1; ctx.stroke();
     });
     registerBulletArt('lazer_auto', (b, color, o, k) => {
@@ -499,7 +542,7 @@
         ctx.strokeStyle = k.team; ctx.lineWidth = r * 2.4;
         ctx.beginPath(); ctx.moveTo(-L * 0.5, 0); ctx.lineTo(L * 0.5, 0); ctx.stroke();
         ctx.restore();
-        ctx.strokeStyle = '#93c5fd'; ctx.lineWidth = r * 1.4;
+        ctx.strokeStyle = b.laHot ? '#ffb347' : '#93c5fd'; ctx.lineWidth = r * 1.4;
         ctx.beginPath(); ctx.moveTo(-L * 0.45, 0); ctx.lineTo(L * 0.5, 0); ctx.stroke();
         ctx.strokeStyle = '#ffffff'; ctx.lineWidth = Math.max(1, r * 0.7);
         ctx.beginPath(); ctx.moveTo(-L * 0.35, 0); ctx.lineTo(L * 0.5, 0); ctx.stroke();
@@ -763,24 +806,27 @@
         MortarMarker.prototype.draw = function () {
             if (!this.active) return;
             const now = Date.now();
-            const age = now - this.spawnTime;
+            const age = (this.age !== undefined) ? this.age * (1000 / 60) : now - this.spawnTime;
             const progress = Math.min(1, age / this.detonateTime);
             const left = this.detonateTime - age;
+            const echo = (this.echoCount || 0) > 0; // nổ bồi: cam, đứng yên tại chỗ
+            const maxR = echo ? this.maxR * 0.9 : this.maxR;
+            const hot = echo ? '#ff9f1c' : '#ff3b30';
             const team = H.teamOf(this.owner);
             const crit = left < 1000;
             const flash = crit && Math.floor(now / 100) % 2 === 0;
             ctx.save();
             ctx.translate(this.x, this.y);
             // vùng nổ cuối cùng (mờ) + vùng đang lớn dần
-            ctx.beginPath(); ctx.arc(0, 0, this.maxR, 0, PI2);
+            ctx.beginPath(); ctx.arc(0, 0, maxR, 0, PI2);
             ctx.fillStyle = 'rgba(255,60,40,0.07)'; ctx.fill();
             ctx.setLineDash([4, 5]); ctx.strokeStyle = 'rgba(255,120,90,0.45)'; ctx.lineWidth = 1.5; ctx.stroke(); ctx.setLineDash([]);
-            const R = this.maxR * progress;
+            const R = maxR * progress;
             ctx.beginPath(); ctx.arc(0, 0, R, 0, PI2);
             ctx.fillStyle = H.rad(0, 0, 0, Math.max(1, R), [[0, 'rgba(255,90,40,0.05)'], [1, 'rgba(255,60,40,0.32)']]);
             ctx.fill();
-            ctx.shadowBlur = 10; ctx.shadowColor = flash ? '#facc15' : '#ff3b30';
-            ctx.strokeStyle = flash ? '#facc15' : '#ff3b30'; ctx.lineWidth = 3.5; ctx.stroke();
+            ctx.shadowBlur = 10; ctx.shadowColor = flash ? '#facc15' : hot;
+            ctx.strokeStyle = flash ? '#facc15' : hot; ctx.lineWidth = 3.5; ctx.stroke();
             ctx.shadowBlur = 0;
             // vòng ngắm màu đội xoay
             ctx.save(); ctx.rotate(now / 400);
@@ -792,7 +838,7 @@
             ctx.beginPath(); ctx.moveTo(-19, 0); ctx.lineTo(-7, 0); ctx.moveTo(7, 0); ctx.lineTo(19, 0);
             ctx.moveTo(0, -19); ctx.lineTo(0, -7); ctx.moveTo(0, 7); ctx.lineTo(0, 19); ctx.stroke();
             // quả pháo đang rơi: bóng thu nhỏ dần về tâm
-            const fall = 1 - progress;
+            const fall = echo ? 0 : 1 - progress;
             ctx.fillStyle = `rgba(0,0,0,${0.25 + progress * 0.3})`;
             ctx.beginPath(); ctx.ellipse(0, 0, 3 + progress * 4, 2 + progress * 2.5, 0, 0, PI2); ctx.fill();
             const sy = -fall * 26;
@@ -805,7 +851,7 @@
             ctx.font = "bold 14px 'Orbitron', Arial";
             ctx.shadowColor = 'black'; ctx.shadowBlur = 4;
             ctx.textAlign = 'center';
-            const txt = (Math.max(0, left) / 1000).toFixed(1);
+            const txt = (echo ? '↻ ' : '') + (Math.max(0, left) / 1000).toFixed(1);
             if (typeof drawWorldText === 'function') drawWorldText(ctx, txt, 0, -24); else ctx.fillText(txt, 0, -24);
             ctx.restore();
         };

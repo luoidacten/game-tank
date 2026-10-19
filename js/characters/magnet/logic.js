@@ -50,38 +50,144 @@ Object.assign(Player.prototype, {
             this.magnetHoldFrames = 0;
             this.isPolarDashing = false;
             this.polarDashTarget = null;
+            this.polarDashKind = null;   // 'node' (Cột Từ Trường) | 'enemy' (kẻ địch nhiễm từ)
+            this.polarDashPhase = 0;     // 1 = lao lên, 2 = bật về
+            this.polarDashHomeY = 0;
+            this.polarDashHit = false;
+            this.polarDashCd = 0;
+            this.polarDashT = 0;
         }
     },
 
-    // [update] magnet
+    // Tìm mục tiêu KHÁC CỰC ở phía trước (cột từ trường hoặc kẻ địch nhiễm từ) để Lướt Cực Tính
+    findPolarDashTarget() {
+        const cx = this.x + this.w / 2;
+        const range = 170;
+        const fwd = (y) => (this.id === 1) ? (y < this.y) : (y > this.y + this.h);
+        let best = null, bestDx = 1e9, kind = null;
+        const enemy = (this.id === 1) ? p2 : p1;
+        if (enemy && enemy.hp > 0 && enemy.infectedPolarityTimer > 0 && enemy.infectedPolarity && enemy.infectedPolarity !== this.magnetPolarity) {
+            const dx = Math.abs(enemy.x + enemy.w / 2 - cx);
+            if (dx <= range) { best = enemy; bestDx = dx - 20; kind = 'enemy'; } // ưu tiên kẻ địch
+        }
+        for (const m of magnetNodes) {
+            if (!m.active || m.polarity === this.magnetPolarity || !fwd(m.y)) continue;
+            const dx = Math.abs(m.x - cx);
+            if (dx <= range && dx < bestDx) { best = m; bestDx = dx; kind = 'node'; }
+        }
+        return best ? { t: best, kind } : null;
+    },
+
+    startPolarDash(found) {
+        this.isPolarDashing = true;
+        this.polarDashTarget = found.t;
+        this.polarDashKind = found.kind;
+        this.polarDashPhase = 1;
+        this.polarDashHomeY = (this.id === 1) ? canvas.height - this.h - 22 : 20;
+        this.polarDashHit = false;
+        this.polarDashT = 0;
+        if (typeof addFloatingText === 'function') addFloatingText(this.x + this.w / 2, this.y - 15, found.kind === 'enemy' ? "HÚT & HÚC! 🧲💥" : "LƯỚT CỰC TÍNH! 🧲💨", "#00ffff", 14);
+        if (soundSystem && !soundSystem.muted) soundSystem.playDash();
+    },
+
+    // Kết thúc pha lao: nổ từ tính tại điểm húc, bật về
+    polarDashImpact(x, y) {
+        let dmg = this.hasUpgrade('evo_mag_net_1') ? 2.0 : 1.0;
+        let radius = 60;
+        explosions.push(new Explosion(x, y, radius, this.magnetPolarity === 1 ? 'rgba(255, 60, 0,' : 'rgba(0, 180, 255,', 0, this));
+        let enemy = (this.id === 1) ? p2 : p1;
+        if (!this.polarDashHit && enemy && enemy.hp > 0 && Math.hypot((enemy.x + enemy.w / 2) - x, (enemy.y + enemy.h / 2) - y) <= radius + enemy.w / 2) {
+            this.polarDashHit = true;
+            enemy.takeDamage(dmg, this);
+        }
+        triggerScreenShake(5, 8);
+        this.polarDashPhase = 2;
+    },
+
+    // Va chạm khi đang lao (giống xe TANK): húc địch 1 lần, phá thùng đồ
+    polarDashCollide() {
+        let enemy = (this.id === 1) ? p2 : p1;
+        if (!this.polarDashHit && enemy && enemy.hp > 0 && rectIntersect(this.x, this.y, this.w, this.h, enemy.x, enemy.y, enemy.w, enemy.h)) {
+            this.polarDashHit = true;
+            let dmg = this.hasUpgrade('evo_mag_net_1') ? 1.5 : 1.0;
+            enemy.takeDamage(dmg, this);
+            enemy.kbX = ((enemy.x + enemy.w / 2) >= (this.x + this.w / 2) ? 1 : -1) * 6;
+            explosions.push(new Explosion(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, 50, this.magnetPolarity === 1 ? 'rgba(255, 60, 0,' : 'rgba(0, 180, 255,', 0, this));
+            triggerScreenShake(6, 10);
+            if (this.polarDashKind === 'enemy') { this.polarDashPhase = 2; return; }
+        }
+        if (typeof crates !== 'undefined') {
+            for (let c of crates) {
+                if (c.active && rectIntersect(this.x, this.y, this.w, this.h, c.x, c.y, c.w, c.h)) {
+                    c.active = false;
+                    crateOnBreak(c, this);
+                    if (typeof grantCrateLoot === 'function') grantCrateLoot(c, this);
+                    break;
+                }
+            }
+        }
+    },
+
+    // [update] magnet — trả về true nếu cần dừng update() (đang Lướt Cực Tính)
     updateMagnet() {
         if (this.weapon === 'magnet') {
-            // 1. Lướt Từ Tính (Polar Dash)
-            // 1. Lướt Từ Tính (Polar Dash) - Chỉ lướt theo trục ngang (X) trên baseline
-            if (this.isPolarDashing && this.polarDashTarget) {
+            if (this.polarDashCd > 0 && !this.isPolarDashing) this.polarDashCd--;
+            // Lướt Cực Tính: lao THẲNG lên phía trước (như xe TANK) về phía mục tiêu khác cực, đồng thời hút mục tiêu lại
+            if (this.isPolarDashing) {
                 let t = this.polarDashTarget;
-                let dx = t.x - (this.x + this.w / 2);
-                let dist = Math.abs(dx);
-                let dashSpeed = 26;
-                this.y = (this.id === 1) ? canvas.height - this.h - 22 : 20;
-
-                if (dist <= dashSpeed) {
-                    this.x = Math.max(0, Math.min(canvas.width - this.w, t.x - this.w / 2));
-                    this.isPolarDashing = false;
-                    this.isInvulnerable = false;
-                    t.active = false;
-                    let dashDmg = this.hasUpgrade('evo_mag_net_1') ? 2.0 : 1.0;
-                    let radius = 60;
-                    explosions.push(new Explosion(t.x, t.y, radius, this.magnetPolarity === 1 ? 'rgba(255, 60, 0,' : 'rgba(0, 180, 255,', dashDmg, this));
+                let dir = (this.id === 1) ? -1 : 1;
+                let cx = this.x + this.w / 2;
+                this.polarDashT++;
+                if (this.polarDashPhase === 1) {
+                    let alive = t && (this.polarDashKind === 'enemy' ? t.hp > 0 : t.active);
+                    if (!alive) { this.polarDashPhase = 2; return true; }
+                    let tx = (this.polarDashKind === 'enemy') ? t.x + t.w / 2 : t.x;
+                    let ty = (this.polarDashKind === 'enemy') ? t.y + t.h / 2 : t.y;
+                    // Bẻ lái ngang về phía mục tiêu
+                    let sdx = tx - cx;
+                    this.x = Math.max(0, Math.min(canvas.width - this.w, this.x + Math.max(-7, Math.min(7, sdx))));
+                    cx = this.x + this.w / 2;
+                    this.y += dir * 18;
+                    // Hút mục tiêu về phía mình
                     let enemy = (this.id === 1) ? p2 : p1;
-                    if (enemy && enemy.hp > 0 && Math.hypot((enemy.x + enemy.w / 2) - t.x, (enemy.y + enemy.h / 2) - t.y) <= radius) {
-                        enemy.takeDamage(dashDmg, this);
+                    if (enemy && enemy.hp > 0) {
+                        let pullX = null, force = 0;
+                        if (this.polarDashKind === 'enemy') { pullX = cx; force = 7; }
+                        else if (Math.abs(enemy.x + enemy.w / 2 - t.x) <= t.radius * 1.5) { pullX = t.x; force = 5; }
+                        if (pullX !== null) {
+                            let edx = pullX - (enemy.x + enemy.w / 2);
+                            enemy.x = Math.max(0, Math.min(canvas.width - enemy.w, enemy.x + Math.max(-force, Math.min(force, edx))));
+                        }
                     }
-                    triggerScreenShake(5, 8);
+                    this.polarDashCollide();
+                    if (this.polarDashPhase !== 1) return true;
+                    let myY = this.y + this.h / 2;
+                    if (this.polarDashKind === 'node' && (dir < 0 ? myY <= t.y + 14 : myY >= t.y - 14)) {
+                        t.active = false;
+                        this.polarDashImpact(t.x, t.y);
+                    } else if (this.polarDashKind === 'enemy' && (dir < 0 ? myY < ty - 30 : myY > ty + 30)) {
+                        this.polarDashPhase = 2;
+                    }
+                    if (this.y < 0 || this.y > canvas.height - this.h) {
+                        this.y = Math.max(0, Math.min(canvas.height - this.h, this.y));
+                        if (this.polarDashPhase === 1) this.polarDashImpact(this.x + this.w / 2, this.y + this.h / 2);
+                    }
                 } else {
-                    this.x += (dx > 0 ? 1 : -1) * dashSpeed;
+                    // Bật về làn của mình
+                    let home = this.polarDashHomeY;
+                    let step = 13;
+                    if (Math.abs(home - this.y) <= step) {
+                        this.y = home;
+                        this.isPolarDashing = false;
+                        this.polarDashPhase = 0;
+                        this.polarDashTarget = null;
+                        this.polarDashCd = 60;
+                    } else {
+                        this.y += (home > this.y ? 1 : -1) * step;
+                    }
                 }
-            } else if (this.weapon === 'magnet') {
+                return true;
+            } else {
                 this.y = (this.id === 1) ? canvas.height - this.h - 22 : 20;
             }
 
@@ -97,6 +203,7 @@ Object.assign(Player.prototype, {
                 ctx.restore();
             }
         }
+        return false;
     },
 
     // [handleShooting] magnet — trả về true nếu cần dừng handleShooting()
@@ -118,21 +225,9 @@ Object.assign(Player.prototype, {
                         let isDoubleTap = (nowTap - (this.lastMagnetTapTime || 0) < 320);
                         this.lastMagnetTapTime = nowTap;
 
-                        let enemyHalfY = canvas.height / 2;
-                        let eligibleNodes = magnetNodes.filter(m => m.active && m.polarity !== this.magnetPolarity && (this.id === 1 ? m.y < enemyHalfY : m.y > enemyHalfY));
-
-                        if (isDoubleTap && eligibleNodes.length > 0) {
-                            let closest = eligibleNodes.reduce((best, curr) => {
-                                let dCurr = Math.hypot(curr.x - (this.x + this.w / 2), curr.y - (this.y + this.h / 2));
-                                let dBest = Math.hypot(best.x - (this.x + this.w / 2), best.y - (this.y + this.h / 2));
-                                return dCurr < dBest ? curr : best;
-                            }, eligibleNodes[0]);
-
-                            this.isPolarDashing = true;
-                            this.polarDashTarget = closest;
-                            this.isInvulnerable = true;
-                            if (typeof addFloatingText === 'function') addFloatingText(this.x + this.w / 2, this.y - 15, "LƯỚT TỪ TÍNH! 🧲💨", "#00ffff", 14);
-                            if (soundSystem && !soundSystem.muted) soundSystem.playDash();
+                        let found = (isDoubleTap && this.polarDashCd <= 0) ? this.findPolarDashTarget() : null;
+                        if (found) {
+                            this.startPolarDash(found);
                             return true;
                         }
 

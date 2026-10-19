@@ -10,6 +10,7 @@ Object.assign(Player.prototype, {
             this.sukunaChargeTimer = 0;      // Thời gian giữ nút bắn (tính bằng frame)
             this.lastRctHealTime = 0;        // Đánh dấu thời điểm hồi máu Phản Chuyển gần nhất
             this.domainActive = false;       // Trạng thái bật Lãnh địa
+            this.sukunaDomainTick = 0;       // Số khung hình từ lúc mở Lãnh địa (chỉ dùng để vẽ)
             this.sukunaCeLockTimer = 0;      // Cooldown khóa hồi Chú Lực sau khi dính hit
             this.sukunaPassiveHealTimer = 0; // Hồi máu tự nhiên ngoài combat
 
@@ -105,6 +106,7 @@ Object.assign(Player.prototype, {
                 }
 
                 if (this.domainActive) {
+                    this.sukunaDomainTick = (this.sukunaDomainTick || 0) + 1; // đếm khung hình cho hiệu ứng mở Lãnh địa
                     this.cursedEnergy -= (2 / 60);
                     if (this.cursedEnergy <= 0) {
                         this.domainActive = false;
@@ -165,6 +167,7 @@ Object.assign(Player.prototype, {
                 if (this.domainActive) {
                     this.domainActive = false;
                 }
+                this.sukunaDomainTick = 0;
 
                 // PHÓNG FUGA (HỎA MŨI TÊN)
                 if (hasEvo1 && this.cursedEnergy >= 99.5 && chargeSec >= 2.0 && chargeSec < 8.0) {

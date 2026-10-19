@@ -292,16 +292,20 @@ function kvTamKiemNow(p) {
     const dmg = 2 * kvSwordDmg(p);
     p.kvSat = 0;
     p.kvSlashFx = 30; p.kvSlashX = cx;
-    if (enemy && enemy.hp > 0 && enemy.x < cx + 14 && enemy.x + enemy.w > cx - 14) {
+    const swW = sniperWallBlockY(p, cx, p.id === 1 ? p.y : p.y + p.h, kvDirY(p), 14, dmg); // Tường Sniper chặn Tâm Kiếm
+    p.kvSlashStopY = swW ? sniperWallStopY(swW, kvDirY(p)) : null;
+    if (swW) { /* bị chặn: không trúng địch */ }
+    else if (enemy && enemy.hp > 0 && enemy.x < cx + 14 && enemy.x + enemy.w > cx - 14) {
         enemy.takeDamage(dmg, p, { bypassShield: true, kvHitscan: true });
         if (kvFull(p)) { enemy.bleedTimer = Math.max(enemy.bleedTimer || 0, 60); enemy.bleedDmg = Math.max(enemy.bleedDmg || 0, 0.04); }
         explosions.push(new Explosion(cx, enemy.y + enemy.h / 2, 44, 'rgba(255, 56, 96,', 0, p));
     }
-    kvSwordHitWorld(p, cx - 14, 0, 28, canvas.height, dmg);
+    if (swW) kvSwordHitWorld(p, cx - 14, Math.min(p.kvSlashStopY, p.y), 28, Math.abs(p.y - p.kvSlashStopY), dmg);
+    else kvSwordHitWorld(p, cx - 14, 0, 28, canvas.height, dmg);
     // Bản Mệnh Kiếm hiện thân cắm ngay trên làn địch
     p.kvSwState = KV_SW_PLANT;
     p.kvSwX = cx;
-    p.kvSwY = enemy ? enemy.y + enemy.h / 2 : (p.id === 1 ? 40 : canvas.height - 40);
+    p.kvSwY = swW ? p.kvSlashStopY - kvDirY(p) * 10 : enemy ? enemy.y + enemy.h / 2 : (p.id === 1 ? 40 : canvas.height - 40);
     p.kvSwAng = kvDirY(p) < 0 ? -Math.PI / 2 : Math.PI / 2;
     p.kvPlantFx = 24;
     p.kvTrail = [];
