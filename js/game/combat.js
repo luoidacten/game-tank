@@ -600,11 +600,9 @@ function checkHits(attacker, victim) {
                 }
             }
 
-            // Magnet Polarity Infection on Hit
-            if (b.isMagnetBullet) {
-                victim.infectedPolarity = b.polarity || attacker.magnetPolarity || 1;
-                victim.infectedPolarityTimer = 240;
-                addFloatingText(victim.x + victim.w / 2, victim.y - 15, victim.infectedPolarity === 1 ? "NHIỄM TỪ (+)" : "NHIỄM TỪ (-)", victim.infectedPolarity === 1 ? "#ff3300" : "#00aaff", 14);
+            // Nam Châm: đạn trúng trực tiếp -> ẤN TỪ (khác với Nhiễm Từ do chạm vùng từ trường)
+            if (b.isMagnetBullet && typeof magnetApplySeal === 'function') {
+                magnetApplySeal(victim, attacker, b.polarity || attacker.magnetPolarity || 1);
             }
 
             // --- DEATH LOCK (TRỐI CHẾT): RÀNG BUỘC (BINDING CURSE) ---

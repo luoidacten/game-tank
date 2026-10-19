@@ -285,6 +285,8 @@ class SmartBot {
         // tap
         if (bot.weapon === 'overload' && (bot.ovMain || 0) < 1 && (bot.ammo || 0) > 0) { inp.s = false; return; } // Quá Tải: chờ thanh chính đầy
         if (this.tapCool > 0) { this.tapCool--; inp.s = this.tapCool > 6; return; }
+        // Nam Châm: có Cột / kẻ địch mang Ấn Từ KHÁC CỰC phía trước -> nhấp để Lướt Cực Tính
+        if (bot.weapon === 'magnet' && !(bot.polarDashCd > 0) && bot.findPolarDashTarget && bot.findPolarDashTarget()) { this.tapCool = 9; inp.s = true; return; }
         if (aligned) { this.tapCool = 9; inp.s = true; this.nextShot(enemy); return; }
         inp.s = false;
     }

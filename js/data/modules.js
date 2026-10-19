@@ -108,7 +108,7 @@ const MODULES = {
         {
             id: 'magnet',
             name: 'Nam Châm',
-            desc: 'HP:4.5 | Dame:0.5 | Đạn:6. Giữ: Đổi Cực Âm/Dương (+/-). Bắn cắm Cột Từ Trường (từ trường cực mạnh 2s đầu rồi yếu dần). Hút/Đẩy kẻ địch nhiễm từ. Nhấp đúp khi Cột/kẻ địch nhiễm từ phía trước KHÁC CỰC: Lướt Cực Tính lao thẳng tới húc như xe TANK, vừa hút mục tiêu về phía mình.',
+            desc: 'HP:4.5 | Dame:0.5 | Đạn:6. Giữ: Đổi Cực Âm/Dương (+/-). Bắn cắm Cột Từ Trường (mạnh 2s đầu rồi yếu dần); kẻ địch chạm vùng từ bị NHIỄM TỪ (chỉ bị hút/đẩy). Đạn trúng trực tiếp gắn ẤN TỪ 6s (mang cực của đạn, tự toả vùng từ nhỏ). Bản thân không bị từ trường của mình tác động. Nhấp khi phía trước có Cột của mình / kẻ địch mang Ấn Từ KHÁC CỰC: Lướt Cực Tính (hồi 3s) — lao tới Cột húc nổ rồi bay về; hoặc hai xe hút nhau va chạm giữa sân (1.5 dame, tiêu hao Ấn Từ) rồi cùng bay về làn.',
             type: 'body', role: ['Kiểm Soát', 'Cơ Động'],
             size: { w: 34, h: 34 },
             stats: { hp: 4.5, dmg: 0.5, ammo: 6, speedMult: 1.0 }

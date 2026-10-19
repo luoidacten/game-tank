@@ -443,7 +443,18 @@
         if (isPos) { ctx.moveTo(bx, by - 2.6); ctx.lineTo(bx, by + 2.6); }
         ctx.stroke();
         ctx.restore();
+        if (this.isPolarDashing) { if (this.drawPolarDashFx) this.drawPolarDashFx(); }
+        else if (this.drawMagnetDashCue) this.drawMagnetDashCue();
     };
+    // HUD nút Bắn: hồi / sẵn sàng Lướt Cực Tính (nhấp khi có mục tiêu KHÁC CỰC phía trước)
+    if (typeof registerEmpowerHUD === 'function') registerEmpowerHUD('magnet', p => {
+        const col = p.magnetPolarity === 1 ? '#ff4422' : '#1ea7ff';
+        if (p.isPolarDashing) return { pct: 1, ready: true, label: 'LƯỚT CỰC!', color: col, idle: true, btnIcon: '🧲' };
+        if (p.polarDashCd > 0) return { pct: 1 - p.polarDashCd / 180, ready: false, label: 'LƯỚT ⌛' + Math.ceil(p.polarDashCd / 60) + 's', color: '#64748b', idle: true, btnIcon: '🧲' };
+        const f = p.findPolarDashTarget ? p.findPolarDashTarget() : null;
+        if (f) return { pct: 1, ready: true, label: f.kind === 'enemy' ? 'HÚT VA CHẠM!' : 'LƯỚT TỚI CỘT!', color: col, idle: true, btnIcon: '🧲' };
+        return { pct: 1, ready: false, label: '', color: col, idle: true };
+    });
 
     // ==========================================
     // BÌNH PHUN — vòi hình nón lớn phía trước, 3 bình hoá chất phía sau
