@@ -8,7 +8,6 @@
 
 ## 1. Body mới ưu tiên (phần Đồ họa đã XONG → làm tiếp mục này)
 Đặc tả đầy đủ: **`docs/BODY_MOI_UU_TIEN.md`**. Làm lần lượt từng body (theo `tools/agents/common.md`), mỗi body xong thì gộp → smoke test → push:
-- Kazuki (`kazuki`) — song kiếm, nhịp A/B → Kiếm Thế Quyết, Nghịch Trảm, Ý Niệm & Kiếm Ý.
 - Tsukiyo (`tsukiyo`) — nhẫn giả 3 phong cách, Nhẫn Đạo theo mốc Tốc độ/Sát thương/Máu.
 - Joker (`joker`) — tay bài 5 lá ngẫu nhiên, Joker, Thoát Hiểm.
 - Juggernaut(`juggernaut`) — miễn nhiễm khống chế (Bá Thể).
