@@ -12,11 +12,21 @@
 - **Xe hỗ trợ & vật triệu hồi** (bản làm dở: `tools/wip/`) (money_tank theo cấp, engineer, magnet, sprayer, steel_hook, dj, flower_shadow, thunder; ụ súng, drone, robot Kẻ Sáng Tạo & Thiên Tài, tường…).
 - Theo đặc tả `game-tank-art-spec` (khung vuông 32×32, màu đội chỉ làm điểm nhấn, silhouette khác nhau).
 
-## 3. HUD còn sót
+## 3. Body mới ưu tiên (làm SAU khi xong mục 2 — Đồ họa)
+Đặc tả đầy đủ: **`docs/BODY_MOI_UU_TIEN.md`**. Làm lần lượt từng body (theo `tools/agents/common.md`), mỗi body xong thì gộp → smoke test → push:
+- Kazuki (`kazuki`) — song kiếm, nhịp A/B → Kiếm Thế Quyết, Nghịch Trảm, Ý Niệm & Kiếm Ý.
+- Tsukiyo (`tsukiyo`) — nhẫn giả 3 phong cách, Nhẫn Đạo theo mốc Tốc độ/Sát thương/Máu.
+- Kẻ Bất Khuất / Phá Xiềng (`juggernaut`) — miễn nhiễm khống chế (Bá Thể).
+- Pháo Phân Mảnh (`cluster_gun`) — 2 chế độ đạn Phân Mảnh / Dễ Vỡ.
+- Nhân Bản (`clone`) — nhân bản không giới hạn + nội tại Gánh Chịu.
+- Phi Công (`jet_pilot`) — tách Chân & Phi Ảnh, chuyển điều khiển, hợp nhất.
+- Thần Bài / Quái Đạo (`joker`) — tay bài 5 lá ngẫu nhiên, Joker, Thoát Hiểm.
+
+## 4. HUD còn sót
 - DJ, Móc Thép, Thiên Tài, Tiến Hóa vẫn dùng chữ → đổi sang biểu tượng.
 - Thanh riêng của Paradox, Ghost, Mirror, Phong Trảm bị thanh máu mới che một phần.
 
-## 4. Ghi chú / cần xác nhận
+## 5. Ghi chú / cần xác nhận
 - Shotgun Evo 1: đang làm **mọi** phát bắn đều có đợt hai 3 viên.
 - Pháo Cao Xạ: **có Evo bất kỳ** là nổ lặp 1 lần, Full Evo 2 lần.
 - Tường Sniper chặn cả Đạn Lớn Full Evo (dù Đạn Lớn "xuyên mọi vật cản").
