@@ -297,6 +297,14 @@ const MODULES = {
             size: { w: 30, h: 30 },
             stats: { hp: 6, dmg: 0.25, ammo: 999, speedMult: 1.2 }
         },
+        {
+            id: 'kazuki',
+            name: 'Kazuki',
+            desc: '"Song kiếm vô niệm!" (Collab) HP:5 | Dame:1 | Ý Niệm 100 (+6/s) | Tốc: 3.8. Nhấp: TẢ TRẢM [A] (kiếm khí nón 0.85 dame, gạt vỡ đạn nhỏ, 10 Ý Niệm). Giữ 0.25s rồi nhả: HỮU TRẢM [B] (nhát chém rộng 1.25 dame, 15). Đủ 2 nhịp -> lần bấm kế tung KIẾM THẾ QUYẾT (25, +1 Kiếm Ý): AA Toàn Phong Trảm (lốc kiếm xóa đạn, 1.6) | AB Đột Kích Điểm Huyệt (cảnh báo rồi đâm cột 1.5 + choáng 1s) | BA Thập Tự Trảm (chữ X 1.8 + Vết Thương Sâu: chảy máu, -60% hồi máu 4s) | BB Ảnh Bộ Xuyên Phá (bất tử lướt xuyên địch 1.6 + choáng 1s). Có >=5 Kiếm Ý: Kiếm Thế Quyết hóa LOẠN VŨ HƯ ẢNH (-5 Kiếm Ý): 5 Hư Ảnh khóa chân 1.5s, tổng 2.5 dame, hất tung, -4s hồi Nghịch Trảm. Giữ 0.6s: VÔ TƯỚNG NGHỊCH TRẢM (hồi 14s) thủ thế 0.6s: đỡ trúng -> chặn đòn, choáng địch 1s, Hư Ảnh nổ 2 dame sau 2s, +5 Kiếm Ý & Kiếm Thế Quyết sẵn sàng; đỡ hụt -> khựng 0.3s.',
+            type: 'body', role: ['Đối Đầu', 'Cơ Động', 'Kiểm Soát'],
+            size: { w: 28, h: 28 },
+            stats: { hp: 5, dmg: 1, ammo: 0, speedMult: 1.086 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 30 },

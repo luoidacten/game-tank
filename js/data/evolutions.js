@@ -240,4 +240,8 @@ const EVOLUTIONS = {
         { id: 'evo_bers_1', name: 'Khát Máu Cực Hạn', desc: 'Cuồng Chiến mạnh x1.5 (giảm st nhận tối đa 45%). Tích Huyết Chiến nhanh hơn 25%. Vừa vào Huyết Chiến: thanh giữ nguyên 100 (không tụt, không bị trừ) trong 1s đầu. Tản nhiệt nhanh hơn 25% sau khi ngừng bắn.', cost: 90, type: 'evo' },
         { id: 'evo_bers_2', name: 'Đấu Trường Huyết Địa', desc: 'Khi Huyết Chiến: dựng 2 bức tường biên (vùng 260px quanh xe). Cả 2 xe không thể đi/lướt ra ngoài; Cổng Không Gian không thể mở cổng hay xuyên ra ngoài. FULL EVO: Chiến Thần Bất Tử — Cuồng Chiến x1.8 (tối đa -50% st), giữ thanh 1.5s, vùng 220px & làm chậm địch 25%; TÀN HƠI CUỐI CÙNG: hết Huyết Chiến không chết mà còn 0.5 HP (tối đa 2 lần/hiệp), sau đó mỗi phát trúng chỉ +1 Huyết Chiến; tản nhiệt nhanh hơn 50% và QUÁ NHIỆT chỉ khoá 1.2s.', cost: 110, type: 'evo' }
     ],
+    kazuki: [
+        { id: 'evo_kaz_1', name: 'Vô Niệm Lưu Thủy', desc: 'Hồi Ý Niệm +10/s, mọi thức kiếm tốn ít hơn 25%. Kiếm Thế Quyết +2 Kiếm Ý. Nghịch Trảm hồi 10s, thủ thế 0.8s, đỡ hụt không bị khựng.', cost: 100, type: 'evo' },
+        { id: 'evo_kaz_2', name: 'Bách Biến Kiếm Thế', desc: 'AA: lốc kiếm to gấp rưỡi & phản đạn nhỏ. AB: xuyên mọi vật cản & 100% Khiên. BA: để lại vệt kiếm 3s (Làm Chậm + Cấm Hồi Máu). BB: để lại 1 Hư Ảnh chém bồi 1 nhát nổ. Loạn Vũ Hư Ảnh: bản thân Bất Tử. FULL EVO (Vạn Cảnh Trảm Vực): vào hiệp sẵn 5 Kiếm Ý, Tốc 4.2; Loạn Vũ / Nghịch Trảm thành công mở Trảm Vực 4s quanh địch (sát thương liên tục, hút về tâm, cấm lướt/dịch chuyển).', cost: 140, type: 'evo' }
+    ],
 };

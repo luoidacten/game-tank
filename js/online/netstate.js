@@ -27,6 +27,7 @@ const NET_CLASSES = {
     BdBatZone, BdLaser, BdOrb,
     BersArena,
     MagHatRain,
+    KazTornado, KazScar, KazEcho, KazLoanVu, KazDomain,
 };
 
 // Biến toàn cục cần đồng bộ: [tên, getter, setter]
