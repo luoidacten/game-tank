@@ -7,17 +7,18 @@
 // Nốt nhạc: p.djNotes = [{ t: tick chạm tâm, hit, beat }]
 // ==========================================
 
-// Độ khó bản nhạc: interval = số tick giữa 2 nốt, approach = thời gian nốt chạy vào tâm,
-// perf = nửa cửa sổ Hoàn Hảo (tick), yel = độ dài vùng Vàng trước tâm (tick)
+// Độ khó bản nhạc: interval = số tick giữa 2 nốt, approach = thời gian nốt chạy vào tâm (lớn = nốt chạy chậm),
+// perf = nửa cửa sổ Hoàn Hảo (tick), yel = độ dài vùng Vàng trước tâm (tick),
+// dbl = cứ mỗi N nốt có 1 NỐT ĐÔI (2 nhịp bấm liên tiếp cách nhau dblGap tick), 0 = không có
 const DJ_DIFFS = [
-    { name: 'DỄ 🎵', short: 'DỄ', interval: 40, approach: 80, perf: 6, yel: 14, color: '#22d3ee' },
-    { name: 'TRUNG BÌNH 🎶', short: 'TB', interval: 40 / 1.4, approach: 68, perf: 5, yel: 12, color: '#a78bfa' }, // +40% mật độ
-    { name: 'KHÓ 🔥', short: 'KHÓ', interval: 40 / 1.8, approach: 56, perf: 4.5, yel: 10, color: '#fb7185' },      // +80% mật độ
-    { name: 'HUYỀN THOẠI 👑', short: 'HT', interval: 15, approach: 46, perf: 4, yel: 8, color: '#facc15' },          // Full Evo
+    { name: 'DỄ 🎵', short: 'DỄ', interval: 60, approach: 115, perf: 18, yel: 20, dbl: 0, dblGap: 0, color: '#22d3ee' },        // chậm, thưa, Hoàn Hảo rất dễ
+    { name: 'TRUNG BÌNH 🎶', short: 'TB', interval: 46, approach: 95, perf: 14, yel: 16, dbl: 4, dblGap: 18, color: '#a78bfa' }, // vừa phải, thỉnh thoảng Nốt Đôi
+    { name: 'KHÓ 🔥', short: 'KHÓ', interval: 34, approach: 74, perf: 10, yel: 12, dbl: 5, dblGap: 15, color: '#fb7185' },       // ≈ Dễ/TB cũ: cho người đã luyện
+    { name: 'HUYỀN THOẠI 👑', short: 'HT', interval: 17, approach: 50, perf: 6, yel: 7, dbl: 3, dblGap: 10, color: '#facc15' },  // Full Evo: rất nhanh, dày đặc
 ];
 const DJ_HOLD_TICKS = 24;    // giữ ~0.4s: đổi bản nhạc
 const DJ_LOCK_TICKS = 90;    // hết đạn vì bấm trượt: khóa xám 1.5s
-const DJ_EARLY_BONUS = 3;    // vàng sát tâm (sớm tối đa 3 tick ngoài vùng đỏ) vẫn tính Hoàn Hảo
+const DJ_EARLY_BONUS = 2;    // dung sai trễ cảm ứng: sớm tối đa 2 tick ngoài vùng đỏ vẫn tính Hoàn Hảo
 const DJ_LATE_KEEP = 14;     // nốt đã qua tâm còn hiển thị thêm bao lâu
 const DJ_COLORS = { red: '#ff1744', yellow: '#ffd60a', blue: '#2f6bff', lock: '#64748b' };
 
@@ -148,6 +149,10 @@ function djJudgePress(p) {
     if (note && d >= -diff.perf && d <= diff.perf + DJ_EARLY_BONUS) {
         note.hit = true; // tiêu thụ nốt ngay để vạch nốt nổ sáng
         p.djPend = { k: 'perfect', t: note.t };
+    } else if (note && d > 0 && d <= diff.perf + diff.yel) {
+        // Vùng VÀNG (canh nhịp): vẫn bắn sóng âm, không tốn đạn nhưng KHÔNG cộng Combo
+        note.hit = true;
+        p.djPend = { k: 'good', t: note.t };
     } else {
         p.djPend = { k: 'miss', t: -1 };
     }
@@ -210,9 +215,9 @@ function djExecute(p) {
             return;
         }
     }
-    // Cảm Âm Hoàn Hảo (hoặc Auto-Play): không tốn đạn, +combo
-    djGainCombo(p, full ? 2 : 1);
-    p.djFb = { k: kind === 'auto' ? 'auto' : 'perfect', t: p.djTick };
+    // Cảm Âm Hoàn Hảo (hoặc Auto-Play): không tốn đạn, +combo. Vùng Vàng ('good'): bắn nhưng không +combo
+    if (kind !== 'good') djGainCombo(p, full ? 2 : 1);
+    p.djFb = { k: kind === 'auto' ? 'auto' : (kind === 'good' ? 'good' : 'perfect'), t: p.djTick };
     if (kind === 'auto') addFloatingText(p.x + p.w / 2, p.id === 1 ? p.y - 40 : p.y + p.h + 40, 'AUTO-PLAY! 🤖🎶', '#facc15', 13);
     const evo2 = p.hasUpgrade('evo_dj_2');
     const c = p.djCombo;
@@ -240,8 +245,17 @@ function djTickBeat(p) {
     if (!p.djNotes) p.djNotes = [];
     if (typeof p.djNext !== 'number' || p.djNext < tick) p.djNext = tick + diff.approach;
     while (p.djNext <= tick + diff.approach) {
-        p.djNotes.push({ t: Math.round(p.djNext), hit: false, beat: false });
-        p.djNext += diff.interval;
+        const t0 = Math.round(p.djNext);
+        p.djNoteN = (p.djNoteN || 0) + 1;
+        if (diff.dbl > 0 && p.djNoteN % diff.dbl === 0) {
+            // Nốt Đôi: 2 nhịp bấm liên tiếp sát nhau
+            p.djNotes.push({ t: t0, hit: false, beat: false, dbl: 1 });
+            p.djNotes.push({ t: t0 + diff.dblGap, hit: false, beat: false, dbl: 2 });
+            p.djNext += diff.interval + diff.dblGap;
+        } else {
+            p.djNotes.push({ t: t0, hit: false, beat: false });
+            p.djNext += diff.interval;
+        }
     }
     for (const n of p.djNotes) {
         if (!n.beat && tick >= n.t) {
@@ -251,7 +265,35 @@ function djTickBeat(p) {
             djOnBeat(p);
         }
     }
-    p.djNotes = p.djNotes.filter(n => n.t >= tick - DJ_LATE_KEEP);
+    // Nốt trôi qua vùng đỏ mà không bấm (hoặc bấm quá muộn) -> mất phát bắn (tốn 1 đạn) & đứt Combo
+    const jt = djJudgeTick(p); // online: bù độ trễ cho guest
+    for (const n of p.djNotes) {
+        if (n.hit || n.passed || jt <= n.t + diff.perf) continue;
+        n.passed = true;
+        djNotePassed(p);
+    }
+    p.djNotes = p.djNotes.filter(n => n.t >= tick - Math.max(DJ_LATE_KEEP, diff.perf + 16));
+}
+
+function djNotePassed(p) {
+    if (p.hp <= 0 || (p.djLock || 0) > 0 || p.djPend || (p.djHold || 0) > 0) return;
+    if (typeof gameState !== 'undefined' && gameState.phase !== 'playing') return;
+    if (p.freezeTimer > 0 || p.silenceTimer > 0) return; // bị khống chế: không phạt
+    const tx = p.x + p.w / 2, ty = p.id === 1 ? p.y - 40 : p.y + p.h + 40;
+    if ((p.djGuards || 0) > 0) {
+        p.djGuards--;
+        p.djFb = { k: 'guard', t: p.djTick };
+    } else {
+        if ((p.djCombo || 0) >= 5) addFloatingText(tx, ty, `ĐỨT CHUỖI ${p.djCombo}! 💔`, '#94a3b8', 12);
+        p.djCombo = 0;
+        p.djFb = { k: 'pass', t: p.djTick };
+    }
+    p.ammo = Math.max(0, (p.ammo || 0) - 1);
+    p.lastShot = Date.now();
+    if (p.ammo <= 0) {
+        p.djLock = DJ_LOCK_TICKS;
+        addFloatingText(tx, p.id === 1 ? p.y - 26 : p.y + p.h + 26, 'LỠ NHỊP! NẠP ĐẠN... 🔇', '#94a3b8', 12);
+    }
 }
 
 // Mỗi nhịp: Full Evo — 2 Loa nổi luân phiên bắn sóng âm phụ
@@ -265,7 +307,7 @@ function djOnBeat(p) {
 
 CharHooks.register('dj', {
     setup() {
-        this.djTick = 0; this.djNotes = []; this.djNext = undefined;
+        this.djTick = 0; this.djNotes = []; this.djNext = undefined; this.djNoteN = 0;
         if (typeof this.djDiff !== 'number') this.djDiff = 0;
         this.djDiff = Math.min(this.djDiff, djMaxDiff(this));
         this.djCombo = djFull(this) ? 30 : 0; // Full Evo: khởi đầu với 30 combo
@@ -383,7 +425,10 @@ class DjBeam {
     fire() {
         const enemy = this.owner === p1 ? p2 : p1;
         const half = 26;
-        if (enemy && enemy.hp > 0 && this.x > enemy.x - half && this.x < enemy.x + enemy.w + half) {
+        const o = this.owner, swDir = o.id === 1 ? -1 : 1;
+        const swW = sniperWallBlockY(o, this.x, o.id === 1 ? o.y : o.y + o.h, swDir, 4, this.dmg); // Tường Sniper chặn tia
+        if (swW) this.stopY = sniperWallStopY(swW, swDir);
+        else if (enemy && enemy.hp > 0 && this.x > enemy.x - half && this.x < enemy.x + enemy.w + half) {
             enemy.takeDamage(this.dmg, this.owner);
             enemy.djSlowT = Math.max(enemy.djSlowT || 0, 54);
             this.hitY = enemy.y + enemy.h / 2;
@@ -397,8 +442,8 @@ class DjBeam {
         if (!this.active) return;
         const o = this.owner;
         const k = this.life / 16;
-        const top = o.id === 1 ? 0 : o.y + o.h;
-        const bot = o.id === 1 ? o.y : canvas.height;
+        const top = o.id === 1 ? (this.stopY != null ? this.stopY : 0) : o.y + o.h;
+        const bot = o.id === 1 ? o.y : (this.stopY != null ? this.stopY : canvas.height);
         ctx.save();
         ctx.globalAlpha = k;
         ctx.globalCompositeOperation = 'lighter';

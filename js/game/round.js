@@ -16,6 +16,8 @@ function startRound() {
     explosions = []; beams = []; radiationZones = []; iceZones = [];
     gameState.lastObstacleSpawn = Date.now();
     gameState.roundStartTime = Date.now();
+    // Bo GĐ1: tâm lệch ngẫu nhiên 12-22% bề ngang sang trái/phải (chống cắm giữa sân)
+    gameState.zoneOff = (Math.random() < 0.5 ? -1 : 1) * (0.12 + Math.random() * 0.1);
     gameState.pauseStartedAt = 0;
     gameState.isPaused = false;
     lastCrateSpawn = Date.now();
@@ -105,7 +107,7 @@ function triggerRoundIntroBanner() {
     if (roundBannerTimeout) clearTimeout(roundBannerTimeout);
     roundBannerTimeout = setTimeout(() => {
         banner.classList.remove('show');
-    }, 2800);
+    }, 1700); // hiện ~1.7s rồi mờ dần 0.4s -> không che sân lâu
 }
 
 function updateMapHUD() {

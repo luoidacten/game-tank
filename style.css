@@ -2257,3 +2257,65 @@ body.ctrl-new .btn-group { padding: 0 14px 0 24px; }
     to   { box-shadow: 0 0 30px var(--emp-color), inset 0 0 22px var(--emp-color); }
 }
 @keyframes empSpin { to { transform: rotate(360deg); } }
+
+
+/* ==========================================================================
+   HUD TRẬN ĐẤU — gọn, dễ đọc trên điện thoại
+   ========================================================================== */
+/* Banner đầu hiệp: 1 khối dọc giữa sân, không xuống dòng, mờ nhanh (~2s) */
+.round-intro-banner {
+    flex-direction: column;
+    gap: 5px;
+    transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.round-pill, .map-pill { white-space: nowrap; text-align: center; }
+.round-pill { font-size: 15px; padding: 6px 16px; letter-spacing: 2px; border-radius: 10px; }
+.map-pill { font-size: 11px; padding: 4px 12px; border-radius: 10px; }
+
+/* Bảng điểm bên phải: viên năng lượng to hơn, nhãn P1/P2 rõ, tiền có nền */
+#score-board {
+    padding: 6px 5px;
+    gap: 4px;
+    border-color: rgba(255, 255, 255, 0.14);
+    background: rgba(8, 12, 22, 0.82);
+}
+.score-side { gap: 3px; }
+.side-tag {
+    font-size: 11px;
+    padding: 1px 5px;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.05);
+}
+.p1-side .side-tag { border: 1px solid rgba(0, 240, 255, 0.45); }
+.p2-side .side-tag { border: 1px solid rgba(255, 0, 85, 0.45); }
+.score-row { gap: 3px; }
+.score-dot { width: 16px; height: 9px; border-radius: 3px; }
+.score-vs {
+    font-size: 7px;
+    color: #94a3b8;
+    width: 100%;
+    text-align: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 2px 0;
+}
+.side-coin {
+    font-size: 9.5px;
+    padding: 1px 4px;
+    border-radius: 5px;
+    background: rgba(255, 215, 0, 0.08);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    min-width: 30px;
+    text-align: center;
+}
+
+/* Nút Bắn: biểu tượng chế độ / kiểu bắn hiện tại (js/render/empower-hud.js: btnIcon) */
+.btn-shoot .emp-icon {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    font-size: 26px; line-height: 1; pointer-events: none; z-index: 2;
+    filter: drop-shadow(0 0 6px var(--emp-color, #fff));
+}
+.btn-shoot .emp-icon:empty { display: none; }
+.btn-shoot.emp-has-icon::after,
+.btn-shoot.emp-has-icon .btn-text,
+.btn-shoot.emp-has-icon .btn-icon { opacity: 0.12; }

@@ -34,8 +34,10 @@ Object.assign(Player.prototype, {
         const beamX = this.x + this.w / 2 - beamW / 2;
 
         // Tọa độ Y và Chiều cao của tia (Bắn thẳng về phía đối diện)
-        const bRy = (this.id === 1) ? 0 : this.y + this.h;
-        const bRh = (this.id === 1) ? this.y : canvas.height - (this.y + this.h);
+        let bRy = (this.id === 1) ? 0 : this.y + this.h;
+        let bRh = (this.id === 1) ? this.y : canvas.height - (this.y + this.h);
+        const swBlk = sniperWallClipBeam(this, beamX, bRy, beamW, bRh, this.id === 1 ? -1 : 1, this.damage / 2); // Tường Sniper chặn tia
+        if (swBlk) { bRy = swBlk.y; bRh = swBlk.h; }
 
         // 2. Vẽ tia (Tận dụng array beams của bạn)
         const redBeam = new Beam(beamX, bRy, beamW, bRh, this.id, isEvo2);

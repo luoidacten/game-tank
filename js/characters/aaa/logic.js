@@ -10,6 +10,7 @@ Object.assign(Player.prototype, {
             this.maxAmmo = 1;
             this.reloadTime = 3000;
             this.aaaAutoInterval = 240; // Giảm tần suất mưa đạn pháo
+            this.aaaBurstLeft = 0; this.aaaBurstTick = 0;
             if (this.hasUpgrade('evo_aaa_2')) { this.reloadTime = 2500; }
             if (this.hasUpgrade('evo_aaa_1') && this.hasUpgrade('evo_aaa_2')) {
                 this.aaaAutoInterval = 200;
@@ -21,18 +22,19 @@ Object.assign(Player.prototype, {
     // [update] Pháo Cao Xạ
     updateAaa() {
         if (this.weapon === 'aaa') {
+            // [FIX] Loạt bắn 3 tia theo tick (trước dùng setTimeout -> có thể bắn sau khi hết round)
+            if ((this.aaaBurstLeft || 0) > 0 && --this.aaaBurstTick <= 0) {
+                this.aaaBurstLeft--; this.aaaBurstTick = 12;
+                if (this.hp > 0) this.fireBullet(1);
+            }
             this.aaaAutoTimer++;
             if (this.aaaAutoTimer >= this.aaaAutoInterval) {
                 this.aaaAutoTimer = 0;
 
                 // Tự bắn thường
                 let shots = this.hasUpgrade('evo_aaa_1') ? 3 : 1;
-
-                for (let i = 0; i < shots; i++) {
-                    setTimeout(() => {
-                        this.fireBullet(1); // Bắn đạn thường
-                    }, i * 200); // Burst delay
-                }
+                this.fireBullet(1);
+                this.aaaBurstLeft = shots - 1; this.aaaBurstTick = 12;
 
                 // Evo 2: Mưa Tên Lửa (Rơi 3 bom ngẫu nhiên)
                 if (this.hasUpgrade('evo_aaa_2')) {
@@ -73,5 +75,31 @@ Object.assign(Player.prototype, {
             }
             return true;
         }
+    }
+});
+
+// HUD: vòng đếm ngược tới lượt TỰ BẮN kế tiếp (để canh thời điểm)
+CharHooks.register('aaa', {
+    drawUI() {
+        if (this.hp <= 0 || !this.aaaAutoInterval) return;
+        const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
+        const R = Math.max(this.w, this.h) * 0.5 + 9;
+        const ratio = Math.min(1, (this.aaaAutoTimer || 0) / this.aaaAutoInterval);
+        const left = Math.max(0, (this.aaaAutoInterval - (this.aaaAutoTimer || 0)) / 60);
+        const soon = left < 1;
+        const col = soon ? (Math.floor(Date.now() / 120) % 2 ? '#ffeb3b' : '#ff5722') : '#ff9800';
+        ctx.save();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = 'rgba(0,0,0,0.45)';
+        ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+        ctx.strokeStyle = col; ctx.shadowColor = col; ctx.shadowBlur = soon ? 12 : 6;
+        ctx.beginPath(); ctx.arc(cx, cy, R, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * ratio); ctx.stroke();
+        // Số giây còn lại (bên cạnh xe, không che đường bắn)
+        ctx.shadowBlur = 3; ctx.shadowColor = '#000';
+        ctx.fillStyle = col; ctx.font = "bold 10px 'Orbitron', Arial"; ctx.textAlign = 'center';
+        const tx = cx + (cx > canvas.width - 70 ? -(R + 16) : R + 16), ty = cy + 4;
+        if (typeof drawWorldText === 'function') drawWorldText(ctx, left.toFixed(1) + 's', tx, ty);
+        else ctx.fillText(left.toFixed(1) + 's', tx, ty);
+        ctx.restore();
     }
 });

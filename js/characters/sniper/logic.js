@@ -2,6 +2,26 @@
 // Sniper (sniper) — Logic (cập nhật, bắn, kỹ năng)
 // ==========================================
 
+// Góc bắn của Sniper (ngắm nón tự động). null = bắn thẳng. Dùng chung cho fireBullet & tia ngắm.
+function sniperAimAngle(p) {
+    const startX = p.x + p.w / 2;
+    const startY = (p.id === 1) ? p.y - 16 : p.y + p.h;
+    const enemy = (p.id === 1) ? p2 : p1;
+    if (!enemy) return null;
+    const isFullEvo = p.hasUpgrade('evo_sniper_1') && p.hasUpgrade('evo_sniper_2');
+    const targetAngle = Math.atan2((enemy.y + enemy.h / 2) - startY, (enemy.x + enemy.w / 2) - startX);
+    const baseAngle = (p.id === 1) ? -Math.PI / 2 : Math.PI / 2;
+    let diff = targetAngle - baseAngle;
+    while (diff <= -Math.PI) diff += Math.PI * 2;
+    while (diff > Math.PI) diff -= Math.PI * 2;
+    const maxCone = isFullEvo ? 0.6 : 0.3;
+    let hasWallInFront = false;
+    if (typeof sniperWalls !== 'undefined') {
+        hasWallInFront = sniperWalls.some(w => rectIntersect(p.x, (p.id === 1) ? p.y - 50 : p.y + p.h, p.w, 50, w.x, w.y, w.w, w.h));
+    }
+    return (!hasWallInFront && Math.abs(diff) <= maxCone) ? targetAngle : null;
+}
+
 Object.assign(Player.prototype, {
     // [setupForNewRound] Sniper
     setupSniper() {
@@ -39,13 +59,14 @@ Object.assign(Player.prototype, {
             // Tự động nạp đạn đầy sau 8s không bắn
             if (now - this.lastShot > 8000 && this.ammo < this.maxAmmo && !this.sniperReloading) {
                 this.ammo = this.maxAmmo;
-                ctx.fillStyle = "lime"; ctx.fillText("AUTO RELOAD", this.x, this.y - 15);
+                addFloatingText(this.x + this.w / 2, this.y - 12, "AUTO RELOAD", "#7CFC00", 11);
             }
 
             // Hết đạn -> Nạp nguyên băng (3s hoặc 2.5s)
             if (this.ammo <= 0 && !this.sniperReloading) {
                 this.sniperReloading = true;
                 this.sniperReloadTimer = isFullEvo ? 150 : 180;
+                this.sniperReloadMax = this.sniperReloadTimer;
             }
 
             if (this.sniperReloading) {

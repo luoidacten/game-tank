@@ -224,7 +224,7 @@ Object.assign(Player.prototype, {
         // ==========================================
         // --- LOGIC NAM CHÂM (MAGNET) ---
         // ==========================================
-        this.updateMagnet();
+        if (this.updateMagnet()) return;
 
         // Đếm lùi nhiễm từ tính trên người chơi
         if (this.infectedPolarityTimer > 0) {
@@ -257,7 +257,7 @@ Object.assign(Player.prototype, {
             this.shield--; // Chuyển hóa 1 lớp khiên thường thành Kiếm Thể
             this.swordShieldActive = true;
             this.swordShieldTimer = 60; // 5s
-            this.swordShieldHits = (this.weapon === 'blade_god' && this.hasUpgrade('evo_blade_2')) ? 5 : 1;
+            this.swordShieldHits = 1;
         }
 
         if (this.swordShieldActive) {
@@ -265,8 +265,8 @@ Object.assign(Player.prototype, {
             if (this.swordShieldTimer <= 0 || this.swordShieldHits <= 0) {
                 // Đổi xong hoặc hết giờ -> Bắn trả kiếm
                 this.swordShieldActive = false;
-                let count = (this.weapon === 'blade_god' && this.hasUpgrade('evo_blade_2')) ? 5 : 3;
-                let isHoming = (this.weapon === 'blade_god' && this.hasUpgrade('evo_blade_2'));
+                let count = 3;
+                let isHoming = false;
                 let dirY = (this.id === 1) ? -1 : 1;
 
                 for (let k = 0; k < count; k++) {
@@ -445,7 +445,7 @@ Object.assign(Player.prototype, {
         if (bodyEffects.length) resolveStoneBlocking(this, prevXForStone);
 
         // Tự động hồi đạn lẻ theo thời gian (Chặn khi Shadow Hunter đang tàng hình)
-        if (this.weapon !== 'tank' && this.weapon !== 'sniper' && !(this.weapon === 'shadow_hunter' && this.stealthActive)) {
+        if (this.weapon !== 'tank' && this.weapon !== 'sniper' && this.weapon !== 'smg' && !(this.weapon === 'shadow_hunter' && this.stealthActive)) {
             if (this.ammo < this.maxAmmo && now - this.lastShot > this.reloadTime) {
                 if (now - this.lastReload > 500) { this.ammo++; this.lastReload = now; }
             }

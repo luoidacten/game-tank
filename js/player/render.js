@@ -103,24 +103,13 @@ Object.assign(Player.prototype, {
         // --- VẼ UI SNIPER ---
         this.drawSniper();
 
-        // Vẽ UI Reload tụ lực
-        if (this.sniperChargeTimer > 0) {
-            ctx.fillStyle = "yellow";
-            ctx.fillRect(this.x, this.y - 10, this.w * (this.sniperChargeTimer / 60), 5);
-        }
-        if (this.sniperReloading) {
-            ctx.fillStyle = "orange";
-            ctx.fillText("RELOADING...", this.x, this.y - 15);
-            let reloadMax = (this.hasUpgrade('evo_sniper_1') && this.hasUpgrade('evo_sniper_2')) ? 150 : 180;
-            ctx.fillRect(this.x, this.y - 10, this.w * (1 - this.sniperReloadTimer / reloadMax), 5);
-        }
         // Xử lý độ mờ cho Ghost
         this.drawGhost();
 
         // Vẽ Phantom (Bóng ma) - Evo 2 Ghost
         this.drawGhost2();
 
-        if ((this.weapon === 'overload' || this.weapon === 'lazer_charge') && this.chargeLevel > 0) {
+        if (this.weapon === 'lazer_charge' && this.chargeLevel > 0) {
             let cColor = (this.weapon === 'lazer_charge') ? `rgb(0, ${this.chargeLevel * 35}, 255)` : `rgb(255, ${255 - this.chargeLevel * 30}, 0)`;
             ctx.fillStyle = cColor;
             ctx.fillRect(this.x, this.y + this.h / 2 - 5, this.w * (this.chargeLevel / 7), 10);
@@ -347,160 +336,29 @@ Object.assign(Player.prototype, {
             return;
         }
 
-        // P1 (ở dưới): Vẽ PHÍA DƯỚI gầm xe
-        // P2 (ở trên): Vẽ PHÍA TRÊN nóc xe
-        let uiY;
-        let subUiY;
-        let shieldY;
-
+        // Toạ độ hàng UI cũ (giữ nguyên cho code UI riêng của từng body)
+        let uiY, subUiY;
         if (this.id === 1) {
             uiY = Math.min(canvas.height - 18, this.y + this.h + 4);
-            subUiY = uiY + 7;
-            shieldY = uiY + 14;
         } else {
             uiY = Math.max(10, this.y - 15);
-            subUiY = uiY + 7;
-            shieldY = uiY - 5;
         }
+        subUiY = uiY + 7;
 
-        // Smooth Ghost HP Tracking
-        if (this.ghostHp === undefined) this.ghostHp = this.hp;
-        if (this.ghostHp > this.hp) {
-            this.ghostHp -= 0.05;
-            if (this.ghostHp < this.hp) this.ghostHp = this.hp;
-        } else if (this.ghostHp < this.hp) {
-            this.ghostHp = this.hp;
-        }
+        // HUD chung: HP (vạch mỗi 1 HP + số), khiên, đạn, hiệu ứng — js/render/tank-hud.js
+        drawTankHUD(this);
 
-        // 1. Health Bar Background & Ghost Bar
         ctx.save();
-        ctx.fillStyle = "rgba(10, 15, 30, 0.85)";
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
-        ctx.lineWidth = 1;
-        ctx.fillRect(this.x - 4, uiY, this.w + 8, 6);
-        ctx.strokeRect(this.x - 4, uiY, this.w + 8, 6);
-
-        // Ghost Damage Bar
-        let ghostWidth = Math.max(0, (this.ghostHp / this.maxHp) * (this.w + 8));
-        ctx.fillStyle = "rgba(255, 215, 0, 0.6)";
-        ctx.fillRect(this.x - 4, uiY, ghostWidth, 6);
-
-        // Active Health Bar (Neon Cyan cho P1, Neon Ruby/Pink cho P2)
-        let hpWidth = Math.max(0, (this.hp / this.maxHp) * (this.w + 8));
-        ctx.fillStyle = (this.id === 1) ? "#00f0ff" : "#ff0055";
-        ctx.fillRect(this.x - 4, uiY, hpWidth, 6);
-
-        // 2. Shield Indicator (Orbs)
-        if (this.shield > 0) {
-            ctx.fillStyle = "#00ffff";
-            ctx.shadowBlur = 8;
-            ctx.shadowColor = "#00ffff";
-            let orbSpacing = Math.min(9, (this.w + 4) / Math.max(1, this.shield));
-            for (let s = 0; s < this.shield; s++) {
-                ctx.beginPath();
-                ctx.arc(this.x + 2 + s * orbSpacing, shieldY, 3.5, 0, Math.PI * 2);
-                ctx.fill();
-            }
-            ctx.shadowBlur = 0;
-        }
-
-        // 3. Thanh Đạn / Tài Nguyên
-        if (this.weapon === 'water_gun' || this.weapon === 'furnace' || this.weapon === 'six_barrel' || this.weapon === 'the_strongest' || this.weapon === 'sukuna' || this.weapon === 'van_kiem' || this.weapon === 'tank' || this.weapon === 'storm') {
-            ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
-            ctx.fillRect(this.x - 4, subUiY, this.w + 8, 4);
-
-            let barColor = "#3498db";
-            let ratio = 0;
-
-            if (this.weapon === 'water_gun') { barColor = "#00bfff"; ratio = this.energy / this.maxEnergy; }
-            else if (this.weapon === 'furnace') { barColor = "#ff6600"; ratio = this.energy / this.maxEnergy; }
-            else if (this.weapon === 'six_barrel') {
-                barColor = (this.isOverheated) ? "#ff0000" : (this.heat >= 75 ? "#ff3300" : (this.heat >= 50 ? "#ff9900" : "#ffd700"));
-                ratio = this.heat / 100;
-                // Đang khởi động nòng (giữ 0.5s): hiện thanh trắng
-                if (!this.isOverheated && (this.sbSpin || 0) < 30 && this.heat < 1) { barColor = "#ffffff"; ratio = (this.sbSpin || 0) / 30; }
-            }
-            else if (this.weapon === 'the_strongest') {
-                barColor = "#00ffff";
-                ratio = this.chuLuc / this.maxChuLuc;
-            }
-            else if (this.weapon === 'sukuna') {
-                barColor = "#e74c3c";
-                ratio = (this.cursedEnergy || 0) / 100;
-            }
-            else if (this.weapon === 'van_kiem') {
-                barColor = "#9b59b6";
-                ratio = Math.min(1, (this.stanceSwordsAccumulated || 0) / 8);
-            }
-            else if (this.weapon === 'tank') {
-                barColor = "#e67e22";
-                ratio = 1;
-            }
-            else if (this.weapon === 'storm') {
-                barColor = "#2ecc71";
-                ratio = this.stormChargeRatio || 0;
-            }
-
-            ctx.fillStyle = barColor;
-            ctx.shadowBlur = 6;
-            ctx.shadowColor = barColor;
-            ctx.fillRect(this.x - 4, subUiY, (this.w + 8) * Math.min(1, Math.max(0, ratio)), 4);
-            ctx.shadowBlur = 0;
-        }
-        else if (this.maxAmmo > 0 && this.maxAmmo < 100) {
-            // Ammo Pips
-            if (this.sniperReloading) {
-                ctx.fillStyle = "#ffd700";
-                ctx.font = "bold 9px 'Orbitron', Arial";
-                ctx.textAlign = "center";
-                drawWorldText(ctx, "RELOADING...", this.x + this.w / 2, subUiY + 5);
-            } else {
-                for (let i = 0; i < this.maxAmmo; i++) {
-                    ctx.fillStyle = (i < this.ammo) ? "#ffd700" : "rgba(255, 255, 255, 0.15)";
-                    let dotsize = ((this.w + 8) / this.maxAmmo) - 1.5;
-                    if (dotsize < 2) dotsize = 2;
-                    ctx.fillRect(this.x - 4 + i * (dotsize + 1.5), subUiY, dotsize, 4);
-                }
-            }
-        }
-
-        // Inventor Linh Kiện (LK) Display
+        // UI riêng của body
         this.drawUIForInventor();
-
-        // Chiêu Hồn Sư (Necromancer) HUD
         this.drawUIForNecromancer(uiY, subUiY);
-
-        // Thiên Tài (Genius) HUD
         this.drawUIForGenius(uiY, subUiY);
-
-        // Cung Charge Bar & State
         this.drawUIForCung(uiY, subUiY);
-
-        // Bow Nhạy Bén (Dodge) Status Indicator
         this.drawUIForCung2(uiY, subUiY);
-
-        // Status Badges (Burn, Silence)
-        if (this.burnStacks > 0) {
-            for (let k = 0; k < this.burnStacks; k++) {
-                ctx.fillStyle = "#ff6600";
-                ctx.fillRect(this.x + k * 7, (this.id === 1) ? uiY - 12 : subUiY + 12, 5, 5);
-            }
-        }
-
-        if (this.silenceTimer > 0 && this.freezeTimer <= 0) {
-            ctx.fillStyle = "#fff";
-            ctx.font = "bold 10px 'Orbitron', Arial";
-            ctx.textAlign = "center";
-            drawWorldText(ctx, "SILENCE", this.x + this.w / 2, (this.id === 1) ? uiY - 14 : subUiY + 22);
-        }
-
-        // Thunder HUD
         this.drawUIForThunder(uiY, subUiY);
-
-        // Magnet HUD
         this.drawUIForMagnet(uiY, subUiY);
 
-        // Infected Polarity Badge
+        // Huy hiệu cực tính bị nhiễm (Magnet)
         if (this.infectedPolarityTimer > 0) {
             let infY = (this.id === 1) ? this.y - 20 : this.y + this.h + 20;
             let isPos = (this.infectedPolarity === 1);
@@ -519,7 +377,6 @@ Object.assign(Player.prototype, {
             ctx.textBaseline = "alphabetic";
         }
 
-        // Evolution HUD
         this.drawUIForEvolution();
 
         ctx.restore();

@@ -12,11 +12,32 @@ const FS_NAME = ['KHAI', 'PHÁ', 'THIÊN'];
 const FS_ICON = ['🌺', '⚔️', '☄️'];
 const FS_PINK = '#ff7eb6', FS_DEEP = '#ff3d8b', FS_LIGHT = '#ffd6e8';
 const FS_HOLD_TICKS = 15;   // giữ 0.25s để đổi vũ điệu
+const FS_REGEN_DELAY = 30;  // Hoa chỉ bắt đầu hồi sau 0.5s không dùng vũ điệu
+const FS_LAND_LOCK = 30;    // Thiên: vòng khóa 0.5s trước khi giáng (RULE 11)
+const FS_EMP_GOLD = '#ffd34d', FS_EMP_LIGHT = '#fff6c8';
+const FS_EMP_PINK = '#ffc4dd', FS_EMP_PINK_LIGHT = '#fff1f7'; // [ĐỔI] cánh Khai cường hóa: hồng nhạt + ánh vàng mờ
 
 function fsEvo1(p) { return p.hasUpgrade('evo_flw_1'); }
 function fsEvo2(p) { return p.hasUpgrade('evo_flw_2'); }
 function fsFull(p) { return fsEvo1(p) && fsEvo2(p); }
 function fsPow(p) { return fsFull(p) ? 1.25 : 1; }
+const FS_PETAL_NERF = 0.78; // cánh hoa (Khai / hoa tự ngắm) giảm ~22% dame
+const FS_SKILL_NERF = 0.9;  // Phá / Thiên / Ngôi Sao giảm 10% dame
+// Kho Hoa: Base 100%, Evo 1: 200%, Full Evo: 300%
+function fsMaxHoa(p) { return fsFull(p) ? 300 : (fsEvo1(p) ? 200 : 100); }
+// Mức tự hồi tối đa (phần trên chỉ nạp được bằng thu hồi cánh hoa): Full Evo 200%, còn lại 100%
+function fsRegenCap(p) { return fsFull(p) ? 200 : 100; }
+// Thời gian cánh hoa nằm nghỉ trước khi tự thu về: 3s (Full Evo: 2s)
+function fsRestTicks(p) { return fsFull(p) ? 120 : 180; }
+// Giới hạn cánh hoa Khai trên sân: Base 12, Evo 1: 24, Full Evo: không giới hạn
+function fsPetalCap(p) { return fsFull(p) ? Infinity : (fsEvo1(p) ? 24 : 12); }
+// Bách Hoa Nở Rộ: ngưỡng Hoa tiêu hao để cường hóa (Base 75%, Evo 1 trở lên 50%)
+function fsBloomNeed(p) { return fsEvo1(p) ? 50 : 75; }
+function fsKhaiCount(p) {
+    let n = 0;
+    for (const e of bodyEffects) if (e instanceof FsPetal && e.active && e.khai && e.owner === p && !e.fade) n++;
+    return n;
+}
 function fsDir(p) { return p.id === 1 ? -1 : 1; }
 function fsEnemy(p) { return p === p1 ? p2 : p1; }
 function fsLaneY(p) { return p.id === 1 ? canvas.height - p.h - 22 : 20; }
@@ -107,6 +128,7 @@ class FsPetal {
         this.dmg = dmg; this.r = 6;
         this.state = opts.state || 'fly';
         this.emp = !!opts.emp; this.refund = opts.refund !== false;
+        this.khai = !!opts.khai; // cánh hoa Khai (tính vào giới hạn trên sân)
         this.timer = opts.timer || 0;
         this.restY = owner.id === 1 ? 12 : canvas.height - 12;
         this.hitOut = false; this.hitBack = false; this.hitObj = [];
@@ -121,14 +143,38 @@ class FsPetal {
         const e = this.enemy();
         return e && e.hp > 0 && this.x > e.x - this.r && this.x < e.x + e.w + this.r && this.y > e.y - this.r && this.y < e.y + e.h + this.r;
     }
-    touchObjects() {
+    // pierce=false: chạm vật cản / công trình / triệu hồi / xe tiền -> gây dame rồi vỡ (trả về true)
+    touchObjects(pierce = true) {
         for (const o of fsObjects(this.owner)) {
             if (this.hitObj.includes(o)) continue;
             if (this.x > o.x - this.r && this.x < o.x + o.w + this.r && this.y > o.y - this.r && this.y < o.y + o.h + this.r) {
                 this.hitObj.push(o);
                 fsHitObject(this.owner, o, this.dmg);
+                if (!pierce) { this.shatter(); return true; }
             }
         }
+        const m = typeof movingObstacle !== 'undefined' ? movingObstacle : null;
+        if (!pierce && m && m.active && this.x > m.x - this.r && this.x < m.x + m.w + this.r && this.y > m.y - this.r && this.y < m.y + m.h + this.r) {
+            this.shatter(); return true;
+        }
+        return false;
+    }
+    shatter() {
+        spawnSparkParticles(this.x, this.y, this.emp ? FS_EMP_PINK : FS_PINK, 6);
+        this.trail = []; this.fade = 1;
+    }
+    // Cánh hoa nằm trên sân địch: xe địch lăn qua -> nát ngay (không thu về được nữa)
+    crushedByEnemy() {
+        if (this.emp) return false; // [ĐỔI] cánh cường hóa không thể bị đè nát
+        const e = this.enemy();
+        if (!e || e.hp <= 0) return false;
+        if (this.x > e.x - this.r && this.x < e.x + e.w + this.r && this.y > e.y - 12 && this.y < e.y + e.h + 12) {
+            spawnSparkParticles(this.x, this.y, FS_LIGHT, 8);
+            addFloatingText(this.x, this.y + (this.owner.id === 1 ? 14 : -14), '🥀', FS_PINK, 10);
+            this.fade = 1;
+            return true;
+        }
+        return false;
     }
     pushTrail() {
         this.trail.unshift(Math.round(this.x * 10) / 10, Math.round(this.y * 10) / 10);
@@ -151,14 +197,16 @@ class FsPetal {
                     e.takeDamage(this.dmg, o);
                     spawnSparkParticles(this.x, this.y, FS_PINK, 6);
                 }
-                this.touchObjects();
+                // Lượt bay ra: bị chặn (trừ cường hóa; Full Evo xuyên khi bay ra)
+                if (this.touchObjects(this.emp || fsFull(o))) break;
                 if ((o.id === 1 && this.y <= this.restY) || (o.id === 2 && this.y >= this.restY)) {
-                    this.y = this.restY; this.state = 'rest'; this.timer = 300; this.trail = [];
+                    this.y = this.restY; this.state = 'rest'; this.timer = this.restMax = fsRestTicks(o); this.trail = [];
                 }
                 break;
             }
             case 'rest': {
                 // Lưu Ảnh: nằm nghỉ, không gây sát thương. Evo 2: tỏa phấn làm chậm
+                if (this.crushedByEnemy()) break;
                 if (fsEvo2(o) && e && Math.hypot(e.x + e.w / 2 - this.x, e.y + e.h / 2 - this.y) < 58) addStatusSlow(e, 0.7);
                 if (--this.timer <= 0) {
                     if (this.emp) { this.state = 'aim'; this.timer = 60; }
@@ -167,6 +215,7 @@ class FsPetal {
                 break;
             }
             case 'aim': { // Khai cường hóa: cảnh báo 1s rồi thu về dạng tia
+                if (this.crushedByEnemy()) break;
                 const h = fsHome(o);
                 this.tx = h.x; this.ty = h.y;
                 if (--this.timer <= 0) this.fireLine();
@@ -174,7 +223,7 @@ class FsPetal {
             }
             case 'line': { // vệt chém vừa bắn ra
                 if (++this.flash > 14) {
-                    if (this.refund) fsGainHoa(o, 5, this.x, this.y);
+                    if (this.refund) fsGainHoa(o, 5, this.x, this.y, true);
                     this.active = false;
                 }
                 break;
@@ -192,9 +241,10 @@ class FsPetal {
                     e.takeDamage(this.dmg, o);
                     spawnSparkParticles(this.x, this.y, FS_PINK, 6);
                 }
-                this.touchObjects();
+                // Lượt thu hồi: luôn bị chặn (trừ cường hóa)
+                if (this.touchObjects(this.emp)) break;
                 if (L < 18) {
-                    if (this.refund) fsGainHoa(o, 5, this.x, this.y);
+                    if (this.refund) fsGainHoa(o, 5, this.x, this.y, true);
                     this.active = false;
                 } else if (this.age > 1600) this.fade = 1;
                 break;
@@ -225,7 +275,7 @@ class FsPetal {
         this.state = 'line'; this.flash = 0;
         if (e && e.hp > 0 && fsSegHitsRect(this.x, this.y, this.tx, this.ty, e, 4)) {
             e.takeDamage(this.dmg, o);
-            bodyEffects.push(new FsSlashMark(o, e, 0, 5, 6, o.damage * fsPow(o), 0.8));
+            bodyEffects.push(new FsSlashMark(o, e, 0, 5, 6, o.damage * fsPow(o) * FS_PETAL_NERF, 0.8));
         }
         for (const ob of fsObjects(o)) if (fsSegHitsRect(this.x, this.y, this.tx, this.ty, ob, 2)) fsHitObject(o, ob, this.dmg * 2);
         fsSfx('playLaser');
@@ -320,7 +370,7 @@ function fsDashStep(o, owner, laneY, cleanseBullets) {
 function fsPhaFinish(owner, hits, n, mult) {
     for (const t of hits) {
         if (!fsTargetAlive(t)) continue;
-        bodyEffects.push(new FsSlashMark(owner, t, 60, n, 7, owner.damage * fsPow(owner) * mult));
+        bodyEffects.push(new FsSlashMark(owner, t, 60, n, 7, owner.damage * fsPow(owner) * FS_SKILL_NERF * mult));
     }
 }
 
@@ -428,7 +478,7 @@ class FsLandStrike {
     }
     strike() {
         const o = this.owner, e = fsEnemy(o);
-        const dmg = o.damage * fsPow(o) * 6 * this.mult;
+        const dmg = o.damage * fsPow(o) * FS_SKILL_NERF * 6 * this.mult;
         if (e && e.hp > 0 && Math.hypot(e.x + e.w / 2 - this.x, e.y + e.h / 2 - this.y) < this.r + e.w / 2) {
             e.takeDamage(dmg, o);
             e.freezeTimer = Math.max(e.freezeTimer || 0, 45);
@@ -444,9 +494,9 @@ class FsLandStrike {
 // Ngôi Sao Trảm (Thiên cường hóa): 2s chém liên tục + hút, rồi nhát kết liễu
 // ==========================================
 class FsStar {
-    constructor(owner, x, y, r) {
+    constructor(owner, x, y, r, dur = 120, fin = 5) {
         this.owner = owner; this.x = x; this.y = y; this.r = r;
-        this.t = 0; this.dur = 120; this.done = false; this.active = true;
+        this.t = 0; this.dur = dur; this.fin = fin; this.done = false; this.active = true;
         this.rot = Math.random() * 6.28;
     }
     inside(e) { return e && e.hp > 0 && Math.hypot(e.x + e.w / 2 - this.x, e.y + e.h / 2 - this.y) < this.r + e.w / 2; }
@@ -460,10 +510,10 @@ class FsStar {
                 const dx = this.x - (e.x + e.w / 2);
                 e.x += Math.max(-1.3, Math.min(1.3, dx * 0.08));
                 e.x = Math.max(0, Math.min(canvas.width - e.w, e.x));
-                if (this.t % 15 === 0) e.takeDamage(o.damage * fsPow(o) * 0.4, o);
+                if (this.t % 15 === 0) e.takeDamage(o.damage * fsPow(o) * FS_SKILL_NERF * 0.4, o);
             }
             if (this.t === this.dur) {
-                const fin = o.damage * fsPow(o) * 5;
+                const fin = o.damage * fsPow(o) * FS_SKILL_NERF * (this.fin || 5);
                 if (this.inside(e)) {
                     e.takeDamage(fin, o);
                     addFloatingText(e.x + e.w / 2, e.y - 18, 'VẠN HOA TRẢM! 🌸', FS_DEEP, 15);
@@ -481,8 +531,11 @@ class FsStar {
 // ==========================================
 // Thanh Hoa & thi triển
 // ==========================================
-function fsGainHoa(p, amt, x, y) {
-    p.fsHoa = Math.min(100, (p.fsHoa || 0) + amt);
+// recall=true: hoa thu hồi -> nạp tới trần kho; nguồn khác chỉ tới mức tự hồi
+function fsGainHoa(p, amt, x, y, recall = false) {
+    const cap = recall ? fsMaxHoa(p) : fsRegenCap(p);
+    const cur = p.fsHoa || 0;
+    if (cur < cap) p.fsHoa = Math.min(cap, cur + amt);
     if (x !== undefined) spawnSparkParticles(x, y, FS_LIGHT, 3);
 }
 
@@ -491,15 +544,20 @@ function fsLogDance(p, rec) {
     for (const s of fsShadows(p)) s.queue.push(Object.assign({ at: s.age + s.delay }, rec));
 }
 
+// Trả về số cánh thực sự bắn ra (bị giới hạn bởi số cánh Khai đang có trên sân)
 function fsKhai(p, emp, sx, sy, mult = 1, refund = true) {
-    const n = emp ? 5 : 3;
-    const spread = emp ? 0.34 : 0.2;
+    const full = fsFull(p);
+    const want = emp ? (full ? 5 : 4) : 3;
+    const n = Math.max(0, Math.min(want, fsPetalCap(p) - fsKhaiCount(p)));
+    if (n <= 0) return 0;
+    const spread = (emp ? 0.34 : 0.2) * (n - 1) / Math.max(1, want - 1);
     const dir = fsDir(p), spd = 7.5;
-    const dmg = p.damage * fsPow(p) * (emp ? 1.5 : 1) * mult;
+    const dmg = p.damage * fsPow(p) * FS_PETAL_NERF * (emp ? (full ? 1.5 : 1.25) : 1) * mult;
     for (let i = 0; i < n; i++) {
-        const a = (i - (n - 1) / 2) * (spread * 2 / Math.max(1, n - 1));
-        bodyEffects.push(new FsPetal(p, sx, sy, Math.sin(a) * spd, dir * Math.cos(a) * spd, dmg, { emp, refund }));
+        const a = n > 1 ? (i - (n - 1) / 2) * (spread * 2 / (n - 1)) : 0;
+        bodyEffects.push(new FsPetal(p, sx, sy, Math.sin(a) * spd, dir * Math.cos(a) * spd, dmg, { emp, refund, khai: true }));
     }
+    return n;
 }
 
 function fsCast(p, d) {
@@ -509,14 +567,23 @@ function fsCast(p, d) {
         if ((p.fsWarnCd || 0) <= 0) { addFloatingText(p.x + p.w / 2, p.y - 14, 'THIẾU HOA 🥀', '#f9a8d4', 11); p.fsWarnCd = 40; }
         return;
     }
+    if (d === 0 && fsKhaiCount(p) >= fsPetalCap(p)) {
+        if ((p.fsWarnCd || 0) <= 0) { addFloatingText(p.x + p.w / 2, p.y - 14, `TỐI ĐA ${fsPetalCap(p)} CÁNH 🌸`, '#f9a8d4', 11); p.fsWarnCd = 40; }
+        return;
+    }
     p.fsHoa -= cost;
     p.fsCd = 18;
+    p.fsRegenWait = FS_REGEN_DELAY;
     const emp = !!p.fsEmpowered;
     p.fsEmpowered = false;
-    // Bách Hoa Nở Rộ: mỗi 50% Hoa tiêu hao -> vũ điệu kế tiếp được cường hóa
-    p.fsSpent = (p.fsSpent || 0) + cost;
+    // Bách Hoa Nở Rộ: tiêu hao đủ ngưỡng (Base 75%, Evo 1+: 50%) -> vũ điệu kế tiếp được cường hóa.
+    // Đòn cường hóa kích hoạt -> bộ đếm Hoa tiêu hao về 0.
     let bloom = false;
-    while (p.fsSpent >= 50) { p.fsSpent -= 50; bloom = true; }
+    if (emp) p.fsSpent = 0;
+    else {
+        p.fsSpent = (p.fsSpent || 0) + cost;
+        if (p.fsSpent >= fsBloomNeed(p)) { p.fsSpent = 0; bloom = true; }
+    }
     const cx = p.x + p.w / 2;
     addFloatingText(cx, p.y - 16, `${emp ? '✿ ' : ''}${FS_NAME[d]} ${FS_ICON[d]}`, emp ? '#fff0f7' : FS_PINK, emp ? 14 : 12);
     if (d === 0) {
@@ -526,8 +593,14 @@ function fsCast(p, d) {
     } else if (d === 1) {
         p.fsMode = 'pha'; p.phase = 1; p.hits = []; p.trail = [];
         if (emp) {
-            bodyEffects.push(new FsClone(p, p.x - 64));
-            bodyEffects.push(new FsClone(p, p.x + 64));
+            // Full Evo: 2 bản sao; Base / Evo 1: 1 bản sao (phía rộng hơn của sân)
+            if (fsFull(p)) {
+                bodyEffects.push(new FsClone(p, p.x - 64));
+                bodyEffects.push(new FsClone(p, p.x + 64));
+            } else {
+                const left = p.x + p.w / 2 > canvas.width / 2;
+                bodyEffects.push(new FsClone(p, left ? p.x - 64 : p.x + 64));
+            }
         }
         fsLogDance(p, { dance: 1 });
         fsSfx('playDash');
@@ -542,13 +615,12 @@ function fsCast(p, d) {
 }
 
 function fsThienStart(p, emp) {
-    const e2 = fsEvo2(p);
     p.fsMode = 'thien';
     p.fsHidden = true;
     p.fsHomeX = p.x;
     p.fsCircle = {
         x: p.x + p.w / 2, y: fsLaneY(p) + p.h / 2,
-        r: emp ? 54 : 36, t: 0, max: 300, emp, landing: 0, landMax: e2 ? 10 : 22,
+        r: emp ? (fsFull(p) ? 54 : 46) : 36, t: 0, max: 300, emp, landing: 0, landMax: FS_LAND_LOCK,
     };
     explosions.push(new Explosion(p.x + p.w / 2, p.y + p.h / 2, 34, 'rgba(255, 126, 182,', 0, p));
     spawnSparkParticles(p.x + p.w / 2, p.y + p.h / 2, FS_PINK, 14);
@@ -562,6 +634,7 @@ function fsThienUpdate(p, inp) {
     if (!c) { fsReturn(p, p.fsHomeX + p.w / 2); return; }
     const e = fsEnemy(p);
     const e2 = fsEvo2(p);
+    // RULE 11: vòng đã khóa (đứng yên, đỏ đặc) 0.5s rồi mới giáng
     if (c.landing > 0) {
         if (--c.landing === 0) fsThienImpact(p);
         return;
@@ -590,14 +663,15 @@ function fsThienUpdate(p, inp) {
 function fsThienLand(p) {
     const c = p.fsCircle;
     if (!c || c.landing > 0) return;
-    c.landing = c.landMax;
+    c.landMax = FS_LAND_LOCK;
+    c.landing = FS_LAND_LOCK;
     fsSfx('playDash');
 }
 
 function fsThienImpact(p) {
     const c = p.fsCircle;
     const e = fsEnemy(p);
-    const dmg = p.damage * fsPow(p) * (6 + (fsEvo2(p) ? 2 : 0));
+    const dmg = p.damage * fsPow(p) * FS_SKILL_NERF * (6 + (fsEvo2(p) ? 2 : 0));
     if (e && e.hp > 0 && Math.hypot(e.x + e.w / 2 - c.x, e.y + e.h / 2 - c.y) < c.r + e.w / 2) {
         e.takeDamage(dmg, p);
         e.freezeTimer = Math.max(e.freezeTimer || 0, 90);
@@ -611,8 +685,10 @@ function fsThienImpact(p) {
     fsSfx('playExplosion');
     fsLogDance(p, { dance: 2, x: c.x, y: c.y, r: c.r });
     if (c.emp) {
-        bodyEffects.push(new FsStar(p, c.x, c.y, c.r * 1.25));
-        p.fsMode = 'star'; p.fsStarT = 120; p.fsLandX = c.x;
+        // Full Evo: Ngôi Sao Trảm nguyên bản (2s, kết liễu x5); Base / Evo 1: 1.5s, x3.5
+        const full = fsFull(p);
+        bodyEffects.push(new FsStar(p, c.x, c.y, c.r * 1.25, full ? 120 : 90, full ? 5 : 3.5));
+        p.fsMode = 'star'; p.fsStarT = full ? 120 : 90; p.fsLandX = c.x;
         p.fsCircle = null;
     } else {
         p.fsCircle = null;
@@ -640,7 +716,7 @@ function fsAutoPetals(p) {
     for (const off of [-36, 36]) {
         const sx = h.x + off, sy = h.y + dir * 26;
         const ex = e.x + e.w / 2 + (e._vx || 0) * 20, ey = e.y + e.h / 2;
-        bodyEffects.push(new FsPetal(p, sx, sy, 0, 0, p.damage * fsPow(p), { state: 'seekAim', timer: 36, tx: ex, ty: ey, refund: false }));
+        bodyEffects.push(new FsPetal(p, sx, sy, 0, 0, p.damage * fsPow(p) * FS_PETAL_NERF, { state: 'seekAim', timer: 36, tx: ex, ty: ey, refund: false }));
     }
 }
 
@@ -661,7 +737,7 @@ CharHooks.register('flower_shadow', {
     setup() {
         this.maxAmmo = 0; this.ammo = 0;
         this.fsHoa = 100; this.fsDance = 0; this.fsHold = 0; this.fsPrevS = false; this.fsHoldValid = false;
-        this.fsSpent = 0; this.fsEmpowered = false; this.fsCd = 0; this.fsWarnCd = 0;
+        this.fsSpent = 0; this.fsEmpowered = false; this.fsCd = 0; this.fsWarnCd = 0; this.fsRegenWait = 0;
         this.fsMode = 'idle'; this.fsHidden = false; this.fsHomeX = 0; this.fsCircle = null;
         this.fsStarT = 0; this.fsLandX = 0; this.fsTick = 0; this.fsBotT = 0;
         this.phase = 0; this.hits = []; this.trail = [];
@@ -670,8 +746,14 @@ CharHooks.register('flower_shadow', {
         this.fsTick++;
         if (this.fsCd > 0) this.fsCd--;
         if (this.fsWarnCd > 0) this.fsWarnCd--;
-        const regen = fsFull(this) ? 8 : (fsEvo1(this) ? 6.5 : 4);
-        this.fsHoa = Math.min(100, this.fsHoa + regen / 60);
+        // Hồi Hoa: chỉ hồi sau 0.5s không dùng vũ điệu (đang múa Phá/Thiên cũng tính là đang dùng)
+        if (this.fsMode !== 'idle') this.fsRegenWait = FS_REGEN_DELAY;
+        else if (this.fsRegenWait > 0) this.fsRegenWait--;
+        if (!(this.fsRegenWait > 0)) {
+            const regen = fsFull(this) ? 8 : (fsEvo1(this) ? 6.5 : 4);
+            const cap = fsRegenCap(this);
+            if (this.fsHoa < cap) this.fsHoa = Math.min(cap, this.fsHoa + regen / 60);
+        }
 
         // Bóng trễ
         if (fsEvo1(this)) {
