@@ -281,6 +281,14 @@ const MODULES = {
             size: { w: 26, h: 26 },
             stats: { hp: 3.5, dmg: 0.75, ammo: 4, speedMult: 1.029 }
         },
+        {
+            id: 'blood_lord',
+            name: 'Huyết Ma',
+            desc: '"Máu = sức mạnh!" HP:3 | Dame:0.25 | Đạn:6 (nghỉ 0.5s mới hồi) | Tốc: 4.0. BỂ MÁU (tối đa MaxHP x2): tăng khi bạn hồi máu, đánh trúng địch hoặc BẤT KỲ mục tiêu nào trên sân mất máu; 8s yên ổn -> rút ra hồi HP (2 Bể Máu = 1 HP). Kỹ năng tự trừ máu không làm HP tụt dưới 0.5. Giữ Bắn 0.25s xoay 4 dạng: ĐẠN MÁU (1 đạn) | HUYẾT PHÁ (2 đạn + 1 HP): hóa dơi bất tử lao thẳng lên, chạm mục tiêu -> Bầy Dơi 2s rồi giật về (kẻ địch đứng trong đủ 2s -> +2 HP) | HUYẾT TIỄN (3 đạn + 1 HP): cảnh báo rồi tia máu xuyên dọc sân | HUYẾT CẦU (toàn bộ đạn + toàn bộ Bể Máu): cầu máu xuyên mọi thứ, nổ ở biên đối diện; từ 50% Bể Máu trở lên cầu to & mạnh và mở BÓNG MA MÀN ĐÊM: lần bắn kế tiếp bay lên trời (không thể bị nhắm), lái vòng cảnh báo, bấm để đáp -> Đại Tiệc Máu, nạp đầy Bể Máu & hồi nhiều HP.',
+            type: 'body', role: ['Sinh Tồn', 'Đối Đầu', 'Cơ Động'],
+            size: { w: 28, h: 28 },
+            stats: { hp: 3, dmg: 0.25, ammo: 6, speedMult: 1.143 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 30 },

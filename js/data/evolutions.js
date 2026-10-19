@@ -232,4 +232,8 @@ const EVOLUTIONS = {
         { id: 'evo_gem_1', name: 'Liên Kết Thần Kinh', desc: 'AI phối hợp: giữ giãn cách tránh nổ lan, bắn ép góc, ưu tiên chạy lại cứu bạn (bám vòng cứu). Chuyển Giao hồi chỉ 1.2s; thanh cứu không bị tụt khi rời vòng. Vòng cứu rộng +50%; lần cứu đầu tiên mỗi hiệp chỉ 1s và không tính nhân đôi.', cost: 90, type: 'evo' },
         { id: 'evo_gem_2', name: 'Đệ Quy Vô Tận', desc: 'Cả 2 xe tăng dần tốc chạy & tốc bắn theo thời gian giao tranh; mỗi hiệp đã qua cộng dồn +0.25 MaxHP, +6% dame, đạn to hơn (tối đa 8 tầng). Sau Chuyển Giao: 1s cả 2 xe +50% tốc chạy, x1.8 tốc bắn, x1.3 dame. FULL EVO: Siêu Trí Tuệ Song Hành — AI tối thượng (tự cân đối cứu / kết liễu); lần gục đầu tiên của mỗi xe tự khởi động lại, các lần sau thanh cứu tự tăng tới 99% (chạm là dậy); 0.5s sau Chuyển Giao mọi đạn của 2 xe tự khoá mục tiêu.', cost: 120, type: 'evo' }
     ],
+    blood_lord: [
+        { id: 'evo_bd_1', name: 'Huyết Ảnh Đào Thoát', desc: 'Tích Bể Máu nhanh hơn (x1.4). Khi nhận sát thương chí tử: hóa dơi dịch chuyển sang vị trí khác, Bất Tử 2s và hồi ngay 50% Bể Máu (1 lần/hiệp).', cost: 90, type: 'evo' },
+        { id: 'evo_bd_2', name: 'Huyết Thể Cường Hóa', desc: '+4 Max HP (Bể Máu x2 theo). Kỹ năng mạnh hơn x1.25, chỉ tốn 0.5 HP. Tự hồi máu sau 6s với tỉ lệ 1.5 Bể Máu = 1 HP. FULL EVO: Huyết Tổ Bất Diệt — thêm +2 Max HP, kỹ năng x1.5, chỉ tốn 0.25 HP, tích Bể Máu x2 (kẻ địch hồi máu cũng nạp); Đào Thoát hồi 100% Bể Máu; tự hồi sau 4s (1 Bể Máu = 1 HP); HỒI SINH tại chỗ 1 lần/trận khi chết lúc Bể Máu đầy.', cost: 120, type: 'evo' }
+    ],
 };
