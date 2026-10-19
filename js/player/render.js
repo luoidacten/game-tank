@@ -76,7 +76,8 @@ Object.assign(Player.prototype, {
                 ctx.save();
                 ctx.rotate((Math.PI * 2 / this.swordShieldHits) * i);
                 ctx.translate(0, -40); // Bán kính quỹ đạo
-                drawGlowingSword(-4, -10, 8, 20, (this.id === 1) ? '#3498db' : '#e74c3c', this.id === 1 ? -1 : 1);
+                if (typeof swDrawShieldSword === 'function') swDrawShieldSword(this);
+                else drawGlowingSword(-4, -10, 8, 20, (this.id === 1) ? '#3498db' : '#e74c3c', this.id === 1 ? -1 : 1);
                 ctx.restore();
             }
             ctx.restore();
@@ -240,6 +241,10 @@ Object.assign(Player.prototype, {
 
             // Vẽ Kiếm Khí (Wind Blade)
             // Vẽ Kiếm Khí (Wind Blade) HOẶC Nhát chém Sukuna
+            // Phong Trảm: lưỡi gió trăng khuyết (js/render/tank-art/swords.js)
+            if (b.isWindBlade && typeof swDrawWindBlade === 'function') { ctx.globalAlpha = 1; swDrawWindBlade(b); return; }
+            // Cuồng Phong: Hư Ảnh -> lốc xoáy
+            if (b.isStormPhantom && typeof swDrawStormPhantom === 'function') { ctx.globalAlpha = 1; swDrawStormPhantom(b); return; }
             if (b.isWindBlade || b.isSukunaSlash) {
                 ctx.save();
                 ctx.translate(b.x + b.w / 2, b.y + b.h / 2);
@@ -279,6 +284,7 @@ Object.assign(Player.prototype, {
             }
 
             // Vẽ Bóng Hư Ảnh (Storm Shadow)
+            if (b.isStormShadow && typeof swDrawStormShadow === 'function') { swDrawStormShadow(b); return; }
             if (b.isStormShadow) {
                 ctx.save();
                 ctx.globalAlpha = 0.6;
@@ -291,13 +297,15 @@ Object.assign(Player.prototype, {
 
             // --- THÊM ĐOẠN NÀY ĐỂ VẼ KIẾM MÀU (Bao gồm Kiếm Hư Vô màu tím) ---
             if (b.type === 'hu_vo') {
-                drawGlowingSword(b.x, b.y, b.w, b.h, '#8a2be2', b.vy < 0 ? -1 : 1); // Vẽ kiếm tím
+                if (typeof swDrawHuVoSword === 'function') swDrawHuVoSword(b); // Ám Kiếm (swords.js)
+                else drawGlowingSword(b.x, b.y, b.w, b.h, '#8a2be2', b.vy < 0 ? -1 : 1); // Vẽ kiếm tím
                 return;
             }
 
             if (b.isFloatingSwordGraphic) {
                 // b.color được lưu từ class FloatingSword truyền sang
-                drawGlowingSword(b.x, b.y, b.w, b.h, b.color || bulletColor, b.owner.id === 1 ? -1 : 1);
+                if (!(typeof swDrawFloatingBullet === 'function' && swDrawFloatingBullet(b)))
+                    drawGlowingSword(b.x, b.y, b.w, b.h, b.color || bulletColor, b.owner.id === 1 ? -1 : 1);
                 return;
             }
 

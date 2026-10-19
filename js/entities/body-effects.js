@@ -155,10 +155,12 @@ class SkyStrike {
             ctx.lineWidth = 2;
             ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
             ctx.beginPath(); ctx.arc(this.x, this.y, this.r * k, 0, Math.PI * 2); ctx.stroke();
-            drawGlowingSword(this.x - 9, this.y - 140 + k * 100, 18, 60, '#ffd700', 1);
+            if (typeof swBlade === 'function') swBlade(this.x, this.y - 110 + k * 100, Math.PI / 2, 60, 8, SW_STYLES.kiem_khach_gold, 1, 1.4);
+            else drawGlowingSword(this.x - 9, this.y - 140 + k * 100, 18, 60, '#ffd700', 1);
         } else {
             ctx.globalAlpha = 1 - this.fall / 20;
-            drawGlowingSword(this.x - 10, this.y - 50, 20, 64, '#ffd700', 1);
+            if (typeof swBlade === 'function') swBlade(this.x, this.y - 18, Math.PI / 2, 64, 9, SW_STYLES.kiem_khach_gold, 1, 1.6);
+            else drawGlowingSword(this.x - 10, this.y - 50, 20, 64, '#ffd700', 1);
         }
         ctx.restore();
     }

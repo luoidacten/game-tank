@@ -16,8 +16,9 @@ Object.assign(CharHooks.registry.kiem_khach, {
             ctx.beginPath(); ctx.arc(cx, cy, this.w * 0.9, 0, Math.PI * 2); ctx.stroke();
             for (let i = 0; i < 4; i++) {
                 const a = t * 2 + i * Math.PI / 2;
-                ctx.fillStyle = '#ffd700';
-                ctx.beginPath(); ctx.arc(cx + Math.cos(a) * this.w * 0.9, cy + Math.sin(a) * this.w * 0.9, 2.5, 0, Math.PI * 2); ctx.fill();
+                const x = cx + Math.cos(a) * this.w * 0.9, y = cy + Math.sin(a) * this.w * 0.9;
+                if (typeof swBlade === 'function') swBlade(x, y, a + Math.PI / 2, 16, 3.4, SW_STYLES.kiem_khach_gold, 1, 1);
+                else { ctx.fillStyle = '#ffd700'; ctx.beginPath(); ctx.arc(x, y, 2.5, 0, Math.PI * 2); ctx.fill(); }
             }
         }
         // Tập Trung: vòng sáng xanh + thanh thời gian, sân hơi tối ở mép (sắc thái tập trung)
