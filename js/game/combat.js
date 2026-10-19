@@ -34,6 +34,14 @@ function checkHits(attacker, victim) {
             }
         }
 
+        // Khiên Thép (Kẻ Sáng Tạo): chặn & hấp thụ MỌI viên đạn đối thủ chạm khiên (kể cả đạn xuyên)
+        if (victim.creatorShield && victim.creatorShield.active && victim.creatorShield.blocksBullet(b)) {
+            victim.creatorShield.absorb(b);
+            BulletHooks.call(b, 'obstacle', attacker, victim.creatorShield, 'wall');
+            attacker.bullets.splice(i, 1); i--;
+            continue;
+        }
+
         // Check va chạm với Kiếm Thể Thủ (Chặn hit)
         if (victim.swordShieldActive && !b.isPiercing) {
             victim.swordShieldHits--;
@@ -148,7 +156,7 @@ function checkHits(attacker, victim) {
                 if (rectIntersect(b.x, b.y, b.w, b.h, t.x, t.y, t.w, t.h)) {
                     if (b.isPiercing && b.hitIds && b.hitIds.includes(t)) continue;
 
-                    let dmgToTurret = (b.isAcid || attacker.weapon === 'acid') ? 5 : currentFinalDmg;
+                    let dmgToTurret = (b.isAcid || attacker.weapon === 'acid') ? acidObjDmg(t, currentFinalDmg) : currentFinalDmg;
                     if (attacker.weapon === 'money_tank') dmgToTurret *= 2;
 
                     if (attacker.weapon === 'furnace') {
@@ -190,7 +198,7 @@ function checkHits(attacker, victim) {
                 if (d.active && rectIntersect(b.x, b.y, b.w, b.h, d.x, d.y, d.w, d.h)) {
                     if (b.isPiercing && b.hitIds && b.hitIds.includes(d)) continue;
 
-                    d.takeDamage((b.isAcid || attacker.weapon === 'acid') ? 5 : currentFinalDmg);
+                    d.takeDamage((b.isAcid || attacker.weapon === 'acid') ? acidObjDmg(d, currentFinalDmg) : currentFinalDmg);
 
                     // Thưởng Linh Kiện cho Inventor khi phá Drone
                     if (!d.active) {
@@ -220,7 +228,7 @@ function checkHits(attacker, victim) {
                 if (m.active && m.owner.id !== attacker.id && rectIntersect(b.x, b.y, b.w, b.h, m.x, m.y, m.w, m.h)) {
                     if (b.isPiercing && b.hitIds && b.hitIds.includes(m)) continue;
 
-                    let minionDmg = (b.isAcid || attacker.weapon === 'acid') ? 5 : currentFinalDmg;
+                    let minionDmg = (b.isAcid || attacker.weapon === 'acid') ? acidObjDmg(m, currentFinalDmg) : currentFinalDmg;
                     m.takeDamage(minionDmg);
 
                     if (!b.hitIds) b.hitIds = [];
@@ -248,7 +256,7 @@ function checkHits(attacker, victim) {
                 // Tường Sniper: chặn MỌI viên đạn của đối thủ (kể cả đạn xuyên); đạn phe mình bay qua
                 if (w instanceof SniperWall && w.owner !== attacker) {
                     BulletHooks.call(b, 'obstacle', attacker, w, 'wall');
-                    w.takeHit((b.isAcid || attacker.weapon === 'acid') ? 5 : currentFinalDmg, attacker);
+                    w.takeHit((b.isAcid || attacker.weapon === 'acid') ? acidObjDmg(w, currentFinalDmg) : currentFinalDmg, attacker);
                     applyBulletEffectsToStructure(w, b.x, b.y);
                     attacker.bullets.splice(i, 1); i--; hitWall = true; break;
                 }
@@ -263,7 +271,7 @@ function checkHits(attacker, victim) {
                 let isOwnEvoWall = (b.owner && w.owner === b.owner && b.owner.hasUpgrade('evo_sniper_1'));
 
                 if (!w.isImmortal) {
-                    let dmgToWall = (b.isAcid || attacker.weapon === 'acid') ? 5 : currentFinalDmg;
+                    let dmgToWall = (b.isAcid || attacker.weapon === 'acid') ? acidObjDmg(w, currentFinalDmg) : currentFinalDmg;
                     w.hp -= dmgToWall;
                     applyBulletEffectsToStructure(w, b.x, b.y);
                     if (w.hp <= 0) {
@@ -299,7 +307,7 @@ function checkHits(attacker, victim) {
                 // [FIX LỖI MÁU ÂM VÀ LỖI KHÔNG ĂN ĐƯỢC HỘP TIẾP TẾ]
                 if (n.hp !== undefined) {
                     // Xử lý Xe Tiền (Có thanh máu)
-                    let truckDmg = (b.isAcid || attacker.weapon === 'acid') ? 3 : currentFinalDmg;
+                    let truckDmg = (b.isAcid || attacker.weapon === 'acid') ? acidObjDmg(n, currentFinalDmg) : currentFinalDmg;
                     n.hp -= truckDmg;
                     applyBulletEffectsToStructure(n, b.x, b.y);
 

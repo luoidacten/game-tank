@@ -182,8 +182,8 @@ function djDrawLane(p, tick) {
     const fb = p.djFb;
     if (fb && tick - fb.t < 24) {
         const k = 1 - (tick - fb.t) / 24;
-        const txt = { perfect: 'PERFECT!', miss: 'LOẠN ÂM', guard: 'BẢO HỘ', auto: 'AUTO!' }[fb.k] || '';
-        const col = { perfect: '#ff2fd1', miss: '#94a3b8', guard: '#4ade80', auto: '#facc15' }[fb.k] || '#fff';
+        const txt = { perfect: 'PERFECT!', good: 'GOOD', miss: 'LOẠN ÂM', pass: 'LỠ NHỊP', guard: 'BẢO HỘ', auto: 'AUTO!' }[fb.k] || '';
+        const col = { perfect: '#ff2fd1', good: '#ffd60a', miss: '#94a3b8', pass: '#94a3b8', guard: '#4ade80', auto: '#facc15' }[fb.k] || '#fff';
         ctx.globalAlpha = k;
         ctx.font = 'bold 8px "Orbitron", Arial'; ctx.textAlign = 'center'; ctx.fillStyle = col;
         const dy = (p.id === 1 ? -1 : 1) * (12 + (1 - k) * 8);

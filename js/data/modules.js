@@ -13,7 +13,7 @@ const MODULES = {
         { id: 'ice', name: 'Pháo Băng', desc: 'HP:5 | Dame:1 | Đạn:5 (Làm chậm)', type: 'body', role: ['Kiểm Soát', 'Đối Đầu'], size: { w: 30, h: 30 }, stats: { hp: 5, dmg: 1, ammo: 5 } },
         { id: 'big_bullet', name: 'Đạn Lớn', desc: 'HP:5 | Dame:2 | Đạn:2. Quả cầu đạn to. Full Evo: nảy 1 lần hóa Xuyên Thấu, tan ở giữa sân & nổ 360° mảnh đạn.', type: 'body', role: ['Đối Đầu'], size: { w: 30, h: 30 }, stats: { hp: 5, dmg: 2, ammo: 2 } },
         { id: 'shotgun', name: 'Shotgun', desc: 'HP:5.5 | Dame:0.9 | Đạn:2 (3 tia)', type: 'body', role: ['Đối Đầu'], size: { w: 26, h: 26 }, stats: { hp: 5.5, dmg: 0.9, ammo: 2 } },
-        { id: 'overload', name: 'Cuộn Quá Tải', desc: 'HP:4.5 | Dame:0.7-7 (Tự tụ) | Đạn:6. Thanh năng lượng tự tụ 2.4s; đầy -> phát kế tiếp là Đạn Sạc nổ xung kích điện.', type: 'body', role: ['Đối Đầu'], size: { w: 30, h: 30 }, stats: { hp: 4.5, dmg: 0.7, ammo: 6 } },
+        { id: 'overload', name: 'Cuộn Quá Tải', desc: 'HP:4.5 | Dame:0.7-7 (Tự tụ) | Đạn:6. Thanh năng lượng tự tụ 2.4s; đầy -> phát kế tiếp là Đạn Sạc nổ xung kích điện (vụ nổ 0.5 dame, Full Evo 1.25).', type: 'body', role: ['Đối Đầu'], size: { w: 30, h: 30 }, stats: { hp: 4.5, dmg: 0.7, ammo: 6 } },
         { id: 'smg', name: 'Tiểu Liên', desc: 'HP:5 | Dame:0.9 | Đạn:12 (Lắc)', type: 'body', role: ['Đối Đầu'], size: { w: 24, h: 24 }, stats: { hp: 5, dmg: 0.9, ammo: 12 } },
         { id: 'lazer_charge', name: 'Lazer Xuyên Phá', desc: 'HP:4 | Dame:0.5 | Đạn:12 (nạp nhanh 0.6s/viên). Nhấp: đạn thường. Giữ 1.5s rồi nhả: Tia Xuyên Phá 20 dmg - một phát hạ gục (tốn 6 đạn). Full Evo: tia xuyên khiên, nạp 0.25s/viên.', type: 'body', role: ['Đối Đầu'], size: { w: 30, h: 30 }, stats: { hp: 4, dmg: 0.5, ammo: 12 } },
         { id: 'lazer_auto', name: 'Lazer Pháo', desc: 'HP:5 | Dame:1 | Đạn:6 (Xuyên)', type: 'body', role: ['Đối Đầu'], size: { w: 30, h: 30 }, stats: { hp: 5, dmg: 1, ammo: 6 } },
@@ -21,7 +21,7 @@ const MODULES = {
         { id: 'portal', name: 'Cổng Không Gian', desc: 'HP:5 | Dame:1 | Đạn:7 (Dịch chuyển)', type: 'body', role: ['Cơ Động', 'Đối Đầu'], size: { w: 30, h: 30 }, stats: { hp: 5, dmg: 1, ammo: 7 } },
         { id: 'wind_slash', name: 'Phong Trảm', desc: 'HP:4 | Tụ lực bắn Kiếm Khí (Phá đạn)', type: 'body', role: ['Đối Đầu', 'Kiểm Soát'], size: { w: 30, h: 30 }, stats: { hp: 4, dmg: 0.9, ammo: 1 } },
         { id: 'storm', name: 'Cuồng Phong', desc: 'HP:3.5 | Giữ nút tụ lực 3.5s, nhả -> Lao & Chém Tròn (Phản đạn)', type: 'body', role: ['Cơ Động', 'Đối Đầu'], size: { w: 30, h: 30 }, stats: { hp: 3.5, dmg: 2, ammo: 0 } },
-        { id: 'acid', name: 'Axit Hóa', desc: 'HP:4 | Dame:0.5 | Đạn:1. Ăn mòn Max HP (Max HP<=1 nhận 4 Dame). Đạn tạo vùng', type: 'body', role: ['Kiểm Soát', 'Đối Đầu'], size: { w: 30, h: 30 }, stats: { hp: 4, dmg: 0.5, ammo: 1 } },
+        { id: 'acid', name: 'Axit Hóa', desc: 'HP:4 | Dame:0.5 | Đạn:1. Ăn mòn Max HP (Max HP<=1 nhận 4 Dame). Mỗi viên thứ 5 (đạn cường hóa) tạo VÙNG ĂN MÒN tím: rút cả HP lẫn Max HP & làm chậm. Mọi đạn/vùng Axit gây x10 dame + 50% Max HP lên vật cản, công trình, xe tiền/phương tiện & vật triệu hồi.', type: 'body', role: ['Kiểm Soát', 'Đối Đầu'], size: { w: 30, h: 30 }, stats: { hp: 4, dmg: 0.5, ammo: 1 } },
         { id: 'engineer', name: 'Kỹ Sư', desc: 'HP:3 (+2 máu xe lớn) | Dame:0.5 | Đạn:2. Tự tạo Ụ Thường. Giữ 1s đặt Ụ Thông Minh. Ụ tồn tại quá 10s tự mất máu chậm.', type: 'body', role: ['Kiểm Soát', 'Sinh Tồn'], size: { w: 34, h: 34 }, stats: { hp: 3, dmg: 0.5, ammo: 2 } },
         { id: 'ghost', name: 'Ghost', desc: 'HP:2.5 | Tốc: Rất Nhanh | Đạn:4. Vô Ảnh 2s (CD 3s). Tàn Ảnh phân thân.', type: 'body', role: ['Cơ Động', 'Đối Đầu'], size: { w: 24, h: 24 }, stats: { hp: 2.5, dmg: 1.75, ammo: 4 } },
         { id: 'aaa', name: 'Pháo Cao Xạ', desc: 'HP:3.5 (+4 máu xe lớn) | Tốc: Chậm | Dame:1.15 Pháo Kích (1.5s nổ) + Xả nhanh khi có đạn.', type: 'body', role: ['Kiểm Soát', 'Đối Đầu'], size: { w: 37, h: 37 }, stats: { hp: 3.5, dmg: 1.15, ammo: 1 } },
@@ -164,7 +164,7 @@ const MODULES = {
         {
             id: 'sprayer',
             name: 'Bình Phun',
-            desc: 'HP:5 (+2 xe lớn) | Năng lượng. Nhấp: Bật/Tắt phun hình nón. Giữ 0.5s: đổi chất Lửa/Axit/Băng. Lớp phủ đầy 100% -> Nổ / Câm Lặng / Đóng Băng. Axit ăn mòn 2 dame/s mọi vật không phải body (thùng, xe tiền, triệu hồi, công trình). Vật cản chặn luồng phun.',
+            desc: 'HP:5 (+2 xe lớn) | Năng lượng. Nhấp: Bật/Tắt phun hình nón. Giữ 0.5s: đổi chất Lửa/Axit/Băng. Lớp phủ đầy 100% -> Nổ / Câm Lặng / Đóng Băng. Axit ăn mòn mọi vật không phải body (thùng, xe tiền, triệu hồi, công trình): x10 dame + mất 50% Max HP mỗi giây hứng luồng; xe tiền/xe bị đốt nhanh gấp 3. Vật cản chặn luồng phun.',
             type: 'body', role: ['Kiểm Soát', 'Đối Đầu'],
             size: { w: 34, h: 34 },
             stats: { hp: 5, dmg: 0, ammo: 0, speedMult: 0.825 }
@@ -197,7 +197,7 @@ const MODULES = {
         {
             id: 'dj',
             name: 'DJ',
-            desc: 'HP:4 | Dame:0.75 | Đạn:2 (∞ khi đúng nhịp) | Tốc: 1.15x. "Lắng nghe nhịp điệu nào!" Nút Bắn đổi màu theo nhịp Xanh -> Vàng -> Đỏ: bấm lúc ĐỎ = Cảm Âm Hoàn Hảo (sóng âm rộng, không tốn đạn, làm chậm, +1 Combo). Bấm sai = Loạn Âm (đứt combo, nửa dame, tốn đạn; hết đạn khóa 1.5s). Vùng canh nhịp dài & rộng. Giữ 0.4s: đổi bản nhạc Dễ (nốt chậm, thưa, Hoàn Hảo rất dễ) / Trung Bình (vừa phải, thỉnh thoảng Nốt Đôi: bấm 2 lần liên tiếp) / Khó (nhanh, cho người đã luyện). Combo tăng tốc & dame; mỗi 30 combo +1 Khiên, mỗi 45 combo +1 HP.',
+            desc: 'HP:4 | Dame:0.75 | Đạn:2 (∞ khi đúng nhịp) | Tốc: 1.15x. "Lắng nghe nhịp điệu nào!" Nút Bắn đổi màu theo nhịp Xanh -> Vàng -> Đỏ: bấm lúc ĐỎ (vùng rộng, dễ bấm trên điện thoại) = Cảm Âm Hoàn Hảo (sóng âm rộng, không tốn đạn, làm chậm, +1 Combo). Bấm lúc VÀNG = vẫn bắn sóng âm nhưng KHÔNG cộng Combo. Bấm sai = Loạn Âm (đứt combo, nửa dame, tốn đạn). Để nốt trôi qua vùng mà không bấm = LỠ NHỊP: mất phát bắn (tốn 1 đạn) & đứt Combo. Hết đạn khóa 1.5s. Giữ 0.4s: đổi bản nhạc Dễ (nốt chậm, thưa, Hoàn Hảo rất dễ) / Trung Bình (vừa phải, thỉnh thoảng Nốt Đôi: bấm 2 lần liên tiếp) / Khó (nhanh, cho người đã luyện). Combo tăng tốc & dame; mỗi 30 combo +1 Khiên, mỗi 45 combo +1 HP.',
             type: 'body',
             role: ['Đối Đầu', 'Cơ Động', 'Sinh Tồn'],
             size: { w: 28, h: 28 },

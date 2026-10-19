@@ -139,10 +139,15 @@ function sniperTeamOf(attacker) {
     return attacker;
 }
 function sniperWallBlockY(attacker, x, fromY, dirY, halfW = 0, dmg = 0) {
-    if (typeof sniperWalls === 'undefined' || !sniperWalls.length) return null;
     const team = sniperTeamOf(attacker);
+    // Khiên Thép của Kẻ Sáng Tạo cũng chặn tia/hitscan của đối thủ như tường
+    const blockers = (typeof sniperWalls !== 'undefined' ? sniperWalls : []).slice();
+    [typeof p1 !== 'undefined' ? p1 : null, typeof p2 !== 'undefined' ? p2 : null].forEach(pl => {
+        if (pl && pl.creatorShield && pl.creatorShield.active && pl !== team && typeof pl.creatorShield.x === 'number') blockers.push(pl.creatorShield);
+    });
+    if (!blockers.length) return null;
     let best = null, bestD = Infinity;
-    for (const w of sniperWalls) {
+    for (const w of blockers) {
         if (!w || !w.active || (team && w.owner === team)) continue;
         if (x + halfW < w.x || x - halfW > w.x + w.w) continue;
         const near = dirY < 0 ? w.y + w.h : w.y;
