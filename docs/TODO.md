@@ -2,13 +2,14 @@
 
 > Danh sách các yêu cầu **chưa làm / đang làm dở**. Làm xong mục nào thì xoá khỏi đây và ghi vào `docs/BODIES.md`.
 > Thứ tự = thứ tự ưu tiên. Mỗi lần chỉ làm 1 mục để tiết kiệm token.
+> Phiên mới: đọc `docs/HANDOVER.md` trước (công cụ test ở `tools/`).
 
 ## 2. Đồ họa (đã làm một phần)
 - ✅ Sukuna, Gojo (2 Lãnh Địa), Âm Dương Sư, Chiêu Hồn Sư, Khóa Chết, Cổng Không Gian — XONG.
 - ✅ Kiếm (Kiếm Trận, Kiếm Sư, Kiếm Khách, Kiếm Vũ, Kiếm Tôn khung xe, Phong Trảm, Cuồng Phong) — XONG.
 - ✅ Xe nhỏ (14 body, trừ Bow đã có art riêng) — XONG.
 - ✅ Xe nặng (13 body) — XONG.
-- **Xe hỗ trợ & vật triệu hồi** (money_tank theo cấp, engineer, magnet, sprayer, steel_hook, dj, flower_shadow, thunder; ụ súng, drone, robot Kẻ Sáng Tạo & Thiên Tài, tường…).
+- **Xe hỗ trợ & vật triệu hồi** (bản làm dở: `tools/wip/`) (money_tank theo cấp, engineer, magnet, sprayer, steel_hook, dj, flower_shadow, thunder; ụ súng, drone, robot Kẻ Sáng Tạo & Thiên Tài, tường…).
 - Theo đặc tả `game-tank-art-spec` (khung vuông 32×32, màu đội chỉ làm điểm nhấn, silhouette khác nhau).
 
 ## 3. HUD còn sót

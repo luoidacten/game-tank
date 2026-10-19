@@ -1,0 +1,67 @@
+diff --git a/js/characters/sprayer/render.js b/js/characters/sprayer/render.js
+index 73e8692..3e7161e 100644
+--- a/js/characters/sprayer/render.js
++++ b/js/characters/sprayer/render.js
+@@ -7,18 +7,12 @@ Object.assign(CharHooks.registry.sprayer, {
+         const n = spNozzle(this);
+         const col = SP_CHEM_COLOR[this.spChem] || '#ff6a1a';
+         ctx.save();
+-        // Bình chứa & nòng phun theo màu chất
+-        ctx.fillStyle = col;
+-        ctx.globalAlpha = 0.85;
+-        ctx.fillRect(n.x - 5, n.dirY < 0 ? this.y - 10 : this.y + this.h, 10, 10);
+-        ctx.globalAlpha = 1;
+-        ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.5;
+-        ctx.strokeRect(n.x - 5, n.dirY < 0 ? this.y - 10 : this.y + this.h, 10, 10);
++        // (Bình chứa & vòi phun đổi màu theo chất: vẽ trong art xe - js/render/tank-art/support_summons.js)
+         // Luồng phun hình nón (cắt ngắn tại vật cản)
+         if (this.spOn) {
+             const r = Math.max(8, this.spRange || 0);
+             const half = Math.max(4, spHalfWidth(r, this));
+-            const y0 = n.dirY < 0 ? n.y - 10 : n.y + 10;
++            const y0 = n.y + n.dirY * 1; // miệng vòi nón ở mép trước xe
+             const g = ctx.createLinearGradient(n.x, y0, n.x, y0 + n.dirY * r);
+             g.addColorStop(0, col);
+             g.addColorStop(1, 'rgba(255,255,255,0)');
+diff --git a/js/characters/steel_hook/render.js b/js/characters/steel_hook/render.js
+index 109b782..3ba2590 100644
+--- a/js/characters/steel_hook/render.js
++++ b/js/characters/steel_hook/render.js
+@@ -153,24 +153,7 @@ Object.assign(CharHooks.registry.steel_hook, {
+         const scale = this.hasUpgrade('evo_hook_2') ? 1.5 : 1;
+         const ph = this.shPhase;
+         ctx.save();
+-        // --- Thân xe: tấm thép + tời quay ---
+-        ctx.strokeStyle = 'rgba(213,222,232,0.55)'; ctx.lineWidth = 1;
+-        for (let i = 1; i < 4; i++) { ctx.beginPath(); ctx.moveTo(this.x + 3, this.y + this.h * i / 4); ctx.lineTo(this.x + this.w - 3, this.y + this.h * i / 4); ctx.stroke(); }
+-        const spin = (ph === 'retract' || ph === 'drag' || ph === 'zip') ? Date.now() / 40 : (ph === 'fly' ? -Date.now() / 50 : 0);
+-        ctx.save();
+-        ctx.translate(cx, cy);
+-        ctx.shadowBlur = 8; ctx.shadowColor = SH_GLOW;
+-        ctx.fillStyle = '#1f2833';
+-        ctx.beginPath(); ctx.arc(0, 0, this.w * 0.3, 0, Math.PI * 2); ctx.fill();
+-        ctx.strokeStyle = SH_STEEL; ctx.lineWidth = 2; ctx.stroke();
+-        ctx.rotate(spin);
+-        ctx.lineWidth = 1.5;
+-        for (let i = 0; i < 4; i++) { ctx.rotate(Math.PI / 4); ctx.beginPath(); ctx.moveTo(-this.w * 0.26, 0); ctx.lineTo(this.w * 0.26, 0); ctx.stroke(); }
+-        ctx.fillStyle = SH_GLOW; ctx.beginPath(); ctx.arc(0, 0, 2.5, 0, Math.PI * 2); ctx.fill();
+-        ctx.restore();
+-        // Bệ móc ở mũi xe
+-        ctx.fillStyle = '#3b4756';
+-        ctx.fillRect(cx - 6, fwd < 0 ? this.y - 5 : this.y + this.h, 12, 5);
++        // (Thân xe, tời quay & bệ móc: vẽ trong art xe - js/render/tank-art/support_summons.js)
+ 
+         // --- Quạt ngắm & móc đang lắc ---
+         if (ph === 'ready' || ph === 'cool') {
+diff --git a/js/player/render.js b/js/player/render.js
+index 68fa9c1..be76f49 100644
+--- a/js/player/render.js
++++ b/js/player/render.js
+@@ -315,6 +315,7 @@ Object.assign(Player.prototype, {
+             }
+ 
+             if (b.isMagnetBullet) {
++                if (typeof drawMagnetBulletArt === 'function') { drawMagnetBulletArt(b); return; }
+                 ctx.save();
+                 let isPos = (b.polarity === 1);
+                 ctx.fillStyle = isPos ? "#ff3300" : "#00aaff";
