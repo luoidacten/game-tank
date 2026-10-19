@@ -6,7 +6,7 @@
 ## 2. Đồ họa (đã làm một phần)
 - ✅ Sukuna, Gojo (2 Lãnh Địa), Âm Dương Sư, Chiêu Hồn Sư, Khóa Chết, Cổng Không Gian — XONG.
 - ✅ Kiếm (Kiếm Trận, Kiếm Sư, Kiếm Khách, Kiếm Vũ, Kiếm Tôn khung xe, Phong Trảm, Cuồng Phong) — XONG.
-- **Xe nhỏ** (basic, smg, ghost, sniper, cung, shadow_hunter, creator, genius, shotgun, magician, mirror, paradox, inventor, evolution, customize): hình xe hiện đại + đạn đặc trưng; đạn cường hóa có hình & hoạt ảnh riêng.
+- ✅ Xe nhỏ (14 body, trừ Bow đã có art riêng) — XONG.
 - **Xe nặng** (ice, big_bullet, overload, lazer_charge, lazer_auto, rocket, acid, aaa, tank, six_barrel, furnace, water_gun, shortgunATK): hình xe + đạn nguyên tố / cường hóa riêng.
 - **Xe hỗ trợ & vật triệu hồi** (money_tank theo cấp, engineer, magnet, sprayer, steel_hook, dj, flower_shadow, thunder; ụ súng, drone, robot Kẻ Sáng Tạo & Thiên Tài, tường…).
 - Theo đặc tả `game-tank-art-spec` (khung vuông 32×32, màu đội chỉ làm điểm nhấn, silhouette khác nhau).
