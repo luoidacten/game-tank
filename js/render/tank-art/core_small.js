@@ -874,7 +874,7 @@
     // =====================================================================
     // 15. TÙY BIẾN (customize) — thân lắp ghép từ khối vuông, mô-đun theo lựa chọn
     // =====================================================================
-    const CU_TRAIT_COL = { explosive: '#f97316', piercing: '#a855f7', hitscan: '#ef4444', homing: '#22d3ee', sticky: '#eab308', bounce: '#84cc16' };
+    const CU_TRAIT_COL = { explosive: '#f97316', piercing: '#a855f7', hitscan: '#ef4444', homing: '#22d3ee', sticky: '#eab308', bounce: '#84cc16', crit: '#facc15', leech: '#f43f5e', twin: '#e2e8f0' };
     const cuTraitColor = (t) => CU_TRAIT_COL[t] || ((typeof ZONE_STYLE !== 'undefined' && ZONE_STYLE[t.slice(3)]) || [0, '#ffffff'])[1];
     registerTankArt('customize', (p, k) => {
         const d = p.cuData || { fire: 'tap', bullet: 'round', traits: {}, passive: null };
