@@ -337,7 +337,7 @@ Khi đạt **Full Evo**, bản thân 3 đòn đánh cơ bản (dù bạn chọn 
 * Khi vào trạng thái **Tập Trung phản đạn**, thời gian duy trì tăng từ `1.0s` lên **`1.5s`**, đạn phản ngược lại sẽ **bay tự ngắm thẳng vào kẻ địch với `×1.5` sát thương**, và mỗi viên đạn phản thành công giúp Tsukiyo **hồi `+0.25 HP**`!
 
 
-# 🛡️ HỒ SƠ BODY: KẺ BẤT KHUẤT / PHÁ XIỀNG (`juggernaut` / `unstoppable`)
+# 🛡️ HỒ SƠ BODY: Juggernaut (`juggernaut`)
 
 > *"Đơn giản là miễn nhiễm — ngươi không thể khống chế ta được đâu!"*
 
