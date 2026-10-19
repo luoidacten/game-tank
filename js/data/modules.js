@@ -239,6 +239,15 @@ const MODULES = {
             size: { w: 34, h: 34 },
             stats: { hp: 6, dmg: 1, ammo: 0, speedMult: 0.9 }
         },
+        {
+            id: 'raven_oca',
+            name: 'Raven - Oca',
+            desc: '"Cuộc săn bắt đầu, Oca tìm chúng!" HP:4 | Dame:0.5 (Tiểu Liên) / 4 (Sniper) | Đạn:10 / 4 | Tốc: 3.8. Giữ Bắn 0.4s đổi súng (hồi 4s). TIỂU LIÊN: nhấp xả loạt 3 viên; đổi sang -> lướt ngang. SNIPER: nhấp -> đứng yên ngắm 0.4s rồi bắn đạn cực nhanh; đổi sang -> thả Bom Khói 2s (đứng trong khói né mọi đạn). OCA (máu = 50% Raven, tự hồi sinh): khi cầm Tiểu Liên thì tàng hình, định kỳ lao cắn địch gây dame + làm chậm; khi cầm Sniper thì bay cao đánh dấu radar -> đạn Sniper tự khóa mục tiêu, xuyên vật thể & bay nhanh hơn.',
+            type: 'body',
+            role: ['Đối Đầu', 'Cơ Động', 'Kiểm Soát'],
+            size: { w: 26, h: 26 },
+            stats: { hp: 4, dmg: 0.5, ammo: 10, speedMult: 1.086 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 30 },
