@@ -6,7 +6,6 @@
 
 ## 0. Chỉnh sửa gấp (làm TRƯỚC mục 1)
 - Hoa Ảnh cải thiện hiệu ứng hơn nữa đặc biệt là rút về vị trí cũ (hóa thành 1 tìa sáng hồng ra giật về vị trí cũng) (các hiệu ứng khác cũng mượt và đẹp hơn) (đặc biệt thêm hiệu ứng kết liễu)
-- Phong trảm: lưỡi kiếm gió xấu quá giống cái mong quá (1 hình bán nguyệt xoay tròn thêm hiệu ứng được rồi
 
 ## 1. Body mới ưu tiên (phần Đồ họa đã XONG → làm tiếp mục này)
 Đặc tả đầy đủ: **`docs/BODY_MOI_UU_TIEN.md`**. Làm lần lượt từng body (theo `tools/agents/common.md`), mỗi body xong thì gộp → smoke test → push:
