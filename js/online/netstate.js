@@ -26,6 +26,7 @@ const NET_CLASSES = {
     GeminiTwin,
     BdBatZone, BdLaser, BdOrb,
     BersArena,
+    MagHatRain,
 };
 
 // Biến toàn cục cần đồng bộ: [tên, getter, setter]
