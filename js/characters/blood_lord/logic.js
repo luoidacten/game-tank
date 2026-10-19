@@ -19,10 +19,14 @@ function bdEvo1(p) { return p.hasUpgrade('evo_bd_1'); }
 function bdEvo2(p) { return p.hasUpgrade('evo_bd_2'); }
 function bdFull(p) { return bdEvo1(p) && bdEvo2(p); }
 function bdPow(p) { return bdFull(p) ? 1.5 : (bdEvo2(p) ? 1.25 : 1); }
+const BD_NERF = 0.72; // giảm ~28% sát thương kỹ năng
+function bdDmgMult(p) { return bdPow(p) * BD_NERF; }
 function bdGainMult(p) { return bdFull(p) ? 2 : (bdEvo1(p) ? 1.4 : 1); }
 function bdHpCost(p) { return bdFull(p) ? 0.25 : (bdEvo2(p) ? 0.5 : 1); }
 function bdCalmNeed(p) { return bdFull(p) ? 240 : (bdEvo2(p) ? 360 : 480); }
-function bdRatio(p) { return bdFull(p) ? 1 : (bdEvo2(p) ? 1.5 : 2); }
+function bdRatio(p) { return bdFull(p) ? 2 : (bdEvo2(p) ? 2.5 : 3); }
+// Đủ máu để dùng kỹ năng tốn máu (sau khi trừ vẫn còn >= 0.5 HP)
+function bdHpOk(p) { return p.hp - bdHpCost(p) >= BD_HP_FLOOR - 1e-6; }
 function bdPoolMax(p) { return (p.maxHp || 3) * 2; }
 function bdDir(p) { return p.id === 1 ? -1 : 1; }
 function bdEnemy(p) { return p === p1 ? p2 : p1; }
@@ -82,7 +86,7 @@ function bdHitObject(p, o, dmg) {
 
 // --- Bể Máu ---
 function bdGain(p, amt) {
-    if (!(amt > 0)) return;
+    if (!(amt > 0) || (p.bdGainLock || 0) > 0) return;
     p.bdPool = Math.min(bdPoolMax(p), (p.bdPool || 0) + amt * bdGainMult(p));
 }
 // Hồi máu do chính Huyết Ma (không tính vào tích lũy để tránh vòng lặp)
@@ -172,8 +176,8 @@ class BdBatZone {
                 const d = e.takeDamage(this.dmg, o, { isEnvironmental: true }) || 0;
                 if (e === bdEnemy(o)) hitEnemy = true;
                 if (d > 0) {
-                    bdGain(o, d * 2); // "rất nhiều" Bể Máu
-                    bdHeal(o, this.feast ? 0.1 : 0.05);
+                    if (!this.feast) bdGain(o, d * 2); // "rất nhiều" Bể Máu (Đại Tiệc Máu: chỉ hồi HP)
+                    bdHeal(o, this.feast ? 0.06 : 0.03);
                 }
             }
             for (const ob of bdObjects(o)) {
@@ -186,7 +190,7 @@ class BdBatZone {
         if (--this.life <= 0) {
             this.active = false;
             // Kẻ địch đứng trong Bầy Dơi đủ 2s -> Huyết Ma hồi 2 HP
-            if (!this.feast && o && this.ticksTotal > 0 && this.stayHits >= this.ticksTotal) bdHeal(o, 2, 'HUYẾT YẾN 🦇');
+            if (!this.feast && o && this.ticksTotal > 0 && this.stayHits >= this.ticksTotal) bdHeal(o, 1.5, 'HUYẾT YẾN 🦇');
         }
         void anyIn;
     }
@@ -291,11 +295,15 @@ function bdCast(p, now) {
     if (p.bdNight) { p.bdNight = false; bdSkyStart(p); p.lastShot = now; return; }
     const f = p.bdForm || 0;
     if (p.ammo < BD_AMMO[f]) { bdNoAmmo(p); return; }
+    if ((f === 1 || f === 2) && !bdHpOk(p)) {
+        if ((p.bdWarnCd || 0) <= 0) { addFloatingText(cx, p.y - 14, 'THIẾU MÁU 🩸', '#94a3b8', 11); p.bdWarnCd = 40; }
+        return;
+    }
     p.bdCd = 12;
     p.lastShot = now;
     if (f === 0) {
         p.ammo -= 1;
-        spawnBullet(p, { x: cx - 3.5, w: 7, h: 9, dmg: p.damage * pw, hook: 'bd_blood', isBdBlood: true });
+        spawnBullet(p, { x: cx - 3.5, w: 7, h: 9, dmg: p.damage * (1 + (pw - 1) * 0.5), hook: 'bd_blood', isBdBlood: true });
         bdSfx('playShoot');
     } else if (f === 1) {
         p.ammo -= 2;
@@ -306,7 +314,7 @@ function bdCast(p, now) {
     } else if (f === 2) {
         p.ammo -= 3;
         bdPayHp(p);
-        bodyEffects.push(new BdLaser(p, cx, 1.2 * pw, 24, bdEvo2(p) ? 8 : 6));
+        bodyEffects.push(new BdLaser(p, cx, 1.2 * pw * BD_NERF, 24, bdEvo2(p) ? 8 : 6));
         addFloatingText(cx, p.y - 16, 'HUYẾT TIỄN 🗡️', BD_RED, 12);
     } else {
         const used = Math.max(1, p.ammo);
@@ -316,8 +324,8 @@ function bdCast(p, now) {
         const big = frac >= 0.5;
         const ammoB = 1 + 0.03 * (used - 1);
         const r = big ? 8 + frac * 10 : 5;
-        const dmg = (big ? 0.3 + 0.9 * frac : 0.3) * pw * ammoB;
-        const exDmg = (big ? 0.2 + 0.6 * frac : 0.2) * pw * ammoB;
+        const dmg = (big ? 0.3 + 0.9 * frac : 0.3) * pw * BD_NERF * ammoB;
+        const exDmg = (big ? 0.2 + 0.6 * frac : 0.2) * pw * BD_NERF * ammoB;
         const exR = big ? 40 + 50 * frac : 26;
         const sy = p.id === 1 ? p.y - r : p.y + p.h + r;
         bodyEffects.push(new BdOrb(p, cx, sy, bdDir(p) * (big ? 5 : 6.5), r, dmg, exDmg, exR, big));
@@ -342,7 +350,7 @@ function bdDashUpdate(p) {
     if (!hit) for (const ob of bdObjects(p)) if (rectIntersect(p.x, p.y, p.w, p.h, ob.x, ob.y, ob.w, ob.h)) { hit = ob; break; }
     const farEdge = dir < 0 ? p.y <= 2 : p.y >= canvas.height - p.h - 2;
     if (!hit && !farEdge) return;
-    const pw = bdPow(p);
+    const pw = bdDmgMult(p);
     const cx = p.x + p.w / 2, cy = Math.max(p.h / 2, Math.min(canvas.height - p.h / 2, p.y + p.h / 2));
     if (hit) {
         if (hit === p1 || hit === p2 || bdFoes(p).includes(hit)) {
@@ -408,7 +416,7 @@ function bdSkyLand(p) {
 }
 function bdSkyImpact(p) {
     const c = p.bdCircle;
-    const pw = bdPow(p);
+    const pw = bdDmgMult(p);
     for (const e of bdFoes(p)) {
         if (Math.hypot(e.x + e.w / 2 - c.x, e.y + e.h / 2 - c.y) < c.r + e.w / 2) {
             e.takeDamage(1.0 * pw, p);
@@ -422,10 +430,12 @@ function bdSkyImpact(p) {
     spawnSparkParticles(c.x, c.y, BD_RED, 22);
     triggerScreenShake(8, 12);
     bdSfx('playExplosion');
-    // Nạp đầy Bể Máu + hồi lượng lớn HP
-    p.bdPool = bdPoolMax(p);
-    bdHeal(p, 1.5 * pw, 'HP 🩸');
-    bdReturn(p, c.x - p.w / 2);
+    // Chỉ hồi HP (không nạp Bể Máu). Khóa tích Bể Máu 5s (Full Evo: chỉ trong lúc Đại Tiệc diễn ra)
+    bdHeal(p, 1.0 * bdPow(p), 'HP 🩸');
+    p.bdGainLock = bdFull(p) ? 180 : 300;
+    // Huyết Ma hóa thành Đại Tiệc Máu (ẩn, không thể bị nhắm) tới khi vùng tan rồi về chỗ cũ
+    p.bdCircle = null;
+    p.bdMode = 'swarm'; p.bdSwarmT = 180;
 }
 
 // ==========================================
@@ -441,13 +451,14 @@ CharHooks.register('blood_lord', {
         this.bdCd = 0; this.bdWarnCd = 0; this.bdCalm = 0; this.bdNight = false;
         this.bdMode = 'idle'; this.bdHomeX = 0; this.bdCircle = null; this.bdSwarmT = 0; this.bdTrail = [];
         this.bdLastHp = undefined; this.bdLastEnemyHp = undefined; this.bdTick = 0;
-        this.bdEscUsed = false;
+        this.bdEscUsed = false; this.bdGainLock = 0;
         if (!(gameState.round > 1) || this.bdRevived === undefined) this.bdRevived = false;
     },
     update(inp, effInp, now) {
         this.bdTick++;
         if (this.bdCd > 0) this.bdCd--;
         if (this.bdWarnCd > 0) this.bdWarnCd--;
+        if (this.bdGainLock > 0) this.bdGainLock--;
         bdTrack(this);
         // Chuyển hóa Bể Máu -> HP sau thời gian yên ổn
         this.bdCalm++;

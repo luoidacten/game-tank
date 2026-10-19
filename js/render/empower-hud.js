@@ -10,6 +10,7 @@
 //     pips?: n, pipMax?: m, pipColor? -> chấm nhỏ quanh vòng (vd. số giáo đang có)
 //     icon?: tên biểu tượng vector (HUD_GLYPH trong js/render/tank-hud.js) vẽ giữa vòng
 //     btnIcon?: ký tự/emoji hiển thị giữa nút Bắn (chế độ / kiểu bắn hiện tại)
+//     dim?: true -> nút Bắn xám (đòn hiện tại chưa dùng được, vd. thiếu máu)
 //   }
 // Mọi trường mới đều tuỳ chọn -> provider cũ vẫn chạy như trước.
 // - Trên sân: vòng nạp nhỏ bên phải xe; sẵn sàng -> viền nét đứt quanh xe + mũi tên trên nòng.
@@ -186,6 +187,7 @@ function empLocalButtons() {
 }
 function empClearButton(el) {
     el.classList.remove('emp-on', 'emp-ready', 'emp-has-icon');
+    el.style.filter = '';
     el.querySelectorAll('.emp-ring,.emp-spin,.emp-badge,.emp-icon').forEach(x => x.remove());
 }
 function updateEmpowerButtons() {
@@ -193,7 +195,7 @@ function updateEmpowerButtons() {
         const el = document.querySelector(sel);
         if (!el) return;
         const s = empowerStateOf(p);
-        const key = s ? `${s.ready ? 1 : 0}|${Math.round(s.pct * 40)}|${s.label}|${s.color}|${s.count || 0}|${s.btnIcon || ''}` : '';
+        const key = s ? `${s.ready ? 1 : 0}|${Math.round(s.pct * 40)}|${s.label}|${s.color}|${s.count || 0}|${s.btnIcon || ''}|${s.dim ? 1 : 0}` : '';
         if (empBtnCache[sel] === key) return;
         empBtnCache[sel] = key;
         if (!s) { empClearButton(el); return; }
@@ -207,6 +209,7 @@ function updateEmpowerButtons() {
         el.classList.toggle('emp-has-icon', !!s.btnIcon);
         el.style.setProperty('--emp-pct', (s.pct * 100).toFixed(1) + '%');
         el.style.setProperty('--emp-color', s.color);
+        el.style.filter = s.dim ? 'grayscale(1) brightness(0.65)' : '';
         badge.textContent = (s.label || '') + (s.count > 1 ? ' x' + s.count : '');
         badge.style.display = s.label ? '' : 'none';
         const ic = el.querySelector('.emp-icon');

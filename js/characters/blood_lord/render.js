@@ -343,13 +343,16 @@ function bdRegisterHUD() {
     registerEmpowerHUD('blood_lord', p => {
         const max = bdPoolMax(p), pool = p.bdPool || 0, pct = Math.min(1, pool / max);
         const pips = { pips: Math.max(0, Math.floor(p.ammo || 0)), pipMax: 6, pipColor: '#ffd0da' };
+        if (p.bdMode === 'swarm' && p.bdGainLock > 0 && !p.bdTrail?.length) return Object.assign({ pct: 1, ready: false, color: BD_VIOLET, btnIcon: '🦇', label: 'ĐẠI TIỆC MÁU' }, pips);
         if (p.bdMode === 'sky') return Object.assign({ pct: 1, ready: true, color: BD_VIOLET, btnIcon: '🦇', label: 'ĐÁP ▼' }, pips);
         if (p.bdNight) return Object.assign({ pct: 1, ready: true, color: BD_VIOLET, btnIcon: '🦇', label: 'BÓNG MA MÀN ĐÊM' }, pips);
         const f = p.bdForm || 0;
         const ready = f === 3 && pct >= 0.5;
+        const noHp = (f === 1 || f === 2) && !bdHpOk(p);
+        const noAmmo = (p.ammo || 0) < BD_AMMO[f];
         return Object.assign({
-            pct, ready, color: COL[f], btnIcon: BD_ICON[f],
-            label: `${BD_NAME[f]} · ${pool.toFixed(1)}/${max}`, idle: !ready,
+            pct, ready, color: noHp ? '#64748b' : COL[f], btnIcon: BD_ICON[f], dim: noHp || noAmmo,
+            label: noHp ? 'THIẾU MÁU' : `${BD_NAME[f]} · ${pool.toFixed(1)}/${max}`, idle: !ready,
         }, pips);
     });
 }
