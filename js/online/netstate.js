@@ -24,6 +24,7 @@ const NET_CLASSES = {
     CnRing, CnRadar, CnEcho,
     BgLightSword, BgDarkHover, BgBlackHole, BgGuardian, BgSkySword,
     GeminiTwin,
+    BdBatZone, BdLaser, BdOrb,
 };
 
 // Biến toàn cục cần đồng bộ: [tên, getter, setter]
