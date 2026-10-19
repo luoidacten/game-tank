@@ -172,7 +172,7 @@ const MODULES = {
         {
             id: 'customize',
             name: 'Tùy Biến',
-            desc: 'HP:6 | Dame:1.5 | Đạn:1. Xe lắp ghép: mỗi hiệp nhận Điểm Tùy Chỉnh để lắp Lối Bắn, Dạng Đạn, Tính Chất Đạn, Kích Thước. Thua liên tiếp nhận thêm điểm.',
+            desc: 'HP:6 | Dame:1.5. Xe lắp ghép: mỗi hiệp nhận 2+ Điểm Tùy Chỉnh (thua / chuỗi thua nhận thêm) để lắp & nâng cấp Lối Bắn (Tap, Loạt, Shotgun, SMG, Tích Tụ, Tiến Công), Dạng Đạn, Tính Chất (Nổ, Xuyên, Chí Mạng, Hút Máu, Song Nòng, Vũng...), Kích Thước và Chỉ Số nâng mãi.',
             type: 'body', role: ['Đối Đầu', 'Sinh Tồn'],
             size: { w: 30, h: 30 },
             stats: { hp: 6, dmg: 1.5, ammo: 1, speedMult: 1.0 }

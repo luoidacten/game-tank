@@ -116,4 +116,14 @@
         if (typeof FS_ICON === 'undefined' || p.fsHidden) return null;
         return { idle: true, pct: Math.max(0, Math.min(1, (p.fsHoa || 0) / 100)), ready: !!p.fsEmpowered, color: '#ff7eb6', label: '', btnIcon: FS_ICON[p.fsDance || 0] };
     });
+
+    // Tùy Biến: vòng tụ lực (Tích Tụ) / hồi lao (Tiến Công) + biểu tượng lối bắn trên nút Bắn
+    reg('customize', p => {
+        const d = p.cuData;
+        if (!d || !d.lv || typeof CU_PART_BY_ID === 'undefined') return null;
+        const icon = (CU_PART_BY_ID[d.fire] || {}).icon || '';
+        if (d.fire === 'charge' && p.cuCharge > 0) { const full = 90 - 15 * d.lv.fire, pct = Math.min(1, p.cuCharge / full); return { pct, ready: pct >= 1, color: '#fbbf24', label: pct >= 1 ? 'TỤ ĐẦY' : 'TÍCH TỤ', btnIcon: icon }; }
+        if (d.fire === 'ram' && p.cuDashCd > 0) { const max = 150 - 25 * d.lv.fire; return { pct: 1 - p.cuDashCd / max, ready: false, color: '#ff5722', label: 'TIẾN CÔNG', btnIcon: icon }; }
+        return { idle: true, pct: 0, ready: false, color: '#f59e0b', label: '', btnIcon: icon };
+    });
 })();

@@ -181,8 +181,8 @@ const EVOLUTIONS = {
         { id: 'evo_spray_2', name: 'Dấu Vết Độc Địa', desc: 'Lớp phủ bám lâu hơn. Phun liên tục để lại vũng Lửa/Axit/Băng 3s. FULL EVO: phun cùng lúc cả 3 chất, góc phun rộng hơn, phun lâu hơn; Nổ 7 dmg lan, Axit ăn mòn x2 & câm thêm 1s, Đóng băng 2.5s.', cost: 110, type: 'evo' }
     ],
     customize: [
-        { id: 'evo_cu_1', name: 'Gói VIP', desc: 'Mở thêm mô-đun: Đạn Tự Ngắm, Đạn Hút (kéo đối thủ), Nảy Tường (+sát thương mỗi lần nảy).', cost: 80, type: 'evo' },
-        { id: 'evo_cu_2', name: 'Cá Nhân Hóa', desc: 'Mọi hiệu ứng lắp ghép mạnh hơn 30%. +1 Điểm Tùy Chỉnh mỗi hiệp. FULL EVO: chọn 1 Nội Tại Độc Quyền.', cost: 110, type: 'evo' }
+        { id: 'evo_cu_1', name: 'Gói VIP', desc: 'Mọi mô-đun đã lắp lên +1 cấp ngay, +2 Điểm Tùy Chỉnh, cấp tối đa +1. Mở mô-đun VIP: Tự Ngắm, Đạn Hút (kéo & làm chậm), Nảy Tường (bắn chéo, +dame mỗi lần nảy).', cost: 80, type: 'evo' },
+        { id: 'evo_cu_2', name: 'Cá Nhân Hóa', desc: 'Nổ, Vũng, Hút Máu, Đạn Hút, Nảy Tường, Tiến Công mạnh hơn 30%. +1 Điểm Tùy Chỉnh mỗi hiệp. FULL EVO: chọn miễn phí 1 Nội Tại Độc Quyền (Hồi Sinh, Vô Ảnh, Tập Trung, Phản Lực).', cost: 110, type: 'evo' }
     ],
     kiem_su: [
         { id: 'evo_ks_1', name: 'Điều Tức Chuyển Khí', desc: 'Cường hóa mọi nguyên tố. Giữ Bắn 0.25s: đổi chỗ viên đạn hiện tại và viên kế tiếp (trùng màu thì tự đổi màu).', cost: 90, type: 'evo' },
