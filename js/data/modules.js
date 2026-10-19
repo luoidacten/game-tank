@@ -248,6 +248,22 @@ const MODULES = {
             size: { w: 26, h: 26 },
             stats: { hp: 4, dmg: 0.5, ammo: 10, speedMult: 1.086 }
         },
+        {
+            id: 'lazer_beam',
+            name: 'Tia Lazer',
+            desc: 'HP:3 | Dame:0.2/tick (6 tick/s) | Năng Lượng | Tốc: 3.8. Giữ Bắn: tích tụ 0.5s -> cảnh báo 0.5s -> chiếu tia liên tục (chậm khi chiếu, tụt Năng Lượng; nghỉ 0.5s mới hồi). Tường Sniper địch chặn tia.',
+            type: 'body', role: ['Đối Đầu'],
+            size: { w: 28, h: 28 },
+            stats: { hp: 3, dmg: 0.2, ammo: 0, speedMult: 1.086 }
+        },
+        {
+            id: 'healer',
+            name: 'Y Sư',
+            desc: 'HP:5 | Dame:0.75 | Đạn:4 | Tốc: 3.5. "Hồi Phục": 3s không mất máu +0.5 HP. Đạn Hấp Huyết +0.25 HP (hồi 20s). Mọi lượng máu được hồi nạp Năng Lượng Sinh Mệnh -> đầy: phát kế tiếp là Đạn Cường Hóa (50% MaxHP + dame, nổ lan).',
+            type: 'body', role: ['Sinh Tồn', 'Kiểm Soát'],
+            size: { w: 30, h: 30 },
+            stats: { hp: 5, dmg: 0.75, ammo: 4, speedMult: 1.0 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 30 },

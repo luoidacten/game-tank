@@ -216,4 +216,12 @@ const EVOLUTIONS = {
         { id: 'evo_raven_1', name: 'Chiến Thuật Đặc Nhiệm', desc: 'Đạn Răng Cưa: mọi viên đạn (cả 2 súng) gây Chảy Máu. Khói Đặc Quánh: Bom Khói +2s (4s). Bộ Pháp Xung Kích: cầm Tiểu Liên tăng mạnh tốc độ. Thay Đạn Tức Thì: đổi súng là nạp đầy băng súng mới.', cost: 100, type: 'evo' },
         { id: 'evo_raven_2', name: 'Hỏa Lực Không Kích', desc: 'Oca máu 80% Raven & định kỳ hiện vòng cảnh báo đỏ rồi thả Bom xuống địch. Tiểu Liên xả loạt 5 viên, băng 15. Sniper bay nhanh hơn, mạnh hơn & gây Trọng Thương: máu bị mất do Sniper không thể hồi trong 10s. FULL EVO: Oca Bất Tử (không bị tiêu diệt, không chặn đạn), đổi súng hồi 2s, Oca vừa lao cắn làm chậm vừa thả mưa bom liên hoàn vừa giữ khóa mục tiêu vĩnh viễn cho cả 2 súng.', cost: 120, type: 'evo' }
     ],
+    lazer_beam: [
+        { id: 'evo_beam_1', name: 'Năng Lượng Xanh', desc: 'Tích tụ khởi động chỉ 0.125s. Chiếu tia tiêu hao chậm hơn, hồi Năng Lượng nhanh hơn.', cost: 40, type: 'evo' },
+        { id: 'evo_beam_2', name: 'Khuếch Đại Nhiệt Quang', desc: 'Tia phình rộng dần khi chiếu lâu. Trúng liên tục -> sát thương tăng tiến (tới x2.5) & Thiêu Đốt. FULL EVO: Quá Tải Quang Học — không còn giảm tốc khi chiếu; mỗi 2s chiếu liên tục phóng thêm 1 Tia Bùng Nổ (1.5 dmg).', cost: 90, type: 'evo' }
+    ],
+    healer: [
+        { id: 'evo_heal_1', name: 'Hồi Phục Vượt Ngưỡng', desc: 'Đầy máu: lượng hồi dư chuyển thành Giáp Trắng (tối đa 4 + 50% MaxHP), đỡ đòn trước máu. Đạn Cường Hóa mạnh hơn (65% MaxHP, nổ lan 30%).', cost: 90, type: 'evo' },
+        { id: 'evo_heal_2', name: 'Nghịch Lý Y Đạo', desc: 'Mỗi lần được hồi máu (mọi nguồn, kể cả vào Giáp Trắng) phóng 1 Tia Xung tự ngắm gây dame = lượng vừa hồi. Giảm Năng Lượng cần cho Đạn Cường Hóa. FULL EVO: Bất Tử Y Thần — Tái Tạo nhanh gấp đôi (1.5s); đạn gắn ấn Kháng Hồi Phục 5s: địch hồi máu bị cướp sang bạn; Đạn Cường Hóa = 100% MaxHP + dame.', cost: 110, type: 'evo' }
+    ],
 };

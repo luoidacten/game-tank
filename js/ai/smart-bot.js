@@ -29,6 +29,7 @@ const BOT_FIRE_STYLE = {
     dj: 'beat',
 };
 BOT_FIRE_STYLE.steel_hook = 'hold:30'; // Móc Thép: tụ 1 mốc rồi nhả; nhấp lại để kích hoạt giai đoạn 2
+BOT_FIRE_STYLE.lazer_beam = 'stream'; // Tia Lazer: giữ liên tục khi thẳng hàng
 
 const BOT_CRATE_VALUE = { coin: 0.7, hp: 0.6, ammo: 0.45, shield: 0.85, dmg: 0.75, gear: 0.5, boom: -2, bullets: -0.4 };
 
