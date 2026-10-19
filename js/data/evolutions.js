@@ -129,7 +129,7 @@ const EVOLUTIONS = {
         { id: 'evo_paradox_2', name: 'Nghịch Đảo', type: 'evo', desc: 'Hồi chiêu Tua Ngược còn 10s. Kéo địch về gây Làm Chậm. Đủ 2 Evo: Kéo địch về Bóng 5s (Choáng 0.5s) hoặc Bóng Đứng (Choáng 1.5s, 2 hit tạo bóng).', cost: 120 }
     ],
     magician: [
-        { id: 'evo_mag_1', name: 'Hoán Đổi Chủ Động', type: 'evo', desc: 'Giữ bắn 1s: Tàng hình & Đổi vị trí với Phân ảnh. Đổi với bóng Đứng: Bóng tự đi. Đổi bóng Đi: Cả hai tăng tốc. Đủ 2 Evo: Thoát Chết 2 lần/hiệp.', cost: 100 },
+        { id: 'evo_mag_1', name: 'Hoán Đổi Chủ Động', type: 'evo', desc: 'Giữ bắn 1s: Tàng hình & Đổi vị trí với Phân ảnh (+1 Khiên, dùng chung hồi chiêu 10s với Phân Ảnh). Đổi với bóng Đứng: Bóng tự đi. Đổi bóng Đi: Cả hai tăng tốc. Đủ 2 Evo: Thoát Chết 2 lần/hiệp.', cost: 100 },
         { id: 'evo_mag_2', name: 'Loạn Ảnh & Suy Yếu', type: 'evo', desc: 'Bắn trúng +1, Địch phá bóng +3 stack Suy Yếu (Nhận thêm dame). Đủ 3 stack: Địch bị Slow. Đạn trúng địch gây Loạn Phím. Đủ 2 Evo: Thoát Chết 2 lần/hiệp.', cost: 120 }
     ],
     inventor: [

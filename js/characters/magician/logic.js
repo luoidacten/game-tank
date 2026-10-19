@@ -250,7 +250,8 @@ Object.assign(Player.prototype, {
                 } else {
                     if (this.magicianCharge > 0) {
                         // MỐC 3 (EVO 1): HOÁN ĐỔI CHỦ ĐỘNG (Giữ > 60 frames ~ 1s)
-                        if (this.magicianCharge >= 60 && hasEvo1 && this.illusions.length > 0) {
+                        if (this.magicianCharge >= 60 && hasEvo1 && this.illusions.length > 0 && this.magCloneCd <= 0) {
+                            this.magCloneCd = MAG_CLONE_CD; // dùng chung hồi chiêu 10s với Phân Ảnh
                             let targetIllusion = this.illusions[0]; // First in, first out
 
                             // Hoán đổi vị trí
