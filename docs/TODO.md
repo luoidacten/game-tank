@@ -4,6 +4,12 @@
 > Thứ tự = thứ tự ưu tiên. Mỗi lần chỉ làm 1 mục để tiết kiệm token.
 > Phiên mới: đọc `docs/HANDOVER.md` trước (công cụ test ở `tools/`).
 
+## 0. Chỉnh sửa gấp (làm TRƯỚC mục 1)
+- Nhà Phát Minh: drone chưa có art mới.
+- Cổng Không Gian: skill mở Cổng Bắn có CD 5s, giới hạn số cổng, chỉ mở bên sân mình (đối thủ né được); tăng giá Evo 2.
+- Cuồng Chiến Binh: thêm thanh Nhiệt — sấy/bắn nhanh & nhiều thì nóng, quá nhiệt phải nghỉ.
+- Nhà Ảo Thuật: tạo phân thân có khiên CD riêng 10s; Thoát Chết dịch chuyển chỗ khác, để lại 1 phân thân (1 lần/hiệp, Full Evo 2 lần); hiệu ứng mũ ảo thuật rơi từ trời khi phân thân & thoát chết.
+
 ## 1. Body mới ưu tiên (phần Đồ họa đã XONG → làm tiếp mục này)
 Đặc tả đầy đủ: **`docs/BODY_MOI_UU_TIEN.md`**. Làm lần lượt từng body (theo `tools/agents/common.md`), mỗi body xong thì gộp → smoke test → push:
 - Kazuki (`kazuki`) — song kiếm, nhịp A/B → Kiếm Thế Quyết, Nghịch Trảm, Ý Niệm & Kiếm Ý.
