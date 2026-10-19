@@ -420,8 +420,9 @@ Object.assign(Player.prototype, {
                 ratio = Math.min(1, (this.stanceSwordsAccumulated || 0) / 8);
             }
             else if (this.weapon === 'tank') {
-                barColor = "#e67e22";
-                ratio = 1;
+                // Thanh = hồi chiêu lao húc (đầy = sẵn sàng)
+                barColor = ((this.tankDashCooldown || 0) > 0 || this.dashState > 0) ? "#7f5a3a" : "#e67e22";
+                ratio = this.dashState > 0 ? 0 : 1 - (this.tankDashCooldown || 0) / 120;
             }
             else if (this.weapon === 'storm') {
                 barColor = "#2ecc71";

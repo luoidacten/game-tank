@@ -5,6 +5,7 @@
 Object.assign(Player.prototype, {
     checkDashCollision() {
         let hitSomething = false;
+        let hitCrateOnly = false; // [MỚI] Tông hòm tiếp tế không bị phản chấn mất máu/khiên
         const enemy = (this.id === 1) ? p2 : p1;
 
         // 1. Va chạm Người chơi (Địch)
@@ -79,6 +80,7 @@ Object.assign(Player.prototype, {
                 if (c.active && rectIntersect(this.x, this.y, this.w, this.h, c.x, c.y, c.w, c.h)) {
                     c.active = false; // Phá hủy hòm ngay lập tức
                     hitSomething = true;
+                    hitCrateOnly = true;
 
                     crateOnBreak(c, this);
 
@@ -186,7 +188,7 @@ Object.assign(Player.prototype, {
                 iceZones.push(new IceZone(this.x + this.w / 2, this.y + this.h / 2, 60, 300, this));
             }
 
-            if (!this.hasUpgrade('evo_tank_1')) {
+            if (!this.hasUpgrade('evo_tank_1') && !hitCrateOnly) {
                 if (this.shield > 0) this.shield = 0;
                 else this.hp -= 3;
             }
@@ -197,16 +199,21 @@ Object.assign(Player.prototype, {
         return false;
     },
 
+    // Thời gian hồi 1 khiên nội tại (tick)
+    tankShieldLimit() {
+        return (this.hasUpgrade('evo_tank_1') && this.hasUpgrade('evo_tank_2')) ? 120 : (this.hasUpgrade('evo_tank_2') ? 240 : 360);
+    },
+
     // [setupForNewRound] Xe TANK
     setupTank() {
         if (this.weapon === 'tank') {
-            this.speed *= 0.7; // Giảm tốc độ di chuyển thường
+            this.speed *= 0.95; // [ĐỔI] Di chuyển nhanh hơn (trước: x0.7)
             this.dashState = 0;
             this.dashStartY = 0;
             this.passiveShieldTimer = 0;
 
             // Tính Dash Speed dựa trên Speed cuối cùng (sau khi đã cộng Feet)
-            this.dashSpeed = 16 + (this.speed - (C.baseSpeed * 0.7)) * 2;
+            this.dashSpeed = 16 + (this.speed - (C.baseSpeed * 0.95)) * 2;
 
             // Full Evo Tank Bonus
             if (this.hasUpgrade('evo_tank_1') && this.hasUpgrade('evo_tank_2')) {
@@ -221,7 +228,7 @@ Object.assign(Player.prototype, {
         if (this.weapon === 'tank') {
             if ((this.tankDashCooldown || 0) > 0 && this.dashState === 0) this.tankDashCooldown--;
             this.passiveShieldTimer++;
-            let shieldLimit = (this.hasUpgrade('evo_tank_1') && this.hasUpgrade('evo_tank_2')) ? 120 : (this.hasUpgrade('evo_tank_2') ? 240 : 360);
+            let shieldLimit = this.tankShieldLimit();
             if (this.passiveShieldTimer >= shieldLimit) {
                 this.shield++;
                 this.passiveShieldTimer = 0;

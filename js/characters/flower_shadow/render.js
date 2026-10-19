@@ -73,17 +73,17 @@ function fsDrawSlash(cx, cy, R, rot, k, col = FS_PINK, width = 0.2) {
     ctx.restore();
 }
 
-// Cánh hoa cường hóa: vàng kim + hào quang tia sáng 4 cánh (xuyên vật cản)
+// Cánh hoa cường hóa: hồng nhạt + ánh kim vàng mờ lấp lánh (xuyên vật cản, không thể phá)
 function fsDrawEmpPetal(x, y, s, rot, alpha, age) {
     ctx.save();
     ctx.globalAlpha *= alpha;
     ctx.globalCompositeOperation = 'lighter';
     const pulse = 0.75 + 0.25 * Math.sin(age * 0.3);
     const halo = ctx.createRadialGradient(x, y, 0, x, y, s * 2.4);
-    halo.addColorStop(0, 'rgba(255, 230, 140, 0.55)'); halo.addColorStop(1, 'rgba(255, 200, 60, 0)');
+    halo.addColorStop(0, 'rgba(255, 196, 222, 0.5)'); halo.addColorStop(0.6, 'rgba(255, 225, 150, 0.12)'); halo.addColorStop(1, 'rgba(255, 210, 120, 0)');
     ctx.fillStyle = halo;
     ctx.beginPath(); ctx.arc(x, y, s * 2.4, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = `rgba(255, 246, 200, ${0.8 * pulse})`; ctx.lineWidth = 1.2;
+    ctx.strokeStyle = `rgba(255, 228, 160, ${0.35 * pulse})`; ctx.lineWidth = 1;
     const L = s * 2.6 * pulse, a = age * 0.08;
     ctx.beginPath();
     for (let i = 0; i < 4; i++) {
@@ -93,7 +93,7 @@ function fsDrawEmpPetal(x, y, s, rot, alpha, age) {
     }
     ctx.stroke();
     ctx.restore();
-    fsDrawPetal(x, y, s, rot, alpha, true, FS_EMP_GOLD, FS_EMP_LIGHT);
+    fsDrawPetal(x, y, s, rot, alpha, true, FS_EMP_PINK, FS_EMP_PINK_LIGHT);
 }
 
 function fsDrawPetalEntity(p) {
@@ -105,16 +105,16 @@ function fsDrawPetalEntity(p) {
     const tr = p.trail || [];
     for (let i = 2; i < tr.length; i += 2) {
         ctx.globalAlpha = alpha * (p.emp ? 0.4 : 0.28) * (1 - i / tr.length);
-        ctx.fillStyle = p.emp ? FS_EMP_GOLD : FS_PINK;
+        ctx.fillStyle = p.emp ? FS_EMP_PINK : FS_PINK;
         ctx.beginPath(); ctx.arc(tr[i], tr[i + 1], p.r * (1 - i / tr.length) * 0.8, 0, Math.PI * 2); ctx.fill();
     }
     ctx.globalAlpha = 1;
     if (p.fade > 0) {
         // Vỡ / bị đè nát: cánh hoa tan dần & rơi vụn
         const k = p.fade / 20;
-        fsDrawPetal(p.x, p.y, p.r * (1.1 - 0.5 * k), p.rot, alpha * 0.9, false, p.emp ? FS_EMP_GOLD : FS_PINK);
+        fsDrawPetal(p.x, p.y, p.r * (1.1 - 0.5 * k), p.rot, alpha * 0.9, false, p.emp ? FS_EMP_PINK : FS_PINK);
         ctx.globalAlpha = alpha;
-        ctx.fillStyle = p.emp ? FS_EMP_LIGHT : FS_LIGHT;
+        ctx.fillStyle = p.emp ? FS_EMP_PINK_LIGHT : FS_LIGHT;
         for (let i = 0; i < 4; i++) {
             const a = i * 1.57 + p.rot;
             ctx.beginPath(); ctx.arc(p.x + Math.cos(a) * 12 * k, p.y + Math.sin(a) * 12 * k, 1.5, 0, Math.PI * 2); ctx.fill();
