@@ -208,6 +208,8 @@ function renderFrame() {
 
     // Lớp phủ Lãnh địa & ấn Ràng Buộc - js/render/tank-art/curse.js
     if (typeof curseFxOver === 'function') curseFxOver();
+    // Lớp phủ kết liễu Hoa Ảnh (chớp màn hình, nhát chém ngang) - js/characters/flower_shadow/render.js
+    if (typeof fsFxOver === 'function') fsFxOver();
 
     // Particles & Floating Numbers
     updateAndDrawParticles();

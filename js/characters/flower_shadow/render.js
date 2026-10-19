@@ -70,7 +70,18 @@ function fsDrawSlash(cx, cy, R, rot, k, col = FS_PINK, width = 0.2) {
     ctx.shadowBlur = 0;
     ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 1.4;
     ctx.beginPath(); ctx.arc(0, 0, R * (1 - width * 0.35), Math.max(tail, head - 0.9), head); ctx.stroke();
+    // Vệt dư mảnh bên ngoài
+    ctx.strokeStyle = 'rgba(255,214,232,0.45)'; ctx.lineWidth = 0.8;
+    ctx.beginPath(); ctx.arc(0, 0, R * 1.08, Math.max(a0, head - 1.2), Math.max(a0, head - 0.1)); ctx.stroke();
     ctx.restore();
+    // Cánh hoa vụn bắn ra từ mũi chém
+    if (k > 0.15) {
+        const sp = (k - 0.15) * R * 0.5;
+        for (let i = 0; i < 2; i++) {
+            const ha = head + rot + 0.25 + i * 0.35, rr = R + sp * (1 + i);
+            fsDrawPetal(cx + Math.cos(ha) * rr, cy + Math.sin(ha) * rr, 2.4, ha + k * 4, fade * 0.85, false, col);
+        }
+    }
 }
 
 // Cánh hoa cường hóa: hồng nhạt + ánh kim vàng mờ lấp lánh (xuyên vật cản, không thể phá)
@@ -103,10 +114,20 @@ function fsDrawPetalEntity(p) {
     ctx.save();
     // Vệt bay
     const tr = p.trail || [];
-    for (let i = 2; i < tr.length; i += 2) {
-        ctx.globalAlpha = alpha * (p.emp ? 0.4 : 0.28) * (1 - i / tr.length);
-        ctx.fillStyle = p.emp ? FS_EMP_PINK : FS_PINK;
-        ctx.beginPath(); ctx.arc(tr[i], tr[i + 1], p.r * (1 - i / tr.length) * 0.8, 0, Math.PI * 2); ctx.fill();
+    if (tr.length >= 4) {
+        // Dải sáng thon dần theo đường bay
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.lineCap = 'round';
+        let px = p.x, py = p.y;
+        for (let i = 0; i < tr.length; i += 2) {
+            const f = 1 - i / tr.length;
+            ctx.globalAlpha = alpha * (p.emp ? 0.55 : 0.4) * f;
+            ctx.strokeStyle = p.emp ? FS_EMP_PINK : FS_PINK;
+            ctx.lineWidth = p.r * 1.3 * f + 0.5;
+            ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(tr[i], tr[i + 1]); ctx.stroke();
+            px = tr[i]; py = tr[i + 1];
+        }
+        ctx.globalCompositeOperation = 'source-over';
     }
     ctx.globalAlpha = 1;
     if (p.fade > 0) {
@@ -341,10 +362,16 @@ function fsDrawThienCircle(p) {
     g.addColorStop(1, 'rgba(255, 61, 139, 0.22)');
     ctx.fillStyle = g;
     ctx.beginPath(); ctx.arc(c.x, c.y, R, 0, Math.PI * 2); ctx.fill();
+    // Quầng ngoài phập phồng
+    const halo = ctx.createRadialGradient(c.x, c.y, R * 0.85, c.x, c.y, R * 1.35);
+    halo.addColorStop(0, `rgba(255,61,139,${0.18 + 0.08 * Math.sin(t * 0.15)})`); halo.addColorStop(1, 'rgba(255,61,139,0)');
+    ctx.fillStyle = halo; ctx.beginPath(); ctx.arc(c.x, c.y, R * 1.35, 0, Math.PI * 2); ctx.fill();
     ctx.strokeStyle = '#ff4d8d'; ctx.lineWidth = 2;
+    ctx.shadowBlur = 10; ctx.shadowColor = FS_DEEP;
     ctx.setLineDash([10, 6]); ctx.lineDashOffset = -t * 0.8;
     ctx.beginPath(); ctx.arc(c.x, c.y, R, 0, Math.PI * 2); ctx.stroke();
     ctx.setLineDash([]);
+    ctx.shadowBlur = 0;
     // Thời gian còn lại
     ctx.strokeStyle = 'rgba(255, 214, 232, 0.85)'; ctx.lineWidth = 3;
     ctx.beginPath(); ctx.arc(c.x, c.y, R + 5, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (1 - t / c.max)); ctx.stroke();
@@ -371,6 +398,224 @@ function fsDrawPetalRain(p) {
     ctx.restore();
 }
 
+// ==========================================
+// Vệt sáng / bùng nở / kết liễu
+// ==========================================
+function fsEaseOut(k) { return 1 - Math.pow(1 - k, 3); }
+function fsEaseBack(k) { const c = 1.9; return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2); }
+
+// Sao chổi sáng hồng: đuôi (x1,y1) thon dần -> đầu (x2,y2) tròn rực
+function fsDrawLightStreak(x1, y1, x2, y2, w, alpha = 1) {
+    const L = Math.hypot(x2 - x1, y2 - y1);
+    if (alpha <= 0) return;
+    ctx.save();
+    ctx.translate(x2, y2); ctx.rotate(Math.atan2(y2 - y1, x2 - x1));
+    ctx.globalAlpha *= alpha;
+    ctx.globalCompositeOperation = 'lighter';
+    const shape = (ww) => {
+        ctx.beginPath();
+        ctx.moveTo(-L, 0);
+        ctx.quadraticCurveTo(-L * 0.35, -ww, 0, -ww);
+        ctx.arc(0, 0, ww, -Math.PI / 2, Math.PI / 2);
+        ctx.quadraticCurveTo(-L * 0.35, ww, -L, 0);
+        ctx.closePath();
+    };
+    if (L > 1) {
+        const g = ctx.createLinearGradient(-L, 0, 0, 0);
+        g.addColorStop(0, 'rgba(255,61,139,0)'); g.addColorStop(0.55, 'rgba(255,61,139,0.32)'); g.addColorStop(1, 'rgba(255,126,182,0.8)');
+        ctx.fillStyle = g; shape(w); ctx.fill();
+        const g2 = ctx.createLinearGradient(-L, 0, 0, 0);
+        g2.addColorStop(0, 'rgba(255,214,232,0)'); g2.addColorStop(0.7, 'rgba(255,230,242,0.7)'); g2.addColorStop(1, '#ffffff');
+        ctx.fillStyle = g2; shape(w * 0.38); ctx.fill();
+    }
+    const hg = ctx.createRadialGradient(0, 0, 0, 0, 0, w * 1.9);
+    hg.addColorStop(0, 'rgba(255,255,255,1)'); hg.addColorStop(0.3, 'rgba(255,214,232,0.75)'); hg.addColorStop(1, 'rgba(255,61,139,0)');
+    ctx.fillStyle = hg;
+    ctx.beginPath(); ctx.arc(0, 0, w * 1.9, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+}
+
+function fsDrawStreak(s) {
+    const D = s.dur, t = s.t;
+    const dx = s.x2 - s.x1, dy = s.y2 - s.y1;
+    const at = (u) => [s.x1 + dx * u, s.y1 + dy * u];
+    const L = Math.hypot(dx, dy) || 1;
+    const nx = -dy / L, ny = dx / L;
+    ctx.save();
+    // Điểm xuất phát: quầng hồng tan dần
+    const k0 = Math.min(1, t / (D + 6));
+    if (k0 < 1) {
+        const g = ctx.createRadialGradient(s.x1, s.y1, 0, s.x1, s.y1, 26);
+        g.addColorStop(0, `rgba(255,214,232,${0.55 * (1 - k0)})`); g.addColorStop(1, 'rgba(255,126,182,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(s.x1, s.y1, 26, 0, Math.PI * 2); ctx.fill();
+    }
+    // Thân vệt sáng (đầu lao nhanh rồi phanh, đuôi đuổi theo)
+    if (t <= D) {
+        const k = t / D;
+        const hu = fsEaseOut(k), tu = Math.pow(k, 2.2) * 0.98;
+        const [hx, hy] = at(hu), [tx, ty] = at(tu);
+        fsDrawLightStreak(tx, ty, hx, hy, 9 - 3 * k, 1);
+    }
+    // Cánh hoa rụng dọc đường bay
+    const N = 12;
+    for (let i = 0; i < N; i++) {
+        const u = (i + 0.5) / N;
+        const born = D * (1 - Math.cbrt(1 - u));
+        const age = t - born;
+        if (age < 0 || age > 26) continue;
+        const f = age / 26;
+        const side = ((i * 7 + Math.floor(s.seed * 10)) % 2) ? 1 : -1;
+        const drift = (6 + (i % 3) * 5) * fsEaseOut(Math.min(1, age / 18)) * side;
+        const [px, py] = at(u);
+        const rot = s.seed + i * 1.7 + age * 0.18 * side;
+        fsDrawPetal(px + nx * drift, py + ny * drift + age * 0.3, 3.4 * (1 - f * 0.5), rot, (1 - f) * 0.9, i % 3 === 0);
+    }
+    ctx.restore();
+}
+
+function fsDrawBloom(b) {
+    const k = b.t / b.dur, e = fsEaseOut(k), R = b.r;
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    // Chớp sáng
+    const fr = R * (0.45 + 0.6 * e);
+    const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, fr);
+    g.addColorStop(0, `rgba(255,255,255,${0.9 * (1 - k) * (1 - k)})`);
+    g.addColorStop(0.4, `rgba(255,180,215,${0.5 * (1 - k)})`);
+    g.addColorStop(1, 'rgba(255,61,139,0)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(b.x, b.y, fr, 0, Math.PI * 2); ctx.fill();
+    // Vòng sóng kép
+    ctx.strokeStyle = `rgba(255,126,182,${0.85 * (1 - k)})`; ctx.lineWidth = 3.2 * (1 - k) + 0.6;
+    ctx.beginPath(); ctx.arc(b.x, b.y, R * (0.3 + 0.95 * e), 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = `rgba(255,255,255,${0.7 * (1 - k)})`; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.arc(b.x, b.y, R * (0.2 + 0.7 * e), 0, Math.PI * 2); ctx.stroke();
+    // Tia sáng
+    ctx.strokeStyle = `rgba(255,230,242,${0.8 * (1 - k)})`; ctx.lineWidth = 1.4; ctx.lineCap = 'round';
+    ctx.beginPath();
+    for (let i = 0; i < 8; i++) {
+        const a = b.rot + i * Math.PI / 4;
+        const r0 = R * (0.25 + 0.5 * e), r1 = R * (0.5 + 0.85 * e) * (i % 2 ? 0.75 : 1);
+        ctx.moveTo(b.x + Math.cos(a) * r0, b.y + Math.sin(a) * r0);
+        ctx.lineTo(b.x + Math.cos(a) * r1, b.y + Math.sin(a) * r1);
+    }
+    ctx.stroke();
+    ctx.restore();
+    // Bông hoa mở
+    const fk = fsEaseBack(Math.min(1, k * 2.4));
+    fsDrawFlower(b.x, b.y, Math.max(0.1, R * 0.42 * fk), b.rot + k * 1.2, Math.max(0, 1 - k * 1.1));
+}
+
+// Kết liễu (lớp dưới xe): hoa lớn nở + cánh hoa bùng nổ + vòng sóng
+function fsDrawFinisher(f) {
+    const t = f.t;
+    const out = t > 55 ? Math.max(0, 1 - (t - 55) / 35) : 1;
+    ctx.save();
+    // Vùng sáng hồng loang
+    const R = 130 * fsEaseOut(Math.min(1, t / 20)) + 1;
+    const g = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, R);
+    g.addColorStop(0, `rgba(255,214,232,${0.45 * out})`); g.addColorStop(0.5, `rgba(255,61,139,${0.18 * out})`); g.addColorStop(1, 'rgba(255,61,139,0)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(f.x, f.y, R, 0, Math.PI * 2); ctx.fill();
+    // Vòng sóng
+    ctx.globalCompositeOperation = 'lighter';
+    for (let j = 0; j < 3; j++) {
+        const kk = (t - j * 6) / 34;
+        if (kk <= 0 || kk >= 1) continue;
+        ctx.strokeStyle = j === 1 ? `rgba(255,255,255,${0.8 * (1 - kk)})` : `rgba(255,140,195,${0.8 * (1 - kk)})`;
+        ctx.lineWidth = 5 * (1 - kk) + 0.5;
+        ctx.beginPath(); ctx.arc(f.x, f.y, 20 + 150 * fsEaseOut(kk), 0, Math.PI * 2); ctx.stroke();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+    // Hoa anh đào khổng lồ
+    const s = 46 * fsEaseBack(Math.min(1, t / 16));
+    if (s > 0.5 && out > 0) {
+        for (let i = 0; i < 5; i++) {
+            const a = f.seed + t * 0.012 + i * Math.PI * 2 / 5;
+            fsDrawPetal(f.x + Math.sin(a) * s * 0.55, f.y - Math.cos(a) * s * 0.55, s * 0.55, a + Math.PI, 0.85 * out, i === 0);
+        }
+        ctx.save();
+        ctx.globalAlpha = out;
+        ctx.strokeStyle = 'rgba(255,247,168,0.9)'; ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        for (let i = 0; i < 10; i++) {
+            const a = f.seed * 2 + i * Math.PI / 5;
+            ctx.moveTo(f.x, f.y); ctx.lineTo(f.x + Math.cos(a) * s * 0.32, f.y + Math.sin(a) * s * 0.32);
+        }
+        ctx.stroke();
+        const cg = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, s * 0.2);
+        cg.addColorStop(0, '#ffffff'); cg.addColorStop(1, '#ffd34d');
+        ctx.fillStyle = cg; ctx.beginPath(); ctx.arc(f.x, f.y, s * 0.18, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+    }
+    // Cánh hoa bùng nổ (xoay, bay chậm dần, rơi nhẹ)
+    for (let i = 0; i < 28; i++) {
+        const r1 = ((Math.sin(f.seed * 13 + i * 12.9898) * 43758.5453) % 1 + 1) % 1;
+        const r2 = ((Math.sin(f.seed * 7 + i * 78.233) * 12345.678) % 1 + 1) % 1;
+        const a = i * 2.39996 + f.seed;
+        const d = (70 + r1 * 120) * fsEaseOut(Math.min(1, t / 50));
+        const px = f.x + Math.cos(a) * d + Math.sin(t * 0.05 + i) * 6;
+        const py = f.y + Math.sin(a) * d + t * t * 0.006;
+        const al = Math.min(1, t / 4) * (t > 40 ? Math.max(0, 1 - (t - 40) / 50) : 1);
+        if (al <= 0) continue;
+        fsDrawPetal(px, py, 3.5 + r2 * 4, a + t * (0.08 + r2 * 0.1), al, i % 4 === 0, i % 5 === 0 ? '#ffc4dd' : FS_PINK);
+    }
+    ctx.restore();
+}
+
+// Kết liễu (lớp trên cùng): chớp màn hình + nhát chém hồng cắt ngang màn hình
+function fsDrawFinisherOver(f) {
+    const t = f.t, W = canvas.width, H = canvas.height;
+    ctx.save();
+    if (t < 10) {
+        ctx.fillStyle = `rgba(255, 210, 230, ${0.55 * (1 - t / 10)})`;
+        ctx.fillRect(-W, -H, W * 3, H * 3);
+    }
+    if (t < 44) {
+        const L = Math.hypot(W, H);
+        const grow = fsEaseOut(Math.min(1, t / 6));
+        const thin = t < 8 ? 1 : Math.max(0, 1 - (t - 8) / 36);
+        ctx.translate(f.x, f.y); ctx.rotate(f.ang);
+        ctx.globalCompositeOperation = 'lighter';
+        const x0 = -L, x1 = -L + 2 * L * grow;
+        const g = ctx.createLinearGradient(x0, 0, x1, 0);
+        g.addColorStop(0, 'rgba(255,61,139,0)'); g.addColorStop(0.75, 'rgba(255,61,139,0.75)'); g.addColorStop(1, 'rgba(255,214,232,0.95)');
+        ctx.fillStyle = g;
+        const hw = 9 * thin + 0.5;
+        ctx.beginPath();
+        ctx.moveTo(x0, 0); ctx.quadraticCurveTo(0, -hw * 1.6, x1, 0); ctx.quadraticCurveTo(0, hw * 1.6, x0, 0);
+        ctx.fill();
+        ctx.fillStyle = `rgba(255,255,255,${0.95 * thin})`;
+        ctx.beginPath();
+        ctx.moveTo(x0 * 0.8, 0); ctx.quadraticCurveTo(0, -hw * 0.45, x1, 0); ctx.quadraticCurveTo(0, hw * 0.45, x0 * 0.8, 0);
+        ctx.fill();
+        // Nhát chéo thứ hai tại mục tiêu
+        if (t > 4 && t < 26) {
+            const kk = (t - 4) / 22;
+            ctx.rotate(Math.PI / 2 + 0.3);
+            ctx.fillStyle = `rgba(255,240,247,${0.9 * (1 - kk)})`;
+            const l2 = 70 * fsEaseOut(kk);
+            ctx.beginPath(); ctx.moveTo(-l2, 0); ctx.quadraticCurveTo(0, -4, l2, 0); ctx.quadraticCurveTo(0, 4, -l2, 0); ctx.fill();
+        }
+    }
+    ctx.restore();
+    if (t >= 6 && t < 70) {
+        ctx.save();
+        ctx.globalAlpha = Math.min(1, (t - 6) / 8) * (t > 55 ? 1 - (t - 55) / 15 : 1);
+        ctx.font = 'bold 20px "Orbitron", Arial';
+        ctx.textAlign = 'center';
+        ctx.shadowBlur = 14; ctx.shadowColor = FS_DEEP;
+        ctx.fillStyle = '#fff0f7';
+        const sg = f.y > H / 2 ? -1 : 1;
+        const ty = f.y + sg * (72 + (t - 6) * 0.2);
+        drawWorldText(ctx, '✿ HOA TÀN ✿', f.x, ty);
+        ctx.restore();
+    }
+}
+
+function fsFxOver() {
+    if (typeof bodyEffects === 'undefined') return;
+    for (const e of bodyEffects) if (e instanceof FsFinisher && e.active) e.drawOver();
+}
+
 Object.assign(CharHooks.registry.flower_shadow, {
     draw() {
         if (fsFull(this) && !(this.id === 2 && p1 && p1.weapon === 'flower_shadow' && fsFull(p1))) fsDrawPetalRain(this);
@@ -382,11 +627,26 @@ Object.assign(CharHooks.registry.flower_shadow, {
         // Vệt lướt Phá
         if (this.fsMode === 'pha') {
             const tr = this.trail || [];
-            for (let i = 0; i < tr.length; i++) {
-                ctx.fillStyle = `rgba(255, 126, 182, ${0.3 * (1 - i / tr.length)})`;
-                ctx.fillRect(this.x, tr[i], this.w, this.h);
+            if (this.phase === 2 && tr.length > 1) {
+                // Lộn về: xe hóa vệt sáng hồng lao vút về chỗ cũ, cánh hoa rụng theo
+                const dir = fsDir(this), farY = dir < 0 ? 2 + this.h / 2 : canvas.height - this.h / 2 - 2;
+                fsDrawLightStreak(cx, cy + dir * Math.min(130, Math.abs(cy - farY) + 10), cx, cy, this.w * 0.4, 1);
+                for (let i = 1; i < tr.length; i++) {
+                    const sd = (i % 2 ? 1 : -1) * (6 + i * 1.5);
+                    fsDrawPetal(cx + sd, tr[i] + this.h / 2, 3.2 - i * 0.2, t * 0.2 + i * 1.3, 0.75 * (1 - i / tr.length), false);
+                }
+            } else {
+                // Lướt tới: tàn ảnh mềm
+                ctx.globalCompositeOperation = 'lighter';
+                for (let i = 1; i < tr.length; i++) {
+                    const yy = tr[i] + this.h / 2, rr = this.w * 0.5 * (1 - i / tr.length * 0.5);
+                    const g = ctx.createRadialGradient(cx, yy, 0, cx, yy, rr);
+                    g.addColorStop(0, `rgba(255,190,220,${0.35 * (1 - i / tr.length)})`); g.addColorStop(1, 'rgba(255,61,139,0)');
+                    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, yy, rr, 0, Math.PI * 2); ctx.fill();
+                }
+                ctx.globalCompositeOperation = 'source-over';
+                fsDrawBlade(cx, this.y, this.h, fsDir(this), 1);
             }
-            fsDrawBlade(cx, this.y, this.h, fsDir(this), 1);
         }
         // Hoa văn trên thân xe
         fsDrawFlower(cx, cy, this.w * 0.42, t * 0.02, 0.95);
