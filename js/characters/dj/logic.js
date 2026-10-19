@@ -11,14 +11,14 @@
 // perf = nửa cửa sổ Hoàn Hảo (tick), yel = độ dài vùng Vàng trước tâm (tick),
 // dbl = cứ mỗi N nốt có 1 NỐT ĐÔI (2 nhịp bấm liên tiếp cách nhau dblGap tick), 0 = không có
 const DJ_DIFFS = [
-    { name: 'DỄ 🎵', short: 'DỄ', interval: 60, approach: 115, perf: 11, yel: 22, dbl: 0, dblGap: 0, color: '#22d3ee' },        // chậm, thưa, Hoàn Hảo rất dễ
-    { name: 'TRUNG BÌNH 🎶', short: 'TB', interval: 46, approach: 95, perf: 9, yel: 18, dbl: 4, dblGap: 15, color: '#a78bfa' }, // vừa phải, thỉnh thoảng Nốt Đôi
-    { name: 'KHÓ 🔥', short: 'KHÓ', interval: 34, approach: 74, perf: 6, yel: 13, dbl: 5, dblGap: 13, color: '#fb7185' },       // ≈ Dễ/TB cũ: cho người đã luyện
-    { name: 'HUYỀN THOẠI 👑', short: 'HT', interval: 17, approach: 50, perf: 4, yel: 8, dbl: 3, dblGap: 9, color: '#facc15' },  // Full Evo: rất nhanh, dày đặc
+    { name: 'DỄ 🎵', short: 'DỄ', interval: 60, approach: 115, perf: 18, yel: 20, dbl: 0, dblGap: 0, color: '#22d3ee' },        // chậm, thưa, Hoàn Hảo rất dễ
+    { name: 'TRUNG BÌNH 🎶', short: 'TB', interval: 46, approach: 95, perf: 14, yel: 16, dbl: 4, dblGap: 18, color: '#a78bfa' }, // vừa phải, thỉnh thoảng Nốt Đôi
+    { name: 'KHÓ 🔥', short: 'KHÓ', interval: 34, approach: 74, perf: 10, yel: 12, dbl: 5, dblGap: 15, color: '#fb7185' },       // ≈ Dễ/TB cũ: cho người đã luyện
+    { name: 'HUYỀN THOẠI 👑', short: 'HT', interval: 17, approach: 50, perf: 6, yel: 7, dbl: 3, dblGap: 10, color: '#facc15' },  // Full Evo: rất nhanh, dày đặc
 ];
 const DJ_HOLD_TICKS = 24;    // giữ ~0.4s: đổi bản nhạc
 const DJ_LOCK_TICKS = 90;    // hết đạn vì bấm trượt: khóa xám 1.5s
-const DJ_EARLY_BONUS = 4;    // vàng sát tâm (sớm tối đa 4 tick ngoài vùng đỏ) vẫn tính Hoàn Hảo
+const DJ_EARLY_BONUS = 2;    // dung sai trễ cảm ứng: sớm tối đa 2 tick ngoài vùng đỏ vẫn tính Hoàn Hảo
 const DJ_LATE_KEEP = 14;     // nốt đã qua tâm còn hiển thị thêm bao lâu
 const DJ_COLORS = { red: '#ff1744', yellow: '#ffd60a', blue: '#2f6bff', lock: '#64748b' };
 
@@ -149,6 +149,10 @@ function djJudgePress(p) {
     if (note && d >= -diff.perf && d <= diff.perf + DJ_EARLY_BONUS) {
         note.hit = true; // tiêu thụ nốt ngay để vạch nốt nổ sáng
         p.djPend = { k: 'perfect', t: note.t };
+    } else if (note && d > 0 && d <= diff.perf + diff.yel) {
+        // Vùng VÀNG (canh nhịp): vẫn bắn sóng âm, không tốn đạn nhưng KHÔNG cộng Combo
+        note.hit = true;
+        p.djPend = { k: 'good', t: note.t };
     } else {
         p.djPend = { k: 'miss', t: -1 };
     }
@@ -211,9 +215,9 @@ function djExecute(p) {
             return;
         }
     }
-    // Cảm Âm Hoàn Hảo (hoặc Auto-Play): không tốn đạn, +combo
-    djGainCombo(p, full ? 2 : 1);
-    p.djFb = { k: kind === 'auto' ? 'auto' : 'perfect', t: p.djTick };
+    // Cảm Âm Hoàn Hảo (hoặc Auto-Play): không tốn đạn, +combo. Vùng Vàng ('good'): bắn nhưng không +combo
+    if (kind !== 'good') djGainCombo(p, full ? 2 : 1);
+    p.djFb = { k: kind === 'auto' ? 'auto' : (kind === 'good' ? 'good' : 'perfect'), t: p.djTick };
     if (kind === 'auto') addFloatingText(p.x + p.w / 2, p.id === 1 ? p.y - 40 : p.y + p.h + 40, 'AUTO-PLAY! 🤖🎶', '#facc15', 13);
     const evo2 = p.hasUpgrade('evo_dj_2');
     const c = p.djCombo;
@@ -261,7 +265,35 @@ function djTickBeat(p) {
             djOnBeat(p);
         }
     }
-    p.djNotes = p.djNotes.filter(n => n.t >= tick - DJ_LATE_KEEP);
+    // Nốt trôi qua vùng đỏ mà không bấm (hoặc bấm quá muộn) -> mất phát bắn (tốn 1 đạn) & đứt Combo
+    const jt = djJudgeTick(p); // online: bù độ trễ cho guest
+    for (const n of p.djNotes) {
+        if (n.hit || n.passed || jt <= n.t + diff.perf) continue;
+        n.passed = true;
+        djNotePassed(p);
+    }
+    p.djNotes = p.djNotes.filter(n => n.t >= tick - Math.max(DJ_LATE_KEEP, diff.perf + 16));
+}
+
+function djNotePassed(p) {
+    if (p.hp <= 0 || (p.djLock || 0) > 0 || p.djPend || (p.djHold || 0) > 0) return;
+    if (typeof gameState !== 'undefined' && gameState.phase !== 'playing') return;
+    if (p.freezeTimer > 0 || p.silenceTimer > 0) return; // bị khống chế: không phạt
+    const tx = p.x + p.w / 2, ty = p.id === 1 ? p.y - 40 : p.y + p.h + 40;
+    if ((p.djGuards || 0) > 0) {
+        p.djGuards--;
+        p.djFb = { k: 'guard', t: p.djTick };
+    } else {
+        if ((p.djCombo || 0) >= 5) addFloatingText(tx, ty, `ĐỨT CHUỖI ${p.djCombo}! 💔`, '#94a3b8', 12);
+        p.djCombo = 0;
+        p.djFb = { k: 'pass', t: p.djTick };
+    }
+    p.ammo = Math.max(0, (p.ammo || 0) - 1);
+    p.lastShot = Date.now();
+    if (p.ammo <= 0) {
+        p.djLock = DJ_LOCK_TICKS;
+        addFloatingText(tx, p.id === 1 ? p.y - 26 : p.y + p.h + 26, 'LỠ NHỊP! NẠP ĐẠN... 🔇', '#94a3b8', 12);
+    }
 }
 
 // Mỗi nhịp: Full Evo — 2 Loa nổi luân phiên bắn sóng âm phụ

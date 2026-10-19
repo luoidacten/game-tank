@@ -137,11 +137,16 @@ class CreatorShield {
         this.active = true;
         this.w = owner.w + 24;
         this.h = 8;
+        this.x = owner.x + owner.w / 2 - this.w / 2;
+        this.y = (owner.id === 1) ? owner.y - 12 : owner.y + owner.h + 4;
+        this.msgCd = 0; this.hitFlash = 0;
     }
 
     update() {
         if (!this.active) return;
         this.durationTicks--;
+        if (this.msgCd > 0) this.msgCd--;
+        if (this.hitFlash > 0) this.hitFlash--;
         if (this.durationTicks <= 0 || this.hp <= 0) {
             this.active = false;
             this.owner.creatorShieldCooldown = 8 * 60; // Cooldown 8s sau khi vỡ/hết giờ
@@ -156,30 +161,52 @@ class CreatorShield {
         this.x = this.owner.x + this.owner.w / 2 - this.w / 2;
         this.y = (this.owner.id === 1) ? this.owner.y - 12 : this.owner.y + this.owner.h + 4;
 
-        // Chặn đạn đối phương bay vào khiên
+        // Chặn đạn đối phương bay vào khiên (kiểm tra cả ở checkHits để đạn nhanh không xuyên qua)
+        this.blockEnemyBullets();
+    }
+
+    // [FIX] Trước đây kiểm tra `!b.active` -> đạn (object thường, không có `active`) luôn bị bỏ qua => khiên không chặn gì.
+    // Quét cả quãng đường đạn đi trong tick vừa rồi để đạn nhanh không "nhảy" qua khiên mỏng.
+    blocksBullet(b) {
+        if (!this.active || !b || b.active === false || typeof this.x !== 'number') return false;
+        const bw = b.w || 6, bh = b.h || 6;
+        const px = b.x - (b.vx || 0), py = b.y - (b.vy || 0);
+        const x0 = Math.min(b.x, px), y0 = Math.min(b.y, py);
+        const x1 = Math.max(b.x, px) + bw, y1 = Math.max(b.y, py) + bh;
+        return x1 > this.x && x0 < this.x + this.w && y1 > this.y && y0 < this.y + this.h;
+    }
+
+    takeHit(dmg) {
+        if (!this.active) return;
+        this.hp -= Math.max(0.1, dmg || 0);
+        this.hitFlash = 8;
+    }
+
+    blockEnemyBullets() {
         const enemy = (this.owner.id === 1) ? p2 : p1;
-        if (enemy && enemy.bullets && enemy.bullets.length > 0) {
-            for (let i = enemy.bullets.length - 1; i >= 0; i--) {
-                let b = enemy.bullets[i];
-                if (!b || !b.active) continue;
-                let bw = b.w || 6;
-                let bh = b.h || 6;
-                if (rectIntersect(b.x, b.y, bw, bh, this.x, this.y, this.w, this.h)) {
-                    let dmgDealt = b.dmg || 1;
-                    this.hp -= dmgDealt;
-                    enemy.bullets.splice(i, 1);
-                    spawnSparkParticles(b.x, b.y, '#00e5ff', 8);
-                    if (typeof addFloatingText === 'function') addFloatingText(this.x + this.w / 2, this.y - 10, "KHIÊN CHẶN ĐẠN! 🛡️", "#00e5ff", 12);
-                    if (this.hp <= 0) break;
-                }
-            }
+        if (!enemy || !enemy.bullets || !enemy.bullets.length) return;
+        for (let i = enemy.bullets.length - 1; i >= 0; i--) {
+            const b = enemy.bullets[i];
+            if (!this.blocksBullet(b)) continue;
+            this.absorb(b);
+            enemy.bullets.splice(i, 1);
+            if (this.hp <= 0) break;
+        }
+    }
+
+    absorb(b) {
+        this.takeHit(b.dmg || 1);
+        spawnSparkParticles(b.x + (b.w || 6) / 2, this.y + this.h / 2, '#00e5ff', 8);
+        if ((this.msgCd || 0) <= 0) {
+            this.msgCd = 30;
+            if (typeof addFloatingText === 'function') addFloatingText(this.x + this.w / 2, this.y - 10, "KHIÊN CHẶN ĐẠN! 🛡️", "#00e5ff", 12);
         }
     }
 
     draw() {
         if (!this.active) return;
         ctx.save();
-        ctx.fillStyle = "rgba(0, 229, 255, 0.25)";
+        ctx.fillStyle = this.hitFlash > 0 ? "rgba(200, 250, 255, 0.7)" : "rgba(0, 229, 255, 0.25)";
         ctx.fillRect(this.x, this.y, this.w, this.h);
         ctx.strokeStyle = "#00e5ff";
         ctx.lineWidth = 2.5;

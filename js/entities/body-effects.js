@@ -30,6 +30,12 @@ class BodyZone {
     update() {
         if (!this.active) return;
         if (--this.life <= 0) { this.active = false; return; }
+        // Vũng Axit: ăn mòn vật thể (x10 sát thương + 50% Max HP mỗi giây); Bình Phun đốt xe nhanh gấp đôi
+        if (this.kind === 'acid' && typeof acidZoneTickObjects === 'function') {
+            acidZoneTickObjects(this.owner,
+                (o) => Math.abs(o.x + o.w / 2 - this.x) < this.r * ZONE_AX + o.w / 2 && Math.abs(o.y + o.h / 2 - this.y) < this.r * ZONE_AY + o.h / 2,
+                0.25 * this.power / 30, (this.maxLife - this.life) % 60 === 1, this.owner && this.owner.weapon === 'sprayer' ? 2 : 1);
+        }
         const enemy = this.owner === p1 ? p2 : p1;
         if (!enemy || enemy.hp <= 0) return;
         const inside = Math.abs(enemy.x + enemy.w / 2 - this.x) < this.r * ZONE_AX + enemy.w / 2 && Math.abs(enemy.y + enemy.h / 2 - this.y) < this.r * ZONE_AY + enemy.h / 2;

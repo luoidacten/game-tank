@@ -91,11 +91,7 @@ function spAffectStructure(p, obj, chem, full) {
             if (typeof obj.hp === 'number' && obj.hp <= 0) obj.active = false;
         }
     } else if (chem === 'acid') {
-        // Ụ súng (không nằm trong spAcidObjects): axit ăn mòn 2 dame/s
-        if ((obj instanceof Turret || obj instanceof CreatorTurret) && typeof obj.hp === 'number' && !obj.isImmortal) {
-            obj.hp -= SP_ACID_OBJ_DPS / 60;
-            if (obj.hp <= 0) { obj.active = false; explosions.push(new Explosion(obj.x + obj.w / 2, obj.y + obj.h / 2, 35, '#7bf85c', 0, p)); }
-        }
+        // Axit lên vật thể xử lý trong spAcidObjects (x10 sát thương + 50% Max HP)
     } else if (chem === 'ice') {
         // Làm chậm vật cản di động / xe tiền đang hứng luồng phun
         if (typeof obj.vx === 'number') obj.x -= obj.vx * 0.6;
@@ -182,7 +178,8 @@ function spApplySpray(p) {
     }
 }
 
-// Axit: SP_ACID_OBJ_DPS sát thương/giây lên vật thể trong luồng (không bị vật cản che)
+// Axit: mọi đòn Axit lên vật thể = x10 sát thương + 50% Max HP. Luồng phun: SP_ACID_OBJ_DPS (=10 x 0.2)/giây
+// + mỗi 1s hứng luồng (lần đầu sau 0.5s) mất thêm 50% Max HP. Xe (xe tiền / xe tấn công) bị đốt nhanh gấp 3.
 function spAcidObjects(p, n, front, blockers) {
     const dmg = SP_ACID_OBJ_DPS / 60;
     const visible = (o) => {
@@ -195,23 +192,21 @@ function spAcidObjects(p, n, front, blockers) {
         if (!spInCone(p, n, o, front)) return;
         if (o.isImmortal || !visible(o)) return;
         if (o instanceof Crate) {
-            o.spAcid = (o.spAcid || 0) + dmg;
+            o.spAcid = (o.spAcid || 0) + dmg * 10;
             if (o.spAcid >= 0.5) { o.active = false; crateOnBreak(o, p); grantCrateLoot(o, p); }
             return;
         }
-        if (typeof o.takeDamage === 'function') { o.takeDamage(dmg, p); return; }
-        if (typeof o.hp !== 'number') return;
-        o.hp -= dmg;
-        if (o.hp <= 0) {
-            o.active = false;
-            if (o instanceof MoneyTruck) { const m = 30; if (p.id === 1) gameState.p1Coins += m; else gameState.p2Coins += m; addFloatingText(o.x + o.w / 2, o.y - 8, '+30$', '#ffd700', 12); }
-            explosions.push(new Explosion(o.x + o.w / 2, o.y + o.h / 2, 35, '#7bf85c', 0, p));
-        }
+        o.spAcidT = (o.spAcidT || 0) + 1;
+        let d = dmg + (o.spAcidT % 60 === 30 ? acidObjMaxHp(o) * 0.5 : 0);
+        if (acidIsTruck(o)) d *= 3;
+        acidDamageObj(o, d, p);
     };
     crates.forEach(hit);
     moneyTrucks.forEach(hit);
-    [necroMinions, creatorDrones, creatorRobots, ghostDecoys, confinementCages, bastions, sniperWalls].forEach(list => (list || []).forEach(hit));
-    bodyEffects.forEach(e => { if (e.isStone) hit(e); });
+    [turrets, creatorTurrets, necroMinions, creatorDrones, creatorRobots, ghostDecoys, confinementCages, bastions, sniperWalls].forEach(list => (list || []).forEach(hit));
+    bodyEffects.forEach(e => { if (e.isStone || e instanceof AttackTruck || e instanceof ThrownMecha) hit(e); });
+    const enemy = p === p1 ? p2 : p1;
+    if (enemy && Array.isArray(enemy.drones)) enemy.drones.forEach(hit);
 }
 
 // Lớp phủ đạt 100%

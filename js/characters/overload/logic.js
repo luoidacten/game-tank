@@ -24,12 +24,12 @@ function ovStored(p) {
     if ((p.ovMain || 0) < 1) return 0;
     return 1 + (p.ovAux || []).filter(v => v >= 1).length;
 }
-function ovBlastR(p) { return ovIsFull(p) ? 95 : 60; }
+function ovBlastR(p) { return ovIsFull(p) ? 85 : 42; } // [NERF] vụ nổ đạn sạc nhỏ hơn (nhiều khi chưa Full Evo)
 function ovEmpR(p) { return ovIsFull(p) ? 175 : 115; }
 
 // ---------- Vô hiệu hoá vật triệu hồi / thiết bị (EMP) ----------
-// Bọc update()/shoot() của các class triệu hồi: empDisabled > 0 -> đứng im, không bắn.
-const OV_EMP_CLASSES = ['Turret', 'CreatorTurret', 'CreatorDrone', 'CreatorRobot', 'NecroMinion', 'GhostDecoy', 'ShadowTrap', 'InventorDrone'];
+// Bọc update()/shoot() của các class triệu hồi: empDisabled > 0 -> ĐỨNG IM (không di chuyển) & không bắn.
+const OV_EMP_CLASSES = ['Turret', 'CreatorTurret', 'CreatorDrone', 'CreatorRobot', 'NecroMinion', 'GhostDecoy', 'ShadowTrap', 'InventorDrone', 'AttackTruck', 'ThrownMecha'];
 function ovPatchEmpClasses() {
     for (const name of OV_EMP_CLASSES) {
         let K;
@@ -60,6 +60,9 @@ function ovEnemySummons(enemy) {
         typeof necroMinions !== 'undefined' ? necroMinions : [], typeof ghostDecoys !== 'undefined' ? ghostDecoys : [],
         typeof shadowTraps !== 'undefined' ? shadowTraps : []];
     lists.forEach(l => (l || []).forEach(add));
+    if (typeof bodyEffects !== 'undefined') bodyEffects.forEach(e => {
+        if ((typeof AttackTruck !== 'undefined' && e instanceof AttackTruck) || (typeof ThrownMecha !== 'undefined' && e instanceof ThrownMecha)) add(e);
+    });
     if (enemy.creatorDrone) add(enemy.creatorDrone);
     if (Array.isArray(enemy.drones)) enemy.drones.forEach(add);
     return out;
@@ -76,20 +79,21 @@ function ovEmp(owner, x, y) {
     const R = ovEmpR(owner);
     const enemy = owner.id === 1 ? p2 : p1;
     bodyEffects.push(new OvEmpRing(x, y, R));
-    let hits = 0;
+    let hits = 0, ownerHit = false;
     if (enemy && enemy.hp > 0) {
         const nx = Math.max(enemy.x, Math.min(x, enemy.x + enemy.w)), ny = Math.max(enemy.y, Math.min(y, enemy.y + enemy.h));
         if (Math.hypot(x - nx, y - ny) <= R) {
             enemy.silenceTimer = Math.max(enemy.silenceTimer || 0, OV_EMP_TICKS);
             ovMark(enemy, 'player');
             addFloatingText(enemy.x + enemy.w / 2, enemy.id === 1 ? enemy.y - 16 : enemy.y + enemy.h + 22, 'EMP · CÂM LẶNG', '#c4b5fd', 12);
-            hits++;
+            hits++; ownerHit = true;
         }
     }
     if (enemy) {
         for (const o of ovEnemySummons(enemy)) {
             const cx = o.x + (o.w || 0) / 2, cy = o.y + (o.h || 0) / 2;
-            if (Math.hypot(cx - x, cy - y) > R + Math.max(o.w || 0, o.h || 0) / 2) continue;
+            // Chủ dính EMP -> toàn bộ vật triệu hồi của chủ cũng bị đóng băng (bất kể khoảng cách)
+            if (!ownerHit && Math.hypot(cx - x, cy - y) > R + Math.max(o.w || 0, o.h || 0) / 2) continue;
             o.empDisabled = Math.max(o.empDisabled || 0, OV_EMP_TICKS);
             ovMark(o, 'obj');
             hits++;
@@ -105,7 +109,7 @@ function ovBurst(b, owner) {
     const x = b.x + b.w / 2;
     const y = Math.max(4, Math.min(canvas.height - 4, b.y + b.h / 2));
     const full = ovIsFull(owner);
-    explosions.push(new Explosion(x, y, ovBlastR(owner), 'rgba(0, 240, 255,', full ? 1.5 : 1, owner));
+    explosions.push(new Explosion(x, y, ovBlastR(owner), 'rgba(0, 240, 255,', full ? 1.25 : 0.5, owner)); // [NERF] 1 -> 0.5, Full 1.5 -> 1.25
     spawnSparkParticles(x, y, '#00f0ff', full ? 22 : 12);
     triggerScreenShake(full ? 7 : 4, 12);
     if (typeof soundSystem !== 'undefined' && soundSystem && !soundSystem.muted && soundSystem.playExplosion) soundSystem.playExplosion();
