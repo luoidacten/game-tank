@@ -212,6 +212,8 @@ function renderFrame() {
     if (typeof fsFxOver === 'function') fsFxOver();
     // Lớp phủ kết liễu Tsukiyo (Nguyệt Trảm) - js/characters/tsukiyo/render.js
     if (typeof tsFxOver === 'function') tsFxOver();
+    // Lớp phủ kết liễu Joker (ALL IN) - js/characters/joker/render.js
+    if (typeof jkFxOver === 'function') jkFxOver();
 
     // Particles & Floating Numbers
     updateAndDrawParticles();

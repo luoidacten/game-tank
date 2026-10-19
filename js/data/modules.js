@@ -313,6 +313,14 @@ const MODULES = {
             size: { w: 26, h: 26 },
             stats: { hp: 4, dmg: 0.25, ammo: 0, speedMult: 0.971 }
         },
+        {
+            id: 'joker',
+            name: 'Joker',
+            desc: '"Lá bài của ta là JOKER!" (Collab) HP:3.5 | Dame:1 | Đạn: tay bài 5 lá | Tốc: 4.4. RÚT BÀI ĐỊNH MỆNH: hết bài -> xào 1.5s rút tay mới (thấy được bài cạnh xe & trên nút Bắn). Nhấp: PHI BÀI theo chất — Rỗng 15% (không hiệu ứng) | ♥ Cơ 10% (trúng +0.25 HP) | ♦ Rô 25% (trúng +$5, phá thùng +$5, x10 dame lên xe tiền) | ♣ Chuồn 20% (nổ AoE đẩy lùi khi trúng / bay qua làn địch) | ♠ Bích 25% (xuyên thấu + Chảy Máu) | 🃏 JOKER 5% (bay cực nhanh lượn cong, cả 4 hiệu ứng, x2 dame). Giữ 0.35s: TRÁO BÀI (hồi 4s) lướt ngắn + đổi lá kế tiếp sang chất khác. THOÁT HIỂM (1 lần/hiệp): nhận đòn chí tử -> dịch chuyển, để lại hình nhân (địch bắn trúng bị choáng 1.25s), bất tử 2s. Hạ gục địch -> kết liễu ALL IN.',
+            type: 'body', role: ['Cơ Động', 'Kiểm Soát', 'Đối Đầu'],
+            size: { w: 26, h: 26 },
+            stats: { hp: 3.5, dmg: 1, ammo: 0, speedMult: 1.257 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 30 },
