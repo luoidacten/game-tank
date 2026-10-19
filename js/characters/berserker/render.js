@@ -2,6 +2,7 @@
 // Cuồng Chiến Binh (berserker) — Hình ảnh
 // Xe giáp gai + rìu đôi ở mũi, lõi tim cuồng nộ sáng dần theo mốc Cuồng Chiến;
 // thanh Huyết Chiến ở hàng "extra" + 3 chevron mốc; Huyết Địa = 2 bức tường năng lượng đỏ.
+// Nhiệt: thanh mảnh ngay ngoài thanh Huyết Chiến; >70 xe ánh đỏ + nòng nung đỏ; QUÁ NHIỆT = hơi nước + quầng đỏ.
 // ==========================================
 
 function bersTierColor(tier) { return ['#94a3b8', '#ffb020', BERS_ORANGE, BERS_RED][tier] || BERS_RED; }
@@ -183,6 +184,87 @@ function bersDrawTier(p, tier, hc) {
     ctx.restore();
 }
 
+// Nhiệt trên xe: ánh đỏ cảnh báo (>70), nòng nung đỏ, QUÁ NHIỆT -> hơi nước xì ra từ khe sau
+function bersDrawHeat(p, cx, cy, t) {
+    const heat = p.bersHeat || 0, oh = (p.bersOH || 0) > 0;
+    if (heat < 35 && !oh) return;
+    const front = p.id === 1 ? -1 : 1, back = -front;
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    // nòng nung đỏ
+    const hk = Math.min(1, (heat - 35) / 65);
+    if (hk > 0) {
+        const mx = cx, my = cy + front * 13;
+        const g = ctx.createRadialGradient(mx, my, 0, mx, my, 5 + hk * 4);
+        g.addColorStop(0, `rgba(255,${Math.round(220 - 140 * hk)},120,${0.5 + 0.4 * hk})`);
+        g.addColorStop(1, 'rgba(255,60,20,0)');
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(mx, my, 5 + hk * 4, 0, Math.PI * 2); ctx.fill();
+    }
+    // ánh đỏ toàn xe
+    if (oh || heat > BERS_HEAT_WARN) {
+        const k = oh ? 1 : (heat - BERS_HEAT_WARN) / (100 - BERS_HEAT_WARN);
+        const pulse = 0.65 + 0.35 * Math.sin(t * (oh ? 22 : 10 + 10 * k));
+        const R = p.w * (oh ? 1.05 : 0.85);
+        const g = ctx.createRadialGradient(cx, cy, 2, cx, cy, R);
+        g.addColorStop(0, `rgba(255,70,30,${(oh ? 0.42 : 0.28 * k) * pulse})`);
+        g.addColorStop(0.6, `rgba(255,40,20,${(oh ? 0.25 : 0.14 * k) * pulse})`);
+        g.addColorStop(1, 'rgba(255,30,10,0)');
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+    if (!oh) return;
+    // hơi nước
+    ctx.save();
+    const tick = p.bersTick || 0;
+    for (let i = 0; i < 9; i++) {
+        const ph = ((tick * 1.3 + i * 11) % 40) / 40;
+        const side = i % 2 ? 1 : -1;
+        const spread = (i % 3) * 3;
+        const x = cx + side * (3 + spread + ph * (10 + spread));
+        const y = cy + back * (p.h / 2 - 3 + ph * 15);
+        const r = 2 + ph * 6;
+        ctx.fillStyle = `rgba(235,238,245,${(1 - ph) * 0.5})`;
+        ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+    }
+    // tia hơi 2 bên hông
+    for (let i = 0; i < 4; i++) {
+        const ph = ((tick * 1.7 + i * 10) % 24) / 24;
+        const side = i % 2 ? 1 : -1;
+        ctx.fillStyle = `rgba(255,255,255,${(1 - ph) * 0.4})`;
+        ctx.beginPath(); ctx.arc(cx + side * (p.w / 2 + 2 + ph * 12), cy + (i < 2 ? -3 : 4), 1.5 + ph * 3.5, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+}
+
+// Thanh Nhiệt mảnh (dưới thanh Huyết Chiến, về phía xa địch)
+function bersDrawHeatBar(p, x, w, hcY, hcH) {
+    const heat = Math.max(0, Math.min(100, p.bersHeat || 0)), oh = (p.bersOH || 0) > 0;
+    if (heat <= 0.5 && !oh) return;
+    const h = 2.2;
+    const y = p.id === 1 ? hcY + hcH + 1.5 : hcY - 1.5 - h;
+    const tt = Date.now();
+    ctx.save();
+    ctx.fillStyle = 'rgba(14,6,4,0.88)';
+    ctx.fillRect(x - 0.5, y - 0.5, w + 1, h + 1);
+    const frac = heat / 100;
+    let col;
+    if (oh) col = (Math.floor(tt / 90) % 2) ? '#ffffff' : '#ff3b1f';
+    else if (heat > BERS_HEAT_WARN) col = '#ff4a1f';
+    else col = heat > 40 ? '#ff9a2a' : '#ffd166';
+    const g = ctx.createLinearGradient(x, 0, x + w, 0);
+    g.addColorStop(0, '#ffd166'); g.addColorStop(0.6, '#ff8a1f'); g.addColorStop(1, '#ff2d1f');
+    ctx.fillStyle = oh ? col : g;
+    ctx.shadowColor = col; ctx.shadowBlur = oh ? 8 : (heat > BERS_HEAT_WARN ? 4 + 3 * Math.sin(tt / 70) : 0);
+    ctx.fillRect(x, y, w * frac, h);
+    ctx.shadowBlur = 0;
+    // vạch cảnh báo 70%
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.fillRect(x + w * BERS_HEAT_WARN / 100 - 0.4, y - 0.5, 0.8, h + 1);
+    ctx.restore();
+}
+
 CharHooks.register('berserker', Object.assign(CharHooks.registry.berserker || {}, {
     draw() {
         const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
@@ -210,6 +292,7 @@ CharHooks.register('berserker', Object.assign(CharHooks.registry.berserker || {}
             ctx.beginPath(); ctx.arc(cx, cy, this.w * 0.78, 0, Math.PI * 2); ctx.stroke();
             ctx.restore();
         }
+        bersDrawHeat(this, cx, cy, t);
     },
     drawUI() {
         if (this.hp <= 0 || typeof hudRowY !== 'function') return;
@@ -244,6 +327,7 @@ CharHooks.register('berserker', Object.assign(CharHooks.registry.berserker || {}
             ctx.beginPath(); ctx.moveTo(dx, dy - 3.5); ctx.quadraticCurveTo(dx + 3, dy + 0.5, dx, dy + 2.5); ctx.quadraticCurveTo(dx - 3, dy + 0.5, dx, dy - 3.5); ctx.fill();
             ctx.globalAlpha = 1; ctx.shadowBlur = 0;
         }
+        bersDrawHeatBar(this, x, w, y, h);
         // Full Evo: số lần Tàn Hơi còn lại (chấm vàng bên trái thanh)
         if (bersFull(this)) {
             const left = 2 - (this.bersRevives || 0);
@@ -262,6 +346,8 @@ function bersRegisterHUD() {
     registerEmpowerHUD('berserker', p => {
         const bar = p.bersBar || 0, tier = bersTier(p);
         const base = { pct: bar / 100, pips: p.bersHC ? 3 : tier, pipMax: 3, pipColor: BERS_GOLD, btnIcon: bersSpray(p) ? '🔥' : '🪓' };
+        if ((p.bersOH || 0) > 0) return Object.assign(base, { ready: false, idle: true, dim: true, pct: (p.bersHeat || 0) / 100, color: '#ff4a1f', label: 'QUÁ NHIỆT', btnIcon: '♨' });
+        if ((p.bersHeat || 0) > BERS_HEAT_WARN && !p.bersBloodReady) return Object.assign(base, { ready: false, idle: true, pct: (p.bersHeat || 0) / 100, color: '#ff4a1f', label: 'NHIỆT ' + Math.floor(p.bersHeat) });
         if (p.bersHC) return Object.assign(base, { ready: !!p.bersBloodReady, color: BERS_RED, icon: 'drop', label: 'HUYẾT CHIẾN ' + Math.ceil(bar) });
         if (p.bersBloodReady) return Object.assign(base, { ready: true, color: BERS_RED, icon: 'drop', label: 'HUYẾT ĐẠN' });
         return Object.assign(base, { ready: false, idle: true, color: BERS_ORANGE, label: 'HUYẾT ' + Math.floor(bar) });
