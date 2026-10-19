@@ -7,7 +7,7 @@
 // --- EVOLUTIONS ---
 const EVOLUTIONS = {
     basic: [
-        { id: 'evo_basic_1', name: 'Công Thủ Toàn Diện', desc: 'HP+6, Dame ×2', cost: 15, type: 'evo' },
+        { id: 'evo_basic_1', name: 'Công Thủ Toàn Diện', desc: 'HP +2, Dame ×1.25', cost: 15, type: 'evo' },
         { id: 'evo_basic_2', name: 'Thập Tử Nhất Sinh', desc: 'Về 0 HP -> Hồi 1 HP + Bất tử 3s', cost: 30, type: 'evo' } // UPDATE DESC
     ],
     money_tank: [
@@ -23,11 +23,11 @@ const EVOLUTIONS = {
         { id: 'evo_ice_2', name: 'Hàn Băng', desc: 'x1.5 Dame lên kẻ bị chậm, Vùng băng gây dame', cost: 60, type: 'evo' }
     ],
     big_bullet: [
-        { id: 'evo_big_1', name: 'To Hơn Nữa', desc: 'Đạn siêu to khổng lồ. Full Evo: sau lần nảy đầu đạn hóa Xuyên Thấu (xuyên vật cản, vẫn trúng địch), không nảy nữa mà tan ở giữa sân', cost: 20, type: 'evo' },
+        { id: 'evo_big_1', name: 'To Hơn Nữa', desc: 'Đạn siêu to khổng lồ (gấp đôi: 32px). Full Evo: sau lần nảy đầu đạn hóa Xuyên Thấu (xuyên vật cản, vẫn trúng địch), không nảy nữa mà tan ở giữa sân', cost: 20, type: 'evo' },
         { id: 'evo_big_2', name: 'Bóng Cao Su', desc: 'Đạn nảy lại khi chạm tường. Full Evo: đạn kết thúc/bị phá sẽ nổ thành vòng mảnh đạn 360° (chỉ hại địch)', cost: 100, type: 'evo' }
     ],
     shotgun: [
-        { id: 'evo_shot_1', name: 'Mưa Đạn', desc: 'Tỏa 5 tia', cost: 45, type: 'evo' },
+        { id: 'evo_shot_1', name: 'Mưa Đạn', desc: 'Tỏa 6 viên; ngay sau mỗi phát bắn thêm đợt 2 gồm 3 viên tụm giữa', cost: 45, type: 'evo' },
         { id: 'evo_shot_2', name: 'Đạn Dự Phòng', desc: 'Băng đạn 4 viên', cost: 30, type: 'evo' }
     ],
     overload: [
@@ -35,16 +35,16 @@ const EVOLUTIONS = {
         { id: 'evo_over_2', name: 'Vụ Nổ EMP', desc: 'Đạn Sạc nổ phát vòng EMP rộng hơn vụ nổ: không gây dame nhưng Câm Lặng địch 2s & vô hiệu trụ/drone/robot/bẫy... của địch 2s. FULL EVO (Lõi Tứ Quá Tải): +4 thanh phụ (5 thanh nạp đồng thời), vụ nổ & vòng EMP to hơn hẳn.', cost: 60, type: 'evo' }
     ],
     smg: [
-        { id: 'evo_smg_1', name: 'Hỏa Lực +++', desc: 'Sấy càng lâu: Dame tăng, Tốc bắn tăng, Đạn bay nhanh.', cost: 80, type: 'evo' },
-        { id: 'evo_smg_2', name: 'Băng Đạn X', desc: 'Đạn: 26. Không bắn 5s -> Hồi FULL đạn.', cost: 120, type: 'evo' } // Đã tăng giá lên 60
+        { id: 'evo_smg_1', name: 'Hỏa Lực +++', desc: 'Sấy càng lâu: Dame tăng (tối đa +0.5), Tốc bắn tăng gấp đôi, Đạn bay nhanh. Băng 22 viên, dame gốc ×0.9.', cost: 80, type: 'evo' },
+        { id: 'evo_smg_2', name: 'Băng Đạn X', desc: 'Băng 30 viên, nạp băng 1.2s. FULL EVO: nạp 0.8s, 6 viên đầu mỗi băng xuyên thấu.', cost: 120, type: 'evo' } // Đã tăng giá lên 60
     ],
     lazer_charge: [
-        { id: 'evo_lazer_c_1', name: 'Pháo Diệt Tinh', desc: 'Tia to, tồn tại 2s gây sát thương', cost: 150, type: 'evo' },
-        { id: 'evo_lazer_c_2', name: 'Năng Lượng Xanh', desc: 'Nạp đạn nhanh hơn (0.4s/viên). FULL EVO: nạp 0.25s/viên, Tia Xuyên Phá xuyên khiên.', cost: 50, type: 'evo' }
+        { id: 'evo_lazer_c_1', name: 'Pháo Diệt Tinh', desc: 'Tia Xuyên Phá to gấp 3, lưu ảnh 2s', cost: 150, type: 'evo' },
+        { id: 'evo_lazer_c_2', name: 'Năng Lượng Xanh', desc: 'Tự Nạp nhanh hơn (4s), đạn thường nạp 0.4s/viên. FULL EVO: Tự Nạp 3.5s, Tia Xuyên Phá HẠ GỤC NGAY bất kể máu & xuyên khiên.', cost: 50, type: 'evo' }
     ],
     lazer_auto: [
-        { id: 'evo_lazer_a_1', name: 'Xuyên Phá', desc: 'Đạn bay cực nhanh', cost: 30, type: 'evo' },
-        { id: 'evo_lazer_a_2', name: 'Phá Hủy', desc: 'Tăng dame, đạn to hơn', cost: 45, type: 'evo' }
+        { id: 'evo_lazer_a_1', name: 'Xuyên Phá', desc: 'Laser bay cực nhanh, nhịp bắn tối đa 0.13s/tia. FULL EVO: mỗi tia chỉ +7% Nhiệt, Quá Nhiệt chỉ 0.8s.', cost: 30, type: 'evo' },
+        { id: 'evo_lazer_a_2', name: 'Phá Hủy', desc: 'Dame ×1.5, laser to hơn, Nóng Đỏ từ 50% Nhiệt.', cost: 45, type: 'evo' }
     ],
     rocket: [
         { id: 'evo_rocket_1', name: 'Đầu Đạn Hạt Nhân', desc: 'Vùng nổ siêu rộng + Phóng xạ', cost: 220, type: 'evo' },

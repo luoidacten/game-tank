@@ -97,10 +97,11 @@ Object.assign(Player.prototype, {
         this.setupBasic();
 
         // --- Weapon Specific Stat Modifiers ---
-        if (this.hasUpgrade('evo_shot_1')) { this.bulletCount = 5; }
+        if (this.hasUpgrade('evo_shot_1')) { this.bulletCount = 6; }
         if (this.hasUpgrade('evo_shot_2')) { this.maxAmmo = 4; }
-        if (this.hasUpgrade('evo_smg_1')) { this.maxAmmo = 26; this.damage *= 0.85; }
-        if (this.hasUpgrade('evo_smg_2')) { this.maxAmmo = 26; this.reloadTime = 400; }
+        if (this.weapon === 'smg') this.maxAmmo = 18;
+        if (this.hasUpgrade('evo_smg_1')) { this.maxAmmo = 22; this.damage *= 0.9; }
+        if (this.hasUpgrade('evo_smg_2')) { this.maxAmmo = 30; }
         if (this.hasUpgrade('evo_lazer_a_2')) { this.damage *= 1.5; }
         // Lazer Xuyên Phá: ít đạn hơn nhưng nạp nhanh (0.6s/viên; Evo 2: 0.4s; Full Evo: 0.25s)
         if (this.weapon === 'lazer_charge') {

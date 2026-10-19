@@ -13,7 +13,6 @@ function registerEmpowerHUD(id, fn) { EMPOWER_HUD[id] = fn; }
 
 // Body sạc chung (chargeLevel 0..7): Lazer Xuyên Phá, Cuộn Quá Tải, Phong Trảm
 const EMP_CHARGE_STYLE = {
-    lazer_charge: { color: '#ff3355', label: 'LAZER' },
     overload: { color: '#38bdf8', label: 'QUÁ TẢI' },
     wind_slash: { color: '#a7f3d0', label: 'PHONG' },
 };
@@ -24,6 +23,9 @@ function empChargeState(p) {
     return { pct, ready: pct >= 1, label: pct >= 1 ? st.label + ' MAX' : st.label, color: st.color };
 }
 Object.keys(EMP_CHARGE_STYLE).forEach(id => registerEmpowerHUD(id, empChargeState));
+// Lazer Xuyên Phá (chế độ Tự Nạp) & Lazer Pháo (Nhiệt): provider khai báo trong file logic của body
+if (typeof lcEmpowerState === 'function') registerEmpowerHUD('lazer_charge', lcEmpowerState);
+if (typeof laEmpowerState === 'function') registerEmpowerHUD('lazer_auto', laEmpowerState);
 
 registerEmpowerHUD('shadow_hunter', p => {
     if (p.stealthActive) return { pct: 1, ready: true, label: 'ĐÒN BÓNG', color: '#a855f7' };

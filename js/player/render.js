@@ -103,17 +103,6 @@ Object.assign(Player.prototype, {
         // --- VẼ UI SNIPER ---
         this.drawSniper();
 
-        // Vẽ UI Reload tụ lực
-        if (this.sniperChargeTimer > 0) {
-            ctx.fillStyle = "yellow";
-            ctx.fillRect(this.x, this.y - 10, this.w * (this.sniperChargeTimer / 60), 5);
-        }
-        if (this.sniperReloading) {
-            ctx.fillStyle = "orange";
-            ctx.fillText("RELOADING...", this.x, this.y - 15);
-            let reloadMax = (this.hasUpgrade('evo_sniper_1') && this.hasUpgrade('evo_sniper_2')) ? 150 : 180;
-            ctx.fillRect(this.x, this.y - 10, this.w * (1 - this.sniperReloadTimer / reloadMax), 5);
-        }
         // Xử lý độ mờ cho Ghost
         this.drawGhost();
 
@@ -447,11 +436,15 @@ Object.assign(Player.prototype, {
         }
         else if (this.maxAmmo > 0 && this.maxAmmo < 100) {
             // Ammo Pips
-            if (this.sniperReloading) {
-                ctx.fillStyle = "#ffd700";
-                ctx.font = "bold 9px 'Orbitron', Arial";
-                ctx.textAlign = "center";
-                drawWorldText(ctx, "RELOADING...", this.x + this.w / 2, subUiY + 5);
+            if (this.sniperReloading || this.smgReloading) {
+                // Đang nạp băng: thanh tiến độ mảnh thay cho chữ RELOADING
+                const prog = this.sniperReloading ? 1 - this.sniperReloadTimer / (this.sniperReloadMax || 180)
+                    : 1 - (this.smgReloadT || 0) / Math.max(1, this.smgReloadMax || 1);
+                ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
+                ctx.fillRect(this.x - 4, subUiY, this.w + 8, 4);
+                ctx.fillStyle = "#ffb020"; ctx.shadowBlur = 6; ctx.shadowColor = "#ffb020";
+                ctx.fillRect(this.x - 4, subUiY, (this.w + 8) * Math.max(0, Math.min(1, prog)), 4);
+                ctx.shadowBlur = 0;
             } else {
                 for (let i = 0; i < this.maxAmmo; i++) {
                     ctx.fillStyle = (i < this.ammo) ? "#ffd700" : "rgba(255, 255, 255, 0.15)";
