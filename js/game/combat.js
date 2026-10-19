@@ -478,6 +478,11 @@ function checkHits(attacker, victim) {
         // [FIX] Xe đã về 0 HP không nhận va chạm đạn nữa. Trước đây Shortgun (Evo 2) hạ gục ->
         // sinh đạn pháo ngay trên xác -> đạn trúng xác -> lại tính hạ gục... vòng lặp vô hạn làm sập game.
         let hitReal = victim.hp > 0 && rectIntersect(b.x, b.y, b.w, b.h, victim.x, victim.y, victim.w, victim.h);
+        // Gemini: đạn trúng Bản Sao AI (xe thứ 2 trên làn) -> js/characters/gemini/logic.js
+        if (!hitReal && victim.weapon === 'gemini' && typeof gmBulletHitTwin === 'function' && gmBulletHitTwin(attacker, victim, b, currentFinalDmg)) {
+            if (!b.isPiercing) { attacker.bullets.splice(i, 1); i--; }
+            continue;
+        }
 
         // 1. Check Mirror clone projection
         let hitProjection = false;

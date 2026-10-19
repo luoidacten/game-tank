@@ -256,6 +256,7 @@ function tickPhysics() {
             const enemy = (b.ownerId === 1) ? p2 : p1;
 
             if (rectIntersect(b.x, b.y, b.w, b.h, enemy.x, enemy.y, enemy.w, enemy.h)) { enemy.takeDamage(1, (b.ownerId === 1 ? p1 : p2)); }
+            if (enemy.weapon === 'gemini' && typeof gmRectHitTwin === 'function') gmRectHitTwin(enemy, b.x, b.y, b.w, b.h, 1, owner); // Gemini: Bản Sao AI
 
             crates.forEach(c => {
                 if (c.active && rectIntersect(b.x, b.y, b.w, b.h, c.x, c.y, c.w, c.h)) {
