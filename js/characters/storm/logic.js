@@ -7,8 +7,8 @@ const ST_DMG = 2.0;          // Dame gốc
 const ST_WINDUP = 30;        // 0.5s rung lắc = đang chém (radar quét kiếm + vùng cảnh báo)
 const ST_TIER = [
     null,
-    { kind: 'wind', dur: 120, r: 75, mult: 0.25, pull: 0.55, slow: 0.25, cut: 1.2, name: 'GIÓ LỐC 🌪️', col: '#5eead4' },
-    { kind: 'thunder', dur: 240, r: 105, mult: 0.3, pull: 1.0, slow: 0.35, cut: 1.8, name: 'LÔI BÃO ⚡', col: '#a78bfa' },
+    { kind: 'wind', dur: 120, r: 55, mult: 0.25, pull: 0.55, slow: 0.25, cut: 1.2, name: 'GIÓ LỐC 🌪️', col: '#5eead4' },
+    { kind: 'thunder', dur: 240, r: 78, mult: 0.3, pull: 1.0, slow: 0.35, cut: 1.8, name: 'LÔI BÃO ⚡', col: '#a78bfa' },
 ];
 
 function stFull(p) { return p.hasUpgrade('evo_storm_1') && p.hasUpgrade('evo_storm_2'); }
@@ -54,7 +54,7 @@ function stEndStorm(p, tor) {
 function stCloneEnd(b, x, y) {
     if (b.stDone) return; b.stDone = true;
     const o = b.owner; if (!o || typeof bodyEffects === 'undefined') return;
-    bodyEffects.push(new StTornado(o.id, 'mini', x, y, 55, 60, 0.3));
+    bodyEffects.push(new StTornado(o.id, 'mini', x, y, 42, 60, 0.3));
 }
 BulletHooks.register('storm_clone', {
     hit(b, attacker, victim) { stCloneEnd(b, victim.x + victim.w / 2, victim.y + victim.h / 2); },
@@ -79,7 +79,7 @@ Object.assign(Player.prototype, {
     // Nhát chém cơ bản (<50%) rồi lướt về
     executeStormSlash() {
         let ratio = this.savedChargeRatio || 0;
-        let radius = 60 + (ratio * 60);
+        let radius = 45 + (ratio * 40); // [CÂN BẰNG] 60-120 -> 45-85
         let finalDmg = ST_DMG + (ratio * 1);
         const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
         iceZones.push(new StormSlash(cx, cy, radius, finalDmg, this, this.hasUpgrade('evo_storm_1') && ratio > 0.5));

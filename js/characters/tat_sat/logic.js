@@ -98,8 +98,8 @@ function tatReturn(p, silent) {
 // Cặp vùng đồng tâm (2B / Full Evo trượt Nhánh 3)
 function tatDoubleZone(p, x, y) {
     const pull = tatE2(p);
-    bodyEffects.push(new TatZone(p.id, x, y, 42, 15, 'stun', 0, { breakSummon: pull }));
-    bodyEffects.push(new TatZone(p.id, x, y, 78, 30, 'dmg', p.damage, { pull }));
+    bodyEffects.push(new TatZone(p.id, x, y, 42, 24, 'stun', 0, { breakSummon: pull }));
+    bodyEffects.push(new TatZone(p.id, x, y, 78, 42, 'dmg', p.damage, { pull }));
 }
 function tatRefund(p) {
     if (!tatE1(p)) return;
@@ -334,7 +334,7 @@ function tatRelease(p, pct) {
     } else {
         p.tatMode = 'warn3'; p.tatModeT = 0;
         p.tatSlowFx = 24;
-        scheduleHitscan(p, 21, TAT_GOLD, tatE2(p) ? 32 : 24, () => { if (p.tatMode === 'warn3') { p.tatMode = 'idle'; tatFire3(p); } });
+        scheduleHitscan(p, 36, TAT_GOLD, tatE2(p) ? 32 : 24, () => { if (p.tatMode === 'warn3') { p.tatMode = 'idle'; tatFire3(p); } });
         addFloatingText(p.x + p.w / 2, p.y + (p.id === 1 ? -26 : p.h + 30), 'NHẤT KIẾM...', TAT_GOLD, 13);
     }
 }
@@ -351,7 +351,7 @@ function tatDashStep(p) {
     const r = 32 + (pct / 0.49) * 36; // [CÂN BẰNG] 45-100 -> 32-68
     let hx = p.x + p.w / 2, hy = p.y + p.h / 2;
     if (hit && hit.o) hy = hit.o.y + hit.o.h / 2;
-    bodyEffects.push(new TatZone(p.id, hx, hy, r, 30, 'dmg', p.damage, { clear: tatE2(p) }));
+    bodyEffects.push(new TatZone(p.id, hx, hy, r, 42, 'dmg', p.damage, { clear: tatE2(p) }));
     tatReturn(p);
 }
 
