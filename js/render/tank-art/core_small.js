@@ -622,9 +622,36 @@
             ctx.fillStyle = i % 2 ? '#f5d0fe' : '#ffffff'; star(x, y, 1.5, 4, 0.35); ctx.fill(); ctx.restore();
         }
     };
+    // Lá bài phóng ra (đánh thường của Nhà Ảo Thuật): xoay tròn + lật 3D, viền neon, chất bài ở giữa
+    const MAG_SUITS = ['♠', '♥', '♦', '♣'];
     registerBulletArt('magician', (b, color, o, k) => {
         if (b.isRocket || b.isExplosive) return false;
-        magicianBullet(color, k, false);
+        const suit = ((b.suit || 0) % 4 + 4) % 4;
+        const red = suit === 1 || suit === 2;
+        // vệt sáng phía sau
+        const L = tailLen(k, 9, 2.0, 22);
+        const g = ctx.createLinearGradient(-L, 0, 0, 0);
+        g.addColorStop(0, 'rgba(224,86,253,0)'); g.addColorStop(1, 'rgba(224,86,253,0.55)');
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.moveTo(-L, 0); ctx.lineTo(-2, -4.5); ctx.lineTo(-2, 4.5); ctx.closePath(); ctx.fill();
+        // xoay + lật
+        ctx.rotate(k.t / 55 + suit * 1.7 + (b.x || 0) * 0.05);
+        ctx.scale(0.45 + 0.55 * Math.abs(Math.cos(k.t / 95 + suit)), 1);
+        const W = 9, H = 13, R = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(-W / 2 + R, -H / 2); ctx.lineTo(W / 2 - R, -H / 2); ctx.quadraticCurveTo(W / 2, -H / 2, W / 2, -H / 2 + R);
+        ctx.lineTo(W / 2, H / 2 - R); ctx.quadraticCurveTo(W / 2, H / 2, W / 2 - R, H / 2);
+        ctx.lineTo(-W / 2 + R, H / 2); ctx.quadraticCurveTo(-W / 2, H / 2, -W / 2, H / 2 - R);
+        ctx.lineTo(-W / 2, -H / 2 + R); ctx.quadraticCurveTo(-W / 2, -H / 2, -W / 2 + R, -H / 2); ctx.closePath();
+        ctx.shadowBlur = 10; ctx.shadowColor = '#e056fd';
+        ctx.fillStyle = lin(0, -H / 2, 0, H / 2, ['#ffffff', '#f3e8ff', '#e9d5ff']); ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = k.team; ctx.lineWidth = 1.1; ctx.stroke();
+        ctx.strokeStyle = 'rgba(192,132,252,0.8)'; ctx.lineWidth = 0.5;
+        ctx.strokeRect(-W / 2 + 1.4, -H / 2 + 1.4, W - 2.8, H - 2.8);
+        ctx.fillStyle = red ? '#ff2d6b' : '#1e1035';
+        ctx.font = 'bold 8px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(MAG_SUITS[suit], 0, 0.6);
     });
 
     // =====================================================================

@@ -26,7 +26,7 @@ const NET_CLASSES = {
     GeminiTwin,
     BdBatZone, BdLaser, BdOrb,
     BersArena,
-    MagHatRain,
+    MagHatRain, MagIllusionLayer, PdxRift,
     KazTornado, KazScar, KazEcho, KazLoanVu, KazDomain,
     TsShade, TsClone, TsWall, TsFirePool, TsRush, TsVoid, TsLoan, TsStreak, TsBigStar, TsFinisher,
     JkDecoy, JkEscapeFx, JkZone, JkVerdict, JkFinisher,
