@@ -226,6 +226,10 @@ function renderFrame() {
     if (typeof clFxOver === 'function') clFxOver();
     // Lớp phủ kết liễu Phi Công (BÁ CHỦ BẦU TRỜI) - js/characters/jet_pilot/render.js
     if (typeof jpFxOver === 'function') jpFxOver();
+    // Lớp phủ kết liễu Phong Trảm (PHONG TRẢM) - js/characters/wind_slash/render.js
+    if (typeof wsFxOver === 'function') wsFxOver();
+    // Lớp phủ kết liễu Cuồng Phong (CUỒNG PHONG / THIÊN PHONG) - js/characters/storm/render.js
+    if (typeof stFxOver === 'function') stFxOver();
 
     // Particles & Floating Numbers
     updateAndDrawParticles();
@@ -259,7 +263,7 @@ function renderFrame() {
 // Băng rôn thắng hiệp: mốc bắt đầu hiện (tick trong fatalCinematic), -1 = chưa hiện
 let victoryBannerStart = -1;
 const VICTORY_BANNER_MAX_WAIT = 66;
-const FINISHER_FX_CLASSES = ['FsFinisher', 'TsFinisher', 'JkFinisher', 'JgFinisher', 'CgFinisher', 'ClFinisher', 'JpFinisher'];
+const FINISHER_FX_CLASSES = ['FsFinisher', 'TsFinisher', 'JkFinisher', 'JgFinisher', 'CgFinisher', 'ClFinisher', 'JpFinisher', 'WsFinisher', 'StFinisher'];
 function finisherFxActive() {
     if (typeof bodyEffects === 'undefined') return false;
     for (const e of bodyEffects) {
