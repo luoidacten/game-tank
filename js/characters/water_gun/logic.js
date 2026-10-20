@@ -14,6 +14,7 @@ function wgBeamTick(p, dmg) {
     let stop = dirY < 0 ? 0 : canvas.height;
     const sw = (typeof sniperWallBlockY === 'function') ? sniperWallBlockY(p, x, fromY, dirY, WG_BEAM_HALF, dmg) : null;
     if (sw) stop = sniperWallStopY(sw, dirY);
+    if (typeof gmTwinAlso === 'function') gmTwinAlso(e, t => x + WG_BEAM_HALF > t.x && x - WG_BEAM_HALF < t.x + t.w && ((dirY < 0 ? t.y + t.h : t.y) - fromY) * dirY > 0 && (stop - (dirY < 0 ? t.y + t.h : t.y)) * dirY >= 0, dmg, p, { isDot: true }); // Gemini: Bản Sao AI
     if (e && e.hp > 0 && !e.isInvisible && x + WG_BEAM_HALF > e.x && x - WG_BEAM_HALF < e.x + e.w) {
         const ey = dirY < 0 ? e.y + e.h : e.y;
         if ((ey - fromY) * dirY > 0 && (stop - ey) * dirY >= 0) {

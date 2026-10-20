@@ -32,7 +32,9 @@ Object.assign(Player.prototype, {
         const bRw = beamW; let bRh = (this.id === 1 ? this.y : canvas.height - (this.y + this.h));
         const swBlk = sniperWallClipBeam(this, bRx, bRy, bRw, bRh, this.id === 1 ? -1 : 1, 20); // Tường Sniper chặn tia
         if (swBlk) { bRy = swBlk.y; bRh = swBlk.h; }
-        beams.push(new Beam(beamX, bRy, beamW, bRh, this.id, isEvo));
+        const lcBeam = new Beam(beamX, bRy, beamW, bRh, this.id, isEvo);
+        lcBeam.gmHit = true; // Gemini: Bản Sao xét trúng riêng bên dưới
+        beams.push(lcBeam);
 
         const enemy = (this.id === 1) ? p2 : p1;
         // Tia 20 dame. Full Evo: hạ gục ngay bất kể máu, xuyên khiên. Đòn hitscan duy nhất không có cột cảnh báo:
@@ -43,6 +45,7 @@ Object.assign(Player.prototype, {
             enemy.takeDamage(dmg, this, lcFull ? { bypassShield: true, isPiercing: true } : {});
             if (typeof fxSlashHit === 'function') fxSlashHit(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, '#7dd3fc', 30);
         }
+        if (typeof gmTwinAlso === 'function') gmTwinAlso(enemy, t => rectIntersect(bRx, bRy, bRw, bRh, t.x, t.y, t.w, t.h), lcFull ? (enemy.maxHp || 5) * 10 + 100 : 20, this, lcFull ? { unavoidable: true } : {}); // Gemini: Bản Sao AI
 
         crates.forEach(c => {
             if (c.active && rectIntersect(bRx, bRy, bRw, bRh, c.x, c.y, c.w, c.h)) {

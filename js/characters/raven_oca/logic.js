@@ -263,7 +263,9 @@ function rvOcaUpdate(p) {
         p.rvOcaX += p.rvOcaVX || 0; p.rvOcaY += p.rvOcaVY || 0;
         p.rvOcaDiveT--;
         const hit = e && e.hp > 0 && rectIntersect(p.rvOcaX - RV_OCA_R, p.rvOcaY - RV_OCA_R, RV_OCA_R * 2, RV_OCA_R * 2, e.x, e.y, e.w, e.h);
-        if (hit) {
+        if (!hit && typeof gmTwinAlso === 'function' && gmTwinAlso(e, t => rectIntersect(p.rvOcaX - RV_OCA_R, p.rvOcaY - RV_OCA_R, RV_OCA_R * 2, RV_OCA_R * 2, t.x, t.y, t.w, t.h), p.damage * 1.2, p)) {
+            p.rvOcaSt = 'back'; p.rvOcaDiveCd = full ? 150 : 210; // Gemini: cắn trúng Bản Sao AI
+        } else if (hit) {
             // Cắn + sóng xung kích làm chậm
             e.takeDamage(p.damage * 1.2, p);
             e.slowTimer = Math.max(e.slowTimer || 0, 72);
@@ -304,6 +306,7 @@ function rvBombsUpdate(p) {
     const e = rvEnemy(p);
     for (const bm of p.rvBombs) {
         if (--bm.t > 0) continue;
+        if (typeof gmTwinAlso === 'function') gmTwinAlso(e, t => Math.abs(t.x + t.w / 2 - bm.x) < 30 + t.w / 2 && Math.abs(t.y + t.h / 2 - bm.y) < 26 + t.h / 2, p.damage * 2, p); // Gemini: Bản Sao AI
         if (e && e.hp > 0 && Math.abs(e.x + e.w / 2 - bm.x) < 30 + e.w / 2 && Math.abs(e.y + e.h / 2 - bm.y) < 26 + e.h / 2) {
             e.takeDamage(p.damage * 2, p);
             if (rvE1(p)) { e.bleedTimer = Math.max(e.bleedTimer || 0, 60); e.bleedDmg = Math.max(e.bleedDmg || 0, 0.03); }

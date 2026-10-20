@@ -140,6 +140,7 @@ class ThunderStrike {
         const enemy = o === p1 ? p2 : p1;
         const top = o.id === 1 ? -20 : canvas.height + 20; // "trời" phía sau lưng đối thủ
         const inR = enemy && enemy.hp > 0 && Math.hypot(enemy.x + enemy.w / 2 - this.x, enemy.y + enemy.h / 2 - this.y) < this.r + enemy.w / 2;
+        if (typeof gmTwinAlso === 'function') gmTwinAlso(enemy, t => Math.hypot(t.x + t.w / 2 - this.x, t.y + t.h / 2 - this.y) < this.r + t.w / 2, this.dmg * (this.kind === 'sub' && o.thunderSlashFalloff ? o.thunderSlashFalloff() : 1), o); // Gemini: Bản Sao AI
         if (this.kind === 'sub') {
             const a = Math.random() * Math.PI;
             fxSweep(this.x, this.y, this.r * 0.9, a, a + Math.PI * 1.3, '#ffcc80', 12, 9);

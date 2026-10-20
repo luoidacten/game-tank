@@ -207,6 +207,7 @@ Object.assign(Player.prototype, {
         explosions.push(new Explosion(toX, toY, R, 'rgba(255, 255, 0,', 0, this));
         this.thunderAfterImage = { x: fromX, y: fromY, t: 14 };
         const enemy = (this.id === 1) ? p2 : p1;
+        if (typeof gmTwinAlso === 'function') gmTwinAlso(enemy, t => Math.hypot((t.x + t.w / 2) - toX, (t.y + t.h / 2) - toY) <= R + t.w / 2, dmg * this.thunderSlashFalloff(), this); // Gemini: Bản Sao AI
         if (enemy && enemy.hp > 0 && Math.hypot((enemy.x + enemy.w / 2) - toX, (enemy.y + enemy.h / 2) - toY) <= R + enemy.w / 2) {
             const dealt = enemy.takeDamage(dmg * this.thunderSlashFalloff(), this);
             if (dealt > 0) this.thunderSlashHits = (this.thunderSlashHits || 0) + 1;
@@ -304,6 +305,7 @@ Object.assign(Player.prototype, {
         fxSweep(cx, this.y + this.h / 2, 48, base + 1.4, base - 1.4, '#80deea', 14, 7);
         fxBolt(cx - 55, sy, cx + 55, sy, '#ffffff', 10, 2.5, 10);
         triggerScreenShake(5, 7);
+        if (typeof gmTwinAlso === 'function') gmTwinAlso(enemy, t => Math.abs(t.x + t.w / 2 - cx) < this.w / 2 + t.w / 2 + 26 && Math.abs(t.y + t.h / 2 - sy) < 50, thunderDmg(this, 0.9), this); // Gemini: Bản Sao AI
         if (enemy && enemy.hp > 0 && Math.abs(enemy.x + enemy.w / 2 - cx) < this.w / 2 + enemy.w / 2 + 26 && Math.abs(enemy.y + enemy.h / 2 - sy) < 50) {
             enemy.takeDamage(thunderDmg(this, 0.9), this);
             fxSlashHit(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, '#fff176', 28);

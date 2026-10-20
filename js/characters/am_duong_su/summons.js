@@ -175,6 +175,7 @@ class SpellZone {
         // Gây sát thương mỗi 0.5s (30 frame)
         if (this.lifeTime % 30 === 0) {
             const enemy = (this.owner.id === 1) ? p2 : p1;
+            if (typeof gmTwinAlso === 'function') gmTwinAlso(enemy, t => zoneDist(this.x - (t.x + t.w / 2), this.y - (t.y + t.h / 2)) < this.r, 0.5, this.owner); // Gemini: Bản Sao AI
             if (zoneDist(this.x - (enemy.x + enemy.w / 2), this.y - (enemy.y + enemy.h / 2)) < this.r) {
                 enemy.takeDamage(0.5, this.owner);
 

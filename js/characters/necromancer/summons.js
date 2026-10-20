@@ -135,6 +135,7 @@ class NecroMinion {
                 this.y += (this.homeY - this.y) * 0.2;
             } else if (this.dashState === 'dash') {
                 this.y += dirY * 13;
+                if (!this.hitDone && typeof gmTwinAlso === 'function' && gmTwinAlso(enemy, t => rectIntersect(this.x, this.y, this.w, this.h, t.x, t.y, t.w, t.h), this.dmg, this.owner)) this.hitDone = true; // Gemini: Bản Sao AI
                 if (!this.hitDone && enemy && enemy.hp > 0 && rectIntersect(this.x, this.y, this.w, this.h, enemy.x, enemy.y, enemy.w, enemy.h)) {
                     this.hitDone = true;
                     enemy.takeDamage(this.dmg, this.owner);

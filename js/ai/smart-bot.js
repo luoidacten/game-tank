@@ -293,6 +293,11 @@ class SmartBot {
             const n = this.tapCool <= 0 && typeof jpBotHold === 'function' ? jpBotHold(bot) : 0;
             if (n) { this.jpHoldN = n; this.hold = 1; inp.s = true; return; }
         }
+        // Sấm Chớp: giữ > 1s rồi nhả = Lôi Trảm (dịch chuyển chém ở từng cây thương đang cắm gần địch)
+        if (bot.weapon === 'thunder') {
+            if (this.hold > 0) { this.hold++; inp.s = this.hold <= 68; if (this.hold > 72) { this.hold = 0; this.tapCool = 10; } return; }
+            if (this.tapCool <= 0 && this.t % 12 === 0 && this.thunderWantsSlash(bot, enemy) && Math.random() < 0.35 + 0.65 * this.L.dodge) { this.hold = 1; inp.s = true; return; }
+        }
         // tap
         if (bot.weapon === 'overload' && (bot.ovMain || 0) < 1 && (bot.ammo || 0) > 0) { inp.s = false; return; } // Quá Tải: chờ thanh chính đầy
         if (this.tapCool > 0) { this.tapCool--; inp.s = this.tapCool > 6; return; }
@@ -300,6 +305,18 @@ class SmartBot {
         if (bot.weapon === 'magnet' && !(bot.polarDashCd > 0) && bot.findPolarDashTarget && bot.findPolarDashTarget()) { this.tapCool = 9; inp.s = true; return; }
         if (aligned) { this.tapCool = 9; inp.s = true; this.nextShot(enemy); return; }
         inp.s = false;
+    }
+
+    // Sấm Chớp: đáng dùng Lôi Trảm khi có thương cắm trong tầm chém của địch (>= 2 cây, hoặc đã hết thương trong tay)
+    thunderWantsSlash(bot, enemy) {
+        if (typeof thunderMyPlanted !== 'function' || bot.thunderLoiMinhTimer > 0 || bot.thunderSky || bot.thunderIsSlashing
+            || bot.thunderDashState || bot.thunderRaycastWarningTimer > 0 || bot.thunderIsRecallWarning || !(enemy.hp > 0)) return false;
+        const planted = thunderMyPlanted(bot);
+        if (!planted.length) return false;
+        const R = (typeof THUNDER_SLASH_R === 'number' ? THUNDER_SLASH_R : 80) + enemy.w / 2 - 8;
+        const ex = enemy.x + enemy.w / 2 + (enemy._vx || 0) * 20, ey = enemy.y + enemy.h / 2;
+        const near = planted.filter(s => Math.hypot(s.x - ex, s.y - ey) <= R).length;
+        return near >= 1 && (planted.length >= 2 || (bot.thunderSpears || 0) === 0);
     }
 
     update(bot, enemy, inp) {

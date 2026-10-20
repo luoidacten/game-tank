@@ -26,6 +26,7 @@ class ThrownMecha {
         const cx = this.x + this.w / 2, cy = this.dirY < 0 ? this.h / 2 : canvas.height - this.h / 2;
         explosions.push(new Explosion(cx, cy, this.radius, '#ff1744', 0, this.owner));
         const enemy = this.owner === p1 ? p2 : p1;
+        if (typeof gmTwinAlso === 'function') gmTwinAlso(enemy, t => Math.hypot(t.x + t.w / 2 - cx, t.y + t.h / 2 - cy) <= this.radius, this.dmg, this.owner); // Gemini: Bản Sao AI
         if (enemy && enemy.hp > 0 && Math.hypot(enemy.x + enemy.w / 2 - cx, enemy.y + enemy.h / 2 - cy) <= this.radius) {
             enemy.takeDamage(this.dmg, this.owner);
         }

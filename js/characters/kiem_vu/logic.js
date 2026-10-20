@@ -216,6 +216,7 @@ function kvUpdateSword(p) {
         p.kvSwX += dx / (d || 1) * stepLen;
         p.kvSwY += dy / (d || 1) * stepLen;
         const hx = p.kvSwX - 8, hy = p.kvSwY - 12;
+        if (!p.kvSwHit && typeof gmTwinAlso === 'function' && gmTwinAlso(enemy, t => rectIntersect(hx, hy, 16, 24, t.x, t.y, t.w, t.h), dmg, p, { kvSword: true })) p.kvSwHit = true; // Gemini: Bản Sao AI
         if (enemy && enemy.hp > 0 && !p.kvSwHit && rectIntersect(hx, hy, 16, 24, enemy.x, enemy.y, enemy.w, enemy.h)) {
             p.kvSwHit = true;
             kvSwordStrikeEnemy(p, enemy, dmg);
@@ -269,6 +270,7 @@ function kvUpdateMinis(p) {
         if (d < 60) m.ang = want;
         m.x += Math.cos(m.ang) * Math.min(s, d);
         m.y += Math.sin(m.ang) * Math.min(s, d);
+        if (m.ph === 0 && typeof gmTwinAlso === 'function' && gmTwinAlso(enemy, t => rectIntersect(m.x - 5, m.y - 9, 10, 18, t.x, t.y, t.w, t.h), 0.25 * kvSwordDmg(p), p, { kvSword: true })) m.ph = 1; // Gemini: Bản Sao AI
         if (m.ph === 0 && enemy && rectIntersect(m.x - 5, m.y - 9, 10, 18, enemy.x, enemy.y, enemy.w, enemy.h)) {
             m.ph = 1;
             enemy.takeDamage(0.25 * kvSwordDmg(p), p, { kvSword: true });

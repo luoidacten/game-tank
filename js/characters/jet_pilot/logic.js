@@ -53,6 +53,7 @@ class JpBomb {
     }
     detonate() {
         const owner = this.team === 1 ? p1 : p2, e = jpEnemy(owner);
+        if (typeof gmTwinAlso === 'function') gmTwinAlso(e, t => Math.abs(t.x + t.w / 2 - this.x) < this.r + t.w / 2 && Math.abs(t.y + t.h / 2 - this.y) < this.r + t.h / 2, this.dmg, owner); // Gemini: Bản Sao AI
         if (e && e.hp > 0 && Math.abs(e.x + e.w / 2 - this.x) < this.r + e.w / 2 && Math.abs(e.y + e.h / 2 - this.y) < this.r + e.h / 2) {
             e.takeDamage(this.dmg, owner);
         }
