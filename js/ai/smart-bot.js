@@ -160,6 +160,8 @@ class SmartBot {
         // Đối thủ né phát này thì dính phát sau; khi đã sát tường chỉ còn 1 khe thoát -> bắn chặn khe đó.
         attackX += this.shotOffset * (enemy.w * 1.4 + 6);
         let goal = { x: attackX, kind: 'enemy', tol: enemy.w / 2 + 2 };
+        // Boomerang: chạy ra đón chiếc Thẳng đang bay về
+        if (bot.weapon === 'boomerang' && typeof boomBotCatchX === 'function') { const bx = boomBotCatchX(bot); if (bx !== null) return { x: bx, kind: 'catch', tol: 5 }; }
         this.attack = goal;
 
         // Thùng tiếp tế / xe tiền đáng bắn
@@ -305,6 +307,11 @@ class SmartBot {
                 inp.s = true; return;
             }
             if (this.tapCool <= 0 && typeof opBotWantsSerious === 'function' && opBotWantsSerious(bot)) { this.hold = 1; inp.s = true; return; }
+        }
+        // Boomerang: chiếc đang chọn không trên tay -> giữ để đổi sang chiếc còn lại
+        if (bot.weapon === 'boomerang') {
+            if (this.hold > 0) { this.hold++; inp.s = this.hold <= 28; if (this.hold > 31) { this.hold = 0; this.tapCool = 4; } return; }
+            if (this.tapCool <= 0 && typeof boomBotWantsSwitch === 'function' && boomBotWantsSwitch(bot)) { this.hold = 1; inp.s = true; return; }
         }
         // Sấm Chớp: giữ > 1s rồi nhả = Lôi Trảm (dịch chuyển chém ở từng cây thương đang cắm gần địch)
         if (bot.weapon === 'thunder') {
