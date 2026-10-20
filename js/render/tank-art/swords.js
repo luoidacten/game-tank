@@ -622,7 +622,7 @@ function swDrawWindBlade(b) {
     const t = Date.now() / 1000;
     const team = b.owner && b.owner.id === 2 ? '#e74c3c' : '#3498db';
     const acc = b.isAccelerated;
-    const spin = t * (13 - ratio * 3);           // lưỡi to xoay chậm, nặng hơn
+    const spin = 0;                              // người dùng: lưỡi gió không xoay
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(ang);                             // +x = hướng bay
