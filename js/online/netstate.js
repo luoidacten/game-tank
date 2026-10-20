@@ -218,6 +218,7 @@ const NetState = {
     applyLoadout(p, pid, d) {
         if (!p || !d) return;
         NET_LOADOUT_KEYS.forEach(k => { if (d[k] !== undefined) p[k] = d[k]; });
+        if (typeof onGearLoadoutSynced === 'function') onGearLoadoutSynced(p);
         if (typeof d.coins === 'number') {
             gameState._noSpendTrack = true; // tiền đã tiêu được tính ở máy người mua (mtSpend đi kèm)
             if (pid === 'p1') gameState.p1Coins = d.coins; else gameState.p2Coins = d.coins;

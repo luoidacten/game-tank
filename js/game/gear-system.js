@@ -311,6 +311,17 @@ function applyGearImmediateEffect(player, gearId) {
     }
 }
 
+// Online: hiệu ứng tức thì của lõi chỉ chạy ở máy người chọn. Lõi #106 cộng +$200 cho ĐỐI THỦ,
+// nên máy nhận trang bị của đối thủ tự cộng tiền cho người chơi của mình (1 lần/trận).
+function onGearLoadoutSynced(p) {
+    if (!p || typeof p.hasGear !== 'function' || !p.hasGear('gear_protagonist_p') || p._protagonistBonusPaid) return;
+    if (typeof onlineManager === 'undefined' || !onlineManager.isOnline) return;
+    const myPid = onlineManager.role === 'guest' ? 2 : 1;
+    if (p.id === myPid) return; // trang bị của chính mình đã xử lý ở applyGearImmediateEffect
+    p._protagonistBonusPaid = true;
+    addPlayerCoins(p.id === 1 ? p2 : p1, 200);
+}
+
 function getJackpotDesc(jackpotId) {
     const names = {
         1: '🎰 ĐỘC ĐẮC [1]: THẦN TÀI (+$250)',
@@ -2641,6 +2652,8 @@ function onGearBulletSpawned(p, b) {
     if (!p || !b || !p.hasGear || b._gearProcessed) return;
     b._gearProcessed = true;
     b._gearSpawnY = b.y;
+    // Một số body (vd. shotgun) tạo đạn không có hitIds; lõi #53/#120 bật isPiercing -> bullets.js gọi hitIds.includes
+    if (!Array.isArray(b.hitIds)) b.hitIds = [];
 
     // #25 Đánh Đổi Liều Lĩnh: +15% tốc đạn
     if (p.hasGear('gear_glass_cannon_g')) {
@@ -3788,6 +3801,7 @@ const PracticeGearModal = {
                     p.gearBonusMaxHp = 0;
                     p.gearInfiniteStacks = 0;
                     p.gearJackpot = 0;
+                    this.clearOwnerGearEntities(p);
                     p.setupForNewRound();
                     this.render();
                 }
@@ -3803,6 +3817,12 @@ const PracticeGearModal = {
         }
         modal.style.display = 'flex';
         this.render();
+    },
+
+    // Xóa vật triệu hồi G.E.A.R cũ của người chơi trước khi setup lại (tránh nhân bản Drone/Lăng Kính/Trụ mỗi lần bật/tắt)
+    clearOwnerGearEntities(p) {
+        if (!p || typeof bodyEffects === 'undefined') return;
+        bodyEffects = bodyEffects.filter(e => !(e && e.team === p.id && e.constructor && /^Gear/.test(e.constructor.name)));
     },
 
     close() {
@@ -3867,6 +3887,7 @@ const PracticeGearModal = {
                     p.addGear(g.id);
                 }
                 const curX = p.x;
+                this.clearOwnerGearEntities(p);
                 p.setupForNewRound();
                 p.x = curX;
                 if (soundSystem && !soundSystem.muted) soundSystem.playPowerup();
