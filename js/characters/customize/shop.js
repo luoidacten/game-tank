@@ -19,7 +19,7 @@ function cuInjectStyle() {
     st.textContent = `
 .cu-sec{flex:0 0 auto;width:160px;box-sizing:border-box;height:100%;display:flex;flex-direction:column;gap:5px;overflow-y:auto;overflow-x:hidden;padding:2px 2px 6px;scrollbar-width:none}
 .cu-sec::-webkit-scrollbar{display:none}
-.player-column .card.cu-side{width:76px;height:auto;align-self:stretch;margin:4px 0}
+.player-column .card.cu-side{width:76px;height:auto;align-self:stretch;margin:15px 0 4px}
 .cu-head{position:sticky;top:0;z-index:2;background:rgba(10,14,24,.96);border-bottom:1px solid #f59e0b;padding:3px 4px 4px;font-family:Orbitron,monospace}
 .cu-head b{display:block;color:#fbbf24;font-size:10.5px;letter-spacing:.6px}
 .cu-head span{display:block;color:#94a3b8;font-size:8.5px;line-height:1.2}
@@ -86,7 +86,7 @@ function cuRenderPanel(playerId) {
     const auto = document.createElement('div');
     auto.className = 'card cu-side';
     auto.style.border = '2px solid #22d3ee';
-    auto.innerHTML = `<h4 style="color:#67e8f9">⚡ TỰ LẮP</h4><p>Tiêu hết CP theo gợi ý (Nổ, Chí Mạng, Dame...)</p><p style="color:#67e8f9">${d.cp} CP</p>`;
+    auto.innerHTML = `<h4 style="color:#67e8f9">⚡ TỰ LẮP</h4><p>Tiêu hết CP theo gợi ý (Nổ, Chí Mạng, Dame...)</p><p>${d.cp > 0 ? 'Có ' + d.cp + ' điểm' : 'Hết điểm'}</p>`; // nhãn trạng thái (không phải giá -> không thành nhãn giá)
     auto.onclick = () => { if (cuAutoSpend(p) > 0) changed(); };
     container.appendChild(auto);
 

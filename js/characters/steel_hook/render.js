@@ -261,60 +261,64 @@ Object.assign(CharHooks.registry.steel_hook, {
     },
 
     drawUI() {
+        // Tụ lực / hồi / chờ lôi xích: vòng nạp cạnh xe + nút Bắn (empower HUD, đăng ký bên dưới)
         const cx = this.x + this.w / 2;
-        const y = this.id === 1 ? this.y + this.h + 12 : this.y - 14;
-        const ph = this.shPhase;
         ctx.save();
-        ctx.font = 'bold 9px "Orbitron", Arial'; ctx.textAlign = 'center';
-        if (ph === 'ready' && this.shCharge >= 0) {
-            const tier = Math.min(4, Math.floor(this.shCharge / SH_TIER_TICKS));
-            const part = tier >= 4 ? 1 : (this.shCharge % SH_TIER_TICKS) / SH_TIER_TICKS;
-            for (let i = 0; i < 4; i++) {
-                const px = cx - 15 + i * 10;
-                ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(px - 4, y - 2, 8, 4);
-                const f = i < tier ? 1 : (i === tier ? part : 0);
-                ctx.fillStyle = tier >= 4 ? '#ffffff' : SH_GLOW;
-                ctx.fillRect(px - 4, y - 2, 8 * f, 4);
-            }
-            // Số lần nảy: ghi bên cạnh xe (không bị mép sân che)
-            const sideX = this.x + this.w / 2 > canvas.width - 60 ? this.x - 20 : this.x + this.w + 20;
-            ctx.fillStyle = tier >= 4 ? '#ffffff' : '#bfe6ff';
-            ctx.font = 'bold 11px "Orbitron", Arial';
-            ctx.shadowBlur = 8; ctx.shadowColor = SH_GLOW;
-            drawWorldText(ctx, `×${shBouncesForTier(this, tier)}`, sideX, this.y + this.h / 2 + 4);
+        if (this.shPhase === 'hold' && (this.shHoldS || 0) > 4) {
+            // Giữ Bắn để cắt xích: vòng tiến trình quanh xe + biểu tượng kéo
+            const k = Math.min(1, this.shHoldS / SH_BREAK_TICKS);
+            const cy = this.y + this.h / 2, R = this.w * 0.78;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = 'rgba(0,0,0,0.55)'; ctx.lineWidth = 5;
+            ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+            ctx.shadowBlur = 12; ctx.shadowColor = '#ff5d73';
+            ctx.strokeStyle = k >= 1 ? '#ffffff' : '#ff7a8a'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.arc(cx, cy, R, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * k); ctx.stroke();
             ctx.shadowBlur = 0;
-        } else if (ph === 'cool') {
-            ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(this.x - 4, y - 2, this.w + 8, 3);
-            ctx.fillStyle = '#94a3b8'; ctx.fillRect(this.x - 4, y - 2, (this.w + 8) * (this.shT / SH_COOLDOWN), 3);
-        } else if (ph === 'hold') {
-            const blink = Math.floor(Date.now() / 200) % 2 === 0;
-            const hasTruck = (this.shHooks || []).some(h => h.st === 'truck');
-            const hasEnemy = (this.shHooks || []).some(h => h.st === 'enemy');
-            ctx.fillStyle = blink ? '#ffffff' : (hasTruck ? '#ffd700' : SH_GLOW);
-            drawWorldText(ctx, hasEnemy ? 'NHẤP: LÔI XÍCH | GIỮ: CẮT' : (hasTruck ? 'SPAM BẮN: KÉO XE! 💰' : 'NHẤP: ĐU DÂY | GIỮ: CẮT'), cx, y + (this.id === 1 ? 6 : -2));
-            ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(this.x - 4, y + (this.id === 1 ? 10 : -10), this.w + 8, 2);
-            ctx.fillStyle = SH_GLOW; ctx.fillRect(this.x - 4, y + (this.id === 1 ? 10 : -10), (this.w + 8) * Math.max(0, 1 - this.shT / SH_HOLD_TIMEOUT), 2);
-            // Giữ Bắn để cắt xích: vòng tiến trình quanh xe
-            if ((this.shHoldS || 0) > 4) {
-                const k = Math.min(1, this.shHoldS / SH_BREAK_TICKS);
-                const cy = this.y + this.h / 2, R = this.w * 0.78;
-                ctx.lineCap = 'round';
-                ctx.strokeStyle = 'rgba(0,0,0,0.55)'; ctx.lineWidth = 5;
-                ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
-                ctx.shadowBlur = 12; ctx.shadowColor = '#ff5d73';
-                ctx.strokeStyle = k >= 1 ? '#ffffff' : '#ff7a8a'; ctx.lineWidth = 3;
-                ctx.beginPath(); ctx.arc(cx, cy, R, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * k); ctx.stroke();
-                ctx.shadowBlur = 0;
-                ctx.fillStyle = '#ffd0d6'; ctx.font = 'bold 9px "Orbitron", Arial';
-                drawWorldText(ctx, 'CẮT XÍCH ✂', cx, this.id === 1 ? this.y - R + 4 : this.y + this.h + R + 2);
+            if (typeof hudGlyphAt === 'function') {
+                const sy = this.id === 1 ? this.y - R + 2 : this.y + this.h + R - 2;
+                ctx.fillStyle = 'rgba(6,10,20,0.85)';
+                ctx.beginPath(); ctx.arc(cx, sy, 6.5, 0, Math.PI * 2); ctx.fill();
+                ctx.strokeStyle = '#ffd0d6'; ctx.fillStyle = '#ffd0d6'; ctx.lineWidth = 1.3;
+                hudGlyphAt('scissors', cx, sy, { flip: hudTextFlip(this) });
             }
         }
-        // Evo 2: hồi móc phụ
+        // Evo 2: hồi móc phụ (phía đối diện vòng nạp)
         if (this.hasUpgrade('evo_hook_2') && !this.shAuto) {
             const k = Math.min(1, (this.shAutoT || 0) / SH_AUTO_PERIOD);
-            ctx.strokeStyle = 'rgba(196,181,253,0.8)'; ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.arc(this.x + this.w + 6, this.y + this.h / 2, 4, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * k); ctx.stroke();
+            const ringRight = this.x + this.w + 24 <= canvas.width;
+            const ax = ringRight ? this.x - 7 : this.x + this.w + 7;
+            ctx.strokeStyle = 'rgba(196,181,253,0.25)'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(ax, this.y + this.h / 2, 4, 0, Math.PI * 2); ctx.stroke();
+            ctx.strokeStyle = 'rgba(196,181,253,0.9)';
+            ctx.beginPath(); ctx.arc(ax, this.y + this.h / 2, 4, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * k); ctx.stroke();
         }
         ctx.restore();
     },
 });
+
+// Móc Thép trên vòng nạp / nút Bắn: số lần nảy (tụ lực 4 mốc), hồi, chờ lôi xích / đu dây / kéo xe
+function shRegisterHUD() {
+    if (typeof registerEmpowerHUD !== 'function') return;
+    registerEmpowerHUD('steel_hook', p => {
+        const ph = p.shPhase;
+        if (ph === 'ready' && p.shCharge >= 0) {
+            const tier = Math.min(4, Math.floor(p.shCharge / SH_TIER_TICKS));
+            const part = tier >= 4 ? 1 : (p.shCharge % SH_TIER_TICKS) / SH_TIER_TICKS;
+            const n = shBouncesForTier(p, tier);
+            return { pct: Math.min(1, (tier + part) / 4), ready: tier >= 4, segments: 4, lit: tier, color: tier >= 4 ? '#ffffff' : SH_GLOW, label: 'NẢY', count: n, icon: 'hook', btnIcon: '🪝' };
+        }
+        if (ph === 'cool') return { pct: Math.min(1, (p.shT || 0) / SH_COOLDOWN), ready: false, color: '#94a3b8', label: '', icon: 'hook' };
+        if (ph === 'hold') {
+            const hooks = p.shHooks || [];
+            const enemy = hooks.some(h => h.st === 'enemy'), truck = hooks.some(h => h.st === 'truck');
+            return {
+                pct: Math.max(0, 1 - (p.shT || 0) / SH_HOLD_TIMEOUT), ready: false, icon: 'chain',
+                color: truck ? '#ffd700' : (enemy ? '#ff7a8a' : SH_GLOW),
+                label: enemy ? 'LÔI' : (truck ? 'KÉO $' : 'ĐU'), btnIcon: enemy ? '⛓' : (truck ? '💰' : '🪝'),
+            };
+        }
+        return null;
+    });
+}
+if (typeof window !== 'undefined') window.addEventListener('load', shRegisterHUD);

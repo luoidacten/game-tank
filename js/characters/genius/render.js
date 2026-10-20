@@ -2,67 +2,57 @@
 // genius (genius) — Hình ảnh (vẽ xe & UI riêng)
 // ==========================================
 
+// Màu & tên 5 chế độ Mecha (ô chế độ trên sân + nút Bắn)
+const GENIUS_MODE_COLORS = ['#ffd54f', '#ff7043', '#4fc3f7', '#ef5350', '#67e8f9'];
+const GENIUS_MODE_INFO = [['BẮN', '🔫'], ['PHÁO', '💣'], ['SMG', '⚡'], ['ĐẤM', '👊'], ['KHIÊN', '🛡']];
+function geniusRegisterHUD() {
+    if (typeof registerEmpowerHUD !== 'function') return;
+    registerEmpowerHUD('genius', p => {
+        if (p.isPilotingMecha) {
+            const m = (p.mechaMode || 1) - 1, inf = GENIUS_MODE_INFO[m] || ['M' + (m + 1), '🤖'];
+            const en = Math.max(0, Math.min(1, (p.mechaEnergy || 0) / (p.mechaMaxEnergy || 1)));
+            return { pct: en, ready: false, idle: true, label: inf[0], btnIcon: inf[1], color: GENIUS_MODE_COLORS[m] || '#ffd54f' };
+        }
+        if (p.mechaSummonHold > 0) return { pct: Math.min(1, p.mechaSummonHold / 40), ready: p.mechaSummonHold >= 40, label: 'MECHA', color: '#ff9800', icon: 'robot' };
+        return null;
+    });
+}
+if (typeof window !== 'undefined') window.addEventListener('load', geniusRegisterHUD);
+
 Object.assign(Player.prototype, {
     // [drawUI] genius
     drawUIForGenius(uiY, subUiY) {
-        if (this.weapon === 'genius') {
-            // Hàng thanh riêng xếp sau HUD chung (không đè lên thân xe / Mecha)
-            const rowY = (i) => (typeof hudRowY === 'function')
-                ? (this.id === 1 ? hudRowY(this, 'extra') + 1 + i * 5 : hudRowY(this, 'extra') - 4 - i * 5)
-                : (this.id === 1 ? uiY - 6 - i * 6 : subUiY + 6 + i * 6);
-            if (!this.isPilotingMecha) {
-                let genY = (this.id === 1) ? this.y - 8 : this.y + this.h + 16;
-                ctx.fillStyle = "#ffb74d";
-                ctx.font = "bold 9px 'Orbitron', Arial";
-                ctx.textAlign = "center";
-                drawWorldText(ctx, `⚙️ BR: ${this.gears || 0} | 🔩 LK: ${this.components || 0}`, this.x + this.w / 2, genY);
-
-                if (this.mechaSummonHold > 0) {
-                    let summonProgress = Math.min(1, this.mechaSummonHold / 40);
-                    let summonY = rowY(0);
-                    ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
-                    ctx.fillRect(this.x - 4, summonY, this.w + 8, 4);
-                    ctx.fillStyle = "#ff9800";
-                    ctx.fillRect(this.x - 4, summonY, (this.w + 8) * summonProgress, 4);
-                    drawWorldText(ctx, "TRIỆU HỒI MECHA...", this.x + this.w / 2, (this.id === 1) ? summonY + 12 : summonY - 4);
-                }
-            } else {
-                let mechaY = (this.id === 1) ? this.y - 10 : this.y + this.h + 18;
-                let modeNames = ["", "1:BẮN", "2:PHÁO", "3:SMG", "4:ĐẤM", "5:KHIÊN"];
-                let curModeName = modeNames[this.mechaMode] || `M${this.mechaMode}`;
-
-                // Mecha HP & Energy Bar
-                let mHpRatio = Math.max(0, Math.min(1, (this.mechaHp || 0) / (this.mechaMaxHp || 1)));
-                let mEnRatio = Math.max(0, Math.min(1, (this.mechaEnergy || 0) / (this.mechaMaxEnergy || 1)));
-                let mBarY1 = rowY(0);
-                let mBarY2 = rowY(1);
-
-                // Mecha HP bar
-                ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
-                ctx.fillRect(this.x - 4, mBarY1, this.w + 8, 4);
-                ctx.fillStyle = "#ff9800";
-                ctx.fillRect(this.x - 4, mBarY1, (this.w + 8) * mHpRatio, 4);
-
-                // Mecha Energy bar
-                ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
-                ctx.fillRect(this.x - 4, mBarY2, this.w + 8, 4);
-                ctx.fillStyle = "#00e5ff";
-                ctx.fillRect(this.x - 4, mBarY2, (this.w + 8) * mEnRatio, 4);
-
-                // Mecha Mode badge & Armor text
-                let armorInfo = (this.mechaVirtualArmor > 0) ? ` (+${this.mechaVirtualArmor} Giáp)` : '';
-                ctx.fillStyle = "#ffd54f";
-                ctx.font = "bold 8.5px 'Orbitron', Arial";
-                ctx.textAlign = "center";
-                drawWorldText(ctx, `🤖 [${curModeName}] NL:${Math.floor(this.mechaEnergy || 0)}${armorInfo}`, this.x + this.w / 2, mechaY);
-
-                // Self-destruct hold indicator
-                if (this.mechaSelfDestructHold > 0) {
-                    let sdProgress = Math.min(1, this.mechaSelfDestructHold / 180);
-                    ctx.fillStyle = "#f44336";
-                    ctx.fillRect(this.x - 4, rowY(2), (this.w + 8) * sdProgress, 4);
-                    drawWorldText(ctx, `💥 TỰ BẠO: ${(this.mechaSelfDestructHold/60).toFixed(1)}s`, this.x + this.w / 2, (this.id === 1) ? rowY(2) + 12 : rowY(2) - 4);
-                }
+        if (this.weapon !== 'genius' || typeof hudExtraBar !== 'function') return;
+        // Biểu tượng thay chữ: thanh mảnh ở hàng phụ sau HUD chung; chip/ô chế độ trước mũi xe (chế độ Mecha cũng hiện trên nút Bắn)
+        if (!this.isPilotingMecha) {
+            // Bánh Răng / Linh Kiện: chip [biểu tượng + số]
+            hudExtraChips(this, 0, [
+                { g: 'gear', c: '#ffb74d', l: String(this.gears || 0) },
+                { g: 'nut', c: '#00ffcc', l: String(this.components || 0) },
+            ], { d: hudNearD(this, 4, 11) });
+            // Giữ nút triệu hồi: vòng nạp cạnh xe (empower HUD) + thanh mảnh
+            if (this.mechaSummonHold > 0) hudExtraBar(this, 0, Math.min(1, this.mechaSummonHold / 40), '#ff9800', { h: 2.5 });
+        } else {
+            const mHp = Math.max(0, Math.min(1, (this.mechaHp || 0) / (this.mechaMaxHp || 1)));
+            const mEn = Math.max(0, Math.min(1, (this.mechaEnergy || 0) / (this.mechaMaxEnergy || 1)));
+            hudExtraBar(this, 0, mHp, '#ff9800', { h: 2.5 });     // máu Mecha
+            hudExtraBar(this, 0.7, mEn, '#00e5ff', { h: 1.5 });   // năng lượng
+            // 5 chế độ: ô sáng = chế độ hiện tại; giáp ảo = khiên nhỏ bên phải
+            const m = (this.mechaMode || 1) - 1;
+            const dP = hudNearD(this, 4, 3);
+            hudExtraPips(this, 0, 5, 0, GENIUS_MODE_COLORS[m] || '#ffd54f', { active: m, pw: 7, h: 3, d: dP });
+            if (this.mechaVirtualArmor > 0) {
+                const F = hudFrame(this);
+                const n = Math.min(4, Math.ceil(this.mechaVirtualArmor));
+                ctx.save();
+                ctx.fillStyle = '#67e8f9'; ctx.shadowBlur = 5; ctx.shadowColor = '#00ffff';
+                for (let i = 0; i < n; i++) hudGlyphAt('guard', F.X(26 + i * 8), F.Y(dP + 1.5), F);
+                ctx.restore();
+            }
+            // Giữ để tự bạo: thanh đỏ nhấp nháy trước ô chế độ
+            if (this.mechaSelfDestructHold > 0) {
+                const k = Math.min(1, this.mechaSelfDestructHold / 180);
+                hudExtraBar(this, 0, k, Math.floor(Date.now() / 120) % 2 ? '#f44336' : '#ffcdd2', { h: 2.5, d: hudNearD(this, 10, 2.5) });
             }
         }
     }

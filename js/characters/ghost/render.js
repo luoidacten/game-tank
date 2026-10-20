@@ -25,14 +25,10 @@ Object.assign(Player.prototype, {
                 ctx.restore(); // Trả lại trạng thái canvas
 
                 // B. Vẽ chữ thông báo trạng thái
-                ctx.fillStyle = "white";
-                ctx.font = "bold 10px Arial";
-                ctx.textAlign = "center";
-                ctx.fillText("VÔ ẢNH", this.x + this.w / 2, this.y - 10);
-
-                // C. Thanh thời gian hiệu lực còn lại (nhỏ màu trắng trên đầu)
-                ctx.fillStyle = "white";
-                ctx.fillRect(this.x, this.y - 5, this.w * (this.ghostActiveTimer / this.ghostDuration), 2);
+                // C. Thời gian Vô Ảnh còn lại: thanh trắng ở hàng phụ HUD + biểu tượng mắt
+                const bar = hudExtraBar(this, 0, this.ghostActiveTimer / this.ghostDuration, '#ffffff', { h: 2.5 });
+                ctx.fillStyle = '#e2e8f0'; ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1.2;
+                hudGlyphAt('blind', bar.F.X(-bar.BW / 2 - 7), bar.F.Y(bar.d + 1.2), bar.F);
 
             } else {
                 ctx.globalAlpha = 1.0;
@@ -40,8 +36,7 @@ Object.assign(Player.prototype, {
                 // [MỚI] Thanh hồi chiêu (Màu Xám) - Để biết bao giờ có lại
                 // Vẽ thanh loading bên dưới nhân vật hoặc trên đầu
                 if (this.ghostTimer > 0) {
-                    ctx.fillStyle = "gray";
-                    ctx.fillRect(this.x, this.y - 5, this.w * (this.ghostTimer / this.ghostCooldown), 2);
+                    hudExtraBar(this, 0, this.ghostTimer / this.ghostCooldown, '#94a3b8', { h: 2, glow: 0 });
                 }
             }
         }

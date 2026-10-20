@@ -147,7 +147,7 @@ function drawEmpowerTankHUD(p, s) {
         ctx.save();
         ctx.translate(rx, ry); ctx.scale(0.8, 0.8); ctx.translate(-rx, -ry);
         ctx.fillStyle = s.color; ctx.strokeStyle = s.color; ctx.lineWidth = 1.3; ctx.lineCap = 'round';
-        HUD_GLYPH[s.icon](rx, ry, F);
+        if (typeof hudGlyphAt === 'function') hudGlyphAt(s.icon, rx, ry, F); else HUD_GLYPH[s.icon](rx, ry, F);
         ctx.restore();
     }
     // sẵn sàng: mũi tên sáng trên nòng + vầng hào quang quanh xe

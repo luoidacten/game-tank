@@ -209,7 +209,6 @@ function djExecute(p) {
             p.lastShot = Date.now();
             if (p.ammo <= 0) {
                 p.djLock = DJ_LOCK_TICKS;
-                addFloatingText(p.x + p.w / 2, p.id === 1 ? p.y - 26 : p.y + p.h + 26, 'LOẠN ÂM! NẠP ĐẠN... 🔇', '#94a3b8', 12);
             }
             if (soundSystem && !soundSystem.muted) soundSystem.playTone(140, 'square', 0.12, 0.12);
             return;
@@ -292,7 +291,6 @@ function djNotePassed(p) {
     p.lastShot = Date.now();
     if (p.ammo <= 0) {
         p.djLock = DJ_LOCK_TICKS;
-        addFloatingText(tx, p.id === 1 ? p.y - 26 : p.y + p.h + 26, 'LỠ NHỊP! NẠP ĐẠN... 🔇', '#94a3b8', 12);
     }
 }
 
@@ -322,7 +320,7 @@ CharHooks.register('dj', {
     update() {
         djTickBeat(this);
         if (this.djLock > 0) {
-            if (--this.djLock === 0) { this.ammo = this.maxAmmo; addFloatingText(this.x + this.w / 2, this.id === 1 ? this.y - 26 : this.y + this.h + 26, 'SẴN SÀNG! 🎧', '#22d3ee', 11); }
+            if (--this.djLock === 0) this.ammo = this.maxAmmo; // khuông hết khoá (biểu tượng trên khuông, render.js)
             else this.lastShot = Date.now(); // không tự hồi đạn lẻ khi đang khóa
         }
         if (this.djPulse > 0) this.djPulse = Math.max(0, this.djPulse - 0.08);
