@@ -2,7 +2,8 @@
 
 ## Trạng thái
 - Nhánh làm việc: `claude/peaceful-goodall-w1qjps` — mọi thứ đã push.
-- 58 body. Danh sách việc còn lại: **`docs/TODO.md`** (theo thứ tự ưu tiên).
+- 58 body + **Hệ thống 150 Lõi Công Nghệ G.E.A.R (`#1 – #150`)** tại `js/data/gears.js` & `js/game/gear-system.js` (chi tiết nhật ký ở `NOTE_Antigravity.md`).
+- Danh sách việc còn lại: **`docs/TODO.md`** (theo thứ tự ưu tiên).
 - Cẩm nang body (tự sinh): `docs/BODIES.md`. Đặc tả body mới người dùng gửi: `docs/BODY_MOI_DAC_TA.md` (đã làm), `docs/BODY_MOI_UU_TIEN.md` (đã làm xong 7 body).
 - Người dùng muốn: **làm từng việc một** (tiết kiệm token), xong việc nào thì gộp → smoke test → push → cập nhật `docs/TODO.md` + `docs/BODIES.md`, rồi tự làm việc kế tiếp.
 
