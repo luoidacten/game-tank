@@ -5,7 +5,6 @@
 > Phiên mới: đọc `docs/HANDOVER.md` trước (công cụ test ở `tools/`).
 
 ## 0. Chỉnh sửa gấp (làm TRƯỚC mục 1)
-- Tsukiyo: Loạn Trảm đẹp hơn — bỏ hình que trắng xoay ở giữa, thay bằng vùng có nhiều vết chém loạn xạ.
 - Cuồng Phong: Gió Lốc / Lôi Bão / Phân Thân Lốc Xoáy + đường quét kiếm kiểu radar khi chém (đặc tả `docs/CUONG_PHONG_GIO_LOC.md`).
 - Còn lại: các mục bên dưới.
 
