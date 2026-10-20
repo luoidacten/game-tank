@@ -8,7 +8,6 @@
 - **Đợt chỉnh mới:**
   - Bài của Nhà Ảo Thuật phải xoay khi bay.
   - Cơ Bản: chỉ tỉ lệ nhỏ mới thức tỉnh MAIN (Hồi Ức); thường thì là Cơ Bản bình thường; Sandbox cho chọn thẳng MAIN.
-  - Joker: băng bài Sao Chép & bài được cường hóa có hiệu ứng riêng, đẹp hơn; Phán Quyết Joker (Showdown, CD 25s, 5 lá Joker trúng địch → -50% máu hiện tại, xóa khiên & buff, +1 Thoát Hiểm) chưa có hiệu ứng và có vẻ không hoạt động.
   - Khiên (hiển thị chung) đẹp hơn.
   - Phong Trảm: thêm hiệu ứng kết liễu.
   - Cuồng Phong: thêm hiệu ứng kết liễu (khác khi Full Evo); lướt hóa thành cơn lốc; cập nhật hoạt ảnh nội tại & chiêu.
