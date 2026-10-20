@@ -50,6 +50,18 @@ class OnlineMultiplayerManager {
         this.predX = null;
         this.lastInputSent = '';
         this.lastInputSentTick = 0;
+        this.inSeq = 0;        // guest: số thứ tự phím đang giữ
+        this.p2InSeq = -1;     // host: phím mới nhất đã nhận từ guest
+        this.p2InTicks = 0;
+        this.resetNetPrediction();
+    }
+
+    // Dự đoán xe của guest: lịch sử phím chưa được host xác nhận (mỗi tick 1 phần tử {seq, dir})
+    resetNetPrediction() {
+        this.predX = null;
+        this.predOff = 0;      // độ lệch hiển thị giảm dần sau mỗi lần sửa (tránh giật)
+        this.inHist = [];
+        this.ackSeq = -1; this.ackDone = 0;
     }
 
     // Nhận mọi tin nhắn (từ BroadcastChannel hoặc WebRTC) qua 1 cửa: lọc trùng rồi định tuyến
@@ -490,6 +502,12 @@ class OnlineMultiplayerManager {
             case 'INPUT':
             case 'INPUT_UPDATE':
                 if (data.input && inputs && inputs.p2) {
+                    // Số thứ tự phím (guest tăng mỗi lần đổi phím): bỏ gói cũ đến trễ,
+                    // đếm số tick đã chạy với phím hiện tại để guest đối chiếu dự đoán
+                    if (typeof data.seq === 'number') {
+                        if (data.seq < this.p2InSeq && this.p2InSeq - data.seq < 50) break; // gói cũ đến trễ
+                        if (data.seq !== this.p2InSeq) { this.p2InSeq = data.seq; this.p2InTicks = 0; }
+                    }
                     inputs.p2.l = !!data.input.l;
                     inputs.p2.r = !!data.input.r;
                     inputs.p2.s = !!data.input.s;
@@ -556,7 +574,7 @@ class OnlineMultiplayerManager {
                 if (data.p2Loadout) NetState.applyLoadout(p2, 'p2', data.p2Loadout);
                 if (data.round) gameState.round = data.round;
                 if (data.map) gameState.currentMap = data.map;
-                this.predX = null;
+                this.resetNetPrediction();
                 startRound();
                 break;
 
@@ -962,11 +980,14 @@ class OnlineMultiplayerManager {
         const pid = this.myPid();
         const inp = inputs[pid];
         const key = (inp.l ? 'L' : '') + (inp.r ? 'R' : '') + (inp.s ? 'S' : '');
+        if (key !== this.lastInputSent) this.inSeq++;
         if (key !== this.lastInputSent || this.netTick - this.lastInputSentTick >= 15) {
             this.lastInputSent = key;
             this.lastInputSentTick = this.netTick;
-            this.sendNetworkMessage({ type: this.role === 'guest' ? 'INPUT' : 'HOST_INPUT', input: { l: inp.l, r: inp.r, s: inp.s } });
+            this.sendNetworkMessage({ type: this.role === 'guest' ? 'INPUT' : 'HOST_INPUT', input: { l: inp.l, r: inp.r, s: inp.s }, seq: this.inSeq });
         }
+        // Host: số tick đã mô phỏng với phím hiện tại của guest (gửi kèm ảnh chụp qua p2.netInSeq / netInTicks)
+        if (this.role === 'host' && p2) { this.p2InTicks++; p2.netInSeq = this.p2InSeq; p2.netInTicks = this.p2InTicks; }
     }
 
     // Host: cuối mỗi tick, gửi ảnh chụp thế giới ~30 lần/giây
@@ -985,19 +1006,27 @@ class OnlineMultiplayerManager {
         if (screenShake.duration > 0) screenShake.duration--;
         if (!p2 || this.predX === null) return;
         const dir = (inputs.p2.r ? 1 : 0) - (inputs.p2.l ? 1 : 0);
-        const frozen = (p2.freezeTimer > 0) || p2.hp <= 0;
-        if (dir !== 0 && !frozen) {
-            let spd = p2.speed || C.baseSpeed;
-            if (p2.slowTimer > 0) spd *= 0.5;
-            this.predX = Math.max(0, Math.min(canvas.width - p2.w, this.predX + dir * spd));
-        }
-        p2.x = this.predX;
+        this.inHist.push({ seq: this.inSeq, dir });
+        if (this.inHist.length > 240) this.inHist.shift();
+        this.predX = this.guestStep(this.predX, dir);
+        this.predOff *= 0.75;
+        if (Math.abs(this.predOff) < 0.2) this.predOff = 0;
+        p2.x = this.predX + this.predOff;
         this.applyGuestLocalEffects();
+    }
+
+    // 1 tick di chuyển dự đoán của xe guest. Tốc độ lấy từ host (p2.netMoveSpd = tốc độ thật sau mọi
+    // hiệu ứng / hook body; 0 khi bị khoá di chuyển) thay vì p2.speed gốc.
+    guestStep(x, dir) {
+        if (!dir || p2.freezeTimer > 0 || p2.hp <= 0) return x;
+        let spd = (typeof p2.netMoveSpd === 'number') ? p2.netMoveSpd : (p2.speed || C.baseSpeed);
+        return Math.max(0, Math.min(canvas.width - p2.w, x + dir * spd));
     }
 
     applyHostSync(data) {
         if (!p1 || !p2 || !data.world) return;
         if (gameState.phase !== 'playing' && !fatalCinematic.active) return; // đang ở shop: bỏ qua ảnh chụp cũ
+        const shownX = p2.x;
         try {
             NetState.applyWorld(data.world);
         } catch (e) {
@@ -1007,14 +1036,30 @@ class OnlineMultiplayerManager {
         this.lastSnapshotAt = Date.now();
         NetState.replayEvents(data.ev);
 
-        // Hoà giải vị trí dự đoán với vị trí thật từ host
+        // Hoà giải kiểu "client-side prediction": vị trí host là kết quả của phím seq netInSeq đã chạy
+        // netInTicks tick -> bỏ các tick lịch sử đó, chạy lại phần phím host chưa xử lý từ vị trí host.
         const hostX = p2.x;
-        if (this.predX === null) this.predX = hostX;
-        const err = hostX - this.predX;
-        const moving = inputs.p2.l || inputs.p2.r;
-        if (Math.abs(err) > 60) this.predX = hostX;
-        else this.predX += err * (moving ? 0.08 : 0.35);
-        p2.x = this.predX;
+        const seq = p2.netInSeq, done = p2.netInTicks;
+        if (typeof seq === 'number' && typeof done === 'number') {
+            // các tick của seq này đã bỏ ở ảnh chụp trước thì không bỏ lại lần nữa
+            let skip = (seq === this.ackSeq) ? done - this.ackDone : done;
+            this.ackSeq = seq; this.ackDone = done;
+            this.inHist = this.inHist.filter(h => {
+                if (h.seq < seq) return false;
+                if (h.seq === seq && skip > 0) { skip--; return false; }
+                return true;
+            });
+        }
+        let x = hostX;
+        for (const h of this.inHist) x = this.guestStep(x, h.dir);
+        if (this.predX === null) { this.predX = x; this.predOff = 0; }
+        else {
+            // Sai lệch nhỏ: trượt mượt về vị trí đúng; lệch lớn (dịch chuyển, lướt, bị kéo): nhảy ngay
+            const off = shownX - x;
+            this.predX = x;
+            this.predOff = Math.abs(off) > 40 ? 0 : off;
+        }
+        p2.x = this.predX + this.predOff;
         this.applyGuestLocalEffects();
     }
 
@@ -1105,7 +1150,7 @@ class OnlineMultiplayerManager {
         this.guestDestroyedCrates = null;
         this.seenSeq = {};
         this.peerToClient = {};
-        this.predX = null;
+        this.resetNetPrediction();
         this.matchActive = false;
         if (this.joinTimeoutTimer) {
             clearTimeout(this.joinTimeoutTimer);

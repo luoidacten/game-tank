@@ -75,6 +75,10 @@ const NET_ROOTS = [
     ['fatalCinematic', () => fatalCinematic, v => fatalCinematic = v],
 ];
 
+// Trường chỉ dùng để vẽ, mỗi máy tự tính theo khung hình của mình (vd. vệt máu trễ ghostHp):
+// host không gửi, guest giữ giá trị cục bộ khi nhận ảnh chụp -> không bị giật ngược mỗi gói
+const NET_LOCAL_PLAYER_KEYS = ['ghostHp'];
+
 // Mảng chứa object thường (được vẽ bằng hàm riêng, không có .draw)
 const NET_PLAIN_LISTS = new Set(['thunderPlantedSpears', 'magnetNodes']);
 
@@ -97,7 +101,10 @@ const NetState = {
             const t = typeof v;
             if (t === 'number') {
                 if (!Number.isFinite(v)) return { $n: String(v) };
-                if (Number.isInteger(v)) return (v > 1e12 && v < 1e13) ? { $t: v - hostNow } : v; // mốc thời gian Date.now()
+                // mốc thời gian Date.now() (kể cả số lẻ như Date.now() + 0.5 * x): gửi dạng tương đối
+                // vì đồng hồ 2 máy lệch nhau -> guest cộng lại theo đồng hồ của mình
+                if (v > 1e12 && v < 1e13) return { $t: Math.round(v - hostNow) };
+                if (Number.isInteger(v)) return v;
                 return Math.round(v * 1000) / 1000;
             }
             if (t === 'string' || t === 'boolean') return v;
@@ -116,8 +123,10 @@ const NetState = {
                 if (!NET_CLASSES[cn]) return undefined; // class lạ (âm thanh, DOM...) – bỏ qua
                 o.$c = cn;
             }
+            const skipLocal = cn === 'Player'; // bỏ trường chỉ để vẽ (NET_LOCAL_PLAYER_KEYS)
             for (const k in v) {
                 if (!Object.prototype.hasOwnProperty.call(v, k)) continue;
+                if (skipLocal && NET_LOCAL_PLAYER_KEYS.includes(k)) continue;
                 const e = enc(v[k]);
                 if (e !== undefined) o[k] = e;
             }
@@ -142,7 +151,7 @@ const NetState = {
             let o;
             if (reuseTarget) {
                 o = reuseTarget;
-                for (const k of Object.keys(o)) if (!(k in v)) delete o[k];
+                for (const k of Object.keys(o)) if (!(k in v) && !NET_LOCAL_PLAYER_KEYS.includes(k)) delete o[k];
             } else {
                 const C = v.$c ? NET_CLASSES[v.$c] : null;
                 o = C ? Object.create(C.prototype) : {};

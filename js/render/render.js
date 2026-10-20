@@ -17,6 +17,8 @@ function drawRain() {
     ctx.stroke();
 }
 
+let worldViewTransform = null;
+
 function renderFrame() {
     if (gameState.phase !== 'playing' && !fatalCinematic.active) return;
 
@@ -47,6 +49,8 @@ function renderFrame() {
     } else {
         screenShake.x = 0; screenShake.y = 0;
     }
+    // Khung nhìn thế giới (xoay guest + zoom kết liễu + rung) – lớp HUD vẽ sau renderFrame dùng lại cho khớp
+    worldViewTransform = ctx.getTransform();
 
     // NỀN SÀN ĐẤU (vẽ trong world-space để rung màn hình đồng bộ)
     ctx.drawImage(getArenaFloor(), 0, 0, canvas.width, canvas.height);

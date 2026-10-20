@@ -4,7 +4,8 @@
 
 Object.assign(Player.prototype, {
     update() {
-
+        // Tốc độ di chuyển thật của tick này (0 = bị khoá) – guest online dùng để dự đoán xe mình
+        this.netMoveSpd = 0;
         this.updateBullets();
         const inp = (this.id === 1) ? inputs.p1 : inputs.p2;
         const now = Date.now();
@@ -81,9 +82,7 @@ Object.assign(Player.prototype, {
         if (typeof magnetStatusTick === 'function' && magnetStatusTick(this)) return;
 
         if (this.freezeTimer > 0) {
-            this.freezeTimer--;
-            ctx.fillStyle = "rgba(0, 255, 255, 0.5)";
-            ctx.fillRect(this.x - 5, this.y - 5, this.w + 10, this.h + 10);
+            this.freezeTimer--; // (khung băng được vẽ ở js/render/tank-hud.js – không vẽ trong update)
             return;
         }
         this.updateIce();
@@ -345,6 +344,7 @@ Object.assign(Player.prototype, {
         if (CharHooks.has(this, 'speed')) currentSpeed = CharHooks.call(this, 'speed', currentSpeed);
 
         const prevXForStone = this.x;
+        this.netMoveSpd = currentSpeed;
         if (inp.l) this.x -= currentSpeed;
         if (inp.r) this.x += currentSpeed;
 

@@ -228,10 +228,10 @@ function resetEmpowerButtons() {
     renderFrame = function () {
         base.apply(this, arguments);
         if (gameState.phase !== 'playing') { resetEmpowerButtons(); return; }
-        // renderFrame đã restore khung xoay -> guest online cần xoay lại sân 180° để vòng nằm đúng cạnh xe
-        const guest = typeof onlineManager !== 'undefined' && onlineManager && onlineManager.isOnline && onlineManager.role === 'guest';
+        // renderFrame đã restore khung nhìn -> dùng lại đúng khung thế giới (xoay guest 180°, zoom kết liễu, rung)
+        // để vòng nằm sát xe, không lệch / trôi khi màn hình rung
         ctx.save();
-        if (guest) { ctx.translate(canvas.width, canvas.height); ctx.rotate(Math.PI); }
+        if (worldViewTransform) ctx.setTransform(worldViewTransform);
         [p1, p2].forEach(p => {
             const s = empowerStateOf(p);
             if (s && !s.idle && !p.isInvisible && !p.stealthActive) drawEmpowerTankHUD(p, s);

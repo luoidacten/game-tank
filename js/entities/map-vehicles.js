@@ -572,10 +572,13 @@ MapVehicle.prototype.draw = function () {
     }
     // thanh máu + tên
     const pct = Math.max(0, Math.min(1, this.hp / (this.maxHp || 1)));
-    ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(x + 2, y - 8, w - 4, 4);
-    ctx.fillStyle = K.c; ctx.fillRect(x + 2, y - 8, (w - 4) * pct, 4);
+    // Guest online nhìn sân xoay 180° -> đặt thanh máu + tên ở mép kia để vẫn nằm PHÍA TRÊN xe trên màn hình
+    const gv = typeof onlineManager !== 'undefined' && onlineManager && onlineManager.isOnline && onlineManager.role === 'guest';
+    const by = gv ? y + h + 4 : y - 8, ty = gv ? y + h + 11 : y - 11;
+    ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(x + 2, by, w - 4, 4);
+    ctx.fillStyle = K.c; ctx.fillRect(gv ? x + w - 2 - (w - 4) * pct : x + 2, by, (w - 4) * pct, 4);
     ctx.fillStyle = K.c; ctx.font = 'bold 8px Arial'; ctx.textAlign = 'center';
     const lbl = this.kind === 'atk' ? (this.variant === 'cannon' ? 'PHÁO' : this.variant === 'smg' ? 'SMG' : 'LAZER') : (this.kind === 'buff' ? 'BUFF ST' : 'HỒI MÁU');
-    if (typeof drawWorldText === 'function') drawWorldText(ctx, lbl, cx, y - 11);
+    if (typeof drawWorldText === 'function') drawWorldText(ctx, lbl, cx, ty);
     ctx.restore();
 };
