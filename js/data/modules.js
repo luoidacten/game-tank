@@ -329,6 +329,14 @@ const MODULES = {
             size: { w: 36, h: 36 },
             stats: { hp: 5.5, dmg: 1.2, ammo: 4, speedMult: 0.971 }
         },
+        {
+            id: 'cluster_gun',
+            name: 'Pháo Phân Mảnh',
+            desc: '"Đạn tách ra: 1 thành nhiều!" HP:5 | Dame:1.5 | Đạn:2 | Tốc: 3.5. Giữ Bắn 0.4s: đổi chế độ đạn. ✸ PHÂN MẢNH: đạn gốc tự tách ở giữa sân thành 3 mảnh tỏa hình nón (chia sát thương gốc); đạn đã bay 0.25s -> nhấp Bắn lần nữa để TÁCH SỚM ngay tại chỗ. ◆ DỄ VỠ (đạn trừng phạt, không thể tự tách): bay như đạn thường, chạm tường/vật cản/xe địch chỉ gây st đơn; nhưng nếu bị ĐẠN ĐỊCH bắn trúng -> nổ tung, phá đạn đó và phóng 8 mảnh văng về phía địch. Hạ gục địch -> kết liễu PHÂN MẢNH.',
+            type: 'body', role: ['Đối Đầu', 'Kiểm Soát'],
+            size: { w: 30, h: 30 },
+            stats: { hp: 5, dmg: 1.5, ammo: 2, speedMult: 1 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 30 },

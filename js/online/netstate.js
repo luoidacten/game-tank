@@ -31,6 +31,7 @@ const NET_CLASSES = {
     TsShade, TsClone, TsWall, TsFirePool, TsRush, TsVoid, TsLoan, TsStreak, TsBigStar, TsFinisher,
     JkDecoy, JkEscapeFx, JkZone, JkVerdict, JkFinisher,
     JgSlug, JgWave, JgImpact, JgFinisher,
+    CgFinisher,
 };
 
 // Biến toàn cục cần đồng bộ: [tên, getter, setter]

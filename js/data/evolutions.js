@@ -256,4 +256,8 @@ const EVOLUTIONS = {
         { id: 'evo_jug_1', name: 'Kháng Thể Tuyệt Đối', desc: 'Giảm 25% sát thương theo thời gian (Đốt, Chảy Máu, Axit); không thể bị ăn mòn Max HP bởi Axit hay khóa máu bởi Trọng Thương. Mỗi lần kích hoạt MIỄN NHIỄM! nạp ngay 1 viên đạn.', cost: 90, type: 'evo' },
         { id: 'evo_jug_2', name: 'Gậy Ông Đập Lưng Ông', desc: 'Đạn Bá Khí lưu giữ khống chế đã hấp thụ (Chậm, Choáng, Đóng băng, Câm lặng, Kéo/Hút, Mù...) và trả ngược lên địch khi trúng. Giáp Phản Chấn giảm 60% st nhận. FULL EVO (Thần Chiến Bất Bại): +3 Max HP, tự tích 1 Bá Khí mỗi 3s, giảm DoT 50%, Đạn Bá Khí KHÔNG THỂ CẢN PHÁ (không bị xóa/phản, xuyên mọi tường/khiên).', cost: 110, type: 'evo' },
     ],
+    cluster_gun: [
+        { id: 'evo_frag_1', name: 'Vỡ Vụn', desc: 'GIA TỐC MẢNH VĂNG: sau khi đạn tách (Phân Mảnh tách hoặc Dễ Vỡ bị đạn địch bắn nổ), mọi mảnh đạn con bay nhanh hơn 50%.', cost: 40, type: 'evo' },
+        { id: 'evo_frag_2', name: 'Phân Chia', desc: 'Phân Mảnh vỡ thành 5 mảnh, Dễ Vỡ phóng 12 mảnh. Mọi mảnh con nảy tường 2 lần. FULL EVO (Bão Mảnh Hủy Diệt): Phân Mảnh vỡ 8 mảnh, Dễ Vỡ nổ tung 360° phóng 36 mảnh càn quét khắp sân; mảnh con bay cực nhanh & nảy tường 4 lần.', cost: 180, type: 'evo' },
+    ],
 };

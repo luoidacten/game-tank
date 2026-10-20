@@ -216,6 +216,8 @@ function renderFrame() {
     if (typeof jkFxOver === 'function') jkFxOver();
     // Lớp phủ kết liễu Juggernaut (PHÁ XIỀNG) - js/characters/juggernaut/render.js
     if (typeof jgFxOver === 'function') jgFxOver();
+    // Lớp phủ kết liễu Pháo Phân Mảnh (PHÂN MẢNH) - js/characters/cluster_gun/render.js
+    if (typeof cgFxOver === 'function') cgFxOver();
 
     // Particles & Floating Numbers
     updateAndDrawParticles();
