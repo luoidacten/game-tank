@@ -6,10 +6,6 @@
 
 ## 0. Chỉnh sửa gấp (làm TRƯỚC mục 1)
 
-## 1. Body mới ưu tiên (phần Đồ họa đã XONG → làm tiếp mục này)
-Đặc tả đầy đủ: **`docs/BODY_MOI_UU_TIEN.md`**. Làm lần lượt từng body (theo `tools/agents/common.md`), mỗi body xong thì gộp → smoke test → push:
-
-
 ## 2. HUD còn sót
 - DJ, Móc Thép, Thiên Tài (chữ BR/LK, chế độ Mecha), Tiến Hóa vẫn dùng chữ → đổi sang biểu tượng.
 - Thanh riêng của Paradox, Ghost, Mirror, Phong Trảm bị thanh máu mới che một phần.
