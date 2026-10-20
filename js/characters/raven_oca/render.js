@@ -122,7 +122,8 @@ function rvDrawOca(p, alpha) {
     const e = rvEnemy(p);
     // hướng mũi: lao -> về phía địch; bay lượn -> về phía sân địch
     let ang = rvDir(p) < 0 ? -Math.PI / 2 : Math.PI / 2;
-    if (diving && e) ang = Math.atan2(e.y + e.h / 2 - y, e.x + e.w / 2 - x);
+    if (diving) ang = Math.atan2(p.rvOcaVY || 0, p.rvOcaVX || 0.0001);
+    else if (p.rvOcaSt === 'aim') ang = Math.atan2((p.rvOcaTY || 0) - y, (p.rvOcaTX || 0) - x);
     ang += Math.max(-0.5, Math.min(0.5, (p.rvOcaFace || 0) * 0.4));
     ctx.save();
     ctx.globalAlpha *= alpha;
@@ -272,6 +273,9 @@ Object.assign(CharHooks.registry.raven_oca, {
             ctx.lineWidth = 2;
             ctx.beginPath(); ctx.ellipse(bm.x, bm.y, 30, 22, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
             ctx.beginPath(); ctx.ellipse(bm.x, bm.y, 30 * k, 22 * k, 0, 0, Math.PI * 2); ctx.stroke();
+            ctx.fillStyle = (Math.floor(bm.t / 6) % 2) ? '#fde047' : '#ff3b3b';
+            ctx.font = 'bold 11px Arial'; ctx.textAlign = 'center';
+            ctx.fillText('⚠', bm.x, bm.y - 25);
             const bx = bm.sx + (bm.x - bm.sx) * k, by = bm.sy + (bm.y - bm.sy) * k * k;
             ctx.fillStyle = '#111827'; ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 1.2;
             ctx.beginPath(); ctx.arc(bx, by, 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
@@ -280,7 +284,42 @@ Object.assign(CharHooks.registry.raven_oca, {
         // Oca
         if (this.rvOcaSt !== 'dead') {
             const hidden = rvOcaHidden(this);
-            if (!hidden) rvDrawOca(this, 1);
+            // Khóa mục tiêu trước khi lao: vạch ngắm thẳng + tâm khóa tại điểm cố định (ai cũng thấy)
+            if (this.rvOcaSt === 'aim' || this.rvOcaSt === 'dive') {
+                const k = this.rvOcaSt === 'aim' ? 1 - (this.rvOcaAimT || 0) / RV_DIVE_AIM : 1;
+                ctx.save();
+                ctx.strokeStyle = `rgba(244,63,94,${0.35 + 0.45 * k})`; ctx.lineWidth = 1.5;
+                ctx.setLineDash([5, 5]); ctx.lineDashOffset = -t / 25;
+                ctx.beginPath(); ctx.moveTo(this.rvOcaX, this.rvOcaY); ctx.lineTo(this.rvOcaTX, this.rvOcaTY); ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.beginPath(); ctx.arc(this.rvOcaTX, this.rvOcaTY, 14 - 4 * k, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(this.rvOcaTX - 18, this.rvOcaTY); ctx.lineTo(this.rvOcaTX - 8, this.rvOcaTY);
+                ctx.moveTo(this.rvOcaTX + 18, this.rvOcaTY); ctx.lineTo(this.rvOcaTX + 8, this.rvOcaTY);
+                ctx.stroke();
+                ctx.restore();
+            }
+            if (!hidden) rvDrawOca(this, this.rvOcaEmp > 0 ? 0.6 : 1);
+            // EMP: tia điện quanh Oca + vòng thời gian
+            if (this.rvOcaEmp > 0) {
+                const ox = this.rvOcaX, oy = this.rvOcaY;
+                ctx.save();
+                ctx.strokeStyle = '#a5f3fc'; ctx.lineWidth = 1.2; ctx.shadowColor = '#a5f3fc'; ctx.shadowBlur = 8;
+                ctx.beginPath();
+                for (let i = 0; i < 4; i++) {
+                    const a0 = (t / 90 + i * 1.6) % (Math.PI * 2);
+                    ctx.moveTo(ox + Math.cos(a0) * 8, oy + Math.sin(a0) * 8);
+                    ctx.lineTo(ox + Math.cos(a0 + 0.4) * 14, oy + Math.sin(a0 + 0.4) * 11);
+                    ctx.lineTo(ox + Math.cos(a0 + 0.2) * 19, oy + Math.sin(a0 + 0.2) * 16);
+                }
+                ctx.stroke();
+                const fr = this.rvOcaEmp / (this.rvOcaEmpMax || 120);
+                ctx.strokeStyle = 'rgba(196,181,253,0.9)'; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.arc(ox, oy, 22, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * fr); ctx.stroke();
+                ctx.fillStyle = '#c4b5fd'; ctx.font = 'bold 9px Arial'; ctx.textAlign = 'center';
+                ctx.fillText('EMP', ox, oy - 26);
+                ctx.restore();
+            }
             else if (rvIsMine(this)) {
                 // Tàng hình: chỉ chủ nhân thấy bóng mờ lấp lánh
                 rvDrawOca(this, 0.22 + 0.06 * Math.sin(t / 150));

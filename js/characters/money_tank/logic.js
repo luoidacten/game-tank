@@ -4,9 +4,10 @@
 // Body "farm tiền": đầu trận yếu, mua CẤP ĐỘ trong shop để mạnh dần.
 //  - Cấp 3: Khiên + 2 HP | Cấp 4: Đạn xuyên + 0.5 dame | Cấp 5: Đạn nổ
 //  - Cấp 6 (cuối) "Đế Chế Tiền Tệ": +3 HP, +2 đạn, +1 dame, 2 khiên đầu hiệp
-//  - Evo 1 Tiền Tấn Công: định kỳ phóng 2 xe tiền từ làn mình lao thẳng về phía địch, nổ khi chạm tường
+//  - Evo 1 Tiền Tấn Công: định kỳ phóng 1 xe tiền (Full Evo: 3 xe LẦN LƯỢT) trên 1 cột dọc ngẫu nhiên gần địch,
+//    mỗi xe có CẢNH BÁO đường chạy 2s trước khi lao (đối thủ kịp né), nổ khi chạm tường
 //  - Evo 2 Sức Mạnh Đồng Tiền: mọi nâng cấp -25%; mỗi 100$ tiêu (tối đa 2500$) nhận 1 mốc thưởng vĩnh viễn
-//  - Full Evo: mọi mặt hàng -50%, nhiều xe tiền trên sân hơn, phóng xe tấn công dày hơn
+//  - Full Evo: mọi mặt hàng -50%, nhiều xe tiền trên sân hơn, 3 xe tấn công lần lượt mỗi 5s
 // ==========================================
 
 const MT_MILESTONE_STEP = 100, MT_MILESTONE_MAX = 2500;
@@ -148,6 +149,65 @@ class AttackTruck {
     }
 }
 
+// --- Cảnh báo đường chạy của xe tấn công: cột dọc nhấp nháy 2s rồi mới phóng xe ---
+const MT_WARN_TICKS = 120;
+class MtTruckWarn {
+    constructor(owner, x, full) {
+        this.team = owner.id; this.full = !!full;
+        this.w = 24;
+        this.x = Math.max(0, Math.min(canvas.width - this.w, x - this.w / 2));
+        this.t = MT_WARN_TICKS; this.max = MT_WARN_TICKS;
+        this.active = true;
+    }
+    update() {
+        if (!this.active) return;
+        if (--this.t > 0) return;
+        this.active = false;
+        const owner = this.team === 1 ? p1 : p2;
+        if (!owner || owner.hp <= 0) return;
+        bodyEffects.push(new AttackTruck(owner, this.x + this.w / 2, this.full));
+        if (typeof soundSystem !== 'undefined' && soundSystem && !soundSystem.muted) soundSystem.playDash();
+    }
+    draw() {
+        if (!this.active) return;
+        const owner = this.team === 1 ? p1 : p2;
+        if (!owner) return;
+        const k = 1 - this.t / this.max; // 0 -> 1
+        const up = this.team === 1;
+        const y0 = up ? 0 : owner.y + owner.h, y1 = up ? owner.y : canvas.height;
+        const blink = Math.floor(this.t / 8) % 2 === 0;
+        ctx.save();
+        // dải cột mờ dần đậm lên
+        ctx.fillStyle = `rgba(255, ${blink ? 60 : 200}, 0, ${0.07 + 0.16 * k})`;
+        ctx.fillRect(this.x, y0, this.w, y1 - y0);
+        // 2 mép nét đứt chạy theo hướng xe
+        ctx.strokeStyle = `rgba(255, 215, 0, ${0.5 + 0.45 * k})`;
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([8, 6]);
+        ctx.lineDashOffset = (up ? 1 : -1) * (this.max - this.t) * 0.8;
+        ctx.beginPath();
+        ctx.moveTo(this.x, y0); ctx.lineTo(this.x, y1);
+        ctx.moveTo(this.x + this.w, y0); ctx.lineTo(this.x + this.w, y1);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        // mũi tên chỉ hướng lao + đếm ngược
+        const cx = this.x + this.w / 2, dir = up ? -1 : 1;
+        ctx.fillStyle = blink ? '#ff3b3b' : '#ffd700';
+        for (let i = 0; i < 3; i++) {
+            const ay = (up ? y1 - 40 : y0 + 40) + dir * (i * 70 + ((this.max - this.t) * 1.5) % 70);
+            if (ay < y0 || ay > y1) continue;
+            ctx.beginPath();
+            ctx.moveTo(cx, ay + dir * 7); ctx.lineTo(cx - 7, ay - dir * 3); ctx.lineTo(cx + 7, ay - dir * 3);
+            ctx.closePath(); ctx.fill();
+        }
+        ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center';
+        ctx.shadowColor = '#ffd700'; ctx.shadowBlur = 8;
+        const ty = up ? 18 : canvas.height - 10;
+        ctx.fillText('⚠ ' + (this.t / 60).toFixed(1) + 's', cx, ty);
+        ctx.restore();
+    }
+}
+
 // Phần thưởng cơ bản khi phá thùng bằng đường khác (xe tấn công, axit...)
 function grantCrateLoot(c, p) {
     if (!c || !p) return;
@@ -169,18 +229,26 @@ CharHooks.register('money_tank', {
         if (lv >= 6) this.shield = Math.max(this.shield || 0, 2);
         if (b && b.shield) this.shield = (this.shield || 0) + b.shield;
         this.mtAtkTimer = 120;
+        this.mtQueue = 0; this.mtQueueT = 0;
         return false;
     },
     update() {
         if (!this.hasUpgrade('evo_money_atk')) return;
         const full = mtIsFull(this);
+        // Hàng chờ: các xe được báo trước LẦN LƯỢT (cách nhau 1s), mỗi xe 1 cột dọc ngẫu nhiên quanh địch
+        if (this.mtQueue > 0 && --this.mtQueueT <= 0) {
+            this.mtQueue--;
+            this.mtQueueT = 60;
+            const enemy = this === p1 ? p2 : p1;
+            const ex = enemy ? enemy.x + enemy.w / 2 : canvas.width / 2;
+            const x = Math.max(12, Math.min(canvas.width - 12, ex + (Math.random() * 2 - 1) * 80));
+            bodyEffects.push(new MtTruckWarn(this, x, full));
+        }
         if (--this.mtAtkTimer > 0) return;
         this.mtAtkTimer = full ? 300 : 480; // Full Evo: 5s / lần, thường: 8s / lần
+        this.mtQueue = full ? 3 : 1; this.mtQueueT = 0;
         const cx = this.x + this.w / 2;
-        const offs = full ? [-48, 0, 48] : [-34, 34];
-        offs.forEach(o => bodyEffects.push(new AttackTruck(this, cx + o, full)));
         addFloatingText(cx, this.id === 1 ? this.y - 16 : this.y + this.h + 16, 'TIỀN TẤN CÔNG! 💰', '#ffd700', 13);
-        if (soundSystem && !soundSystem.muted) soundSystem.playDash();
     },
     shopButtons(container) {
         const d = this.mtSpend;

@@ -205,6 +205,12 @@ function jpDrawBomb(m) {
         ctx.beginPath(); ctx.arc(m.x, m.y, m.r * k, 0, Math.PI * 2); ctx.stroke();
         // dấu ngắm
         ctx.beginPath(); ctx.moveTo(m.x - m.r - 4, m.y); ctx.lineTo(m.x - m.r + 5, m.y); ctx.moveTo(m.x + m.r + 4, m.y); ctx.lineTo(m.x + m.r - 5, m.y); ctx.stroke();
+        // [MỚI] bom oanh tạc: dấu ⚠ nhấp nháy trong 1s cảnh báo
+        if (!mortar) {
+            ctx.fillStyle = (Math.floor(m.delay / 6) % 2) ? '#fde047' : '#f43f5e';
+            ctx.font = 'bold 11px Arial'; ctx.textAlign = 'center';
+            ctx.fillText('⚠', m.x, m.y - m.r - 3);
+        }
         // quả bom rơi (to dần)
         const sz = 2 + 3 * k;
         ctx.fillStyle = mortar ? '#a5f3fc' : '#1f2937'; ctx.strokeStyle = `rgb(${c})`; ctx.lineWidth = 1;

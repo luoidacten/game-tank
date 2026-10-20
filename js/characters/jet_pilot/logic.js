@@ -20,6 +20,7 @@ const JP_HOLD_SPLIT = 30;   // 0.5s
 const JP_HOLD_MERGE = 60;   // 1.0s
 const JP_HOVER = 120;       // Phi Ảnh bay trước làn mình 120px
 const JP_GCD = 10;
+const JP_BOMB_WARN = 60;    // bom oanh tạc: cảnh báo 1s trước khi nổ
 
 function jpE1(p) { return !!(p && p.hasUpgrade && p.hasUpgrade('evo_pilot_1')); }
 function jpE2(p) { return !!(p && p.hasUpgrade && p.hasUpgrade('evo_pilot_2')); }
@@ -170,7 +171,7 @@ function jpCarpet(p, n, dmg, spacing, baseDelay) {
     const ex = e ? e.x + e.w / 2 : canvas.width / 2;
     const x0 = Math.max(20, Math.min(canvas.width - 20 - spacing * (n - 1), ex - spacing * (n - 1) / 2));
     for (let i = 0; i < n; i++) {
-        bodyEffects.push(new JpBomb(p, x0 + i * spacing, ly, 'bomb', dmg, 24, baseDelay + i * 5, jpE1(p) && i % 2 === 0));
+        bodyEffects.push(new JpBomb(p, x0 + i * spacing, ly, 'bomb', dmg, 24, Math.max(JP_BOMB_WARN, baseDelay) + i * 5, jpE1(p) && i % 2 === 0));
     }
     return { x0, x1: x0 + spacing * (n - 1), y: ly };
 }
@@ -230,7 +231,7 @@ function jpJetUpdate(p, inp, now) {
         else if (T < 70) {
             const k = (T - 30) / 40; ty = ly; tx = p.jpRunSx + p.jpRunDir * 150 * k;
             const every = jpFull(p) ? 6 : 9;
-            if ((T - 30) % every === 0) bodyEffects.push(new JpBomb(p, Math.max(14, Math.min(W - 14, tx)), jpLaneY(p), 'bomb', 0.35 * jpPow(p) * (p.damage / 0.5), 24, 14, jpE1(p) && ((T - 30) / every) % 2 === 0));
+            if ((T - 30) % every === 0) bodyEffects.push(new JpBomb(p, Math.max(14, Math.min(W - 14, tx)), jpLaneY(p), 'bomb', 0.35 * jpPow(p) * (p.damage / 0.5), 24, JP_BOMB_WARN, jpE1(p) && ((T - 30) / every) % 2 === 0));
         } else { const k = (T - 70) / 30; ty = ly + (jpHoverY(p) - ly) * k; tx = p.jpJx + (p.jpRunX0 - p.jpJx) * Math.min(1, k * 0.5); }
         p.jpJx += (tx - p.jpJx) * 0.35; p.jpJy += (ty - p.jpJy) * 0.35; p.jpJvx = 0;
         p.jpJx = Math.max(13, Math.min(W - 13, p.jpJx));

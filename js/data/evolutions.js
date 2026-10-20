@@ -11,8 +11,8 @@ const EVOLUTIONS = {
         { id: 'evo_basic_2', name: 'Thập Tử Nhất Sinh', desc: 'Về 0 HP -> Hồi 1 HP + Bất tử 3s', cost: 30, type: 'evo' } // UPDATE DESC
     ],
     money_tank: [
-        { id: 'evo_money_atk', name: 'Tiền Tấn Công', desc: 'Mỗi 8s phóng 2 xe tiền từ làn bạn lao thẳng về phía địch (tông trúng 1.5 dame, chạm tường nổ 1.5 dame, phá xe tiền/thùng trên đường). Phá xe tiền bằng đạn -> bắn chùm đạn vào địch.', cost: 150, type: 'evo' },
-        { id: 'evo_money_2', name: 'Sức Mạnh Đồng Tiền', desc: 'Mọi nâng cấp giảm 25%. Mỗi 100$ tiêu (tối đa 2500$, tính từ lúc mua) nhận 1 mốc thưởng vĩnh viễn: HP, Dame, Đạn, Tốc, Khiên. FULL EVO: mọi mặt hàng giảm 50%, thêm xe tiền trên sân, 3 xe tấn công mỗi 5s (mạnh hơn).', cost: 120, type: 'evo' }
+        { id: 'evo_money_atk', name: 'Tiền Tấn Công', desc: 'Mỗi 8s phóng 1 xe tiền trên 1 cột dọc ngẫu nhiên quanh địch, lao thẳng từ làn bạn sang (có CẢNH BÁO đường chạy 2s trước khi lao để né; tông trúng 1.5 dame, chạm tường nổ 1.5 dame, phá xe tiền/thùng trên đường). Phá xe tiền bằng đạn -> bắn chùm đạn vào địch.', cost: 150, type: 'evo' },
+        { id: 'evo_money_2', name: 'Sức Mạnh Đồng Tiền', desc: 'Mọi nâng cấp giảm 25%. Mỗi 100$ tiêu (tối đa 2500$, tính từ lúc mua) nhận 1 mốc thưởng vĩnh viễn: HP, Dame, Đạn, Tốc, Khiên. FULL EVO: mọi mặt hàng giảm 50%, thêm xe tiền trên sân, mỗi 5s phóng 3 xe tấn công LẦN LƯỢT (cách nhau 1s, mỗi xe 1 cột ngẫu nhiên, đều cảnh báo 2s, mạnh hơn).', cost: 120, type: 'evo' }
     ],
     tank: [
         { id: 'evo_tank_1', name: 'Không Thể Cản Phá', desc: 'Lao húc x1.5 dame, không bị phản chấn khi tông tường/vật thể, khi lao chỉ nhận 20% sát thương', cost: 100, type: 'evo' }, // UPDATE COST
@@ -214,7 +214,7 @@ const EVOLUTIONS = {
     ],
     raven_oca: [
         { id: 'evo_raven_1', name: 'Chiến Thuật Đặc Nhiệm', desc: 'Đạn Răng Cưa: mọi viên đạn (cả 2 súng) gây Chảy Máu. Khói Đặc Quánh: Bom Khói +2s (4s). Bộ Pháp Xung Kích: cầm Tiểu Liên tăng mạnh tốc độ. Thay Đạn Tức Thì: đổi súng là nạp đầy băng súng mới.', cost: 100, type: 'evo' },
-        { id: 'evo_raven_2', name: 'Hỏa Lực Không Kích', desc: 'Oca máu 80% Raven & định kỳ hiện vòng cảnh báo đỏ rồi thả Bom xuống địch. Tiểu Liên xả loạt 5 viên, băng 15. Sniper bay nhanh hơn, mạnh hơn & gây Trọng Thương: máu bị mất do Sniper không thể hồi trong 10s. FULL EVO: Oca Bất Tử (không bị tiêu diệt, không chặn đạn), đổi súng hồi 2s, Oca vừa lao cắn làm chậm vừa thả mưa bom liên hoàn vừa giữ khóa mục tiêu vĩnh viễn cho cả 2 súng.', cost: 120, type: 'evo' }
+        { id: 'evo_raven_2', name: 'Hỏa Lực Không Kích', desc: 'Oca máu 80% Raven & định kỳ hiện vòng cảnh báo đỏ ⚠ (ít nhất 1s) rồi thả Bom xuống địch. Tiểu Liên xả loạt 5 viên, băng 15. Sniper bay nhanh hơn, mạnh hơn & gây Trọng Thương: máu bị mất do Sniper không thể hồi trong 10s. FULL EVO: Oca Bất Tử (không bị tiêu diệt, không chặn đạn), đổi súng hồi 2s, Oca vừa lao cắn làm chậm vừa thả mưa bom liên hoàn vừa giữ khóa mục tiêu vĩnh viễn cho cả 2 súng (Tiểu Liên tự ngắm vào vị trí hiện tại, không đón đầu, hơi tản -> di chuyển là né được).', cost: 120, type: 'evo' }
     ],
     lazer_beam: [
         { id: 'evo_beam_1', name: 'Năng Lượng Xanh', desc: 'Tích tụ khởi động chỉ 0.125s. Chiếu tia tiêu hao chậm hơn, hồi Năng Lượng nhanh hơn.', cost: 40, type: 'evo' },

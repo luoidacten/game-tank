@@ -14,7 +14,7 @@ const NET_CLASSES = {
     ShadowTrap, ShortgunFireZone, FireZone, WindWall, InventorDrone, ConfinementCage,
     CreatorTurret, CreatorShield, CreatorDrone, CreatorRobot,
     SniperWall, NecroMinion, GhostDecoy, Turret,
-    BodyZone, StoneBlock, SkyStrike, HitscanTelegraph, ThrownMecha, CrateBurst, AttackTruck, SwordSweep, LightningBolt, PortalGate, HitscanWarning,
+    BodyZone, StoneBlock, SkyStrike, HitscanTelegraph, ThrownMecha, CrateBurst, AttackTruck, MtTruckWarn, SwordSweep, LightningBolt, PortalGate, HitscanWarning,
     DjSoundZone, DjBeam,
     BigBulletBurst,
     FsPetal, FsSlashMark, FsClone, FsShadow, FsLandStrike, FsStar, FsStreak, FsBloom, FsFinisher,
