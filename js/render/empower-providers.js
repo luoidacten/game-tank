@@ -63,7 +63,8 @@
     reg('storm', p => {
         const k = Math.min(1, p.stormChargeRatio || 0);
         if (k <= 0) return null;
-        return { pct: k, ready: k >= 0.95, label: k >= 0.95 ? 'BÃO SẴN SÀNG' : 'BÃO', color: k >= 0.95 ? '#ff0055' : (k >= 0.5 ? '#00ffcc' : '#2ecc71'), btnIcon: k >= 0.95 ? '🌪️' : '' };
+        const full = k >= 0.999, mid = k >= 0.5;
+        return { pct: k, ready: full, label: full ? 'LÔI BÃO ⚡' : (mid ? 'GIÓ LỐC' : 'CHÉM'), color: full ? '#a78bfa' : (mid ? '#00ffcc' : '#2ecc71'), btnIcon: full ? '⚡' : (mid ? '🌪️' : '') };
     });
 
     // Chiêu Hồn Sư: vòng chia ô = số linh hồn; giữ nút = 4 cấp triệu hồi

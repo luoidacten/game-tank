@@ -267,10 +267,10 @@ class SmartBot {
             return;
         }
         if (style.startsWith('hold:')) {
-            const n = +style.slice(5);
+            const n = (bot.weapon === 'storm' && typeof stBotHoldN === 'function') ? (this.stHoldN || (this.stHoldN = stBotHoldN(bot))) : +style.slice(5); // Cuồng Phong: lúc tụ 50% / 100%
             if (this.hold > 0) { // đang nạp: nhả khi đủ lực VÀ thẳng hàng
                 this.hold++;
-                if ((this.hold >= n && aligned) || this.hold > n + 120) { this.hold = 0; inp.s = false; this.tapCool = 6; this.nextShot(enemy); return; }
+                if ((this.hold >= n && aligned) || this.hold > n + 120) { this.hold = 0; this.stHoldN = 0; inp.s = false; this.tapCool = 6; this.nextShot(enemy); return; }
                 inp.s = true; return;
             }
             if (this.tapCool > 0) { this.tapCool--; inp.s = false; return; }

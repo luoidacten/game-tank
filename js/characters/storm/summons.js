@@ -219,3 +219,108 @@ class StFinisher {
     draw() { }
     drawOver() { if (typeof stDrawFinisherOver === 'function') stDrawFinisherOver(this); }
 }
+
+// ---------- Entity: GIÓ LỐC (wind) / LÔI BÃO (thunder) / Cơn Lốc Nhỏ của Phân Thân (mini) — dữ liệu thuần ----------
+// wind/thunder: xe chủ ẩn bên trong (bất tử, không thể bị nhắm); hết giờ -> nhát chém chẻ đôi cơn lốc (stEndStorm)
+class StTornado {
+    constructor(team, kind, x, y, r, dur, dmg) {
+        this.team = team; this.kind = kind; this.x = x; this.y = y; this.r = r;
+        this.dur = dur; this.dmg = dmg; this.t = 0; this.active = true;
+        this.bolts = []; this.hit = false; this.slowT = 0; this.flash = 0;
+    }
+    inside(e, k = 1) {
+        return !!e && e.hp > 0 && Math.abs(e.x + e.w / 2 - this.x) < this.r * k + e.w * 0.3 && Math.abs(e.y + e.h / 2 - this.y) < this.r * 0.75;
+    }
+    update() {
+        const o = this.team === 1 ? p1 : p2, e = this.team === 1 ? p2 : p1;
+        this.t++;
+        if (this.flash > 0) this.flash--;
+        if (this.kind === 'mini') {
+            if (this.t <= this.dur && !this.hit && this.inside(e)) {
+                this.hit = true; this.slowT = 60;
+                e.takeDamage(this.dmg, o);
+                if (typeof fxSlashHit === 'function') fxSlashHit(e.x + e.w / 2, e.y + e.h / 2, '#99f6e4', 18);
+            }
+            if (this.slowT > 0) { this.slowT--; addStatusSlow(e, 0.75); }
+            if (this.t >= this.dur && this.slowT <= 0) this.active = false;
+            return;
+        }
+        if (!o || o.stMode !== 'storm' || o.hp <= 0) { this.active = false; return; }
+        const thunder = this.kind === 'thunder';
+        // Hút nhẹ theo trục X về tâm + Làm Chậm + dame mỗi 0.4s
+        if (this.inside(e, 1.5)) {
+            const dx = this.x - (e.x + e.w / 2), pull = thunder ? 1.0 : 0.55;
+            e.x = Math.max(0, Math.min(canvas.width - e.w, e.x + Math.sign(dx) * Math.min(Math.abs(dx), pull)));
+        }
+        if (this.inside(e)) {
+            addStatusSlow(e, thunder ? 0.65 : 0.75);
+            if (this.t % 24 === 0) {
+                e.takeDamage(this.dmg, o);
+                if (typeof spawnSparkParticles === 'function') spawnSparkParticles(e.x + e.w / 2, e.y + e.h / 2, thunder ? '#c4b5fd' : '#99f6e4', 4);
+            }
+        }
+        // Lôi Bão: mỗi 0.8s 1 tia sét ngẫu nhiên trong lốc (chớp báo trước 0.25s)
+        if (thunder) {
+            if (this.t % 48 === 0 && this.t < this.dur - 10) {
+                this.bolts.push({ x: Math.max(10, Math.min(canvas.width - 10, this.x + (Math.random() * 2 - 1) * this.r * 0.85)), y: this.y + (Math.random() * 2 - 1) * 10, t: 15 });
+            }
+            for (const b of this.bolts) {
+                if (--b.t > 0) continue;
+                this.flash = 6;
+                if (typeof fxBolt === 'function') fxBolt(b.x + (Math.random() - 0.5) * 40, b.y - 230, b.x, b.y, '#c4b5fd', 16, 5, 20);
+                explosions.push(new Explosion(b.x, b.y, 28, 'rgba(196, 181, 253,', 0, o));
+                if (e.hp > 0 && Math.abs(e.x + e.w / 2 - b.x) < 22 + e.w / 2 && Math.abs(e.y + e.h / 2 - b.y) < 32) {
+                    const inv = (e.invincibleTimer || 0) > 0;
+                    e.takeDamage(0.5, o);
+                    if (!inv) {
+                        e.freezeTimer = Math.max(e.freezeTimer || 0, 45);
+                        addFloatingText(e.x + e.w / 2, e.y - 14, 'CHOÁNG ⚡', '#c4b5fd', 13);
+                    }
+                }
+                triggerScreenShake(4, 6);
+            }
+            this.bolts = this.bolts.filter(b => b.t > 0);
+        }
+        if (this.t >= this.dur) { this.active = false; stEndStorm(o, this); }
+    }
+    draw() { if (typeof stDrawTornadoFx === 'function') stDrawTornadoFx(this); }
+}
+
+// Nhát chém chẻ đôi cơn lốc (hình ảnh)
+class StSplitFx {
+    constructor(team, x, y, r, kind, second) {
+        this.team = team; this.x = x; this.y = y; this.r = r; this.kind = kind; this.second = !!second;
+        this.ang = second ? 0.75 : -0.55; this.t = 0; this.dur = 30; this.active = true;
+    }
+    update() { if (++this.t >= this.dur) this.active = false; }
+    draw() { if (typeof stDrawSplitFx === 'function') stDrawSplitFx(this); }
+}
+
+// Vệt lướt giật về vị trí cũ (hình ảnh)
+class StDashTrail {
+    constructor(team, x0, y0, x1, y1) {
+        this.team = team; this.x0 = x0; this.y0 = y0; this.x1 = x1; this.y1 = y1;
+        this.t = 0; this.dur = 16; this.active = true;
+    }
+    update() { if (++this.t >= this.dur) this.active = false; }
+    draw() { if (typeof stDrawDashTrail === 'function') stDrawDashTrail(this); }
+}
+
+// Nhát chém trễ (chém bồi / Hư Ảnh Lặp Lại) — dữ liệu thuần
+class StDelayedSlash {
+    constructor(team, x, y, r, dmg, delay, split, kind) {
+        this.team = team; this.x = x; this.y = y; this.r = r; this.dmg = dmg; this.delay = delay;
+        this.split = !!split; this.kind = kind; this.active = true;
+    }
+    update() {
+        if (--this.delay > 0) return;
+        this.active = false;
+        const o = this.team === 1 ? p1 : p2;
+        if (!o) return;
+        iceZones.push(new StormSlash(this.x, this.y, this.r, this.dmg, o, false));
+        if (this.split) bodyEffects.push(new StSplitFx(this.team, this.x, this.y, this.r, this.kind, true));
+        else explosions.push(new Explosion(this.x, this.y, this.r, 'rgba(100, 100, 255,', 0, o));
+        triggerScreenShake(6, 8);
+    }
+    draw() { }
+}

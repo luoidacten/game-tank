@@ -6,8 +6,8 @@
 function stUp() { return (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'guest') ? 1 : -1; }
 
 // Phễu lốc xoáy nhiều lớp + mảnh vụn bay xoắn (cx,cy = chân phễu)
-function stDrawTornado(cx, cy, r0, r1, hh, t, alpha, team) {
-    const up = stUp(), N = 14;
+function stDrawTornado(cx, cy, r0, r1, hh, t, alpha, team, upDir) {
+    const up = upDir || stUp(), N = 14;
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
     ctx.lineCap = 'round';
@@ -41,7 +41,7 @@ function stDrawTornado(cx, cy, r0, r1, hh, t, alpha, team) {
 Object.assign(Player.prototype, {
     // [draw] Cuồng Phong (chỉ hình ảnh)
     drawStorm() {
-        if (this.weapon !== 'storm') return;
+        if (this.weapon !== 'storm' || this.stHidden) return;
         const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
         const t = Date.now() / 1000;
         const team = this.id === 2 ? '#e74c3c' : '#3498db';
@@ -58,19 +58,21 @@ Object.assign(Player.prototype, {
             ctx.restore();
             if (typeof swDrawVortex === 'function') swDrawVortex(cx, cy, this.w * 0.75, team, 0.9, t * 1.6, 1);
             stDrawTornado(cx, cy + this.h * 0.3 * -stUp(), 5, 26, 46, t * 1.5, 1, team);
-            return;
-        }
-        // Chờ chém: gió cuộn vào tâm
-        if (this.stormSlashDelay > 0) {
-            const k = 1 - this.stormSlashDelay / 30;
+            // Vòng lưỡi gió xoay tròn phản đạn
             ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
-            for (let a = 0; a < 6; a++) {
-                const base = a * Math.PI / 3 - t * 9, R = 70 * (1 - k) + 18;
-                ctx.globalAlpha = 0.3 + 0.6 * k;
-                ctx.strokeStyle = a % 2 ? '#5eead4' : '#ffffff'; ctx.lineWidth = 1.5 + 2 * k;
-                ctx.beginPath(); ctx.arc(cx, cy, R, base, base + 1.1); ctx.stroke();
+            for (let a = 0; a < 3; a++) {
+                const base = t * 26 + a * Math.PI * 2 / 3;
+                ctx.globalAlpha = 0.9; ctx.strokeStyle = a ? '#5eead4' : '#ffffff'; ctx.lineWidth = 3;
+                ctx.shadowBlur = 10; ctx.shadowColor = '#5eead4';
+                ctx.beginPath(); ctx.arc(cx, cy, this.w * 0.85, base, base + 1.3); ctx.stroke();
             }
             ctx.restore();
+            return;
+        }
+        // Rung lắc = đang chém: radar quét kiếm theo chiều kim đồng hồ + vùng cảnh báo
+        if (this.stormSlashDelay > 0) {
+            stDrawRadar(cx, cy, this.stSlashR || 70, 1 - this.stormSlashDelay / 30, '#5eead4');
+            return;
         }
         const ch = Math.min(1, this.stormChargeRatio || 0);
         if (ch <= 0) return;
@@ -212,4 +214,200 @@ function stDrawFinisherOver(f) {
 function stFxOver() {
     if (typeof bodyEffects === 'undefined') return;
     for (const e of bodyEffects) if (e instanceof StFinisher && e.active) e.drawOver();
+}
+
+// ---------- Radar quét kiếm (chiều kim đồng hồ) + vùng cảnh báo — lúc xe rung lắc = đang chém ----------
+function stDrawRadar(cx, cy, R, k, col) {
+    k = Math.max(0, Math.min(1, k));
+    const a = -Math.PI / 2 + k * Math.PI * 2;
+    ctx.save();
+    // Vùng cảnh báo
+    ctx.globalAlpha = 0.14 + 0.12 * k; ctx.fillStyle = '#ff2d55';
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 0.9; ctx.strokeStyle = '#ff4d6d'; ctx.lineWidth = 2;
+    ctx.setLineDash([9, 6]); ctx.lineDashOffset = -k * 80;
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+    ctx.globalAlpha = 0.55; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(cx, cy, Math.max(4, R * (1 - k)), 0, Math.PI * 2); ctx.stroke();
+    // Lưới radar
+    ctx.globalAlpha = 0.3; ctx.strokeStyle = col; ctx.lineWidth = 1;
+    for (const f of [0.33, 0.66]) { ctx.beginPath(); ctx.arc(cx, cy, R * f, 0, Math.PI * 2); ctx.stroke(); }
+    ctx.beginPath(); ctx.moveTo(cx - R, cy); ctx.lineTo(cx + R, cy); ctx.moveTo(cx, cy - R); ctx.lineTo(cx, cy + R); ctx.stroke();
+    // Vệt quét mờ phía sau lưỡi kiếm
+    ctx.globalCompositeOperation = 'lighter';
+    const tail = Math.min(k * Math.PI * 2, 1.5);
+    for (let i = 0; i < 12; i++) {
+        const f0 = i / 12, f1 = (i + 1) / 12;
+        ctx.globalAlpha = 0.32 * (1 - f0); ctx.fillStyle = col;
+        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, R, a - tail * f1, a - tail * f0); ctx.closePath(); ctx.fill();
+    }
+    // Lưỡi kiếm quét
+    const ex = cx + Math.cos(a) * R, ey = cy + Math.sin(a) * R;
+    ctx.lineCap = 'round'; ctx.shadowBlur = 16; ctx.shadowColor = col;
+    ctx.globalAlpha = 0.9; ctx.strokeStyle = col; ctx.lineWidth = 6;
+    ctx.beginPath(); ctx.moveTo(cx + Math.cos(a) * 8, cy + Math.sin(a) * 8); ctx.lineTo(ex, ey); ctx.stroke();
+    ctx.globalAlpha = 1; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2.2;
+    ctx.beginPath(); ctx.moveTo(cx + Math.cos(a) * 8, cy + Math.sin(a) * 8); ctx.lineTo(ex, ey); ctx.stroke();
+    // Mũi kiếm
+    ctx.save(); ctx.translate(ex, ey); ctx.rotate(a);
+    ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.moveTo(6, 0); ctx.lineTo(-4, -4); ctx.lineTo(-2, 0); ctx.lineTo(-4, 4); ctx.closePath(); ctx.fill();
+    ctx.restore();
+    ctx.restore();
+}
+
+// Xoắn ốc gió nhìn từ trên xuống
+function stDrawSpiral(x, y, R, ph, col, alpha, arms = 5, lw = 2.4) {
+    ctx.lineCap = 'round';
+    for (let a = 0; a < arms; a++) {
+        const base = a * Math.PI * 2 / arms + ph;
+        ctx.globalAlpha = alpha * (a % 2 ? 0.6 : 1);
+        ctx.strokeStyle = a % 2 ? '#ffffff' : col; ctx.lineWidth = lw;
+        ctx.beginPath();
+        for (let i = 0; i <= 14; i++) {
+            const q = i / 14, rr = R * (0.12 + q * 0.88), th = base + q * 2.6;
+            const px = x + Math.cos(th) * rr, py = y + Math.sin(th) * rr;
+            if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+    }
+}
+
+// ---------- GIÓ LỐC / LÔI BÃO / Cơn Lốc Nhỏ ----------
+function stDrawTornadoFx(z) {
+    const mini = z.kind === 'mini', thunder = z.kind === 'thunder';
+    if (mini && z.t > z.dur) return;
+    const t = z.t / 60;
+    const life = mini ? Math.max(0, Math.min(1, (z.dur - z.t) / 15, z.t / 6)) : Math.min(1, z.t / 12);
+    const R = z.r * (0.8 + 0.2 * Math.min(1, z.t / 12));
+    const c1 = thunder ? '#a78bfa' : '#5eead4', team = z.team === 2 ? '#e74c3c' : '#3498db';
+    ctx.save();
+    // 1. Vùng ảnh hưởng
+    const g = ctx.createRadialGradient(z.x, z.y, R * 0.1, z.x, z.y, R);
+    if (thunder) { g.addColorStop(0, 'rgba(46, 16, 101, 0.55)'); g.addColorStop(0.7, 'rgba(76, 29, 149, 0.35)'); g.addColorStop(1, 'rgba(76, 29, 149, 0)'); }
+    else { g.addColorStop(0, 'rgba(15, 118, 110, 0.4)'); g.addColorStop(0.7, 'rgba(20, 184, 166, 0.22)'); g.addColorStop(1, 'rgba(20, 184, 166, 0)'); }
+    ctx.globalAlpha = life; ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(z.x, z.y, R, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = life * 0.75; ctx.strokeStyle = c1; ctx.lineWidth = 1.6;
+    ctx.setLineDash([12, 8]); ctx.lineDashOffset = -z.t * 3;
+    ctx.beginPath(); ctx.arc(z.x, z.y, R, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+    // 2. Các lớp xoắn ốc
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.shadowBlur = 10; ctx.shadowColor = c1;
+    stDrawSpiral(z.x, z.y, R, t * 7, c1, life * 0.75, mini ? 4 : 6, mini ? 2 : 3);
+    stDrawSpiral(z.x, z.y, R * 0.72, t * 11 + 1, thunder ? '#e0e7ff' : '#ccfbf1', life * 0.55, 4, 2);
+    stDrawSpiral(z.x, z.y, R * 0.45, t * 16 + 2, team, life * 0.5, 3, 1.6);
+    ctx.shadowBlur = 0;
+    // 3. Phễu lốc 3D vươn về phía sân
+    const up = z.y < canvas.height / 2 ? 1 : -1;
+    stDrawTornado(z.x, z.y, R * 0.1, R * 0.5, R * (mini ? 0.7 : 1.0), t * 1.6, life * 0.8, team, up);
+    // 4. Mắt bão
+    const eg = ctx.createRadialGradient(z.x, z.y, 0, z.x, z.y, R * 0.28);
+    eg.addColorStop(0, `rgba(255,255,255,${0.75 * life})`); eg.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.globalAlpha = 1; ctx.fillStyle = eg; ctx.beginPath(); ctx.arc(z.x, z.y, R * 0.28, 0, Math.PI * 2); ctx.fill();
+    // 5. Mảnh vụn xoay quanh
+    const n = mini ? 8 : 16;
+    for (let j = 0; j < n; j++) {
+        const ang = t * (5 + (j % 3)) + j * 2.4, rr = R * (0.35 + ((j * 0.37) % 0.6));
+        ctx.globalAlpha = life * 0.85; ctx.fillStyle = j % 3 ? c1 : '#e2e8f0';
+        const s = 2 + (j % 3);
+        ctx.fillRect(z.x + Math.cos(ang) * rr - s / 2, z.y + Math.sin(ang) * rr - s / 2, s, s);
+    }
+    // 6. Lôi Bão: tia điện chạy trong lốc + chớp báo trước điểm sét
+    if (thunder) {
+        ctx.strokeStyle = '#e0e7ff'; ctx.lineWidth = 1.4;
+        for (let j = 0; j < 3; j++) {
+            if ((z.t + j * 7) % 20 > 6) continue;
+            const a0 = (z.t * 0.37 + j * 2.1) % (Math.PI * 2);
+            ctx.globalAlpha = 0.8;
+            ctx.beginPath();
+            for (let i = 0; i <= 6; i++) {
+                const rr = R * (0.2 + i * 0.12), th = a0 + i * 0.25 + ((i * 7 + z.t) % 5 - 2) * 0.08;
+                const px = z.x + Math.cos(th) * rr, py = z.y + Math.sin(th) * rr;
+                if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+        }
+        for (const b of z.bolts || []) {
+            const on = (b.t % 6) < 3;
+            ctx.globalAlpha = on ? 0.95 : 0.4;
+            ctx.fillStyle = 'rgba(237, 233, 254, 0.35)';
+            ctx.beginPath(); ctx.arc(b.x, b.y, 24, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = on ? '#ffffff' : '#a78bfa'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(b.x, b.y, 10 + b.t, 0, Math.PI * 2); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(b.x - 8, b.y); ctx.lineTo(b.x + 8, b.y); ctx.moveTo(b.x, b.y - 8); ctx.lineTo(b.x, b.y + 8); ctx.stroke();
+        }
+        if (z.flash > 0) {
+            ctx.globalAlpha = z.flash / 6 * 0.35; ctx.fillStyle = '#ede9fe';
+            ctx.beginPath(); ctx.arc(z.x, z.y, R * 1.2, 0, Math.PI * 2); ctx.fill();
+        }
+    }
+    // 7. Vòng thời gian còn lại
+    if (!mini) {
+        const rem = Math.max(0, 1 - z.t / z.dur);
+        ctx.globalAlpha = 0.8; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.arc(z.x, z.y, R + 6, -Math.PI / 2, -Math.PI / 2 + rem * Math.PI * 2); ctx.stroke();
+    }
+    ctx.restore();
+    // 8. 0.5s cuối: đang chém -> radar quét kiếm + cảnh báo
+    if (!mini && z.dur - z.t <= 30) stDrawRadar(z.x, z.y, R * 1.05, 1 - (z.dur - z.t) / 30, c1);
+}
+
+// ---------- Nhát chém chẻ đôi cơn lốc ----------
+function stDrawSplitFx(f) {
+    const k = f.t / f.dur, a = f.ang, dx = Math.cos(a), dy = Math.sin(a), nx = -dy, ny = dx;
+    const col = f.kind === 'thunder' ? '#a78bfa' : '#5eead4', B = 2000;
+    ctx.save();
+    // Hai nửa cơn lốc trượt tách ra rồi tan
+    if (!f.second) {
+        for (const s of [-1, 1]) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(f.x - dx * B, f.y - dy * B); ctx.lineTo(f.x + dx * B, f.y + dy * B);
+            ctx.lineTo(f.x + dx * B + nx * s * B, f.y + dy * B + ny * s * B); ctx.lineTo(f.x - dx * B + nx * s * B, f.y - dy * B + ny * s * B);
+            ctx.closePath(); ctx.clip();
+            const off = s * (6 + k * 34);
+            ctx.translate(nx * off, ny * off);
+            ctx.globalCompositeOperation = 'lighter';
+            stDrawSpiral(f.x, f.y, f.r * (1 - k * 0.3), f.t * 0.2, col, (1 - k) * 0.8, 6, 3);
+            ctx.globalAlpha = (1 - k) * 0.25; ctx.fillStyle = col;
+            ctx.beginPath(); ctx.arc(f.x, f.y, f.r * (1 - k * 0.3), 0, Math.PI * 2); ctx.fill();
+            ctx.restore();
+        }
+    }
+    // Đường chém
+    ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
+    const L = f.r * 1.6 * Math.min(1, k * 5), fade = 1 - k;
+    ctx.shadowBlur = 24; ctx.shadowColor = col;
+    ctx.globalAlpha = fade; ctx.strokeStyle = col; ctx.lineWidth = 16 * fade + 2;
+    ctx.beginPath(); ctx.moveTo(f.x - dx * L, f.y - dy * L); ctx.lineTo(f.x + dx * L, f.y + dy * L); ctx.stroke();
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 5 * fade + 1;
+    ctx.beginPath(); ctx.moveTo(f.x - dx * L, f.y - dy * L); ctx.lineTo(f.x + dx * L, f.y + dy * L); ctx.stroke();
+    ctx.shadowBlur = 0;
+    for (let i = 0; i < 14; i++) {
+        const q = (i / 13) * 2 - 1, sp = (i % 2 ? 1 : -1) * k * (10 + (i % 4) * 8);
+        ctx.globalAlpha = fade; ctx.fillStyle = i % 3 ? '#ffffff' : col;
+        ctx.fillRect(f.x + dx * L * q + nx * sp - 1.5, f.y + dy * L * q + ny * sp - 1.5, 3, 3);
+    }
+    if (f.t < 5) { ctx.globalAlpha = 0.3 * (1 - f.t / 5); ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(f.x, f.y, f.r * 1.5, 0, Math.PI * 2); ctx.fill(); }
+    ctx.restore();
+}
+
+// ---------- Vệt lướt giật về vị trí cũ ----------
+function stDrawDashTrail(d) {
+    const k = d.t / d.dur, fade = 1 - k;
+    const team = d.team === 2 ? '#e74c3c' : '#3498db';
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
+    const g = ctx.createLinearGradient(d.x0, d.y0, d.x1, d.y1);
+    g.addColorStop(0, 'rgba(94, 234, 212, 0)'); g.addColorStop(1, 'rgba(204, 251, 241, 0.9)');
+    ctx.globalAlpha = fade; ctx.strokeStyle = g; ctx.lineWidth = 14 * fade + 2;
+    ctx.beginPath(); ctx.moveTo(d.x0, d.y0); ctx.lineTo(d.x1, d.y1); ctx.stroke();
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(d.x0 + (d.x1 - d.x0) * k, d.y0 + (d.y1 - d.y0) * k); ctx.lineTo(d.x1, d.y1); ctx.stroke();
+    for (let i = 1; i <= 5; i++) {
+        const q = i / 6, x = d.x0 + (d.x1 - d.x0) * q, y = d.y0 + (d.y1 - d.y0) * q;
+        ctx.globalAlpha = fade * q * 0.6; ctx.strokeStyle = i % 2 ? team : '#5eead4'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(x, y, 12, 0, Math.PI * 2); ctx.stroke();
+    }
+    ctx.restore();
 }
