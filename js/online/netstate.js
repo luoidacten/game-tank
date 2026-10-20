@@ -36,6 +36,7 @@ const NET_CLASSES = {
     JpBomb, JpFlyby, JpFinisher,
     WsFinisher, StFinisher,
     TatZone, TatPhantom, TatCombo, TatTrail, TatFinisher,
+    OpPunchFx, OpFinisher,
     MapVehicle, MvShot, MvHealOrbs, MvAura,
     MainAwakenFx,
 };

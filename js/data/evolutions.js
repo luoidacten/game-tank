@@ -272,4 +272,8 @@ const EVOLUTIONS = {
         { id: 'evo_ts_1', name: 'Thuấn Kiếm Sát Ý', desc: 'Tụ đầy chỉ còn 3.5s. Khi đang tụ >= 50%: giảm 30% sát thương nhận vào. Chém trượt tướng địch ở Nhánh 2 hoặc 3 được hoàn 35% thanh tụ lực.', cost: 100, type: 'evo' },
         { id: 'evo_ts_2', name: 'Phá Vọng Đoạt Hồn', desc: 'Nhánh 1: vùng nổ xóa đạn thường & Làm Chậm 35% 2s. Nhánh 2: Phân Ảnh xuyên Thùng Tiếp Tế / Xe Tiền, Vùng 1 phá hủy vật triệu hồi, Vùng 2 hút nhẹ địch vào tâm. Nhánh 3: tia rộng 48px & Xuyên 100% Khiên. FULL EVO (Vô Thượng Nhất Kiếm): +1.5 Max HP, mỗi lần Chém Nát Màn Hình thành công hồi +1 HP, ngưỡng Nhánh 3 giảm còn 75%, Nhánh 3 trượt vẫn để lại 2 vùng cảnh báo (Choáng 2s + Nổ dame) tại cuối đường kiếm.', cost: 130, type: 'evo' },
     ],
+    one_punch: [
+        { id: 'evo_punch_1', name: 'Đấm Bồi Hai Tay', desc: 'Nạp đạn chỉ 1.5s. Trong 0.4s sau Đấm Thường, nhấp tiếp -> phóng thêm 4 luồng quyền phong nhỏ liên tiếp (tổng +1.2 st). Thú Vị tích +30% mỗi 1 dame nhận; hồi máu chỉ tốn 7% Thú Vị / 1 HP.', cost: 100, type: 'evo' },
+        { id: 'evo_punch_2', name: 'Nhảy Liên Hoàn Nghiêm Túc', desc: 'Khi đang tụ Đấm Nghiêm Túc: bấm Trái/Phải -> bật nhảy ngang 120px, đường cảnh báo di chuyển theo. FULL EVO (DEATH PUNCH): giữ chỉ 0.5s, hồi 8s, Thú Vị +40% mỗi 1 dame; Thú Vị không giảm khi hồi máu (5s không bị đánh tự hồi +0.5 HP/s); Giáp Ảo tồn tại vĩnh viễn; khi tụ hút nhẹ địch về tâm đường cảnh báo; địch trúng tâm cú Đấm Nghiêm Túc mà máu <= 35% -> "DEATH (TỬ)" HẠ GỤC NGAY (xuyên Khiên & Bất tử tạm thời).', cost: 120, type: 'evo' },
+    ],
 };

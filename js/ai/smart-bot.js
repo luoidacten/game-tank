@@ -296,6 +296,16 @@ class SmartBot {
             const n = this.tapCool <= 0 && typeof jpBotHold === 'function' ? jpBotHold(bot) : 0;
             if (n) { this.jpHoldN = n; this.hold = 1; inp.s = true; return; }
         }
+        // Nhất Quyền: nhấp = Đấm Thường; Thú Vị >= 55% & hết hồi -> giữ tụ Đấm Nghiêm Túc rồi nhả khi thẳng hàng
+        if (bot.weapon === 'one_punch') {
+            if (this.hold > 0) {
+                this.hold++;
+                const n = (typeof opHoldN === 'function' ? opHoldN(bot) : 60) + 2;
+                if ((this.hold >= n && aligned) || this.hold > n + 90) { this.hold = 0; this.tapCool = 8; inp.s = false; this.nextShot(enemy); return; }
+                inp.s = true; return;
+            }
+            if (this.tapCool <= 0 && typeof opBotWantsSerious === 'function' && opBotWantsSerious(bot)) { this.hold = 1; inp.s = true; return; }
+        }
         // Sấm Chớp: giữ > 1s rồi nhả = Lôi Trảm (dịch chuyển chém ở từng cây thương đang cắm gần địch)
         if (bot.weapon === 'thunder') {
             if (this.hold > 0) { this.hold++; inp.s = this.hold <= 68; if (this.hold > 72) { this.hold = 0; this.tapCool = 10; } return; }

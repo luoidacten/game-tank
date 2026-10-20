@@ -361,6 +361,14 @@ const MODULES = {
             size: { w: 30, h: 30 },
             stats: { hp: 3.5, dmg: 2, ammo: 0, speedMult: 1.4286 }
         },
+        {
+            id: 'one_punch',
+            name: 'Nhất Quyền / Một Đấm',
+            desc: '"Chỉ cần một đấm." HP:8 | Dame:2.5 | Đạn:1 (nạp 2.2s; mỗi viên đạn cộng thêm -> +20% tốc nạp & +15% st) | Tốc: 3.6. THÚ VỊ: nhận sát thương (tính st gốc) -> +22% Thú Vị mỗi 1 dame; Thú Vị tăng tốc chạy (tối đa +35%) & giảm st nhận (tối đa 30%). 5s không bị đánh -> tiêu Thú Vị hồi máu (10% = +1 HP). Nhấp: ĐẤM THƯỜNG - cột áp lực dọc sân: tâm 2.5 st, đẩy lùi & phá 1 lớp Khiên; rìa 0.8 st; xoá đạn thường trên đường quyền, x3 st lên Tường/Vật triệu hồi. Giữ 1s khi Thú Vị >= 55% (hồi 12s): ĐẤM NGHIÊM TÚC - khi tụ giảm 50% st nhận, miễn đẩy/kéo, hiện đường cảnh báo đỏ; nhả -> tiêu hết Thú Vị nhận GIÁP ẢO (tối đa 4, giảm dần 12s), hitscan 4.0 st xuyên MỌI tường, xoá đạn/triệu hồi/vũng trên đường. Hạ gục địch -> kết liễu CÚ ĐẤM RẼ ĐÔI BẦU TRỜI.',
+            type: 'body', role: ['Đối Đầu', 'Sinh Tồn'],
+            size: { w: 30, h: 30 },
+            stats: { hp: 8, dmg: 2.5, ammo: 1, speedMult: 1.0286 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 30 },
