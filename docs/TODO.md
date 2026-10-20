@@ -14,6 +14,7 @@
   - ~14 chỗ `hasGear('...')` trỏ tới id không tồn tại (đổi tên?).
   - Thiếu hình ảnh: Giáp Trắng (`gearWhiteShield`) không vẽ; #127 đường ray, #138 vùng Bullet Time, #45 màng hấp thụ, #141 buff Hộp Bí Ẩn, #119 không có phản hồi; #116/#81/#137/#108/#115 hình sơ sài; các buff theo thời gian/cộng dồn không có chỉ báo (#23 #24 #136 #142 #51 #52 #53 #59 #98 #148).
 - 5 body mới (đặc tả `docs/BODY_MOI_3.md`), làm từ dễ đến khó, xong cái nào push cái đó: Nhện Độc (`arachnid`) → Boomerang (`boomerang`) → Thợ May (`tailor`) → Siêu Năng (`psychokinesis`) → Kusarigama (`kusarigama`).
+- Nhóm Cờ Bạc + 2 body mới (đặc tả `docs/BODY_MOI_4.md`): nội tại Cờ Bạc (Joker/Jack/COC: Reroll shop miễn phí lần đầu mỗi hiệp, +1 ô lựa chọn); Jack - 6 Lỗ (`jack_6_lo`); COC (`coc`) — Evo 2 phần Xúc Xắc Nội Tại & Full Evo đang bị cắt, chờ người dùng gửi bổ sung.
 - Sau đó: thêm hiệu ứng kết liễu cho mọi body còn thiếu (trừ Cơ Bản); chữ thắng hiệp ("PLAYER X THẮNG") chỉ hiện sau khi kết liễu kết thúc 3s.
 - Còn lại: các mục bên dưới.
 
