@@ -140,5 +140,8 @@ Tài liệu này ghi nhận đầy đủ tất cả các file tạo mới, các 
 8. **[js/characters/money_tank/logic.js](file:///d:/Game/game-tank-claude-peaceful-goodall-w1qjps/game-tank-claude-peaceful-goodall-w1qjps/js/characters/money_tank/logic.js)**
 9. **[js/ai/pve.js](file:///d:/Game/game-tank-claude-peaceful-goodall-w1qjps/game-tank-claude-peaceful-goodall-w1qjps/js/ai/pve.js)**
 10. **[js/online/netstate.js](file:///d:/Game/game-tank-claude-peaceful-goodall-w1qjps/game-tank-claude-peaceful-goodall-w1qjps/js/online/netstate.js)** (bổ sung `GearFieldDevice` vào `NET_CLASSES`)
-11. **[index.html](file:///d:/Game/game-tank-claude-peaceful-goodall-w1qjps/game-tank-claude-peaceful-goodall-w1qjps/index.html)**
-12. **[style.css](file:///d:/Game/game-tank-claude-peaceful-goodall-w1qjps/game-tank-claude-peaceful-goodall-w1qjps/style.css)**
+11. **[js/game/controls.js](file:///d:/Game/game-tank-claude-peaceful-goodall-w1qjps/game-tank-claude-peaceful-goodall-w1qjps/js/game/controls.js)** & **[js/online/multiplayer.js](file:///d:/Game/game-tank-claude-peaceful-goodall-w1qjps/game-tank-claude-peaceful-goodall-w1qjps/js/online/multiplayer.js)**:
+    - Chặn lỗi bấm nút Bắn (`Shoot` / `S` / `Space` / `Enter` / `ArrowDown`) làm tự động Sẵn Sàng bỏ qua bước chọn Vũ Khí hoặc chọn G.E.A.R (thêm hàm `canPlayerReady(pid)` trong `shop-ui.js` kèm hiệu ứng rung nhắc nhở `.must-pick-shake`).
+    - Thêm nút **`🔄 ĐỔI LẠI` (Reroll từng ô 1 lần)** trên từng thẻ nâng cấp G.E.A.R (`renderGearSelection` và `rollSingleGearReplacement` trong `gear-system.js`) cũng như trên từng thẻ Vũ Khí ở Hiệp 1 (`renderStandardCards` trong `shop-ui.js`).
+12. **[index.html](file:///d:/Game/game-tank-claude-peaceful-goodall-w1qjps/game-tank-claude-peaceful-goodall-w1qjps/index.html)**
+13. **[style.css](file:///d:/Game/game-tank-claude-peaceful-goodall-w1qjps/game-tank-claude-peaceful-goodall-w1qjps/style.css)**

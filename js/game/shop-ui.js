@@ -199,17 +199,69 @@ function showUpgradeScreen() {
 
 function renderStandardCards(playerId, list) {
     const container = document.getElementById(`${playerId}-upgrades`);
-    container.innerHTML = "";
-    let shuffled = [...list].sort(() => 0.5 - Math.random()).slice(0, 3);
+    if (!container) return;
     const player = (playerId === 'p1') ? p1 : p2;
 
-    shuffled.forEach(mod => {
+    if (!player._bodySelectionState || player._bodySelectionState.round !== gameState.round) {
+        const initial = [...list].sort(() => 0.5 - Math.random()).slice(0, 3);
+        player._bodySelectionState = {
+            round: gameState.round,
+            choices: initial,
+            rerolledSlots: initial.map(() => false),
+            seenIds: new Set(initial.map(m => m.id)),
+            justRerolledSlot: -1
+        };
+    }
+
+    const state = player._bodySelectionState;
+    const shuffled = state.choices;
+    container.innerHTML = "";
+
+    shuffled.forEach((mod, slotIdx) => {
+        const isRerolled = !!state.rerolledSlots[slotIdx];
         const div = document.createElement('div');
-        div.className = 'card pick-card' + (collabBonusOf(mod.id) ? ' collab-card' : '');
-        if (collabBonusOf(mod.id)) { div.style.border = '2px solid #ff2bd6'; div.style.boxShadow = '0 0 14px rgba(255,43,214,0.65), inset 0 0 10px rgba(255,179,0,0.25)'; }
-        div.innerHTML = `<h4>${collabBonusOf(mod.id) ? '★ ' : ''}${mod.name}</h4>${roleBadges(mod)}<p>${mod.desc}</p>`;
+        div.className = 'card pick-card' +
+            (collabBonusOf(mod.id) ? ' collab-card' : '') +
+            (state.justRerolledSlot === slotIdx ? ' gear-card-reroll-anim' : '');
+        if (collabBonusOf(mod.id)) {
+            div.style.border = '2px solid #ff2bd6';
+            div.style.boxShadow = '0 0 14px rgba(255,43,214,0.65), inset 0 0 10px rgba(255,179,0,0.25)';
+        }
+        div.innerHTML = `
+            <h4>${collabBonusOf(mod.id) ? '★ ' : ''}${mod.name}</h4>
+            ${roleBadges(mod)}
+            <p>${mod.desc}</p>
+            <button type="button" class="gear-card-reroll-btn${isRerolled ? ' is-used' : ''}" ${isRerolled ? 'disabled' : ''} title="${isRerolled ? 'Ô này đã dùng lượt đổi lại' : 'Đổi lại riêng vũ khí ở ô này (1 lần/ô)'}">
+                ${isRerolled ? '✔ ĐÃ ĐỔI' : '🔄 ĐỔI LẠI'}
+            </button>
+        `;
+
+        const rerollBtn = div.querySelector('.gear-card-reroll-btn');
+        if (rerollBtn) {
+            rerollBtn.onclick = (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                if (state.rerolledSlots[slotIdx]) return;
+                const currentIds = new Set(state.choices.map(m => m && m.id).filter(Boolean));
+                let pool = list.filter(m => !state.seenIds.has(m.id) && !currentIds.has(m.id));
+                if (pool.length === 0) pool = list.filter(m => !currentIds.has(m.id));
+                if (pool.length > 0) {
+                    const replacement = pool[Math.floor(Math.random() * pool.length)];
+                    state.choices[slotIdx] = replacement;
+                    state.seenIds.add(replacement.id);
+                    state.rerolledSlots[slotIdx] = true;
+                    state.justRerolledSlot = slotIdx;
+                    if (soundSystem && !soundSystem.muted) soundSystem.playClick ? soundSystem.playClick() : soundSystem.playPowerup();
+                    renderStandardCards(playerId, list);
+                }
+            };
+        }
+
         div.onclick = () => {
+            player._bodySelectionState = null;
             player.addUpgrade(mod.id); soundSystem.playPowerup();
+            const rb = div.querySelector('.gear-card-reroll-btn');
+            if (rb) rb.remove();
             // Chuyển sang bước chọn G.E.A.R Mốc 1 ngay sau khi chọn Body ở Hiệp 1
             if (typeof showGearSelectionIfNeeded === 'function') {
                 showGearSelectionIfNeeded(playerId, () => {
@@ -238,6 +290,7 @@ function renderStandardCards(playerId, list) {
         };
         container.appendChild(div);
     });
+    state.justRerolledSlot = -1;
 }
 
 function renderShop(playerId, keepItems = false) {
@@ -761,7 +814,59 @@ function updateShopTitle() {
     document.getElementById('roundTitleText').innerText = `SHOP (Coin: P1:${gameState.p1Coins}${streakNote(p1)} - P2:${gameState.p2Coins}${streakNote(p2)})`;
 }
 
-function handlePlayerReady(pid) {
+function canPlayerReady(pid, fromRemote = false) {
+    if (gameState.phase !== 'upgrade') return false;
+    const player = (pid === 'p1') ? p1 : p2;
+    if (!player) return false;
+
+    // Nếu là gói READY gửi từ đối thủ qua mạng P2P thì luôn chấp nhận
+    if (fromRemote) return true;
+
+    // 1. Ở Hiệp 1: Bắt buộc phải đã chọn Body (Vũ Khí)
+    if (gameState.round === 1) {
+        const bodyIds = MODULES.BODY.map(m => m.id);
+        const hasPickedBody = (player.upgrades || []).some(u => bodyIds.includes(u));
+        if (!hasPickedBody) return false;
+    }
+
+    // 2. Ở các mốc mở G.E.A.R (R1, R2/R3 BO3, R3/R5 BO5): Bắt buộc phải đã chọn G.E.A.R của mốc đó
+    if (typeof getGearMilestoneIndex === 'function') {
+        const milestoneIdx = getGearMilestoneIndex(gameState.round);
+        if (milestoneIdx >= 0) {
+            const picked = Array.isArray(player.gearPickedMilestones) && player.gearPickedMilestones.includes(milestoneIdx);
+            if (!picked) return false;
+        }
+    }
+
+    // 3. Nếu trên bảng của người chơi đang còn thẻ bắt buộc phải chọn (.gear-card chưa xác nhận)
+    const container = document.getElementById(`${pid}-upgrades`);
+    if (container && container.querySelector('.gear-card:not(.gear-picked-confirm)')) {
+        return false;
+    }
+
+    return true;
+}
+
+function handlePlayerReady(pid, fromRemote = false) {
+    if (!canPlayerReady(pid, fromRemote)) {
+        const container = document.getElementById(`${pid}-upgrades`);
+        if (container) {
+            container.querySelectorAll('.pick-card, .gear-card').forEach(c => {
+                c.classList.remove('must-pick-shake');
+                void c.offsetWidth;
+                c.classList.add('must-pick-shake');
+            });
+        }
+        const statusEl = document.getElementById(`${pid}-ready-status`);
+        if (statusEl && !statusEl.classList.contains('is-ready')) {
+            const isPickingGear = container && container.querySelector('.gear-card');
+            statusEl.innerHTML = isPickingGear
+                ? '⚠️ HÃY CHỌN 1 LÕI G.E.A.R TRƯỚC!'
+                : '⚠️ HÃY CHỌN VŨ KHÍ & G.E.A.R TRƯỚC!';
+        }
+        return false;
+    }
+
     if (pid === 'p1') gameState.p1Ready = true; else gameState.p2Ready = true;
 
     // Đổi màu thẻ Sẵn Sàng trên UI
@@ -822,6 +927,7 @@ function handlePlayerReady(pid) {
             setTimeout(startRound, 500);
         }
     }
+    return true;
 }
 
 

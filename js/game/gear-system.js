@@ -347,6 +347,60 @@ function renderEquippedGearStrip(playerOrId, container = null) {
     return html;
 }
 
+function rollSingleGearReplacement(player, milestoneIdx, currentChoices, slotIdx, seenIds) {
+    ensurePlayerGearState(player);
+    const targetTier = player.gearTiers[milestoneIdx] || 'SILVER';
+    const currentIds = new Set((currentChoices || []).map(c => c && c.id).filter(Boolean));
+    const otherFamilies = new Set(
+        (currentChoices || [])
+            .filter((c, idx) => idx !== slotIdx && c && c.familyId)
+            .map(c => c.familyId)
+    );
+
+    // 1. Ưu tiên cùng bậc, chưa từng xuất hiện ở mốc này và không trùng family với 2 thẻ còn lại trên bàn
+    let pool = GEARS.filter(g =>
+        !seenIds.has(g.id) &&
+        !currentIds.has(g.id) &&
+        (!g.familyId || !otherFamilies.has(g.familyId)) &&
+        canGearAppearForPlayer(g, player, milestoneIdx, targetTier, false)
+    );
+
+    // 2. Fallback cùng bậc (nếu bể hẹp)
+    if (pool.length === 0) {
+        pool = GEARS.filter(g =>
+            !seenIds.has(g.id) &&
+            !currentIds.has(g.id) &&
+            canGearAppearForPlayer(g, player, milestoneIdx, targetTier, false)
+        );
+    }
+
+    // 3. Fallback khác bậc chưa xuất hiện
+    if (pool.length === 0) {
+        pool = GEARS.filter(g =>
+            !seenIds.has(g.id) &&
+            !currentIds.has(g.id) &&
+            canGearAppearForPlayer(g, player, milestoneIdx, targetTier, true)
+        );
+    }
+
+    // 4. Fallback cuối cùng: bất kỳ lõi hợp lệ nào không trùng 3 thẻ hiện tại
+    if (pool.length === 0) {
+        pool = GEARS.filter(g =>
+            !currentIds.has(g.id) &&
+            canGearAppearForPlayer(g, player, milestoneIdx, targetTier, true)
+        );
+    }
+
+    if (pool.length === 0) return currentChoices[slotIdx];
+
+    const weightedPool = [];
+    pool.forEach(g => {
+        const copies = (Array.isArray(g.bodies) && g.bodies.length <= 4) ? 2 : 1;
+        for (let i = 0; i < copies; i++) weightedPool.push(g);
+    });
+    return weightedPool[Math.floor(Math.random() * weightedPool.length)];
+}
+
 function showGearSelectionIfNeeded(playerId, onComplete) {
     const player = (playerId === 'p1') ? p1 : p2;
     if (!player) { if (onComplete) onComplete(); return; }
@@ -376,13 +430,35 @@ function renderGearSelection(playerId, milestoneIdx, onComplete) {
         roundTitle.innerText = `HIỆP ${gameState.round} — CHỌN LÕI G.E.A.R #${milestoneIdx + 1} (${tierLabel})`;
     }
 
-    container.innerHTML = '';
-    const choices = rollPlayerGearChoices(player, milestoneIdx);
+    // Khởi tạo hoặc giữ nguyên trạng thái 3 thẻ + lượt đổi lại (Reroll) từng ô ở mốc hiện tại
+    if (
+        !player._gearSelectionState ||
+        player._gearSelectionState.milestoneIdx !== milestoneIdx ||
+        player._gearSelectionState.round !== gameState.round ||
+        !Array.isArray(player._gearSelectionState.choices) ||
+        player._gearSelectionState.choices.length === 0
+    ) {
+        const initialChoices = rollPlayerGearChoices(player, milestoneIdx);
+        player._gearSelectionState = {
+            round: gameState.round,
+            milestoneIdx,
+            choices: initialChoices,
+            rerolledSlots: initialChoices.map(() => false),
+            seenIds: new Set(initialChoices.map(g => g.id)),
+            justRerolledSlot: -1
+        };
+    }
 
-    choices.forEach(g => {
+    const state = player._gearSelectionState;
+    const choices = state.choices;
+    container.innerHTML = '';
+
+    choices.forEach((g, slotIdx) => {
         const tInfo = GEAR_TIERS[g.tier] || GEAR_TIERS.SILVER;
+        const isRerolled = !!state.rerolledSlots[slotIdx];
         const div = document.createElement('div');
-        div.className = `card pick-card gear-card gear-tier-${g.tier.toLowerCase()}`;
+        div.className = `card pick-card gear-card gear-tier-${g.tier.toLowerCase()}` +
+            (state.justRerolledSlot === slotIdx ? ' gear-card-reroll-anim' : '');
 
         let tagLabel = '⚡ CHUNG';
         if (Array.isArray(g.bodies) && g.bodies.length === 1) {
@@ -401,11 +477,33 @@ function renderGearSelection(playerId, milestoneIdx, onComplete) {
             </div>
             <h4 class="gear-title">${g.name}</h4>
             <p class="gear-desc">${g.desc}</p>
+            <button type="button" class="gear-card-reroll-btn${isRerolled ? ' is-used' : ''}" ${isRerolled ? 'disabled' : ''} title="${isRerolled ? 'Ô này đã dùng lượt đổi lại' : 'Đổi lại riêng lõi nâng cấp này (1 lần/ô)'}">
+                ${isRerolled ? '✔ ĐÃ ĐỔI' : '🔄 ĐỔI LẠI'}
+            </button>
         `;
+
+        const rerollBtn = div.querySelector('.gear-card-reroll-btn');
+        if (rerollBtn) {
+            rerollBtn.onclick = (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                if (player.gearPickedMilestones.includes(milestoneIdx)) return;
+                if (state.rerolledSlots[slotIdx]) return;
+
+                const newGear = rollSingleGearReplacement(player, milestoneIdx, state.choices, slotIdx, state.seenIds);
+                state.choices[slotIdx] = newGear;
+                if (newGear && newGear.id) state.seenIds.add(newGear.id);
+                state.rerolledSlots[slotIdx] = true;
+                state.justRerolledSlot = slotIdx;
+                if (soundSystem && !soundSystem.muted) soundSystem.playClick ? soundSystem.playClick() : soundSystem.playPowerup();
+                renderGearSelection(playerId, milestoneIdx, onComplete);
+            };
+        }
 
         div.onclick = () => {
             if (player.gearPickedMilestones.includes(milestoneIdx)) return;
             player.gearPickedMilestones.push(milestoneIdx);
+            player._gearSelectionState = null;
             player.addGear(g.id);
             if (soundSystem && !soundSystem.muted) soundSystem.playPowerup();
 
@@ -419,6 +517,8 @@ function renderGearSelection(playerId, milestoneIdx, onComplete) {
                 div.classList.add('gear-picked-confirm');
                 div.style.cursor = 'default';
                 div.onclick = null;
+                const rb = div.querySelector('.gear-card-reroll-btn');
+                if (rb) rb.remove();
                 if (g.id === 'gear_all_in_gamble_p' && player.gearJackpot) {
                     const jpEl = document.createElement('div');
                     jpEl.style.cssText = 'color:#fde047;font-weight:bold;font-size:10px;margin-top:4px;';
@@ -435,6 +535,7 @@ function renderGearSelection(playerId, milestoneIdx, onComplete) {
 
         container.appendChild(div);
     });
+    state.justRerolledSlot = -1;
 
     // Tự động chọn G.E.A.R cho Bot (Practice hoặc PVE) nếu đây là p2
     if (playerId === 'p2' && ((typeof botAI !== 'undefined' && botAI.enabled) || (typeof PVE !== 'undefined' && PVE.active))) {

@@ -529,7 +529,7 @@ class OnlineMultiplayerManager {
                 break;
 
             case 'READY':
-                if (data.pid === 'p2') handlePlayerReady('p2');
+                if (data.pid === 'p2') handlePlayerReady('p2', true);
                 break;
 
             case 'LEAVE':
@@ -591,7 +591,7 @@ class OnlineMultiplayerManager {
                 break;
 
             case 'READY':
-                if (data.pid === 'p1') handlePlayerReady('p1');
+                if (data.pid === 'p1') handlePlayerReady('p1', true);
                 break;
 
             case 'LEAVE':

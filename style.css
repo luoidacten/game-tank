@@ -2542,8 +2542,65 @@ body.ctrl-new .btn-group { padding: 0 14px 0 24px; }
     color: #e2e8f0 !important;
     text-align: left;
     overflow-y: auto;
-    max-height: 105px;
+    max-height: 96px;
     padding-right: 2px;
+    flex: 1 1 auto;
+}
+
+/* Nút Đổi Lại (Reroll) riêng cho từng ô nâng cấp G.E.A.R / Body */
+.gear-card-reroll-btn {
+    margin-top: auto;
+    align-self: stretch;
+    padding: 4px 6px;
+    border-radius: 7px;
+    font-family: 'Orbitron', monospace;
+    font-size: 8.8px;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+    cursor: pointer;
+    color: #f8fafc;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.32), rgba(59, 130, 246, 0.22));
+    border: 1px solid rgba(56, 189, 248, 0.65);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+    transition: transform 0.12s ease, background 0.12s ease, border-color 0.12s ease;
+}
+.gear-card-reroll-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.55), rgba(59, 130, 246, 0.45));
+    border-color: #7dd3fc;
+    transform: translateY(-1px);
+}
+.gear-card-reroll-btn:active:not(:disabled) {
+    transform: scale(0.95);
+}
+.gear-card-reroll-btn.is-used,
+.gear-card-reroll-btn:disabled {
+    opacity: 0.45;
+    cursor: default;
+    color: #94a3b8;
+    background: rgba(15, 23, 42, 0.5);
+    border: 1px dashed rgba(148, 163, 184, 0.35);
+    box-shadow: none;
+}
+
+@keyframes gearCardRerollFlip {
+    0%   { transform: scale(0.88) rotateY(35deg); filter: brightness(1.45); }
+    100% { transform: scale(1) rotateY(0deg); filter: brightness(1); }
+}
+.gear-card-reroll-anim {
+    animation: gearCardRerollFlip 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes mustPickShake {
+    0%, 100% { transform: translateX(0); }
+    20%      { transform: translateX(-5px) rotate(-1deg); }
+    40%      { transform: translateX(5px) rotate(1deg); }
+    60%      { transform: translateX(-4px); }
+    80%      { transform: translateX(4px); }
+}
+.must-pick-shake {
+    animation: mustPickShake 0.32s ease;
+    border-color: #f43f5e !important;
+    box-shadow: 0 0 14px rgba(244, 63, 94, 0.75) !important;
 }
 
 /* Dải hiển thị G.E.A.R đã trang bị */

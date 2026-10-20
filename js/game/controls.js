@@ -203,9 +203,10 @@ function setupControls() {
                 onlineManager.conn.send({ type: 'INPUT', input: inputs.p2 });
             }
             if (pressed && action === 'shoot' && gameState.phase === 'upgrade') {
-                handlePlayerReady('p2');
-                if (onlineManager.conn && onlineManager.conn.open) {
-                    onlineManager.conn.send({ type: 'READY', pid: 'p2' });
+                if (handlePlayerReady('p2')) {
+                    if (onlineManager.conn && onlineManager.conn.open) {
+                        onlineManager.conn.send({ type: 'READY', pid: 'p2' });
+                    }
                 }
             }
             return;
@@ -219,9 +220,10 @@ function setupControls() {
                     onlineManager.conn.send({ type: 'HOST_INPUT', input: inputs.p1 });
                 }
                 if (pressed && action === 'shoot' && gameState.phase === 'upgrade') {
-                    handlePlayerReady('p1');
-                    if (onlineManager.conn && onlineManager.conn.open) {
-                        onlineManager.conn.send({ type: 'READY', pid: 'p1' });
+                    if (handlePlayerReady('p1')) {
+                        if (onlineManager.conn && onlineManager.conn.open) {
+                            onlineManager.conn.send({ type: 'READY', pid: 'p1' });
+                        }
                     }
                 }
             }
@@ -373,12 +375,14 @@ function setupControls() {
         if (gameState.phase === 'upgrade') {
             if (e.key === 's' || e.key === 'S' || e.key === ' ') {
                 if (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'guest') {
-                    handlePlayerReady('p2');
-                    if (onlineManager.conn && onlineManager.conn.open) onlineManager.conn.send({ type: 'READY', pid: 'p2' });
+                    if (handlePlayerReady('p2')) {
+                        if (onlineManager.conn && onlineManager.conn.open) onlineManager.conn.send({ type: 'READY', pid: 'p2' });
+                    }
                 } else {
-                    handlePlayerReady('p1');
-                    if (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.conn && onlineManager.conn.open) {
-                        onlineManager.conn.send({ type: 'READY', pid: 'p1' });
+                    if (handlePlayerReady('p1')) {
+                        if (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.conn && onlineManager.conn.open) {
+                            onlineManager.conn.send({ type: 'READY', pid: 'p1' });
+                        }
                     }
                 }
             }
