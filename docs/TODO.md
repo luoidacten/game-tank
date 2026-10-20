@@ -5,7 +5,6 @@
 > Phiên mới: đọc `docs/HANDOVER.md` trước (công cụ test ở `tools/`).
 
 ## 0. Chỉnh sửa gấp (làm TRƯỚC mục 1)
-- **Cân bằng mới (đặc tả: `docs/CAN_BANG_MOI.md`)** — làm TRƯỚC:
 - Còn lại: các mục bên dưới.
 
 ## 2. HUD còn sót
