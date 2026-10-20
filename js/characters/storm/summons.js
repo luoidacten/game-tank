@@ -23,6 +23,7 @@ class StormSlash {
 
         // 1. XỬ LÝ VA CHẠM ĐỊCH (P1/P2)
         const enemy = (this.owner.id === 1) ? p2 : p1;
+        if (!this.gmTw && typeof gmTwinAlso === 'function' && gmTwinAlso(enemy, t => Math.hypot(this.x - (t.x + t.w / 2), this.y - (t.y + t.h / 2)) < this.r, this.dmg, this.owner)) this.gmTw = true; // Gemini: Bản Sao AI
         if (!this.hitTargets.includes(enemy)) {
             let d = Math.hypot(this.x - (enemy.x + enemy.w / 2), this.y - (enemy.y + enemy.h / 2));
             if (d < this.r) {

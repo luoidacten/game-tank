@@ -153,7 +153,7 @@ class HitscanWarning {
                 if (typeof this.fire === 'function' && gameState.phase === 'playing' && (!o || o.hp === undefined || o.hp > 0)) {
                     const ox = o ? o.x : 0;
                     if (o && typeof o.x === 'number' && o.w) o.x = this.x - o.w / 2; // bắn đúng cột đã khoá
-                    try { this.fire(); } finally { if (o && typeof o.x === 'number' && o.w) o.x = ox; }
+                    try { if (typeof gmHitscanFire === 'function') gmHitscanFire(this, this.fire); else this.fire(); } finally { if (o && typeof o.x === 'number' && o.w) o.x = ox; }
                 }
                 this.fire = null;
                 this.flash = 10;

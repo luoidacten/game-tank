@@ -234,6 +234,7 @@ function tickPhysics() {
     for (let i = shortgunFireZones.length - 1; i >= 0; i--) {
         let fz = shortgunFireZones[i];
         let targets = [p1, p2, ...turrets, ...crates, ...moneyTrucks].filter(t => t && t !== fz.owner);
+        if (typeof gmExtraTargets === 'function') targets.push(...gmExtraTargets(fz.owner)); // Gemini: Bản Sao AI
         fz.update(targets);
         if (!fz.active) shortgunFireZones.splice(i, 1);
     }

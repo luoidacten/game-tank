@@ -139,6 +139,9 @@ class FsPetal {
         this.active = true;
     }
     enemy() { return fsEnemy(this.owner); }
+    gmTouchTwin(dmg, o) {
+        return typeof gmTwinAlso === 'function' && gmTwinAlso(this.enemy(), t => this.x > t.x - this.r && this.x < t.x + t.w + this.r && this.y > t.y - this.r && this.y < t.y + t.h + this.r, dmg, o) > 0;
+    }
     touchEnemy() {
         const e = this.enemy();
         return e && e.hp > 0 && this.x > e.x - this.r && this.x < e.x + e.w + this.r && this.y > e.y - this.r && this.y < e.y + e.h + this.r;
@@ -192,6 +195,7 @@ class FsPetal {
                 this.x += this.vx; this.y += this.vy;
                 if (this.x < 6 || this.x > canvas.width - 6) { this.vx = -this.vx; this.x = Math.max(6, Math.min(canvas.width - 6, this.x)); }
                 this.pushTrail();
+                if (!this.hitOut && this.gmTouchTwin(this.dmg, o)) this.hitOut = true; // Gemini: Bản Sao AI
                 if (!this.hitOut && this.touchEnemy()) {
                     this.hitOut = true;
                     e.takeDamage(this.dmg, o);
@@ -236,6 +240,7 @@ class FsPetal {
                 this.vy += (dy / L * spd - this.vy) * 0.06;
                 this.x += this.vx; this.y += this.vy;
                 this.pushTrail();
+                if (!this.hitBack && this.gmTouchTwin(this.dmg, o)) this.hitBack = true; // Gemini: Bản Sao AI
                 if (!this.hitBack && this.touchEnemy()) {
                     this.hitBack = true;
                     e.takeDamage(this.dmg, o);
@@ -259,6 +264,7 @@ class FsPetal {
             case 'seek': {
                 this.x += this.vx; this.y += this.vy;
                 this.pushTrail();
+                if (!this.hitOut && this.gmTouchTwin(this.dmg, o)) this.hitOut = true; // Gemini: Bản Sao AI
                 if (!this.hitOut && this.touchEnemy()) {
                     this.hitOut = true; e.takeDamage(this.dmg, o);
                     spawnSparkParticles(this.x, this.y, FS_PINK, 8);
@@ -273,6 +279,7 @@ class FsPetal {
     fireLine() {
         const o = this.owner, e = this.enemy();
         this.state = 'line'; this.flash = 0;
+        if (typeof gmTwinAlso === 'function') gmTwinAlso(e, t => fsSegHitsRect(this.x, this.y, this.tx, this.ty, t, 4), this.dmg, o); // Gemini: Bản Sao AI
         if (e && e.hp > 0 && fsSegHitsRect(this.x, this.y, this.tx, this.ty, e, 4)) {
             e.takeDamage(this.dmg, o);
             bodyEffects.push(new FsSlashMark(o, e, 0, 5, 6, o.damage * fsPow(o) * FS_PETAL_NERF, 0.8));

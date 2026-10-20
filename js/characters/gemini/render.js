@@ -199,6 +199,27 @@ function gmDrawTwin(t) {
                 }));
             } catch (e) { /* HUD lỗi không làm sập game */ }
         }
+        // Thanh Mệt của Bản Sao (né nhiều liên tục -> chậm & phản xạ kém, hồi dần khi nghỉ)
+        const fat = t.gmFat || 0;
+        if (fat > 6 && !fatal) {
+            // thanh dọc bên phải xe (không đè HUD máu/đạn), đầy dần về phía địch
+            const bh = t.h, bx = t.x + t.w + 4, by = t.y;
+            const k = Math.min(1, fat / 100);
+            ctx.save();
+            ctx.globalAlpha = 0.9;
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.85)'; ctx.fillRect(bx - 1, by - 1, 5, bh + 2);
+            ctx.fillStyle = k > 0.66 ? '#fb7185' : (k > 0.33 ? '#fbbf24' : '#a3e635');
+            ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 6;
+            const fh = bh * k;
+            ctx.fillRect(bx, p.id === 1 ? by + bh - fh : by, 3, fh);
+            if (k > 0.66) {
+                ctx.shadowBlur = 0; ctx.font = "bold 9px 'Orbitron', Arial"; ctx.textAlign = 'left'; ctx.fillStyle = '#fb7185';
+                ctx.globalAlpha = 0.6 + 0.4 * Math.sin(tm / 90);
+                const ty = t.y + t.h / 2 + 3;
+                if (typeof drawWorldText === 'function') { ctx.textAlign = 'center'; drawWorldText(ctx, 'MỆT', bx + 18, ty); } else ctx.fillText('MỆT', bx + 7, ty);
+            }
+            ctx.restore();
+        }
     }
     if (!fatal) {
         if (p.hp > 0 || p.gmDown) gmDrawTag(p, true);

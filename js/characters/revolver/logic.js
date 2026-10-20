@@ -164,7 +164,11 @@ function revCopperPass(p) {
         if (!b || b.hook !== 'revolver' || !b.revCopper || b.owner !== p) continue;
         if (!b.hitIds) b.hitIds = [];
         if (b.hitIds.includes(enemy)) continue;
-        if (!rectIntersect(b.x, b.y, b.w, b.h, enemy.x, enemy.y, enemy.w, enemy.h)) continue;
+        if (!rectIntersect(b.x, b.y, b.w, b.h, enemy.x, enemy.y, enemy.w, enemy.h)) {
+            // Gemini: đạn đồng trúng Bản Sao AI
+            if (enemy.weapon === 'gemini' && typeof gmBulletHitTwin === 'function' && gmBulletHitTwin(p, enemy, b, b.dmg) && !b.isPiercing) p.bullets.splice(i, 1);
+            continue;
+        }
         b.hitIds.push(enemy);
         enemy.takeDamage(b.dmg, p, { bypassShield: true, isPiercing: true });
         revOnHit(b, p, enemy);

@@ -14,7 +14,10 @@
 // - Evo2 Đệ Quy Vô Tận: tốc chạy / tốc bắn tăng dần theo thời gian giao tranh; mỗi hiệp đã qua cộng dồn
 //   +0.25 MaxHP, +6% dame, đạn to hơn (tối đa 8 tầng). Sau chuyển giao: 1s cả 2 xe +50% tốc, x1.8 tốc bắn, x1.3 dame.
 // - Full Evo: AI tối thượng (cân đối cứu / kết liễu), lần gục đầu tiên của mỗi xe tự tái khởi động (1.5s),
-//   các lần sau thanh cứu tự tăng tới 99% (chạm là dậy); 0.5s sau chuyển giao mọi đạn của 2 xe tự khoá mục tiêu.
+//   các lần sau thanh cứu tự tăng tới 99% (chạm là dậy); 0.5s sau chuyển giao đạn của xe đang điều khiển tự khoá mục tiêu.
+// - Bản Sao né như người: thanh MỆT tăng khi né liên tục (chạy chậm, phản xạ chậm, hay bỏ sót), hồi dần khi nghỉ;
+//   với đòn tia / hitscan (cột cảnh báo, Lôi Độn) phản xạ chậm hơn hẳn và đôi khi không né.
+// - Đòn riêng của body khác trúng được Bản Sao: gmTwinAlso (gọi tại chỗ xét trúng), gmHitscanFire (scheduleHitscan).
 // Mọi state là dữ liệu thuần trên player / GeminiTwin (đồng bộ online); bộ não AI chỉ chạy trên host.
 // ==========================================
 
@@ -70,13 +73,13 @@ function gmFire(p, cx, tag) {
     const y = p.id === 1 ? p.y - 8 : p.y + p.h + 2;
     const b = spawnBullet(p, {
         x: cx - sz / 2, y, w: sz, h: sz, vx: 0, vy: gmDir(p) * spd,
-        dmg: (p.damage + (p.dmgBuff || 0)) * gmDmgMult(p), hook: 'gemini', gmSrc: tag, gmHome: p.gmAim > 0,
+        dmg: (p.damage + (p.dmgBuff || 0)) * gmDmgMult(p), hook: 'gemini', gmSrc: tag, gmHome: p.gmAim > 0 && tag === p.gmTag,
     });
-    if (p.gmAim > 0) { const e = gmEnemy(p); if (e && e.hp > 0) { const v = aimVelocity(cx, y, e, spd, true); b.vx = v.vx; b.vy = v.vy; } }
+    if (p.gmAim > 0 && tag === p.gmTag) { const e = gmEnemy(p); if (e && e.hp > 0) { const v = aimVelocity(cx, y, e, spd, true); b.vx = v.vx; b.vy = v.vy; } }
     if (soundSystem && !soundSystem.muted && soundSystem.playShoot) soundSystem.playShoot();
     return b;
 }
-// Full Evo: đạn bắn trong cửa sổ khoá mục tiêu tự lượn theo địch
+// Full Evo: đạn của xe đang điều khiển bắn trong cửa sổ khoá mục tiêu tự lượn theo địch
 function gmSteer(p) {
     const e = gmEnemy(p);
     if (!e || e.hp <= 0) return;
@@ -203,6 +206,49 @@ function gmRectHitTwin(victim, x, y, w, h, dmg, attacker) {
     if (gmStanding(t) && rectIntersect(x, y, w, h, t.x, t.y, t.w, t.h)) t.takeDamage(dmg, attacker);
 }
 
+// Đòn riêng của body khác (tia, vùng nổ, triệu hồi, lưỡi kiếm...): sau khi xét trúng bản thể, gọi hàm này để
+// xét trúng & gây dame lên Bản Sao của victim. hit(t) dùng lại đúng hình học của đòn với t thay cho enemy.
+function gmTwinAlso(victim, hit, dmg, attacker, opts) {
+    if (!victim || victim.weapon !== 'gemini') return 0;
+    const t = gmTwinOf(victim);
+    if (!gmStanding(t) || !hit(t)) return 0;
+    return t.takeDamage(dmg, attacker, opts || {}) || 0;
+}
+// Đòn hitscan có cột cảnh báo (scheduleHitscan): hàm fire() của từng body chỉ nhắm p1/p2.
+// Chạy fire() đúng 1 lần: Bản Sao trong cột mà bản thể không -> tạm đặt bản thể vào chỗ Bản Sao và chuyển mọi dame
+// (kèm choáng / chậm) sang Bản Sao; cả 2 trong cột -> Bản Sao nhận lại đúng lượng dame bản thể vừa nhận.
+function gmHitscanFire(w, fire) {
+    const o = w.owner;
+    const oid = o ? (o.id || (o.owner && o.owner.id)) : 0;
+    const v = oid === 1 ? p2 : (oid === 2 ? p1 : null);
+    const t = v && v.weapon === 'gemini' ? gmTwinOf(v) : null;
+    const inCol = (b) => Math.abs(b.x + b.w / 2 - w.x) < (w.width || 16) / 2 + b.w / 2;
+    if (!gmStanding(t) || !inCol(t)) return fire();
+    const nb = typeof beams !== 'undefined' ? beams.length : 0;
+    const ownTD = Object.prototype.hasOwnProperty.call(v, 'takeDamage') ? v.takeDamage : null;
+    const restoreTD = () => { if (ownTD) v.takeDamage = ownTD; else delete v.takeDamage; };
+    const markBeams = () => { if (typeof beams !== 'undefined') for (let i = nb; i < beams.length; i++) beams[i].gmHit = true; };
+    if (v.hp > 0 && inCol(v)) {
+        let got = 0;
+        const orig = v.takeDamage;
+        v.takeDamage = function (a, at, op) { const d = orig.call(this, a, at, op); got += d || 0; return d; };
+        try { fire(); } finally { restoreTD(); markBeams(); }
+        if (got > 0) t.takeDamage(got, o && o.owner ? o.owner : o);
+        return;
+    }
+    const keep = {};
+    ['x', 'hp', 'freezeTimer', 'slowTimer', 'kbX', 'bleedTimer', 'burnTimer', 'silenceTimer'].forEach(k => keep[k] = v[k]);
+    v.x = t.x;
+    if (!(v.hp > 0)) v.hp = 0.01; // bản thể đang gục: vẫn để fire() xét va chạm
+    v.takeDamage = (a, at, op) => t.takeDamage(a, at, op);
+    try { fire(); } finally {
+        restoreTD(); markBeams();
+        if ((v.freezeTimer || 0) > (keep.freezeTimer || 0)) t.freezeTimer = Math.max(t.freezeTimer || 0, v.freezeTimer);
+        if ((v.slowTimer || 0) > (keep.slowTimer || 0)) t.slowTimer = Math.max(t.slowTimer || 0, v.slowTimer);
+        for (const k in keep) v[k] = keep[k];
+    }
+}
+
 // ---- Thua hiệp chỉ khi cả 2 cùng gục ----
 const gmBaseFatal = triggerFatalCinematic;
 // eslint-disable-next-line no-global-assign
@@ -237,12 +283,45 @@ function gmBrain(p) {
     return b;
 }
 
+// Bản Sao "giống người": Mệt (t.gmFat 0..100) tăng khi né liên tục, hồi dần khi được nghỉ.
+// Mệt -> chạy chậm hơn, phản xạ chậm hơn, hay bỏ sót đạn. Đòn tia / hitscan: phản xạ chậm hơn hẳn và đôi khi không né.
+const GM_FAT_GAIN = 1.1, GM_FAT_REC = 0.35, GM_FAT_GRACE = 30;
+function gmFatK(t) { return Math.max(0, Math.min(1, (t.gmFat || 0) / 100)); }
+function gmTwinTune(brain, t, p) {
+    const f = gmFatK(t), B = BOT_LEVELS[brain.levelIdx];
+    brain.L = Object.assign({}, B, {
+        react: B.react + Math.round(16 * f),
+        dodge: B.dodge * (1 - 0.45 * f),
+        think: B.think + Math.round(4 * f),
+        aimErr: B.aimErr + 10 * f,
+    });
+    // Tia / hitscan (cột cảnh báo): thấy muộn hơn + tỉ lệ bỏ sót
+    const hsDelay = (gmFull(p) ? 13 : gmE1(p) ? 15 : 18) + Math.round(16 * f);
+    const hsMiss = (gmFull(p) ? 0.28 : 0.35) + 0.35 * f;
+    for (const ef of bodyEffects) {
+        if (!ef.active || brain.seen.has(ef)) continue;
+        if ((typeof HitscanWarning !== 'undefined' && ef instanceof HitscanWarning) || (typeof HitscanTelegraph !== 'undefined' && ef instanceof HitscanTelegraph)) {
+            brain.seen.set(ef, brain.t + hsDelay);
+            brain.noticed.set(ef, Math.random() > hsMiss);
+        }
+    }
+}
+
 function gmTwinAI(t, p) {
     const e = gmEnemy(p);
     const brain = gmBrain(p);
     brain.t++;
+    gmTwinTune(brain, t, p);
     const cx = t.x + t.w / 2;
     const threats = (e ? brain.collectThreats(t, e) : []);
+    // Lôi Độn (cột cảnh báo lao của Sấm Chớp) cũng là đòn dạng tia: phản xạ chậm
+    if (e && e.thunderRaycastWarningTimer > 0 && !t.gmRayMiss) {
+        if (t.gmRaySeen === undefined || t.gmRaySeen < 0) { t.gmRaySeen = 0; t.gmRayMiss = Math.random() < 0.35 + 0.35 * gmFatK(t); }
+        t.gmRaySeen++;
+    } else if (!(e && e.thunderRaycastWarningTimer > 0)) { t.gmRaySeen = -1; t.gmRayMiss = false; }
+    if (e && e.thunderRaycastWarningTimer > 0 && (t.gmRayMiss || t.gmRaySeen < 16 + 16 * gmFatK(t))) {
+        for (let i = threats.length - 1; i >= 0; i--) if (threats[i].x === e.thunderRaycastX && threats[i].w === 3) threats.splice(i, 1);
+    }
     let goal = e ? brain.chooseGoal(t, e) : { x: canvas.width / 2, kind: 'idle', tol: 4 };
     // Giữ giãn cách với bản thể (tránh dính chung 1 vụ nổ lan) — Evo 1+
     if (gmE1(p) && gmStanding(p)) threats.push({ t: 25, x: p.x + p.w / 2, half: 44, w: 0.5 });
@@ -265,6 +344,11 @@ function gmTwinAI(t, p) {
     }
     const dx = mx - cx;
     let spd = p.speed * gmSpeedMult(p) * (t.slowTimer > 0 ? 0.5 : 1) * (p.statusSpeedMult === undefined ? 1 : p.statusSpeedMult);
+    spd *= 1 - 0.4 * gmFatK(t); // mệt -> chạy chậm
+    // Đang né: có mối nguy gần & đi lệch khỏi mục tiêu -> tích Mệt; được nghỉ -> hồi dần
+    const dodging = Math.abs(dx) > 2.5 && Math.abs(mx - goal.x) > 10 && threats.some(th => th.t < 40 && Math.abs(th.x - cx) < th.half + 10);
+    if (dodging) { t.gmFat = Math.min(100, (t.gmFat || 0) + GM_FAT_GAIN); t.gmFatRest = 0; }
+    else if (++t.gmFatRest > GM_FAT_GRACE) t.gmFat = Math.max(0, (t.gmFat || 0) - GM_FAT_REC);
     const prevX = t.x;
     if (Math.abs(dx) > 2.5) t.x += Math.max(-spd, Math.min(spd, dx));
     t.x = Math.max(0, Math.min(canvas.width - t.w, t.x));
@@ -273,7 +357,7 @@ function gmTwinAI(t, p) {
     if (!e || e.hp <= 0) return;
     const onGoal = Math.abs(goal.x - cx) <= Math.max(4, goal.tol) && goal.kind !== 'rescue';
     const onEnemy = brain.attack && Math.abs(brain.attack.x - cx) <= brain.attack.tol;
-    if ((onGoal || onEnemy || p.gmAim > 0) && t.ammo > 0 && t.gmCd <= 0 && !brain.lineBlockedByBoom(t, e)) {
+    if ((onGoal || onEnemy) && t.ammo > 0 && t.gmCd <= 0 && !brain.lineBlockedByBoom(t, e)) {
         gmFire(p, cx, t.gmTag);
         t.ammo--; t.gmCd = GM_FIRE_CD / gmRateMult(p); t.gmSince = 0; t.gmKick = 6;
         brain.nextShot(e);
@@ -295,6 +379,7 @@ class GeminiTwin {
         this.gmDown = false; this.gmRes = 0; this.gmResOut = 0; this.gmReboot = 0; this.gmRebootUsed = false;
         this.inv = 0; this.freezeTimer = 0; this.slowTimer = 0;
         this.gmCd = 20; this.gmSince = 999; this.gmRel = 0; this.gmKick = 0; this.gmHitFx = 0;
+        this.gmFat = 0; this.gmFatRest = 0; this.gmRaySeen = -1; this.gmRayMiss = false;
         this.active = true;
     }
     hasUpgrade(u) { const o = gmOwnerOf(this); return !!(o && o.hasUpgrade(u)); }

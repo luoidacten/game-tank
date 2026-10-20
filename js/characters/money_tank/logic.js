@@ -103,6 +103,7 @@ class AttackTruck {
             enemy.takeDamage(this.dmg, this.owner);
             spawnSparkParticles(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, '#ffd700', 10);
         }
+        if (!this.gmTw && typeof gmTwinAlso === 'function' && gmTwinAlso(enemy, t => rectIntersect(this.x, this.y, this.w, this.h, t.x, t.y, t.w, t.h), this.dmg, this.owner)) this.gmTw = true; // Gemini: Bản Sao AI
         // Tông xe tiền trung lập / thùng tiếp tế trên đường -> phá như bắn trúng (vẫn nhận tiền)
         moneyTrucks.forEach(t => {
             if (!t.active || this.hitIds.includes(t) || !rectIntersect(this.x, this.y, this.w, this.h, t.x, t.y, t.w, t.h)) return;
@@ -130,6 +131,7 @@ class AttackTruck {
         explosions.push(new Explosion(cx, cy, 45, 'rgba(255,215,0,', 0, this.owner));
         const enemy = this.owner === p1 ? p2 : p1;
         if (enemy && enemy.hp > 0 && Math.hypot(enemy.x + enemy.w / 2 - cx, enemy.y + enemy.h / 2 - cy) < 45 + enemy.w / 2) enemy.takeDamage(this.boomDmg, this.owner);
+        if (typeof gmTwinAlso === 'function') gmTwinAlso(enemy, t => Math.hypot(t.x + t.w / 2 - cx, t.y + t.h / 2 - cy) < 45 + t.w / 2, this.boomDmg, this.owner);
         triggerScreenShake(4, 8);
     }
     draw() {

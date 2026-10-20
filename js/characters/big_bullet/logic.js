@@ -51,6 +51,7 @@ class BigBulletBurst extends CrateBurst {
                 }
             }
             if (!b.on) continue;
+            if (!this.skipEnemy && this.hits < BIG_FRAG_MAX_HITS && typeof gmTwinAlso === 'function' && gmTwinAlso(enemy, t => rectIntersect(b.x - 3, b.y - 3, 6, 6, t.x, t.y, t.w, t.h), this.dmg, owner)) { this.hits++; b.on = false; continue; } // Gemini: Bản Sao AI
             if (enemy && enemy.hp > 0 && !this.skipEnemy && this.hits < BIG_FRAG_MAX_HITS && rectIntersect(b.x - 3, b.y - 3, 6, 6, enemy.x, enemy.y, enemy.w, enemy.h)) {
                 enemy.takeDamage(this.dmg, owner);
                 this.hits++;

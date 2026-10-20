@@ -198,6 +198,7 @@ class HitscanTelegraph {
             const d = enemy.takeDamage(this.dmg, this.owner);
             if (this.onFire) BulletHooks.call({ hook: this.onFire, x: this.x, y: enemy.y + enemy.h / 2, owner: this.owner, isHitscan: true }, 'hit', this.owner, enemy, d);
         }
+        if (!swW && typeof gmTwinAlso === 'function') gmTwinAlso(enemy, t => this.x > t.x - 4 && this.x < t.x + t.w + 4, this.dmg, this.owner); // Gemini: Bản Sao AI
         if (soundSystem && !soundSystem.muted) soundSystem.playLaser();
     }
     draw() {
