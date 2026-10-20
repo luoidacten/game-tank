@@ -18,7 +18,7 @@ CharHooks.registry.basic.drawUI = function () {
     }
     ctx.shadowBlur = 0;
     ctx.font = 'bold 8px Arial';
-    if (!main) {
+    if (!main && this.mainEgg) {
         // Hồi Ức sẵn sàng (ngọn lửa mờ chờ bùng cháy)
         ctx.fillStyle = 'rgba(255,140,40,0.85)';
         hudText(F, '🔥 HỒI ỨC', lx, d + 5, 'left');

@@ -331,15 +331,35 @@ class BotAIController {
                 <div class="bwi-stats">${statsText}</div>
                 <div class="bwi-desc">${mod.desc || ''}</div>
             `;
-            item.onclick = () => {
-                if (this.modalTarget === 'player') {
-                    this.changePlayerWeapon(mod.id);
-                } else {
-                    this.changeBotWeapon(mod.id);
-                }
-            };
+            item.onclick = () => this.pickSandboxBody(mod.id, false);
             grid.appendChild(item);
+            // Cơ Bản: lựa chọn riêng "MAIN" (chỉ có trong Phòng Tập) — vào thẳng dạng MAIN đã Thức Tỉnh
+            if (mod.id === 'basic') {
+                const mainItem = document.createElement('div');
+                const isMain = currentWeapon === 'basic' && targetPlayer && targetPlayer.mainAwakened;
+                mainItem.className = 'bot-weapon-item' + (isMain ? ' current' : '');
+                mainItem.style.borderColor = '#ffb020';
+                mainItem.innerHTML = `
+                    <div class="bwi-name" style="color:#ffb020">🔥 MAIN (Cơ Bản Thức Tỉnh)</div>
+                    <div class="bwi-stats">Phòng Tập: vào thẳng dạng MAIN</div>
+                    <div class="bwi-desc">Cơ Bản bản MAIN (bình thường chỉ 8% mỗi trận): Full Evo sẵn, đã Thức Tỉnh — x2 Max HP, +1 Dame/viên, 10 đạn; hiệp quyết định kích hoạt Cơ Hội Cuối.</div>
+                `;
+                mainItem.onclick = () => this.pickSandboxBody('basic', true);
+                grid.appendChild(mainItem);
+            }
         });
+    }
+
+    // Phòng Tập: chọn body (Cơ Bản: main=true -> dạng MAIN, false -> Cơ Bản thường)
+    pickSandboxBody(bodyId, main) {
+        const tp = (this.modalTarget === 'player') ? p1 : p2;
+        if (tp && bodyId === 'basic') {
+            tp.mainEgg = !!main;
+            tp.mainAwakened = !!main;
+            if (!main) tp.upgrades = tp.upgrades.filter(u => u !== 'evo_basic_1' && u !== 'evo_basic_2');
+        }
+        if (this.modalTarget === 'player') this.changePlayerWeapon(bodyId);
+        else this.changeBotWeapon(bodyId);
     }
 
     startPractice() {

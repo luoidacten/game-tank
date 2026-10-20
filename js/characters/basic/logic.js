@@ -1,9 +1,10 @@
 // ==========================================
 // Cơ Bản (basic) — Logic: Thiên Phú Bẩm Sinh, Thức Tỉnh "MAIN" (Hồi Ức), Cơ Hội Cuối
 // ------------------------------------------
-// • Thiên Phú Bẩm Sinh: vào trận là sở hữu sẵn cả 2 Evo (không cần mua).
-// • Easter Egg: 8% mỗi trận xe hiện tên MAIN + khẩu hiệu "Chiến đấu đến khi lửa tàn!!" (chỉ hình thức).
-// • HỒI ỨC (Evo 2): lần ĐẦU TIÊN trong TRẬN bị đối thủ hạ gục -> hồi sinh 100% máu, chuyển VĨNH VIỄN
+// • Bản thường: Evo mua trong shop như mọi body (Evo 2 = Bản Lĩnh: +2 đạn, nạp nhanh hơn 15%).
+// • Bản MAIN (8% mỗi trận, hoặc chọn thẳng "MAIN" trong Phòng Tập): xe mang tên MAIN + khẩu hiệu
+//   "Chiến đấu đến khi lửa tàn!!", THIÊN PHÚ BẨM SINH (có sẵn Full Evo) và nội tại HỒI ỨC.
+// • HỒI ỨC (chỉ bản MAIN): lần ĐẦU TIÊN trong TRẬN bị đối thủ hạ gục -> hồi sinh 100% máu, chuyển VĨNH VIỄN
 //   sang dạng MAIN (x2 Max HP, +1 Dame/viên, 10 đạn), sóng xung kích đẩy lùi + xoá đạn địch gần, bất tử 3s.
 // • CƠ HỘI CUỐI (chỉ dạng MAIN, hiệp quyết định = đối thủ chạm điểm thắng, gồm 2-2):
 //   Tốc chạy +20%, nạp đạn nhanh hơn 25%, Max HP +3, 2 Khiên; "Sức Mạnh Hợp Nhất":
@@ -18,14 +19,21 @@ Object.assign(Player.prototype, {
     // [setupForNewRound] Cơ Bản (gọi giữa setup, trước chỉ số chân/khiên)
     setupBasic() {
         if (this.weapon !== 'basic') return;
-        // Thiên Phú Bẩm Sinh: tự sở hữu Full Evo
-        ['evo_basic_1', 'evo_basic_2'].forEach(id => { if (!this.hasUpgrade(id)) this.upgrades.push(id); });
+        // Bản MAIN: 8% mỗi trận (Player tạo mới mỗi trận -> roll 1 lần/trận); Phòng Tập có thể chọn thẳng
+        if (this.mainEgg === undefined) this.mainEgg = Math.random() < 0.08;
+        // Thiên Phú Bẩm Sinh (chỉ bản MAIN): tự sở hữu Full Evo
+        if (this.mainEgg) ['evo_basic_1', 'evo_basic_2'].forEach(id => { if (!this.hasUpgrade(id)) this.upgrades.push(id); });
         // Nội tại: nạp đạn nhanh hơn 20% (đạn bay nhanh hơn: xem fireBullet)
         this.reloadTime *= 0.8;
         // Evo 1: Công Thủ Toàn Diện
         if (this.hasUpgrade('evo_basic_1')) {
             this.maxHp += 2;
             this.damage *= 1.25;
+        }
+        // Evo 2 bản thường: Bản Lĩnh (bản MAIN dùng Evo 2 làm Hồi Ức)
+        if (!this.mainEgg && this.hasUpgrade('evo_basic_2')) {
+            this.maxAmmo += 2;
+            this.reloadTime *= 0.85;
         }
     }
 });
@@ -106,7 +114,6 @@ BulletHooks.register('main_unity', {
 
 CharHooks.register('basic', {
     setup() {
-        if (this.mainEgg === undefined) this.mainEgg = Math.random() < 0.08; // easter egg theo trận
         this.mainFinal = false;
         this.mainDashCd = 0; this.mainDashT = 0; this.mainDashDir = 0;
         this.mainTapL = -99; this.mainTapR = -99; this.mainPrevL = false; this.mainPrevR = false;
@@ -167,10 +174,9 @@ CharHooks.register('basic', {
     },
     // HỒI ỨC: lần đầu trong trận bị đối thủ hạ gục -> Thức Tỉnh dạng MAIN
     beforeLethal(dmg, attacker) {
-        if (this.mainAwakened || !this.hasUpgrade('evo_basic_2')) return false;
+        if (this.mainAwakened || !this.mainEgg || !this.hasUpgrade('evo_basic_2')) return false;
         if (!attacker || attacker === this || gameState.phase !== 'playing') return false;
         this.mainAwakened = true;
-        this.mainEgg = true; // tên xe đổi hẳn thành MAIN
         mainApplyForm(this);
         this.hp = this.maxHp;
         this.ammo = this.maxAmmo;

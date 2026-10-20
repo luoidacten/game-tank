@@ -686,15 +686,28 @@
         g.addColorStop(0, 'rgba(224,86,253,0)'); g.addColorStop(1, 'rgba(224,86,253,0.55)');
         ctx.fillStyle = g;
         ctx.beginPath(); ctx.moveTo(-L, 0); ctx.lineTo(-2, -4.5); ctx.lineTo(-2, 4.5); ctx.closePath(); ctx.fill();
-        // xoay + lật
-        ctx.rotate(k.t / 55 + suit * 1.7 + (b.x || 0) * 0.05);
-        ctx.scale(0.45 + 0.55 * Math.abs(Math.cos(k.t / 95 + suit)), 1);
-        const W = 9, H = 13, R = 1.8;
-        ctx.beginPath();
-        ctx.moveTo(-W / 2 + R, -H / 2); ctx.lineTo(W / 2 - R, -H / 2); ctx.quadraticCurveTo(W / 2, -H / 2, W / 2, -H / 2 + R);
-        ctx.lineTo(W / 2, H / 2 - R); ctx.quadraticCurveTo(W / 2, H / 2, W / 2 - R, H / 2);
-        ctx.lineTo(-W / 2 + R, H / 2); ctx.quadraticCurveTo(-W / 2, H / 2, -W / 2, H / 2 - R);
-        ctx.lineTo(-W / 2, -H / 2 + R); ctx.quadraticCurveTo(-W / 2, -H / 2, -W / 2 + R, -H / 2); ctx.closePath();
+        // XOAY TRÒN khi bay: góc theo quãng đường đã bay (b.y) -> giống nhau host/guest, ~5 vòng/s
+        const spin = (b.y || 0) * 0.11 + suit * 1.7 + (b.x || 0) * 0.05;
+        const W = 10, H = 14, R = 2;
+        const cardPath = () => {
+            ctx.beginPath();
+            ctx.moveTo(-W / 2 + R, -H / 2); ctx.lineTo(W / 2 - R, -H / 2); ctx.quadraticCurveTo(W / 2, -H / 2, W / 2, -H / 2 + R);
+            ctx.lineTo(W / 2, H / 2 - R); ctx.quadraticCurveTo(W / 2, H / 2, W / 2 - R, H / 2);
+            ctx.lineTo(-W / 2 + R, H / 2); ctx.quadraticCurveTo(-W / 2, H / 2, -W / 2, H / 2 - R);
+            ctx.lineTo(-W / 2, -H / 2 + R); ctx.quadraticCurveTo(-W / 2, -H / 2, -W / 2 + R, -H / 2); ctx.closePath();
+        };
+        // Vòng xoáy mờ (motion blur): cung sáng quanh lá bài + 2 bóng lá ở góc trước đó
+        ctx.save();
+        ctx.strokeStyle = 'rgba(240,171,252,0.55)'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.arc(0, 0, 9, spin + 0.4, spin + 2.2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(0, 0, 9, spin + Math.PI + 0.4, spin + Math.PI + 2.2); ctx.stroke();
+        for (let i = 2; i >= 1; i--) {
+            ctx.save(); ctx.rotate(spin - i * 0.32); ctx.globalAlpha *= 0.22 / i;
+            cardPath(); ctx.fillStyle = '#f5d0fe'; ctx.fill(); ctx.restore();
+        }
+        ctx.restore();
+        ctx.rotate(spin);
+        cardPath();
         ctx.shadowBlur = 10; ctx.shadowColor = '#e056fd';
         ctx.fillStyle = lin(0, -H / 2, 0, H / 2, ['#ffffff', '#f3e8ff', '#e9d5ff']); ctx.fill();
         ctx.shadowBlur = 0;
