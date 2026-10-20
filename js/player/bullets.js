@@ -344,10 +344,10 @@ Object.assign(Player.prototype, {
             }
             if (b.x <= 0 || b.x >= canvas.width) {
                 // Check đạn lớn
-                if (this.hasUpgrade('evo_big_2') && b.bounceCount < 5 && !b.bigPierce) {
+                if (this.hasUpgrade('evo_big_2') && !b.bigFinal && b.bounceCount < bigMaxBounce(this)) {
                     b.vx = -b.vx;
                     b.bounceCount++;
-                    if (b.isFullEvoBig) bigOnBounce(b); // Full Evo Đạn Lớn: nảy lần đầu -> Xuyên Thấu
+                    bigOnBounce(b, this); // Đạn Lớn: phình to mỗi lần nảy; nảy đủ số lần -> tự nổ ở giữa sân; Full Evo: từ lần nảy 2 hóa Xuyên Thấu
                     hitWall = false; // Đánh dấu là nảy, không phải đâm tường mất đạn
 
                     // FULL EVO BIG BULLET: Nảy tường phình to kích thước & tăng dame (bỏ tăng tốc đạn)
@@ -360,10 +360,10 @@ Object.assign(Player.prototype, {
                 } else hitWall = true;
             }
             if (b.y <= 0 || b.y >= canvas.height) {
-                if (this.hasUpgrade('evo_big_2') && b.bounceCount < 5 && !b.bigPierce) {
+                if (this.hasUpgrade('evo_big_2') && !b.bigFinal && b.bounceCount < bigMaxBounce(this)) {
                     b.vy = -b.vy;
                     b.bounceCount++;
-                    if (b.isFullEvoBig) bigOnBounce(b); // Full Evo Đạn Lớn: nảy lần đầu -> Xuyên Thấu
+                    bigOnBounce(b, this); // Đạn Lớn: phình to mỗi lần nảy; nảy đủ số lần -> tự nổ ở giữa sân; Full Evo: từ lần nảy 2 hóa Xuyên Thấu
                     hitWall = false;
 
                     // FULL EVO BIG BULLET: Nảy tường phình to kích thước & tăng dame (bỏ tăng tốc đạn)

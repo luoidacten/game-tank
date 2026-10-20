@@ -23,8 +23,8 @@ const EVOLUTIONS = {
         { id: 'evo_ice_2', name: 'Hàn Băng', desc: 'x1.5 Dame lên kẻ bị chậm, Vùng băng gây dame', cost: 60, type: 'evo' }
     ],
     big_bullet: [
-        { id: 'evo_big_1', name: 'To Hơn Nữa', desc: 'Đạn siêu to khổng lồ (gấp đôi: 32px). Full Evo: sau lần nảy đầu đạn hóa Xuyên Thấu (xuyên vật cản, vẫn trúng địch), không nảy nữa mà tan ở giữa sân', cost: 20, type: 'evo' },
-        { id: 'evo_big_2', name: 'Bóng Cao Su', desc: 'Đạn nảy lại khi chạm tường. Full Evo: đạn kết thúc/bị phá sẽ nổ thành vòng mảnh đạn 360° (chỉ hại địch)', cost: 100, type: 'evo' }
+        { id: 'evo_big_1', name: 'To Hơn Nữa', desc: 'Đạn siêu to khổng lồ (gấp đôi: 32px). Full Evo: từ lần nảy thứ 2 đạn hóa Xuyên Thấu (xuyên mọi vật cản, vẫn trúng địch) và vẫn nảy tiếp', cost: 20, type: 'evo' },
+        { id: 'evo_big_2', name: 'Bóng Cao Su', desc: 'Đạn nảy tường tối đa 7 lần (Full Evo 9), càng nảy càng to; nảy đủ thì tự nổ khi tới giữa sân. Full Evo: đạn kết thúc/bị phá sẽ nổ thành vòng mảnh đạn 360° (chỉ hại địch)', cost: 100, type: 'evo' }
     ],
     shotgun: [
         { id: 'evo_shot_1', name: 'Mưa Đạn', desc: 'Tỏa 6 viên; ngay sau mỗi phát bắn thêm đợt 2 gồm 3 viên tụm giữa', cost: 45, type: 'evo' },

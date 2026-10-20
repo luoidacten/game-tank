@@ -3,8 +3,8 @@
 // ------------------------------------------
 // Mọi viên đạn của Đạn Lớn mang b.hook = 'big_bullet' (vẽ quả cầu tròn phát sáng, không đuôi).
 // Full Evo (evo_big_1 + evo_big_2):
-//  1. Sau lần nảy tường đầu tiên -> đạn hóa Xuyên Thấu: đi xuyên mọi vật cản (vẫn trúng địch),
-//     không nảy nữa và biến mất khi chạy tới giữa sân trên quãng đường kế tiếp.
+//  1. Evo Bóng Cao Su: nảy tối đa 7 lần (Full Evo 9), càng nảy càng to; nảy đủ -> tự nổ khi tới giữa sân.
+//     Full Evo: từ lần nảy thứ 2 đạn hóa Xuyên Thấu (xuyên mọi vật cản, vẫn trúng địch).
 //  2. Khi đạn kết thúc (trúng, bị phá, chạm mép, tới giữa sân) -> nổ thành vòng đạn nhỏ 360° (chỉ hại địch).
 // ==========================================
 
@@ -100,12 +100,19 @@ function bigFragment(owner, x, y, bulletDmg) {
     if (typeof soundSystem !== 'undefined' && soundSystem && !soundSystem.muted && soundSystem.playExplosion) soundSystem.playExplosion();
 }
 
-// Gọi trong bullets.js lúc đạn nảy tường: Full Evo -> lần nảy đầu biến đạn thành Xuyên Thấu
-function bigOnBounce(b) {
-    if (!b.isFullEvoBig || b.bigPierce) return;
-    b.bigPierce = true;
-    b.isPiercing = true;
-    b.bigMidSide = Math.sign((b.y + b.h / 2) - canvas.height / 2) || 1; // nửa sân hiện tại
+// Số lần nảy tối đa (Evo Bóng Cao Su: 7, Full Evo: 9) trước khi đạn tự nổ ở giữa sân
+function bigMaxBounce(p) { return bigIsFullEvo(p) ? 9 : 7; }
+// Gọi trong bullets.js mỗi lần đạn nảy tường
+function bigOnBounce(b, owner) {
+    // Càng nảy bóng càng to (đã có sẵn tăng to/dame riêng cho Full Evo trong bullets.js)
+    if (!b.isFullEvoBig) { b.w = Math.min(56, (b.w || 10) + 3); b.h = Math.min(56, (b.h || 10) + 3); }
+    // Full Evo: từ lần nảy thứ 2 đạn hóa Xuyên Thấu (xuyên mọi vật cản), vẫn tiếp tục nảy
+    if (b.isFullEvoBig && b.bounceCount >= 2 && !b.bigPierce) { b.bigPierce = true; b.isPiercing = true; }
+    // Nảy đủ số lần -> lần chạy tới giữa sân kế tiếp sẽ tự nổ
+    if (owner && b.bounceCount >= bigMaxBounce(owner)) {
+        b.bigFinal = true;
+        b.bigMidSide = Math.sign((b.y + b.h / 2) - canvas.height / 2) || 1;
+    }
 }
 
 // Theo dõi đạn Full Evo (chỉ chạy nơi mô phỏng, không nằm trong state đồng bộ)
@@ -114,16 +121,20 @@ const _bigTrack = { 1: [], 2: [] };
 CharHooks.register('big_bullet', {
     setup() { _bigTrack[this.id] = []; },
     update() {
-        if (!bigIsFullEvo(this)) { _bigTrack[this.id] = []; return; }
         if (typeof gameState !== 'undefined' && gameState.phase !== 'playing') return;
-        const mid = canvas.height / 2;
-        // 1. Đạn Xuyên Thấu chạy tới giữa sân -> biến mất (nổ phân mảnh ở bước 2)
+        const mid = canvas.height / 2, full = bigIsFullEvo(this);
+        // 1. Đạn đã nảy đủ số lần chạy tới giữa sân -> tự nổ (Full Evo: nổ phân mảnh ở bước 2)
         for (let i = this.bullets.length - 1; i >= 0; i--) {
             const b = this.bullets[i];
-            if (!b.bigPierce || b.owner !== this) continue;
+            if (b.owner !== this || b.hook !== 'big_bullet') continue;
             const side = Math.sign((b.y + b.h / 2) - mid);
-            if (b.bigDone || (side !== 0 && side !== b.bigMidSide) || side === 0) this.bullets.splice(i, 1);
+            const reachedMid = b.bigFinal && (side === 0 || side !== b.bigMidSide);
+            if (reachedMid || (full && b.bigPierce && b.bigDone)) {
+                this.bullets.splice(i, 1);
+                if (!full) explosions.push(new Explosion(b.x + b.w / 2, b.y + b.h / 2, Math.max(30, b.w * 1.2), this.id === 1 ? 'rgba(90, 209, 255,' : 'rgba(255, 107, 107,', (b.dmg || 2) * 0.5, this));
+            }
         }
+        if (!full) { _bigTrack[this.id] = []; return; }
         // 2. Đạn đã theo dõi nhưng không còn -> nổ phân mảnh tại vị trí cuối
         const live = new Set(this.bullets);
         for (const t of _bigTrack[this.id]) {
