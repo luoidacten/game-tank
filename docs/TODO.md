@@ -5,7 +5,6 @@
 > Phiên mới: đọc `docs/HANDOVER.md` trước (công cụ test ở `tools/`).
 
 ## 0. Chỉnh sửa gấp (làm TRƯỚC mục 1)
-- 2 body mới (đặc tả `docs/BODY_MOI_2.md`): Tất Sát (`tat_sat`), Nhất Quyền (`one_punch`).
 - Còn lại: các mục bên dưới.
 
 
