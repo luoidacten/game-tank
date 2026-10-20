@@ -116,7 +116,7 @@ const MODULES = {
         {
             id: 'evolution',
             name: 'Tiến Hóa',
-            desc: 'HP:2 | Dame:1 | Đạn:1 (Thuần Farm). Ăn/Phá Rương cộng vĩnh viễn chỉ số. Rương Giả Mạo (Mimic). Late game bất khả chiến bại.',
+            desc: 'HP:2 | Dame:1 | Đạn:1 (Thuần Farm). Ăn/Phá Rương & Xe cộng vĩnh viễn chỉ số (Thùng Băng: tỉ lệ làm chậm khi bắn trúng; Miễn Nhiễm: +HP & lượt miễn nhiễm đầu hiệp; Tốc: +tốc chạy; Xe Buff/Hồi Máu/Tấn Công: +ST/+HP/+tốc). Rương Giả Mạo (Mimic). Late game bất khả chiến bại.',
             type: 'body', role: ['Sinh Tồn', 'Đối Đầu'],
             size: { w: 30, h: 30 },
             stats: { hp: 2, dmg: 1, ammo: 1, speedMult: 1.0 }

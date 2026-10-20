@@ -48,7 +48,7 @@ class Crate {
         // [ĐỔI] Thùng bánh răng chỉ xuất hiện khi có Kỹ Sư / Kẻ Sáng Tạo / Thiên Tài / Nhà Phát Minh
         const hasMaker = ws.some(p => CRATE_GEAR_BODIES.includes(p.weapon));
         const hasEvo1 = ws.some(p => (p.weapon === 'inventor' && p.hasUpgrade('evo_inv_1')) || (p.weapon === 'genius' && p.hasUpgrade('evo_gen_1')));
-        const weights = { coin: 25, hp: 20, ammo: 15, shield: 13, dmg: 10, boom: 9, bullets: 8 };
+        const weights = { coin: 25, hp: 20, ammo: 15, shield: 13, dmg: 10, boom: 9, bullets: 8, frost: 6, immune: 5, haste: 6 };
         if (hasMaker) weights.gear = hasEvo1 ? 24 : 16;
         let total = 0; for (const k in weights) total += weights[k];
         let rand = Math.random() * total;
@@ -119,6 +119,8 @@ function crateOnBreak(c, opener) {
         bodyEffects.push(new CrateBurst(cx, cy, opener, !!(opener && opener.weapon === 'evolution')));
         explosions.push(new Explosion(cx, cy, 34, 'rgba(255,160,30,', 0, null));
     }
+    // Thùng Băng / Miễn Nhiễm / Tốc (js/entities/map-vehicles.js)
+    if (typeof mvCrateBreak === 'function') mvCrateBreak(c, opener);
 }
 
 // Chùm đạn 360 độ từ Thùng Đạn (đạn trung lập: trúng cả 2 xe)

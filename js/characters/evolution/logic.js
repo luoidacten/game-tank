@@ -6,7 +6,11 @@ Object.assign(Player.prototype, {
     onEvolutionCrateEat(type) {
         if (this.weapon !== 'evolution') return;
         this.evolutionPermanentBonus = this.evolutionPermanentBonus || { hp: 0, dmg: 0, ammo: 0, speed: 0, ammoCrates: 0 };
+        // Xe đặc biệt (Buff/Hồi Máu/Tấn Công) bị phá bằng đường phá Xe Tiền -> không nhận thưởng Xe Tiền (thưởng riêng 'v_*')
+        if (type === 'truck' && typeof mvDyingVeh !== 'undefined' && mvDyingVeh) { mvDyingVeh = null; return; }
         let mult = this.hasUpgrade('evo_evo_1') ? 1.3 : 1.0;
+        const B = this.evolutionPermanentBonus;
+        const fx = (txt, col) => { if (typeof addFloatingText === 'function') addFloatingText(this.x + this.w / 2, this.y - 14, txt, col, 12); };
 
         if (type === 'hp') {
             let gain = 0.5 * mult;
@@ -70,6 +74,34 @@ Object.assign(Player.prototype, {
             this.evolutionPermanentBonus.speed += spdGain;
             this.speed += spdGain;
             if (typeof addFloatingText === 'function') addFloatingText(this.x + this.w / 2, this.y - 18, `SCAVENGER DIỆT XE TIỀN: +${hpGain.toFixed(1)} HP, +${dmgGain.toFixed(2)} DMG, +${spdGain.toFixed(2)} SPEED! 🧬⚡`, "gold", 13);
+        } else if (type === 'c_frost') {
+            // Thùng Băng: +5% tỉ lệ đòn đánh làm chậm địch (tối đa 30%) + chút sát thương
+            const dmgGain = 0.06 * mult;
+            B.frost = Math.min(0.3, (B.frost || 0) + 0.05 * mult);
+            B.dmg += dmgGain; this.damage += dmgGain;
+            fx(`TIẾN HÓA BĂNG: ${Math.round(B.frost * 100)}% LÀM CHẬM, +${dmgGain.toFixed(2)} DMG ❄🧬`, '#7dd3fc');
+        } else if (type === 'c_immune') {
+            // Thùng Miễn Nhiễm: +HP; cứ 2 thùng -> mỗi hiệp bắt đầu với 1 lượt miễn nhiễm (tối đa 3)
+            const hpGain = 0.3 * mult;
+            B.immune = (B.immune || 0) + 1;
+            B.hp += hpGain; this.maxHp += hpGain; this.hp = Math.min(this.maxHp, this.hp + hpGain);
+            fx(`TIẾN HÓA MIỄN NHIỄM: +${hpGain.toFixed(2)} HP, ${Math.min(3, Math.floor(B.immune / 2))} lượt/hiệp ⛨🧬`, '#fde68a');
+        } else if (type === 'c_haste') {
+            const spdGain = 0.05 * mult;
+            B.speed += spdGain; this.speed += spdGain;
+            fx(`TIẾN HÓA TỐC: +${spdGain.toFixed(2)} SPEED »🧬`, '#38f0ff');
+        } else if (type === 'v_buff') {
+            const dmgGain = 0.2 * mult;
+            B.dmg += dmgGain; this.damage += dmgGain;
+            fx(`TIẾN HÓA XE BUFF: +${dmgGain.toFixed(2)} DMG 🧬`, '#ff2bd6');
+        } else if (type === 'v_heal') {
+            const hpGain = 0.8 * mult;
+            B.hp += hpGain; this.maxHp += hpGain; this.hp = Math.min(this.maxHp, this.hp + hpGain);
+            fx(`TIẾN HÓA XE HỒI MÁU: +${hpGain.toFixed(2)} HP 🧬`, '#22ff88');
+        } else if (type === 'v_atk') {
+            const dmgGain = 0.1 * mult, spdGain = 0.03 * mult;
+            B.dmg += dmgGain; this.damage += dmgGain; B.speed += spdGain; this.speed += spdGain;
+            fx(`TIẾN HÓA XE TẤN CÔNG: +${dmgGain.toFixed(2)} DMG, +${spdGain.toFixed(2)} SPEED 🧬`, '#ff6b6b');
         } else if (type === 'mimic') {
             let spdGain = 0.05 * mult;
             this.evolutionPermanentBonus.speed += spdGain;

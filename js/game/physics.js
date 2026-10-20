@@ -61,6 +61,8 @@ function tickPhysics() {
             if (mtIsFull(p1) || mtIsFull(p2)) spawnRate = 0.006;
             if (Math.random() < spawnRate) moneyTrucks.push(new MoneyTruck());
         }
+        // Xe đặc biệt: Buff ST / Hồi Máu / Tấn Công (js/entities/map-vehicles.js)
+        if (typeof mvSpawnTick === 'function') mvSpawnTick();
 
         // Artillery map: bão đạn pháo kích ngẫu nhiên mỗi 2.5s
         if (gameState.currentMap === 'artillery') {
