@@ -236,6 +236,8 @@ function renderFrame() {
     if (typeof opFxOver === 'function') opFxOver();
     // Lớp phủ kết liễu Boomerang (KHÔNG LỐI THOÁT) - js/characters/boomerang/render.js
     if (typeof bmFxOver === 'function') bmFxOver();
+    // Lớp phủ kết liễu Nhện Độc (HÓA KÉN KẾT LIỄU) - js/characters/arachnid/render.js
+    if (typeof arFxOver === 'function') arFxOver();
 
     // Particles & Floating Numbers
     updateAndDrawParticles();
@@ -269,7 +271,7 @@ function renderFrame() {
 // Băng rôn thắng hiệp: mốc bắt đầu hiện (tick trong fatalCinematic), -1 = chưa hiện
 let victoryBannerStart = -1;
 const VICTORY_BANNER_MAX_WAIT = 66;
-const FINISHER_FX_CLASSES = ['FsFinisher', 'TsFinisher', 'JkFinisher', 'JgFinisher', 'CgFinisher', 'ClFinisher', 'JpFinisher', 'WsFinisher', 'StFinisher', 'TatFinisher', 'OpFinisher', 'BmFinisher'];
+const FINISHER_FX_CLASSES = ['FsFinisher', 'TsFinisher', 'JkFinisher', 'JgFinisher', 'CgFinisher', 'ClFinisher', 'JpFinisher', 'WsFinisher', 'StFinisher', 'TatFinisher', 'OpFinisher', 'BmFinisher', 'ArFinisher'];
 function finisherFxActive() {
     if (typeof bodyEffects === 'undefined') return false;
     for (const e of bodyEffects) {

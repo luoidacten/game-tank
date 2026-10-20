@@ -377,6 +377,14 @@ const MODULES = {
             size: { w: 28, h: 28 },
             stats: { hp: 4.5, dmg: 1.0, ammo: 2, speedMult: 1.1143 }
         },
+        {
+            id: 'arachnid',
+            name: 'Nhện Độc',
+            desc: '"Hóa kén... rồi kết liễu!" HP:5.5 | Dame:1.1 | Đạn:3 | Tốc: 3.8. Nhấp: ĐẠN TƠ ĐỘC 1.1 st -> để lại VÙNG TƠ NHỆN 4s (chậm 30%) dưới chân địch & +1 tầng TƠ QUẤN (6s). Đạn chạm biên / vật cản cũng tạo Vùng Tơ (tối đa 3 vùng); Nhện đứng trên tơ +25% tốc chạy. Đủ 4 tầng -> HÓA KÉN 1.75s: choáng hoàn toàn (không đi, không bắn, không kỹ năng) & Lộ Điểm Yếu +25% st nhận (Juggernaut vẫn bị bọc kén nhưng miễn choáng). Giữ 0.5s (hồi 9s): CÚ VỒ ĐOẠT MỆNH - lao thẳng lên cắn 1.5 st, +2 tầng Tơ, hồi 0.5 HP rồi bật về làn. Khi địch trong Kén: khoá mục tiêu 100% (bất tử khi lao), xé kén 2.5x dame + 15% máu đã mất, hút 1.25 HP, hoàn 50% hồi chiêu; máu địch < 15% Max HP -> XỬ TỬ (xuyên Khiên). Hạ gục địch -> kết liễu HÓA KÉN KẾT LIỄU.',
+            type: 'body', role: ['Đối Đầu', 'Kiểm Soát'],
+            size: { w: 30, h: 30 },
+            stats: { hp: 5.5, dmg: 1.1, ammo: 3, speedMult: 1.0857 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 30 },
