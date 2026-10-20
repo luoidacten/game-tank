@@ -5,12 +5,6 @@
 > Phiên mới: đọc `docs/HANDOVER.md` trước (công cụ test ở `tools/`).
 
 ## 0. Chỉnh sửa gấp (làm TRƯỚC mục 1)
-- **Đợt chỉnh mới:**
-  - Bài của Nhà Ảo Thuật phải xoay khi bay.
-  - Cơ Bản: chỉ tỉ lệ nhỏ mới thức tỉnh MAIN (Hồi Ức); thường thì là Cơ Bản bình thường; Sandbox cho chọn thẳng MAIN.
-  - Khiên (hiển thị chung) đẹp hơn.
-  - Phong Trảm: thêm hiệu ứng kết liễu.
-  - Cuồng Phong: thêm hiệu ứng kết liễu (khác khi Full Evo); lướt hóa thành cơn lốc; cập nhật hoạt ảnh nội tại & chiêu.
 - Còn lại: các mục bên dưới.
 
 
