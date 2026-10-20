@@ -6,7 +6,7 @@
 
 ## 0. Chỉnh sửa gấp (làm TRƯỚC mục 1)
 - **Cân bằng mới (đặc tả: `docs/CAN_BANG_MOI.md`)** — làm TRƯỚC:
-- Sau đó: lỗi HUD Online → Cơ Bản thành MAIN → còn lại.
+- Sau đó: lỗi HUD Online → còn lại.
 
 ## 2. HUD còn sót
 - DJ, Móc Thép, Thiên Tài (chữ BR/LK, chế độ Mecha), Tiến Hóa vẫn dùng chữ → đổi sang biểu tượng.
@@ -22,4 +22,3 @@
 - Shop Tùy Biến: biểu tượng tròn hơi đè mép trên; thẻ "TỰ LẮP" hiện giá "0 CP" màu xanh.
 - Chưa thử thật chế độ Online cho các thay đổi gần đây.(Có rất nhiều lỗi về HUB bay loạn xạ và sai độ họa)
 ## 4. Y Cầu Cân bằng/chỉnh sửa
-- Cơ Bản ----> Nhân Vật Chính (MAIN)
