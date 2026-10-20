@@ -346,7 +346,7 @@ Object.assign(Player.prototype, {
 
     drawUI() {
         // Tàng hình: Ẩn hoàn toàn thanh HP, đạn và khiên để không lộ vị trí
-        if ((this.weapon === 'ghost' && this.isGhostActive) || (this.weapon === 'magician' && this.invisTimer > 0) || (this.weapon === 'shadow_hunter' && this.stealthActive)) {
+        if ((this.weapon === 'ghost' && this.isGhostActive) || (this.weapon === 'magician' && this.invisTimer > 0) || (this.weapon === 'shadow_hunter' && this.stealthActive) || (this.weapon === 'storm' && this.stHidden)) {
             return;
         }
 

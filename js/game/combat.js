@@ -20,7 +20,7 @@ function checkHits(attacker, victim) {
         let currentFinalDmg = b.dmg * dmgReduc;
 
         // --- 0. LOGIC PHẢN ĐẠN (Storm Evo 2) ---
-        if (victim.weapon === 'storm' && victim.shield > 0) {
+        if (victim.weapon === 'storm' && victim.shield > 0 && !victim.stHidden) {
             if (victim.weapon === 'ghost' && victim.isGhostActive) continue;
             if (rectIntersect(b.x, b.y, b.w, b.h, victim.x, victim.y, victim.w, victim.h)) {
                 if (!b.isPiercing && b.bounceCount === 0 && !b.isStormShadow) {
@@ -428,6 +428,7 @@ function checkHits(attacker, victim) {
 
         // --- 2. KIỂM TRA VA CHẠM VỚI PLAYER ---
         if (victim.weapon === 'ghost' && victim.isGhostActive) continue;
+        if (victim.weapon === 'storm' && victim.stHidden) continue; // Cuồng Phong ẩn trong Gió Lốc / Lôi Bão: không thể bị nhắm
 // cho mirror
         // ĐỊCH PHÁ ẢNH CHIẾU TAN VỠ (Shattered Clone) CỦA MIRROR
         if (victim.weapon === 'mirror' && victim.shatteredClone && victim.shatteredClone.active) {

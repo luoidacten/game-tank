@@ -59,8 +59,8 @@ const EVOLUTIONS = {
         { id: 'evo_wind_2', name: 'Nghịch Phong', desc: 'Chém vào đạn địch -> Phản lại về phía địch', cost: 100, type: 'evo' }
     ],
     storm: [
-        { id: 'evo_storm_1', name: 'Mắt Bão', desc: 'Tụ >50% + Khiên: Xóa đạn quanh người. Chém xong hút địch.', cost: 80, type: 'evo' },
-        { id: 'evo_storm_2', name: 'Phong Ảnh Trảm', desc: 'Mỗi 3-8s bóng lao lên chém. Full lực + Khiên: Chém bồi thêm phát nữa.', cost: 100, type: 'evo' }
+        { id: 'evo_storm_1', name: 'Mắt Bão', desc: 'Tụ >50% + Khiên: Xóa đạn quanh người. Nhát chém chẻ lốc hút địch. Tụ 100%: +2 Khiên.', cost: 80, type: 'evo' },
+        { id: 'evo_storm_2', name: 'Phong Ảnh Trảm', desc: 'Mỗi 3-8s Phân Thân lao lên chém, cuối đường lao để lại Cơn Lốc Nhỏ (0.3 dame, chậm 25%). Lôi Bão + Khiên: chém bồi nhát 2 (+50%). Full Evo: tụ 2.5s, Phân Thân 3-5s.', cost: 100, type: 'evo' }
     ],
     acid: [
         { id: 'evo_acid_1', name: 'Bào Mòn', desc: 'Vùng Ăn Mòn rộng hơn & tồn tại lâu hơn, tốc độ rút HP / Max HP gấp đôi.', cost: 40, type: 'evo' },

@@ -1117,6 +1117,7 @@ registerTankArt('storm', (p, k) => {
     const ch = Math.min(1, p.stormChargeRatio || 0);
     const spin = k.t * (5 + ch * 22);
     // Lao thân: xe xoay tít, mờ dần hòa vào lốc xoáy (vẽ lốc ở drawStorm)
+    if (p.stHidden) return; // ẩn trong Gió Lốc / Lôi Bão
     if (p.stormDashState === 1) { ctx.rotate(k.t * 40); ctx.globalAlpha *= 0.4; ctx.scale(0.8, 0.8); }
     // Hai cánh quạt
     for (const sx of [-1, 1]) {
