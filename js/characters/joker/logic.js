@@ -231,37 +231,60 @@ function jkTickEnemy(p) {
     }
 }
 
-// ---------- Entity: PHÁN QUYẾT JOKER (Full Evo) ----------
+// ---------- PHÁN QUYẾT JOKER (Full Evo) ----------
+// Đủ 5 lá Joker TRÚNG xe địch (jokerHitCount) & hết hồi chiêu -> SHOWDOWN ngay lập tức:
+// máu hiện tại x0.5 (đòn tối thượng: bỏ qua bất tử / né / khiên), Khiên = 0, xóa mọi buff, +1 Thoát Hiểm (tối đa 3).
+const JK_VERDICT_CD = 1500, JK_VERDICT_HITS = 5;
+function jkClearBuffs(v) {
+    v.shield = 0;
+    v.invincibleTimer = 0; v.invisTimer = 0; v.stealthActive = false;
+    v.crateShieldActive = false; v.crateShieldExpireTimer = 0;
+    v.swordShieldActive = false; v.swordShieldHits = 0; v.swordShieldTimer = 0;
+    v.jkSpdT = 0; v.jkDR = 0; v.jkDR2 = 0; v.jkInvis = 0;
+    for (const k of Object.keys(v)) {
+        if (typeof v[k] === 'number' && v[k] > 0 && /buff/i.test(k) && /(Timer|T)$/.test(k)) v[k] = 0;
+    }
+}
+function jkShowdown(o, v) {
+    if (!jkAlive(v)) return false;
+    o.jokerHitCount = 0; o.jkVerdictCd = JK_VERDICT_CD;
+    const before = v.hp;
+    v.hp = Math.max(0.01, v.hp * 0.5);
+    jkClearBuffs(v);
+    o.jkEsc = Math.min(3, (o.jkEsc || 0) + 1);   // có thể vượt giới hạn (tối đa 3)
+    bodyEffects.push(new JkVerdict(o, v, before - v.hp));
+    addFloatingText(o.x + o.w / 2, o.y + (o.id === 1 ? -22 : o.h + 26), '+1 THOÁT HIỂM', JK_PURPLE, 12);
+    triggerScreenShake(6, 10);
+    jkSfx('playPowerup');
+    return true;
+}
+// Entity thuần hình ảnh (state số + ref owner) -> NET_CLASSES
 class JkVerdict {
-    constructor(owner, target) {
-        this.owner = owner; this.target = target;
+    constructor(owner, target, lost) {
+        this.owner = owner; this.tid = target.id;
         this.x = target.x + target.w / 2; this.y = target.y + target.h / 2;
-        this.t = 0; this.hitT = 40; this.dur = 80; this.done = false; this.active = true;
+        this.lost = Math.round((lost || 0) * 100) / 100;
+        this.seed = Math.round(Math.random() * 600) / 100;
+        this.t = 0; this.hitT = 30; this.dur = 96; this.active = true;
     }
     update() {
         if (!this.active) return;
-        const tg = this.target, o = this.owner;
+        const tg = this.tid === 1 ? p1 : p2;
         if (jkAlive(tg)) { this.x = tg.x + tg.w / 2; this.y = tg.y + tg.h / 2; }
         this.t++;
-        if (!this.done && this.t >= this.hitT) {
-            this.done = true;
-            if (jkAlive(tg)) {
-                tg.shield = 0;
-                tg.invincibleTimer = 0; tg.invisTimer = 0; tg.stealthActive = false;
-                const d = tg.hp * 0.5;
-                if (d > 0) tg.takeDamage(d, o, { unavoidable: true, bypassShield: true, isPiercing: true });
-                o.jkEsc = Math.min(3, (o.jkEsc || 0) + 1);   // có thể vượt giới hạn 2
-                addFloatingText(this.x, this.y + (tg.id === 1 ? -30 : 34), 'SHOWDOWN! -50% HP', JK_GOLD, 16);
-                addFloatingText(o.x + o.w / 2, o.y + (o.id === 1 ? -22 : o.h + 26), '+1 THOÁT HIỂM', JK_PURPLE, 12);
-            }
-            explosions.push(new Explosion(this.x, this.y, 90, 'rgba(253, 224, 71,', 0, o));
-            spawnSparkParticles(this.x, this.y, JK_PURPLE, 24);
-            triggerScreenShake(9, 14);
+        if (this.t === this.hitT) {
+            const cy = this.y + (this.tid === 1 ? -46 : 46);
+            explosions.push(new Explosion(this.x, cy, 80, 'rgba(253, 224, 71,', 0, this.owner));
+            explosions.push(new Explosion(this.x, this.y, 54, 'rgba(168, 85, 247,', 0, this.owner));
+            spawnSparkParticles(this.x, cy, JK_GOLD, 26);
+            spawnSparkParticles(this.x, this.y, JK_PURPLE, 18);
+            triggerScreenShake(10, 16);
             jkSfx('playExplosion');
         }
         if (this.t >= this.dur) this.active = false;
     }
     draw() { if (typeof jkDrawVerdict === 'function') jkDrawVerdict(this); }
+    drawOver() { if (typeof jkDrawVerdictOver === 'function') jkDrawVerdictOver(this); }
 }
 
 // ---------- Entity: Kết liễu ALL IN ----------
@@ -574,14 +597,12 @@ BulletHooks.register('joker', {
                 jkTxt(o, 'SAO CHÉP: ' + o.jkCopyNext.toUpperCase() + ' (tay kế)', JK_PINK, 12);
                 if (o.jkEscT > 0) o.jkEscT = Math.max(1, o.jkEscT - 120);
             }
-            if (jkFull(o)) {
-                o.jkJHits = (o.jkJHits || 0) + 1;
-                if (o.jkJHits >= 5 && !(o.jkVerdictCd > 0) && jkAlive(v)) {
-                    o.jkJHits = 0; o.jkVerdictCd = 1500;
-                    bodyEffects.push(new JkVerdict(o, v));
-                    addFloatingText(v.x + v.w / 2, v.y + (v.id === 1 ? -26 : v.h + 30), 'PHÁN QUYẾT JOKER!', JK_GOLD, 15);
-                }
-            }
+        }
+        // Phán Quyết: đếm mọi lá Joker TRÚNG xe địch (kể cả bị khiên chặn)
+        if (J && jkFull(o)) {
+            o.jokerHitCount = Math.min(JK_VERDICT_HITS, (o.jokerHitCount || 0) + 1);
+            if (o.jokerHitCount >= JK_VERDICT_HITS && !(o.jkVerdictCd > 0)) jkShowdown(o, v);
+            else jkTxt(o, 'PHÁN QUYẾT ' + o.jokerHitCount + '/' + JK_VERDICT_HITS + (o.jkVerdictCd > 0 ? ' (' + Math.ceil(o.jkVerdictCd / 60) + 's)' : ''), JK_GOLD, 10);
         }
     },
     truckDmgMult(b) { return b.jk === 'D' || b.jk === 'J' ? 10 : 1; },
@@ -643,7 +664,7 @@ CharHooks.register('joker', {
         this.jkCopy = ''; this.jkCopyNext = ''; this.jkSpdT = 0; this.jkSpdM = 1; this.jkDR2 = 0;
         jkAceInit(this, false); this.jkAceOk = false;   // tick đầu kiểm tra lại (địch có thể chưa setup)
         this.jkEscMax = jkFull(this) ? 2 : 1; this.jkEsc = 1; this.jkEscT = 0;
-        this.jkJHits = 0; this.jkVerdictCd = 0;
+        this.jokerHitCount = 0; this.jkVerdictCd = 0;
         this.ammo = 0;
         jkNewHand(this);
     },
@@ -655,6 +676,8 @@ CharHooks.register('joker', {
         if (this.jkThrowFx > 0) this.jkThrowFx--;
         if (this.jkSwapFx > 0) this.jkSwapFx--;
         if (this.jkVerdictCd > 0) this.jkVerdictCd--;
+        // đã tích đủ 5 lá trong lúc hồi chiêu -> hết hồi là Phán Quyết ngay
+        if (jkFull(this) && (this.jokerHitCount || 0) >= JK_VERDICT_HITS && !(this.jkVerdictCd > 0)) jkShowdown(this, jkEnemy(this));
         if (this.jkSpdT > 0) this.jkSpdT--;
         if (this.jkDR2 > 0) this.jkDR2--;
         if (!this.jkAceOk) jkAceInit(this, true);
