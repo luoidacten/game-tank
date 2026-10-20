@@ -109,18 +109,20 @@ function crateOnBreak(c, opener) {
     if (!c || c._broke) return;
     c._broke = true;
     const cx = c.x + c.w / 2, cy = c.y + c.h / 2;
-    if (c.type === 'boom' && opener && typeof opener.takeDamage === 'function') {
+    const hasAllyCrate = !!(opener && typeof opener.hasGear === 'function' && (opener.hasGear('gear_ally_crate_s') || opener.hasGear('gear_ally_crate_p')));
+    if (c.type === 'boom' && opener && typeof opener.takeDamage === 'function' && !hasAllyCrate) {
         explosions.push(new Explosion(opener.x + opener.w / 2, opener.y + opener.h / 2, 40, 'rgba(255,0,0,', 0, null));
         addFloatingText(opener.x + opener.w / 2, opener.y - 18, 'PHẢN NỔ! 💥', '#ff4d4d', 14);
         opener.takeDamage(CRATE_BOOM_DMG, null, { unavoidable: true, isEnvironmental: true });
         triggerScreenShake(6, 10);
     }
     if (c.type === 'bullets') {
-        bodyEffects.push(new CrateBurst(cx, cy, opener, !!(opener && opener.weapon === 'evolution')));
+        bodyEffects.push(new CrateBurst(cx, cy, opener, !!(opener && (opener.weapon === 'evolution' || hasAllyCrate))));
         explosions.push(new Explosion(cx, cy, 34, 'rgba(255,160,30,', 0, null));
     }
     // Thùng Băng / Miễn Nhiễm / Tốc (js/entities/map-vehicles.js)
     if (typeof mvCrateBreak === 'function') mvCrateBreak(c, opener);
+    if (typeof onGearCrateBroken === 'function') onGearCrateBroken(c, opener);
 }
 
 // Chùm đạn 360 độ từ Thùng Đạn (đạn trung lập: trúng cả 2 xe)

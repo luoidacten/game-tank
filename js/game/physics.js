@@ -25,10 +25,11 @@ function tickPhysics() {
 
         [p1, p2].forEach(p => {
             if (p.x < zoneX || p.x + p.w > zoneX + zoneW) {
+                const zDmg = (p.hasGear && p.hasGear('gear_early_zone_g')) ? 0.025 : 0.05;
                 if (p.weapon === 'the_strongest') {
-                    p.takeDamage(0.05, null, { isEnvironmental: true });
+                    p.takeDamage(zDmg, null, { isEnvironmental: true });
                 } else {
-                    p.hp -= 0.05;
+                    p.hp -= zDmg;
                 }
             }
         });
@@ -59,6 +60,7 @@ function tickPhysics() {
             let spawnRate = 0.001;
             if (p1.upgradeLevel >= 2 || p2.upgradeLevel >= 2) spawnRate = 0.003;
             if (mtIsFull(p1) || mtIsFull(p2)) spawnRate = 0.006;
+            if ((p1 && p1.hasGear && p1.hasGear('gear_ally_crate_p')) || (p2 && p2.hasGear && p2.hasGear('gear_ally_crate_p'))) spawnRate *= 1.5;
             if (Math.random() < spawnRate) moneyTrucks.push(new MoneyTruck());
         }
         // Xe đặc biệt: Buff ST / Hồi Máu / Tấn Công (js/entities/map-vehicles.js)
@@ -298,6 +300,7 @@ function tickPhysics() {
             moneyTrucks.forEach(t => {
                 if (t.active && rectIntersect(b.x, b.y, b.w, b.h, t.x, t.y, t.w, t.h)) {
                     let dmg = 1; if (owner.weapon === 'money_tank') dmg *= 3;
+                    if (owner.hasGear && owner.hasGear('gear_crate_magnet_s')) dmg *= 2;
                     t.hp -= dmg;
                     if (t.hp <= 0) {
                         t.active = false;
@@ -305,6 +308,7 @@ function tickPhysics() {
                         if (owner.id === 1) gameState.p1Coins += money; else gameState.p2Coins += money;
                         if (owner.weapon === 'inventor') owner.components = (owner.components || 0) + 3;
                         if (owner.hasUpgrade('evo_money_atk')) explosions.push(new Explosion(t.x + t.w / 2, t.y + t.h / 2, 100, 'rgba(255,215,0,', 5, owner));
+                        if (typeof onGearTruckDestroyed === 'function') onGearTruckDestroyed(t, owner);
                     }
                 }
             });
@@ -365,7 +369,9 @@ function tickPhysics() {
 // ==========================================
 function getZoneState(tp) {
     const fast = gameState.currentMap === 'fast_shrink';
-    const limit = fast ? 20000 : C.suddenDeathTime;
+    const hasEarlyZoneGear = (typeof p1 !== 'undefined' && p1 && p1.hasGear && p1.hasGear('gear_early_zone_g'))
+        || (typeof p2 !== 'undefined' && p2 && p2.hasGear && p2.hasGear('gear_early_zone_g'));
+    const limit = fast ? 20000 : (hasEarlyZoneGear ? 35000 : C.suddenDeathTime);
     if (tp <= limit) return null;
     const W = canvas.width;
     const rate = fast ? 0.15 : 0.05;           // px/ms mỗi bên (như cũ)

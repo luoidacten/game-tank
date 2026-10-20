@@ -98,7 +98,8 @@ class AttackTruck {
         this.speed = Math.min(this.maxSpeed, this.speed + 0.35);
         this.y += this.dirY * this.speed;
         const enemy = this.owner === p1 ? p2 : p1;
-        if (!this.hitEnemy && enemy && enemy.hp > 0 && rectIntersect(this.x, this.y, this.w, this.h, enemy.x, enemy.y, enemy.w, enemy.h)) {
+        const enemyImmuneTruck = !!(enemy && typeof enemy.hasGear === 'function' && (enemy.hasGear('gear_ally_crate_s') || enemy.hasGear('gear_ally_crate_p')));
+        if (!this.hitEnemy && !enemyImmuneTruck && enemy && enemy.hp > 0 && rectIntersect(this.x, this.y, this.w, this.h, enemy.x, enemy.y, enemy.w, enemy.h)) {
             this.hitEnemy = true;
             enemy.takeDamage(this.dmg, this.owner);
             spawnSparkParticles(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, '#ffd700', 10);
@@ -114,6 +115,7 @@ class AttackTruck {
                 if (this.owner.id === 1) gameState.p1Coins += 60; else gameState.p2Coins += 60;
                 addFloatingText(t.x + t.w / 2, t.y - 8, '+60$', '#ffd700', 13);
                 explosions.push(new Explosion(t.x + t.w / 2, t.y + t.h / 2, 60, 'rgba(255,215,0,', 0, this.owner));
+                if (typeof onGearTruckDestroyed === 'function') onGearTruckDestroyed(t, this.owner);
             }
         });
         crates.forEach(c => {
@@ -130,7 +132,8 @@ class AttackTruck {
         const cx = this.x + this.w / 2, cy = this.dirY < 0 ? this.y + 10 : this.y + this.h - 10;
         explosions.push(new Explosion(cx, cy, 45, 'rgba(255,215,0,', 0, this.owner));
         const enemy = this.owner === p1 ? p2 : p1;
-        if (enemy && enemy.hp > 0 && Math.hypot(enemy.x + enemy.w / 2 - cx, enemy.y + enemy.h / 2 - cy) < 45 + enemy.w / 2) enemy.takeDamage(this.boomDmg, this.owner);
+        const enemyImmuneTruck = !!(enemy && typeof enemy.hasGear === 'function' && (enemy.hasGear('gear_ally_crate_s') || enemy.hasGear('gear_ally_crate_p')));
+        if (!enemyImmuneTruck && enemy && enemy.hp > 0 && Math.hypot(enemy.x + enemy.w / 2 - cx, enemy.y + enemy.h / 2 - cy) < 45 + enemy.w / 2) enemy.takeDamage(this.boomDmg, this.owner);
         if (typeof gmTwinAlso === 'function') gmTwinAlso(enemy, t => Math.hypot(t.x + t.w / 2 - cx, t.y + t.h / 2 - cy) < 45 + t.w / 2, this.boomDmg, this.owner);
         triggerScreenShake(4, 8);
     }

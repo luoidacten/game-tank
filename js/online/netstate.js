@@ -39,6 +39,7 @@ const NET_CLASSES = {
     OpPunchFx, OpFinisher,
     MapVehicle, MvShot, MvHealOrbs, MvAura,
     MainAwakenFx,
+    GearSupportDrone, GearMine, GearBarrierWall, GearCenterPrism, GearMirage, GearPrankBox, GearStormBolt, GearFieldDevice,
 };
 
 // Biến toàn cục cần đồng bộ: [tên, getter, setter]
@@ -87,13 +88,16 @@ const NET_LOCAL_PLAYER_KEYS = ['ghostHp'];
 const NET_PLAIN_LISTS = new Set(['thunderPlantedSpears', 'magnetNodes']);
 
 // Trường của gameState được host quyết định
-const NET_GAMESTATE_KEYS = ['round', 'p1Score', 'p2Score', 'p1Coins', 'p2Coins', 'phase', 'currentMap', 'winScore', 'lastObstacleSpawn', 'lastArtillerySpawn', 'zoneOff'];
+const NET_GAMESTATE_KEYS = ['round', 'p1Score', 'p2Score', 'p1Coins', 'p2Coins', 'phase', 'currentMap', 'winScore', 'lastObstacleSpawn', 'lastArtillerySpawn', 'zoneOff', 'matchGearTiers'];
 
 // Trang bị / ví của người chơi (đồng bộ ở màn hình shop)
 const NET_LOADOUT_KEYS = ['upgrades', 'rerollCount', 'upgradeLevel', 'invUpgrades', 'boughtInvShopItems', 'boughtShopItems', 'isFullEvoInventor',
     'components', 'gears', 'geniusUpgrades', 'geniusPurchaseCount', 'mechaSummonMultiplier',
     'shortgunBonusMaxHp', 'shortgunBonusDmg', 'evolutionPermanentBonus',
-    'kkData', 'cuData', 'loseStreak', 'winStreak', 'lastRoundResult', 'lastStreakBonus', 'mtSpend'];
+    'kkData', 'cuData', 'loseStreak', 'winStreak', 'lastRoundResult', 'lastStreakBonus', 'mtSpend',
+    'equippedGears', 'gearTiers', 'gearPickedMilestones', 'gearFreeFeetUpgrades',
+    'gearBonusMaxHp', 'gearComebackDmgBuff', 'gearEarlyEvoFallback', 'gearInfiniteStacks', 'gearJackpot',
+    'mainEgg', 'mainAwakened', 'isMainChar'];
 
 const NetState = {
     // ---------- Tuần tự hoá ----------

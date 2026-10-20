@@ -196,7 +196,7 @@ Object.assign(Player.prototype, {
             if (feetIds.includes(uId)) {
                 if (uId === 'speed') this.speed += 1.5;
                 if (uId === 'armor') this.maxHp += 1;
-                if (uId === 'damage') this.damage *= feetDamageMult(++dmgStacks);
+                if (uId === 'damage') this.damage *= feetDamageMult(++dmgStacks, this);
             }
         });
 

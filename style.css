@@ -2453,3 +2453,169 @@ body.ctrl-new .btn-group { padding: 0 14px 0 24px; }
 .card.shop-card.shop-back p, .card.shop-card.shop-reroll p:not(.price-tag) { flex: 0 0 auto; }
 @keyframes shopReadyPulse { 50% { box-shadow: 0 0 18px rgba(34, 197, 94, 0.55); } }
 @media (hover: none) and (pointer: coarse) { .card.shop-card:hover { transform: none; } }
+
+/* ==========================================================================
+   HỆ THỐNG LÕI CÔNG NGHỆ G.E.A.R (BẠC • VÀNG • LĂNG KÍNH)
+   ========================================================================== */
+.card.gear-card {
+    position: relative;
+    width: clamp(106px, 29vw, 148px);
+    min-height: 158px;
+    padding: 8px 8px 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 5px;
+    border-radius: 12px;
+    transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+.card.gear-card:hover { transform: translateY(-3px) scale(1.02); }
+.card.gear-card:active { transform: scale(0.96); }
+
+.card.gear-card.gear-tier-silver {
+    background: linear-gradient(155deg, #1e293b 0%, #0f172a 100%);
+    border: 2px solid #94a3b8;
+    box-shadow: 0 0 14px rgba(148, 163, 184, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+.card.gear-card.gear-tier-gold {
+    background: linear-gradient(155deg, #422006 0%, #1c1917 100%);
+    border: 2px solid #facc15;
+    box-shadow: 0 0 16px rgba(250, 204, 21, 0.55), inset 0 1px 0 rgba(254, 240, 138, 0.35);
+}
+.card.gear-card.gear-tier-prismatic {
+    background: linear-gradient(135deg, #3b0764 0%, #083344 50%, #4c0519 100%);
+    border: 2px solid #22d3ee;
+    box-shadow: 0 0 20px rgba(232, 121, 249, 0.7), 0 0 8px rgba(34, 211, 238, 0.6), inset 0 0 12px rgba(232, 121, 249, 0.35);
+    animation: gearPrismaticPulse 2.4s ease-in-out infinite alternate;
+}
+@keyframes gearPrismaticPulse {
+    from { border-color: #22d3ee; box-shadow: 0 0 16px rgba(34, 211, 238, 0.7), inset 0 0 10px rgba(232, 121, 249, 0.3); }
+    to   { border-color: #e879f9; box-shadow: 0 0 22px rgba(232, 121, 249, 0.85), inset 0 0 14px rgba(34, 211, 238, 0.4); }
+}
+
+.gear-tier-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 3px;
+    width: 100%;
+}
+.gear-tier-badge {
+    font-family: 'Orbitron', monospace;
+    font-size: 8.5px;
+    font-weight: 900;
+    padding: 2px 5px;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.45);
+    color: #f8fafc;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+.gear-tier-gold .gear-tier-badge { color: #fde047; border-color: rgba(250, 204, 21, 0.6); }
+.gear-tier-prismatic .gear-tier-badge { color: #f0abfc; border-color: rgba(34, 211, 238, 0.7); }
+
+.gear-cat-badge {
+    font-size: 8px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #cbd5e1;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.card.gear-card .gear-title {
+    font-size: 11px !important;
+    line-height: 1.25;
+    color: #ffffff;
+    margin: 2px 0;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+.gear-tier-gold .gear-title { color: #fef08a !important; }
+.gear-tier-prismatic .gear-title { color: #f5d0fe !important; text-shadow: 0 0 8px rgba(232, 121, 249, 0.8); }
+
+.card.gear-card .gear-desc {
+    font-size: 9.2px !important;
+    line-height: 1.32;
+    color: #e2e8f0 !important;
+    text-align: left;
+    overflow-y: auto;
+    max-height: 105px;
+    padding-right: 2px;
+}
+
+/* Dải hiển thị G.E.A.R đã trang bị */
+.gear-equipped-strip-wrap {
+    display: flex;
+    align-items: center;
+    align-self: center;
+    margin-left: 4px;
+}
+.gear-equipped-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: center;
+    align-items: center;
+}
+.gear-mini-pill {
+    font-size: 9px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 8px;
+    white-space: nowrap;
+    background: #1e293b;
+    color: #e2e8f0;
+    border: 1px solid #94a3b8;
+}
+.gear-mini-pill.tier-gold {
+    background: #422006;
+    color: #fde047;
+    border-color: #facc15;
+}
+.gear-mini-pill.tier-prismatic {
+    background: linear-gradient(90deg, #3b0764, #083344);
+    color: #f0abfc;
+    border-color: #22d3ee;
+    box-shadow: 0 0 6px rgba(232, 121, 249, 0.55);
+}
+
+/* Modal thử nghiệm G.E.A.R trong Phòng Tập */
+.gear-sandbox-modal { max-width: 680px; width: 95vw; }
+.gear-sandbox-controls { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+.gear-sandbox-tabs { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
+.gear-filter-btn {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 5px 9px;
+    border-radius: 8px;
+    background: #0f172a;
+    color: #cbd5e1;
+    border: 1px solid #334155;
+    cursor: pointer;
+}
+.gear-filter-btn.active {
+    background: #0284c7;
+    color: #fff;
+    border-color: #38bdf8;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+}
+.gear-sandbox-search-row { display: flex; gap: 6px; align-items: center; }
+.gear-sandbox-equipped-bar {
+    min-height: 28px;
+    padding: 6px 8px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px dashed rgba(148, 163, 184, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.gear-sandbox-item.tier-silver { border-color: rgba(148, 163, 184, 0.55); }
+.gear-sandbox-item.tier-gold { border-color: rgba(250, 204, 21, 0.65); }
+.gear-sandbox-item.tier-prismatic { border-color: rgba(34, 211, 238, 0.8); background: linear-gradient(135deg, rgba(59, 7, 100, 0.55), rgba(8, 51, 68, 0.55)); }
+.gear-sandbox-item.current { box-shadow: 0 0 14px rgba(34, 197, 94, 0.7); border-color: #22c55e !important; }

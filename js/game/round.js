@@ -206,6 +206,11 @@ function endRound(winnerId) {
         } else p.lastStreakBonus = null;
     });
 
+    // Hook kết thúc hiệp cho G.E.A.R (Thưởng tiền #14/#15/#105, bảo hiểm thua #29, thưởng hạ gục #12...)
+    if (typeof applyGearsOnRoundEnd === 'function') {
+        applyGearsOnRoundEnd(winnerId);
+    }
+
     updateScoreBoard();
 
     // Hook kết thúc hiệp cho body (bài tập, điểm tùy chỉnh...)
@@ -281,9 +286,12 @@ function startBattle() {
     gameState.p2Coins = 0;
     gameState.collabBonusDone = false;
     gameState.isPaused = false;
+    gameState.matchGearTiers = typeof generateMatchGearTiers === 'function' ? generateMatchGearTiers() : ['SILVER', 'GOLD', 'PRISMATIC'];
 
     p1 = new Player(1, "#3498db");
     p2 = new Player(2, "#e74c3c");
+    p1.gearTiers = [...gameState.matchGearTiers];
+    p2.gearTiers = [...gameState.matchGearTiers];
 
     thunderPlantedSpears = [];
     magnetNodes = [];

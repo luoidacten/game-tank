@@ -308,6 +308,7 @@ function checkHits(attacker, victim) {
                 if (n.hp !== undefined) {
                     // Xử lý Xe Tiền (Có thanh máu)
                     let truckDmg = (b.isAcid || attacker.weapon === 'acid') ? acidObjDmg(n, currentFinalDmg) : currentFinalDmg;
+                    if (attacker.hasGear && attacker.hasGear('gear_crate_magnet_s')) truckDmg *= 2;
                     n.hp -= truckDmg;
                     applyBulletEffectsToStructure(n, b.x, b.y);
 
@@ -325,6 +326,7 @@ function checkHits(attacker, victim) {
                             addFloatingText(attacker.x + attacker.w / 2, attacker.y - 15, "+2 BÁNH RĂNG ⚙️", "#ff9800", 13);
                         }
                         if (attacker.weapon === 'evolution') attacker.onEvolutionCrateEat('truck');
+                        if (typeof onGearTruckDestroyed === 'function') onGearTruckDestroyed(n, attacker);
                         explosions.push(new Explosion(n.x + n.w / 2, n.y + n.h / 2, 80, 'rgba(255,215,0,', 5, attacker));
                         handleEntityKilledByAttacker(n, n.x + n.w / 2, n.y + n.h / 2);
                     }
@@ -697,6 +699,9 @@ function checkHits(attacker, victim) {
             if (localApplyDamage) {
                 let dealtDmg = victim.takeDamage(finalDmg, attacker);
                 BulletHooks.call(b, 'hit', attacker, victim, dealtDmg);
+                if (typeof onGearBulletHitPlayer === 'function') {
+                    onGearBulletHitPlayer(attacker, victim, b, dealtDmg);
+                }
 
                 // --- SHADOW HUNTER BULLET HIT EFFECTS ---
                 if (attacker.weapon === 'shadow_hunter' || b.isShadowHunter) {

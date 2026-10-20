@@ -8,10 +8,21 @@
 // Động Cơ giới hạn 3 lần (chống "ma tốc độ"), đủ rồi thì không xuất hiện trong shop nữa.
 const FEET_PRICE_STEP = 0.5;
 const FEET_MAX = { speed: 3 };
-function feetOwnedCount(player, id) { return (player.upgrades || []).filter(u => u === id).length; }
-function feetMaxed(player, id) { return FEET_MAX[id] !== undefined && feetOwnedCount(player, id) >= FEET_MAX[id]; }
-// Bánh Xích: 3 lần đầu x1.25, sau đó hiệu quả giảm dần (x1.15, x1.09, x1.05...)
-function feetDamageMult(n) { return n <= 3 ? 1.25 : 1 + 0.25 * Math.pow(0.6, n - 3); }
+function feetOwnedCount(player, id) {
+    const total = (player.upgrades || []).filter(u => u === id).length;
+    const free = (player.gearFreeFeetUpgrades || []).filter(u => u === id).length;
+    return Math.max(0, total - free);
+}
+function feetTotalCount(player, id) { return (player.upgrades || []).filter(u => u === id).length; }
+function feetMaxed(player, id) {
+    if (id === 'speed' && player && typeof player.hasGear === 'function' && (player.hasGear('gear_uncap_speed_g') || player.hasGear('gear_speed_heal_p'))) return false;
+    return FEET_MAX[id] !== undefined && feetTotalCount(player, id) >= FEET_MAX[id];
+}
+// Bánh Xích: 3 lần đầu x1.25 (hoặc 6 lần đầu nếu có G.E.A.R #22 Bánh Xích Hạng Nặng), sau đó hiệu quả giảm dần
+function feetDamageMult(n, player) {
+    const flatCap = (player && typeof player.hasGear === 'function' && player.hasGear('gear_heavy_tread_s')) ? 6 : 3;
+    return n <= flatCap ? 1.25 : 1 + 0.25 * Math.pow(0.6, n - flatCap);
+}
 // Lợi Tức: tiền nhận mỗi hiệp không chỉ cộng dồn mà còn nhân thêm 20% mỗi tầng
 // (1 tầng 30$, 2 tầng 72$, 3 tầng 126$, 4 tầng 192$...; Xe Tiền gấp đôi)
 function interestIncome(n, isMoneyTank) {
@@ -19,10 +30,31 @@ function interestIncome(n, isMoneyTank) {
     return Math.round(n * (isMoneyTank ? 60 : 30) * (1 + 0.2 * (n - 1)));
 }
 function shopItemPrice(player, item) {
+    if (item.type === 'feet' && player && player._gearFreeFootAvailable) return 0;
     const base = item.cost || 10;
-    const m = typeof mtPriceMult === 'function' ? mtPriceMult(player) : 1; // Xe Tiền Evo 2 / Full Evo giảm giá
-    if (item.type !== 'feet') return Math.round(base * m);
-    return Math.round(base * (1 + FEET_PRICE_STEP * feetOwnedCount(player, item.id)) * m);
+    let m = typeof mtPriceMult === 'function' ? mtPriceMult(player) : 1; // Xe Tiền Evo 2 / Full Evo giảm giá
+    if (player && typeof player.hasGear === 'function') {
+        if (item.type === 'feet' && player.hasGear('gear_discount_s')) m *= 0.75; // #4 Giảm Giá (-25% Module Chân)
+        if (player.hasGear('gear_discount_g')) m *= 0.70; // #5 Giảm Giá++ (-30% mọi mặt hàng)
+        if (item.id === 'speed' && player.hasGear('gear_uncap_speed_g')) m *= 0.80; // #15 (-20% giá Động Cơ)
+    }
+    if (item.type !== 'feet') return Math.max(1, Math.round(base * m));
+    return Math.max(1, Math.round(base * (1 + FEET_PRICE_STEP * feetOwnedCount(player, item.id)) * m));
+}
+
+function triggerGearVipShop(player, playerId, item) {
+    if (!player || !item || item.type !== 'feet' || typeof player.hasGear !== 'function' || !player.hasGear('gear_vip_shop_g')) return;
+    player._gearVipFootBoughtCount = (player._gearVipFootBoughtCount || 0) + 1;
+    if (player._gearVipFootBoughtCount % 3 === 0) {
+        const bonusPool = ['armor', 'damage', 'speed'];
+        const pick = bonusPool[Math.floor(Math.random() * bonusPool.length)];
+        if (!Array.isArray(player.gearFreeFeetUpgrades)) player.gearFreeFeetUpgrades = [];
+        player.gearFreeFeetUpgrades.push(pick);
+        const names = { armor: '+1 Giáp Thép', damage: '+1 Bánh Xích', speed: '+1 Động Cơ' };
+        if (typeof addFloatingText === 'function') {
+            addFloatingText(player.x + player.w / 2, player.y - 24, `KHÁCH VIP: TẶNG ${names[pick]}! 🎁`, '#facc15', 14);
+        }
+    }
 }
 
 // Huy hiệu vai trò của body (vai trò chính đứng đầu, nổi bật hơn)
@@ -74,6 +106,16 @@ function showUpgradeScreen() {
             ? '🔴 ĐỐI THỦ: ĐANG CHỌN...' : '🔴 BẠN: CHƯA SẴN SÀNG';
     }
 
+    // Reset ưu đãi G.E.A.R đầu mỗi hiệp cửa hàng (#103 Reroll miễn phí, #3 Module Chân 0$)
+    [p1, p2].forEach(pl => {
+        if (!pl) return;
+        if (pl._gearShopRound !== gameState.round) {
+            pl._gearShopRound = gameState.round;
+            pl._gearFreeRerollAvailable = typeof pl.hasGear === 'function' && pl.hasGear('gear_starter_p');
+            pl._gearFreeFootAvailable = typeof pl.hasGear === 'function' && pl.hasGear('gear_free_foot_s');
+        }
+    });
+
     // In Online Mode: Only render cards for yourself, cleanly centered
     if (typeof onlineManager !== 'undefined' && onlineManager.isOnline) {
         if (gameState.round === 1) {
@@ -87,11 +129,15 @@ function showUpgradeScreen() {
             return;
         }
 
-        updateShopTitle();
-        if (onlineManager.role === 'guest') {
-            renderShop('p2');
+        const myPid = (onlineManager.role === 'guest') ? 'p2' : 'p1';
+        if (typeof showGearSelectionIfNeeded === 'function') {
+            showGearSelectionIfNeeded(myPid, () => {
+                updateShopTitle();
+                renderShop(myPid);
+            });
         } else {
-            renderShop('p1');
+            updateShopTitle();
+            renderShop(myPid);
         }
         return;
     }
@@ -123,21 +169,31 @@ function showUpgradeScreen() {
     }
 
     updateShopTitle();
-    renderShop('p1');
-    renderShop('p2');
+    const openP1Shop = () => { updateShopTitle(); renderShop('p1'); };
+    const openP2Shop = () => {
+        updateShopTitle();
+        renderShop('p2');
+        // Giải Đấu PVE: bot tự mua đồ rồi sẵn sàng
+        if (typeof PVE !== 'undefined' && PVE.active) {
+            setTimeout(() => { if (gameState.phase === 'upgrade' && !gameState.p2Ready) PVE.botShop(); }, 400);
+            return;
+        }
+        // Tự động sẵn sàng cho Bot trong Shop ở các round tiếp theo
+        if (typeof botAI !== 'undefined' && botAI.enabled) {
+            setTimeout(() => {
+                if (gameState.phase === 'upgrade' && !gameState.p2Ready) {
+                    handlePlayerReady('p2');
+                }
+            }, 300);
+        }
+    };
 
-    // Giải Đấu PVE: bot tự mua đồ rồi sẵn sàng
-    if (typeof PVE !== 'undefined' && PVE.active) {
-        setTimeout(() => { if (gameState.phase === 'upgrade' && !gameState.p2Ready) PVE.botShop(); }, 400);
-        return;
-    }
-    // Tự động sẵn sàng cho Bot trong Shop ở các round tiếp theo
-    if (typeof botAI !== 'undefined' && botAI.enabled) {
-        setTimeout(() => {
-            if (gameState.phase === 'upgrade' && !gameState.p2Ready) {
-                handlePlayerReady('p2');
-            }
-        }, 300);
+    if (typeof showGearSelectionIfNeeded === 'function') {
+        showGearSelectionIfNeeded('p1', openP1Shop);
+        showGearSelectionIfNeeded('p2', openP2Shop);
+    } else {
+        openP1Shop();
+        openP2Shop();
     }
 }
 
@@ -154,6 +210,22 @@ function renderStandardCards(playerId, list) {
         div.innerHTML = `<h4>${collabBonusOf(mod.id) ? '★ ' : ''}${mod.name}</h4>${roleBadges(mod)}<p>${mod.desc}</p>`;
         div.onclick = () => {
             player.addUpgrade(mod.id); soundSystem.playPowerup();
+            // Chuyển sang bước chọn G.E.A.R Mốc 1 ngay sau khi chọn Body ở Hiệp 1
+            if (typeof showGearSelectionIfNeeded === 'function') {
+                showGearSelectionIfNeeded(playerId, () => {
+                    container.innerHTML = '';
+                    div.style.background = '#27ae60';
+                    div.style.cursor = 'default'; div.onclick = null;
+                    container.appendChild(div);
+                    if (typeof renderEquippedGearStrip === 'function') renderEquippedGearStrip(playerId, container);
+                    handlePlayerReady(playerId);
+                    if (typeof onlineManager !== 'undefined' && onlineManager.isOnline) {
+                        onlineManager.sendLoadout(playerId);
+                        onlineManager.sendReady(playerId);
+                    }
+                });
+                return;
+            }
             container.innerHTML = '';
             div.style.background = '#27ae60';
             div.style.cursor = 'default'; div.onclick = null;
@@ -180,11 +252,19 @@ function renderShop(playerId, keepItems = false) {
     const rerollBtn = document.createElement('div');
     rerollBtn.className = 'card';
     rerollBtn.style.background = '#c0392b';
-    const rerollCost = Math.max(2, Math.round(5 * (typeof mtPriceMult === 'function' ? mtPriceMult(player) : 1)));
-    rerollBtn.innerHTML = `<h4>REROLL</h4><p>Đổi hàng</p><p style="color:yellow">$${rerollCost}</p>`;
+    let rerollMult = typeof mtPriceMult === 'function' ? mtPriceMult(player) : 1;
+    if (player && typeof player.hasGear === 'function') {
+        if (player.hasGear('gear_discount_g')) rerollMult *= 0.70;
+    }
+    const rerollCost = player._gearFreeRerollAvailable ? 0 : Math.max(2, Math.round(5 * rerollMult));
+    rerollBtn.innerHTML = `<h4>REROLL</h4><p>Đổi hàng</p><p style="color:yellow">${rerollCost === 0 ? 'MIỄN PHÍ' : '$' + rerollCost}</p>`;
     rerollBtn.onclick = () => {
         if ((playerId === 'p1' ? gameState.p1Coins : gameState.p2Coins) >= rerollCost) {
-            if (playerId === 'p1') gameState.p1Coins -= rerollCost; else gameState.p2Coins -= rerollCost;
+            if (player._gearFreeRerollAvailable) {
+                player._gearFreeRerollAvailable = false;
+            } else {
+                if (playerId === 'p1') gameState.p1Coins -= rerollCost; else gameState.p2Coins -= rerollCost;
+            }
             player.rerollCount++;
             soundSystem.playCoin();
             updateShopTitle();
@@ -197,7 +277,11 @@ function renderShop(playerId, keepItems = false) {
     // [FIX] Chỉ hiện Gói Nâng Cấp khi cầm XE TIỀN
     if (player.weapon === 'money_tank') {
         if (player.upgradeLevel < 6) {
-            let cost = Math.round(15 * Math.pow(2, player.upgradeLevel) * mtPriceMult(player));
+            let mtUpgradeMult = mtPriceMult(player);
+            if (typeof player.hasGear === 'function' && player.hasGear('gear_discount_g')) {
+                mtUpgradeMult *= 0.70;
+            }
+            let cost = Math.max(1, Math.round(15 * Math.pow(2, player.upgradeLevel) * mtUpgradeMult));
             let nextLvl = player.upgradeLevel + 1;
             let bonusText = "";
             if (nextLvl === 3) bonusText = "<br>(Mở khóa: KHIÊN + 2 HP)";
@@ -286,20 +370,27 @@ function renderShop(playerId, keepItems = false) {
             if (item.type === 'evo') card.className = 'card evo-card';
             else card.className = 'card';
 
-            const owned = item.type === 'feet' ? feetOwnedCount(player, item.id) : 0;
-            const cap = FEET_MAX[item.id];
+            const owned = item.type === 'feet' ? feetTotalCount(player, item.id) : 0;
+            const cap = (item.id === 'speed' && player && typeof player.hasGear === 'function' && (player.hasGear('gear_uncap_speed_g') || player.hasGear('gear_speed_heal_p'))) ? undefined : FEET_MAX[item.id];
             const lvlTxt = owned > 0 || cap ? ` <span style="color:#94a3b8">(${cap ? `${owned}/${cap}` : `đã có ${owned}`})</span>` : '';
             let extra = '';
-            if (item.id === 'damage') extra = `<br><span style="color:#facc15">Lần này: x${feetDamageMult(owned + 1).toFixed(2)} sát thương</span>`;
+            if (item.id === 'damage') extra = `<br><span style="color:#facc15">Lần này: x${feetDamageMult(owned + 1, player).toFixed(2)} sát thương</span>`;
             if (item.id === 'interest') extra = `<br><span style="color:#facc15">Mỗi hiệp: ${interestIncome(owned, player.weapon === 'money_tank')}$ → ${interestIncome(owned + 1, player.weapon === 'money_tank')}$</span>`;
-            card.innerHTML = `<h4>${item.name}${lvlTxt}</h4><p>${item.desc}${extra}</p><p style="color:#f1c40f; font-weight:bold">$${price}</p>`;
+            const priceLabel = price === 0 ? 'MIỄN PHÍ' : ('$' + price);
+            card.innerHTML = `<h4>${item.name}${lvlTxt}</h4><p>${item.desc}${extra}</p><p style="color:#f1c40f; font-weight:bold">${priceLabel}</p>`;
             card.dataset.icon = SHOP_ICON[item.id] || (item.type === 'evo' ? '🧬' : '');
 
             card.onclick = () => {
                 const currentCoin = (playerId === 'p1') ? gameState.p1Coins : gameState.p2Coins;
                 if (currentCoin >= price) {
+                    const wasFreeFoot = (item.type === 'feet' && price === 0 && player._gearFreeFootAvailable);
                     if (!player.addUpgrade(item.id)) return; // Động Cơ đã đủ giới hạn
-                    if (playerId === 'p1') gameState.p1Coins -= price; else gameState.p2Coins -= price;
+                    if (wasFreeFoot) {
+                        player._gearFreeFootAvailable = false;
+                    } else {
+                        if (playerId === 'p1') gameState.p1Coins -= price; else gameState.p2Coins -= price;
+                    }
+                    triggerGearVipShop(player, playerId, item);
                     updateShopTitle();
                     soundSystem.playPowerup();
                     if (!player.boughtShopItems) player.boughtShopItems = [];
@@ -354,6 +445,7 @@ function renderShop(playerId, keepItems = false) {
         }
     };
     container.appendChild(readyBtn);
+    if (typeof renderEquippedGearStrip === 'function') renderEquippedGearStrip(playerId, container);
 }
 
 function renderInventorShop(playerId, keepItems = false) {
@@ -429,10 +521,12 @@ function renderInventorShop(playerId, keepItems = false) {
         player._invShopItems = availablePool.slice(0, 3);
     }
 
+    const invDiscountMult = (player && typeof player.hasGear === 'function' && player.hasGear('gear_discount_g')) ? 0.70 : 1;
+
     player._invShopItems.forEach(item => {
         let currentLvl = player.invUpgrades[item.id] || 0;
         if (currentLvl === true) currentLvl = 1;
-        let price = Math.floor(item.cost * Math.pow(2, currentLvl));
+        let price = Math.max(1, Math.floor(item.cost * Math.pow(2, currentLvl) * invDiscountMult));
 
         const card = document.createElement('div');
         card.className = 'card';
@@ -444,19 +538,20 @@ function renderInventorShop(playerId, keepItems = false) {
         else if (item.type === 'fullevo') { catTag = '[TỐI THƯỢNG]'; catColor = '#f1c40f'; }
 
         if (item.type === 'fullevo') {
+            const fullEvoCost = Math.max(1, Math.floor(15 * invDiscountMult));
             card.style.border = '2px solid gold';
             card.style.boxShadow = '0 0 14px gold';
             card.style.background = 'linear-gradient(135deg, #1e1b4b, #312e81)';
-            let canAfford = (player.components || 0) >= 15;
+            let canAfford = (player.components || 0) >= fullEvoCost;
             card.innerHTML = `
                 <span style="font-size:9px; color:gold; font-weight:bold;">${catTag}</span>
                 <h4 style="color:gold; font-size:11px;">FULL EVO ⭐</h4>
                 <p style="font-size:9px; color:#fef3c7;">4 Drone, 200% stats, giảm 60% CD!</p>
-                <p style="color:${canAfford ? 'gold' : '#ef4444'}; font-weight:bold; font-size:12px;">15 LK</p>
+                <p style="color:${canAfford ? 'gold' : '#ef4444'}; font-weight:bold; font-size:12px;">${fullEvoCost} LK</p>
             `;
             card.onclick = () => {
-                if ((player.components || 0) >= 15) {
-                    player.components -= 15;
+                if ((player.components || 0) >= fullEvoCost) {
+                    player.components -= fullEvoCost;
                     player.isFullEvoInventor = true;
                     player.invUpgrades['inv_full_evo'] = 1;
                     if (!player.upgrades.includes('inv_full_evo')) player.upgrades.push('inv_full_evo');
@@ -553,7 +648,8 @@ function renderGeniusBlackMarket(playerId, keepItems = false) {
     if (!player.geniusUpgrades) player.geniusUpgrades = {};
     if (player.geniusPurchaseCount === undefined) player.geniusPurchaseCount = 0;
 
-    let cost = 3 * Math.pow(2, player.geniusPurchaseCount);
+    const genDiscountMult = (player && typeof player.hasGear === 'function' && player.hasGear('gear_discount_g')) ? 0.70 : 1;
+    let cost = Math.max(1, Math.floor(3 * Math.pow(2, player.geniusPurchaseCount) * genDiscountMult));
 
     // 1. Nút QUAY LẠI Cửa Hàng Thường
     const backBtn = document.createElement('div');

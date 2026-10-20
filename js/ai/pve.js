@@ -103,13 +103,23 @@ const PVE = {
         if (typeof updateCanvasDimensions === 'function') updateCanvasDimensions();
     },
 
-    // Hiệp 1: bot chọn body của vòng
+    // Hiệp 1: bot chọn body của vòng + chọn G.E.A.R mốc 1
     botPickBody() {
         const id = this.bodies[this.stage] || 'basic';
         p2.addUpgrade(id);
-        const c = document.getElementById('p2-upgrades');
-        if (c) c.innerHTML = `<div class="card" style="background:#7f1d1d"><h4>🤖 BOT: ${this.bodyName(id)}</h4><p>${BOT_LEVELS[PVE_STAGES[this.stage].level].name}</p></div>`;
-        handlePlayerReady('p2');
+        const finishBotPick = () => {
+            const c = document.getElementById('p2-upgrades');
+            if (c) {
+                c.innerHTML = `<div class="card" style="background:#7f1d1d"><h4>🤖 BOT: ${this.bodyName(id)}</h4><p>${BOT_LEVELS[PVE_STAGES[this.stage].level].name}</p></div>`;
+                if (typeof renderEquippedGearStrip === 'function') renderEquippedGearStrip('p2', c);
+            }
+            handlePlayerReady('p2');
+        };
+        if (typeof showGearSelectionIfNeeded === 'function') {
+            showGearSelectionIfNeeded('p2', finishBotPick);
+        } else {
+            finishBotPick();
+        }
     },
 
     // Các hiệp sau: thưởng thêm tiền theo vòng rồi tự mua đồ
