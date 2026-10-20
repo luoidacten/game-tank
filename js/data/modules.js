@@ -337,6 +337,14 @@ const MODULES = {
             size: { w: 30, h: 30 },
             stats: { hp: 5, dmg: 1.5, ammo: 2, speedMult: 1 }
         },
+        {
+            id: 'clone',
+            name: 'Nhân Bản',
+            desc: '"1 thành 2, sau đó 3 và 4..." HP:6 | Dame:1 | Đạn:4 | Tốc: 3.5. Nhấp: bắn đạn 1 dame. Giữ Bắn 1s: tạo 1 CLONE THƯỜNG cạnh xe (giữ tiếp -> mỗi 1s thêm 1, tối đa 8 cùng lúc): 24×24, 25% chỉ số của bạn (HP 1.5 | Dame 0.25 | Đạn 4), tự di chuyển & bắn địch, chặn và bị đạn địch bắn hạ. GÁNH CHỊU: mỗi Clone Thường bị hạ -> bạn nhận phản phệ = 50% Máu tối đa của clone đó (xuyên khiên). Hạ gục địch -> kết liễu VÔ HẠN.',
+            type: 'body', role: ['Kiểm Soát', 'Đối Đầu', 'Sinh Tồn'],
+            size: { w: 30, h: 30 },
+            stats: { hp: 6, dmg: 1, ammo: 4, speedMult: 1 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 30 },

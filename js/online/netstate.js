@@ -32,6 +32,7 @@ const NET_CLASSES = {
     JkDecoy, JkEscapeFx, JkZone, JkVerdict, JkFinisher,
     JgSlug, JgWave, JgImpact, JgFinisher,
     CgFinisher,
+    ClClone, ClFinisher,
 };
 
 // Biến toàn cục cần đồng bộ: [tên, getter, setter]

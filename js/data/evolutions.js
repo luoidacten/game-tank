@@ -260,4 +260,8 @@ const EVOLUTIONS = {
         { id: 'evo_frag_1', name: 'Vỡ Vụn', desc: 'GIA TỐC MẢNH VĂNG: sau khi đạn tách (Phân Mảnh tách hoặc Dễ Vỡ bị đạn địch bắn nổ), mọi mảnh đạn con bay nhanh hơn 50%.', cost: 40, type: 'evo' },
         { id: 'evo_frag_2', name: 'Phân Chia', desc: 'Phân Mảnh vỡ thành 5 mảnh, Dễ Vỡ phóng 12 mảnh. Mọi mảnh con nảy tường 2 lần. FULL EVO (Bão Mảnh Hủy Diệt): Phân Mảnh vỡ 8 mảnh, Dễ Vỡ nổ tung 360° phóng 36 mảnh càn quét khắp sân; mảnh con bay cực nhanh & nảy tường 4 lần.', cost: 180, type: 'evo' },
     ],
+    clone: [
+        { id: 'evo_clone_1', name: 'Nhân Bản Song Song', desc: 'CLONE HOÀN HẢO: đầu mỗi hiệp tự tạo 1 Clone Hoàn Hảo cùng kích thước & 100% chỉ số của bạn (HP 6 | Dame 1 | Đạn 4), tự di chuyển & bắn. Khi bạn nhận đòn chí mạng -> HỒI SINH vào vị trí Clone Hoàn Hảo (máu = máu còn lại của clone), clone đó biến mất. Còn Clone Hoàn Hảo -> nó gánh thay phản phệ Gánh Chịu của clone thường.', cost: 90, type: 'evo' },
+        { id: 'evo_clone_2', name: 'Khuếch Đại Bản Sao', desc: 'Clone Thường hưởng 50% chỉ số của bạn (bắn đau & trâu gấp đôi). Miễn trừ phản phệ: 2 lần đầu có Clone bị tiêu diệt mỗi hiệp không gây sát thương Gánh Chịu. FULL EVO (Quân Đoàn Bất Tử): miễn 4 lần Gánh Chịu mỗi hiệp; 2 Clone Hoàn Hảo cùng lúc (hồi sinh tới 2 lần), mỗi con 200% Max HP; Clone Thường hưởng 80% chỉ số.', cost: 110, type: 'evo' },
+    ],
 };

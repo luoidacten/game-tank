@@ -282,6 +282,11 @@ class SmartBot {
             if (!bot.lcAuto) { this.hold = 1; inp.s = true; return; }
             if ((bot.lcEnergy || 0) < 100) { inp.s = false; return; }
         }
+        // Nhân Bản: thỉnh thoảng giữ 1s để tạo clone
+        if (bot.weapon === 'clone') {
+            if (this.hold > 0) { this.hold++; inp.s = this.hold <= 64; if (this.hold > 68) { this.hold = 0; this.tapCool = 6; } return; }
+            if (this.tapCool <= 0 && typeof clBotWantsClone === 'function' && clBotWantsClone(bot)) { this.hold = 1; inp.s = true; return; }
+        }
         // tap
         if (bot.weapon === 'overload' && (bot.ovMain || 0) < 1 && (bot.ammo || 0) > 0) { inp.s = false; return; } // Quá Tải: chờ thanh chính đầy
         if (this.tapCool > 0) { this.tapCool--; inp.s = this.tapCool > 6; return; }

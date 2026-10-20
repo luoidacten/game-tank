@@ -218,6 +218,8 @@ function renderFrame() {
     if (typeof jgFxOver === 'function') jgFxOver();
     // Lớp phủ kết liễu Pháo Phân Mảnh (PHÂN MẢNH) - js/characters/cluster_gun/render.js
     if (typeof cgFxOver === 'function') cgFxOver();
+    // Lớp phủ kết liễu Nhân Bản (VÔ HẠN) - js/characters/clone/render.js
+    if (typeof clFxOver === 'function') clFxOver();
 
     // Particles & Floating Numbers
     updateAndDrawParticles();
