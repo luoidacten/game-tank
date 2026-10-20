@@ -356,7 +356,7 @@ const MODULES = {
         {
             id: 'tat_sat',
             name: 'Tất Sát',
-            desc: '"Quên ta rồi sao? NHẤT KIẾM TẤT SÁT!" HP:3.5 | Dame:2 | Năng lượng: Tụ lực (4.5s đầy 100%) | Tốc: 5.0. Giữ Bắn tụ lực, nhả theo mốc: 1–49% LƯỚT CHÉM CẢNH BÁO – lao lên, chạm vật/biên tạo vùng đỏ (45–100px theo lực) nổ sau 0.5s 1x dame, xe giật về chỗ cũ. 50–85% PHÂN ẢNH ĐOẠT MỆNH – slow-motion 0.4s, phóng Phân Ảnh: trúng tướng -> ẩn thân 2s (Bất Tử, không thể bị nhắm) LIÊN HOÀN TRẢM & CHÉM NÁT MÀN HÌNH x3 dame; trúng thứ khác -> 2 vùng đồng tâm (60px Choáng 2s sau 0.25s | 110px nổ 1x sau 0.5s). 86–100% NHẤT KIẾM TẤT SÁT – cột cảnh báo 0.35s rồi chém hitscan (Tường Sniper chặn): trúng -> combo ẩn thân 2s x6 dame; trượt -> lướt vút theo đường kiếm rồi về. Hạ gục địch -> kết liễu NHẤT KIẾM TẤT SÁT!',
+            desc: '"Quên ta rồi sao? NHẤT KIẾM TẤT SÁT!" HP:3.5 | Dame:2 | Năng lượng: Tụ lực (4.5s đầy 100%) | Tốc: 5.0. Giữ Bắn tụ lực, nhả theo mốc: 1–49% LƯỚT CHÉM CẢNH BÁO – lao lên, chạm vật/biên tạo vùng đỏ (32–68px theo lực) nổ sau 0.5s 1x dame, xe giật về chỗ cũ. 50–85% PHÂN ẢNH ĐOẠT MỆNH – slow-motion 0.4s, phóng Phân Ảnh: trúng tướng -> ẩn thân 2s (Bất Tử, không thể bị nhắm) LIÊN HOÀN TRẢM & CHÉM NÁT MÀN HÌNH x3 dame; trúng thứ khác -> 2 vùng đồng tâm (42px Choáng 2s sau 0.25s | 78px nổ 1x sau 0.5s). 86–100% NHẤT KIẾM TẤT SÁT – cột cảnh báo 0.35s (rộng 24px) rồi chém hitscan (Tường Sniper chặn): trúng -> combo ẩn thân 2s x6 dame; trượt -> lướt vút theo đường kiếm rồi về. Hạ gục địch -> kết liễu NHẤT KIẾM TẤT SÁT!',
             type: 'body', role: ['Đối Đầu', 'Cơ Động'],
             size: { w: 30, h: 30 },
             stats: { hp: 3.5, dmg: 2, ammo: 0, speedMult: 1.4286 }

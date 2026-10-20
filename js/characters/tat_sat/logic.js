@@ -98,8 +98,8 @@ function tatReturn(p, silent) {
 // Cặp vùng đồng tâm (2B / Full Evo trượt Nhánh 3)
 function tatDoubleZone(p, x, y) {
     const pull = tatE2(p);
-    bodyEffects.push(new TatZone(p.id, x, y, 60, 15, 'stun', 0, { breakSummon: pull }));
-    bodyEffects.push(new TatZone(p.id, x, y, 110, 30, 'dmg', p.damage, { pull }));
+    bodyEffects.push(new TatZone(p.id, x, y, 42, 15, 'stun', 0, { breakSummon: pull }));
+    bodyEffects.push(new TatZone(p.id, x, y, 78, 30, 'dmg', p.damage, { pull }));
 }
 function tatRefund(p) {
     if (!tatE1(p)) return;
@@ -296,7 +296,7 @@ class TatFinisher {
 // ---------- Nhánh 3: hitscan ----------
 function tatFire3(p) {
     const e = tatEnemy(p), dir = tatDir(p);
-    const cx = p.x + p.w / 2, hw = tatE2(p) ? 24 : 18;
+    const cx = p.x + p.w / 2, hw = tatE2(p) ? 16 : 12; // [CÂN BẰNG] thu hẹp tia (24/18 -> 16/12)
     const fromY = p.id === 1 ? p.y : p.y + p.h;
     const sw = typeof sniperWallBlockY === 'function' ? sniperWallBlockY(p, cx, fromY, dir, hw, p.damage) : null;
     const stopY = sw ? sniperWallStopY(sw, dir) : (dir < 0 ? 16 : canvas.height - 16);
@@ -334,7 +334,7 @@ function tatRelease(p, pct) {
     } else {
         p.tatMode = 'warn3'; p.tatModeT = 0;
         p.tatSlowFx = 24;
-        scheduleHitscan(p, 21, TAT_GOLD, tatE2(p) ? 48 : 36, () => { if (p.tatMode === 'warn3') { p.tatMode = 'idle'; tatFire3(p); } });
+        scheduleHitscan(p, 21, TAT_GOLD, tatE2(p) ? 32 : 24, () => { if (p.tatMode === 'warn3') { p.tatMode = 'idle'; tatFire3(p); } });
         addFloatingText(p.x + p.w / 2, p.y + (p.id === 1 ? -26 : p.h + 30), 'NHẤT KIẾM...', TAT_GOLD, 13);
     }
 }
@@ -348,7 +348,7 @@ function tatDashStep(p) {
     if (++p.tatModeT > 90) edge = true; // an toàn
     if (!hit && !edge) return;
     const pct = Math.min(0.49, p.tatPct || 0);
-    const r = 45 + (pct / 0.49) * 55;
+    const r = 32 + (pct / 0.49) * 36; // [CÂN BẰNG] 45-100 -> 32-68
     let hx = p.x + p.w / 2, hy = p.y + p.h / 2;
     if (hit && hit.o) hy = hit.o.y + hit.o.h / 2;
     bodyEffects.push(new TatZone(p.id, hx, hy, r, 30, 'dmg', p.damage, { clear: tatE2(p) }));
