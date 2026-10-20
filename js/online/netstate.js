@@ -29,7 +29,7 @@ const NET_CLASSES = {
     MagHatRain,
     KazTornado, KazScar, KazEcho, KazLoanVu, KazDomain,
     TsShade, TsClone, TsWall, TsFirePool, TsRush, TsVoid, TsLoan, TsStreak, TsBigStar, TsFinisher,
-    JkDecoy, JkEscapeFx, JkZone, JkVerdict, JkFinisher,
+    JkDecoy, JkEscapeFx, JkZone, JkVerdict, JkFinisher, JkPhantom,
     JgSlug, JgWave, JgImpact, JgFinisher,
     CgFinisher,
     ClClone, ClFinisher,

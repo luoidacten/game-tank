@@ -150,6 +150,12 @@ function jkDrawBullet(b) {
         ctx.strokeStyle = JK_PINK; ctx.lineWidth = 1; ctx.globalAlpha = 0.8;
         ctx.beginPath(); ctx.arc(x, y, 11, 0, Math.PI * 2); ctx.stroke();
     }
+    if (b.jkAce && !J) {   // Lá Bài A: viền vàng + chữ A
+        ctx.globalAlpha = 1; ctx.strokeStyle = JK_GOLD; ctx.lineWidth = 1; ctx.shadowColor = JK_GOLD; ctx.shadowBlur = 8;
+        ctx.strokeRect(x - 7, y - 9, 14, 18);
+        ctx.shadowBlur = 0; ctx.font = "800 6px 'Orbitron', Arial"; ctx.fillStyle = JK_GOLD; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('A', x + 9, y - 9);
+    }
     ctx.restore();
 }
 
@@ -183,6 +189,26 @@ function jkDrawDecoy(d) {
     ctx.beginPath(); ctx.arc(cx, cy, d.w * 0.8, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
     ctx.restore();
 }
+// Phân Ảnh Bài (copy Cơ Động ♣): bóng hồng nhấp nháy + thanh máu; khi cảm tử -> vệt lao
+function jkDrawPhantom(f) {
+    const cx = f.x + f.w / 2, cy = f.y + f.h / 2, t = jkNow();
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.shadowColor = JK_PINK; ctx.shadowBlur = 12;
+    jkArtAt(f.owner, cx, cy, f.w * 1.1, (f.state ? 0.75 : 0.4 + 0.15 * Math.sin(t * 12)));
+    ctx.globalCompositeOperation = 'source-over'; ctx.shadowBlur = 0;
+    if (f.state) {
+        for (let i = 0; i < 3; i++) jkCard(cx + Math.cos(t * 20 + i * 2.1) * 9, cy + Math.sin(t * 20 + i * 2.1) * 9, 6, 8, t * 10 + i, 1, ['C', 'J', 'S'][i], 0.9, 6);
+    } else {
+        ctx.strokeStyle = 'rgba(244, 114, 182, 0.8)'; ctx.lineWidth = 1; ctx.setLineDash([2, 3]); ctx.lineDashOffset = -t * 25;
+        ctx.beginPath(); ctx.arc(cx, cy, f.w * 0.75, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+        const k = Math.max(0, f.hp / (f.maxHp || 1)), bw = f.w;
+        ctx.fillStyle = 'rgba(4,8,18,0.8)'; ctx.fillRect(cx - bw / 2, cy + f.h * 0.75, bw, 3);
+        ctx.fillStyle = JK_PINK; ctx.fillRect(cx - bw / 2, cy + f.h * 0.75, bw * k, 3);
+        ctx.fillStyle = 'rgba(253, 224, 71, 0.8)'; ctx.fillRect(cx - bw / 2, cy + f.h * 0.75 + 3, bw * Math.max(0, f.life / 120), 1);
+    }
+    ctx.restore();
+}
 function jkDrawEscapeFx(f) {
     const t = f.t;
     ctx.save();
@@ -207,7 +233,7 @@ function jkDrawEscapeFx(f) {
 }
 function jkDrawZone(z) {
     const t = jkNow(), a = Math.min(1, z.life / 20);
-    const col = z.kind === 'silence' ? '196, 181, 253' : '244, 114, 182';
+    const col = z.kind === 'silence' ? '196, 181, 253' : (z.dot ? '103, 232, 249' : (z.bleed ? '244, 63, 94' : '244, 114, 182'));
     ctx.save();
     ctx.globalAlpha = a;
     zoneRectPath(z.x, z.y, z.r);
@@ -349,7 +375,21 @@ Object.assign(CharHooks.registry.joker, {
             if (this.jkAllIn) { ctx.font = "800 6px 'Orbitron', Arial"; ctx.fillStyle = JK_GOLD; hudText(F, 'ALL-IN', 0, d0 + ch + 4); }
         }
         // chấm Thoát Hiểm (bên trái) & Tráo Bài (bên phải)
-        for (let i = 0; i < Math.max(this.jkEscMax || 1, this.jkEsc || 0); i++) {
+        const escN = Math.max(this.jkEscMax || 1, this.jkEsc || 0);
+        // Huy hiệu Lá Bài A (vd. "A♠") + vai trò sao chép tay kế
+        if (this.jkAce && JK_SUIT[this.jkAce]) {
+            const ax = bx - 6 - escN * 5 - 6;
+            ctx.fillStyle = 'rgba(4, 8, 18, 0.85)'; hudRRect(F, ax - 6, d0 - 1, 12, 7, 2); ctx.fill();
+            ctx.strokeStyle = JK_SUIT[this.jkAce].c; ctx.lineWidth = 0.7; ctx.stroke();
+            ctx.font = "800 5.5px 'Orbitron', Arial"; ctx.fillStyle = JK_SUIT[this.jkAce].c;
+            ctx.shadowColor = JK_SUIT[this.jkAce].c; ctx.shadowBlur = 4;
+            hudText(F, 'A' + JK_SUIT[this.jkAce].g, ax, d0 + 2.6); ctx.shadowBlur = 0;
+        }
+        if (this.jkCopyNext) {
+            ctx.font = "700 5px 'Orbitron', Arial"; ctx.fillStyle = JK_PINK;
+            hudText(F, '⟳ ' + this.jkCopyNext.toUpperCase(), 0, d0 - 4);
+        }
+        for (let i = 0; i < escN; i++) {
             const r = hudRect(F, bx - 6 - i * 5, d0 + 2, 0, 0);
             ctx.fillStyle = i < (this.jkEsc || 0) ? JK_PURPLE : 'rgba(255,255,255,0.15)';
             ctx.beginPath(); ctx.arc(r[0], r[1], 1.8, 0, Math.PI * 2); ctx.fill();
@@ -374,6 +414,7 @@ function jkRegisterHUD() {
         let label = JK_SUIT[s].n;
         if (s === 'J' && c[1]) label = c[1] === 'R' ? 'JOKER ĐỎ' : 'JOKER ĐEN';
         if (p.jkCopy) label += ' · ' + p.jkCopy.toUpperCase();
+        else if (p.jkAce && (s === p.jkAce)) label = 'A' + JK_SUIT[s].g + ' ' + label;
         else if (jkE1(p) && hand[1]) label += ' + ' + JK_SUIT[jkSuitOf(hand[1])].n;
         return { idle: s !== 'J', pct: hand.length / max, ready: s === 'J', color: jkCardColor(c), label, btnIcon: ICON[s], segments: max, lit: hand.length };
     });
