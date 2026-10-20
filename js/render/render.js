@@ -214,6 +214,8 @@ function renderFrame() {
     if (typeof tsFxOver === 'function') tsFxOver();
     // Lớp phủ kết liễu Joker (ALL IN) - js/characters/joker/render.js
     if (typeof jkFxOver === 'function') jkFxOver();
+    // Lớp phủ kết liễu Juggernaut (PHÁ XIỀNG) - js/characters/juggernaut/render.js
+    if (typeof jgFxOver === 'function') jgFxOver();
 
     // Particles & Floating Numbers
     updateAndDrawParticles();

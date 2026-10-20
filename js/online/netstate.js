@@ -30,6 +30,7 @@ const NET_CLASSES = {
     KazTornado, KazScar, KazEcho, KazLoanVu, KazDomain,
     TsShade, TsClone, TsWall, TsFirePool, TsRush, TsVoid, TsLoan, TsStreak, TsBigStar, TsFinisher,
     JkDecoy, JkEscapeFx, JkZone, JkVerdict, JkFinisher,
+    JgSlug, JgWave, JgImpact, JgFinisher,
 };
 
 // Biến toàn cục cần đồng bộ: [tên, getter, setter]

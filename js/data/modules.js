@@ -321,6 +321,14 @@ const MODULES = {
             size: { w: 26, h: 26 },
             stats: { hp: 3.5, dmg: 1, ammo: 0, speedMult: 1.257 }
         },
+        {
+            id: 'juggernaut',
+            name: 'Juggernaut',
+            desc: '"Đơn giản là miễn nhiễm!" HP:5.5 (+3 máu xe lớn) | Dame:1.2 | Đạn:4 | Tốc: 3.4. BÁ THỂ TUYỆT ĐỐI: miễn nhiễm 100% khống chế (Chậm, Đóng Băng, Choáng, Trói, Hút/Đẩy/Kéo, Câm Lặng, Mù HUD, Loạn Phím) và đi xuyên lồng giam / tường giới hạn. Mỗi lần hấp thụ khống chế -> MIỄN NHIỄM! (hồi 2s): +0.25 HP, +20% tốc 1.5s, +1 Bá Khí (tối đa 3). Nhấp: ĐẠN PHÁ XIỀNG 1.2 dame; có Bá Khí -> ĐẠN BÁ KHÍ (to x1.5, cực nhanh, +0.8 sát thương chuẩn xuyên khiên). Giữ 0.5s: GIÁP PHẢN CHẤN 1.5s (hồi 6s) giảm 40% st nhận; bị dính hiệu ứng xấu/DoT khi bật -> gạt phăng & phóng Sóng Phản Chấn (hồi 2s). Hạ gục địch -> kết liễu PHÁ XIỀNG.',
+            type: 'body', role: ['Sinh Tồn', 'Đối Đầu'],
+            size: { w: 36, h: 36 },
+            stats: { hp: 5.5, dmg: 1.2, ammo: 4, speedMult: 0.971 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 30 },
