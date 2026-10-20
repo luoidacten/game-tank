@@ -374,36 +374,111 @@ function tsDrawVoid(o) {
     tsCrescent(o.x, o.y, ry * 0.55, t * 0.6, '#c4b5fd', 0.9);
     ctx.restore();
 }
+// Hash tất định (đồng bộ host/guest theo t + seed)
+function tsHash(a, b) {
+    const v = Math.sin(a * 127.1 + b * 311.7) * 43758.5453;
+    return v - Math.floor(v);
+}
+// Một nhát chém sắc: lõi trắng mảnh + quầng tím, vạch vào nhanh rồi tắt dần
+function tsCutLine(x0, y0, x1, y1, w, a, cross) {
+    ctx.strokeStyle = `rgba(168, 85, 247, ${0.28 * a})`; ctx.lineWidth = w * 4.2;
+    ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+    ctx.strokeStyle = `rgba(216, 180, 254, ${0.55 * a})`; ctx.lineWidth = w * 2;
+    ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+    // lõi: thon hai đầu (đa giác hình thoi dẹt)
+    const dx = x1 - x0, dy = y1 - y0, L = Math.hypot(dx, dy) || 1;
+    const nx = -dy / L * w * 0.6, ny = dx / L * w * 0.6;
+    const mx = x0 + dx * 0.55, my = y0 + dy * 0.55;
+    ctx.fillStyle = cross ? `rgba(255, 255, 255, ${a})` : `rgba(250, 245, 255, ${a})`;
+    ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(mx + nx, my + ny); ctx.lineTo(x1, y1); ctx.lineTo(mx - nx, my - ny); ctx.closePath(); ctx.fill();
+}
 function tsDrawLoan(o) {
     const t = o.t, now = tsNow();
     ctx.save();
     const a = o.final > 0 ? Math.max(0, 1 - o.final / 24) : Math.min(1, t / 8);
-    const rx = o.r, ry = o.r; // vùng tròn
-    ctx.fillStyle = `rgba(46, 16, 101, ${0.35 * a})`;
-    ctx.beginPath(); ctx.ellipse(o.x, o.y, rx, ry, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = `rgba(192, 132, 252, ${0.8 * a})`; ctx.lineWidth = o.big ? 2 : 1.2;
-    ctx.setLineDash([5, 4]); ctx.lineDashOffset = -now * 60;
-    ctx.beginPath(); ctx.ellipse(o.x, o.y, rx, ry, 0, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
-    if (o.final <= 0) { // kiếm khí loạn xạ
+    const R = o.r;
+    // Nền vùng: tím sẫm, đậm dần ra mép + viền mảnh
+    const g = ctx.createRadialGradient(o.x, o.y, R * 0.15, o.x, o.y, R);
+    g.addColorStop(0, `rgba(20, 6, 48, ${0.42 * a})`);
+    g.addColorStop(0.75, `rgba(46, 16, 101, ${0.45 * a})`);
+    g.addColorStop(1, `rgba(88, 28, 135, ${0.6 * a})`);
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(o.x, o.y, R, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = `rgba(192, 132, 252, ${0.55 * a})`; ctx.lineWidth = o.big ? 1.6 : 1.1;
+    ctx.beginPath(); ctx.arc(o.x, o.y, R, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = `rgba(233, 213, 255, ${0.22 * a})`; ctx.lineWidth = 0.8;
+    ctx.setLineDash([2, 7]); ctx.lineDashOffset = -now * 20;
+    ctx.beginPath(); ctx.arc(o.x, o.y, R - 3, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+    if (o.final <= 0) { // loạn trảm: vô số nhát chém ngẫu nhiên trong vùng
+        ctx.save();
+        ctx.beginPath(); ctx.arc(o.x, o.y, R - 1, 0, Math.PI * 2); ctx.clip();
         ctx.globalCompositeOperation = 'lighter';
-        const n = o.big ? 6 : 4;
-        for (let i = 0; i < n; i++) {
-            const ang = o.seed + i * 2.1 + Math.floor(t / 3) * 1.37;
-            const L = o.r * (0.7 + ((i * 37 + Math.floor(t / 3) * 13) % 10) / 20);
-            ctx.strokeStyle = i % 2 ? 'rgba(255,255,255,0.85)' : 'rgba(192,132,252,0.9)';
-            ctx.lineWidth = o.big ? 2.6 : 1.8;
-            ctx.beginPath();
-            ctx.moveTo(o.x - Math.cos(ang) * L, o.y - Math.sin(ang) * L * 0.7);
-            ctx.lineTo(o.x + Math.cos(ang) * L, o.y + Math.sin(ang) * L * 0.7);
-            ctx.stroke();
+        ctx.lineCap = 'round';
+        const step = o.big ? 1 : 2, LIFE = 14, DRAW = 3;
+        const sd = o.seed * 100;
+        const cut = (i) => { // thông số nhát chém thứ i
+            const pr = Math.sqrt(tsHash(sd, i)) * R * 0.78, pa = tsHash(sd + 1, i) * Math.PI * 2;
+            const cross = tsHash(sd + 2, i) < 0.18;
+            return {
+                cx: o.x + Math.cos(pa) * pr, cy: o.y + Math.sin(pa) * pr,
+                ang: tsHash(sd + 3, i) * Math.PI,
+                L: R * (cross ? 1.1 + tsHash(sd + 4, i) * 0.5 : 0.35 + tsHash(sd + 4, i) * 0.45),
+                cross, dir: tsHash(sd + 5, i) < 0.5 ? 1 : -1,
+            };
+        };
+        const last = Math.floor(t / step);
+        // Bóng ninja lướt giữa các nhát chém (tàn ảnh)
+        ctx.globalCompositeOperation = 'source-over';
+        for (let j = 0; j < 3; j++) {
+            const i = Math.floor(last / 3) * 3 - j * 3; if (i < 0) break;
+            const c0 = cut(i), c1 = cut(i + 3);
+            const age = t - (i + 3) * step;
+            const al = Math.max(0, 1 - age / (LIFE * 2.2)) * a;
+            if (al <= 0) continue;
+            ctx.strokeStyle = `rgba(167, 139, 250, ${0.25 * al})`; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(c0.cx, c0.cy); ctx.lineTo(c1.cx, c1.cy); ctx.stroke();
+            if (j < 2) tsArtAt(o.owner, c1.cx, c1.cy, 20, 0.22 * al * (j ? 0.5 : 1), 2);
         }
-        // Tsukiyo hiện thân chớp nhoáng trong vùng
-        if (t < 60) {
-            const ang = o.seed + Math.floor(t / 4) * 2.4;
-            tsArtAt(o.owner, o.x + Math.cos(ang) * o.r * 0.6, o.y + Math.sin(ang) * o.r * 0.4, 24, 0.6, 2);
+        ctx.globalCompositeOperation = 'lighter';
+        for (let i = Math.max(0, last - Math.ceil(LIFE / step)); i <= last; i++) {
+            const age = t - i * step;
+            if (age < 0 || age >= LIFE) continue;
+            const c = cut(i);
+            const drawK = Math.min(1, (age + 1) / DRAW); // vạch vào nhanh
+            const fade = age < DRAW ? 1 : 1 - (age - DRAW) / (LIFE - DRAW);
+            const al = fade * fade * a;
+            const ca = Math.cos(c.ang) * c.dir, sa = Math.sin(c.ang) * c.dir;
+            const x0 = c.cx - ca * c.L / 2, y0 = c.cy - sa * c.L / 2;
+            const x1 = x0 + ca * c.L * drawK, y1 = y0 + sa * c.L * drawK;
+            const w = (c.cross ? 2.4 : 1.5) * (o.big ? 1.2 : 1) * (0.6 + 0.4 * fade);
+            tsCutLine(x0, y0, x1, y1, w, al, c.cross);
+            if (c.cross) { // chém chéo chữ X
+                const k2 = Math.max(0, Math.min(1, (age - 1) / DRAW));
+                if (k2 > 0) {
+                    const cb = Math.cos(c.ang + 1.35), sb = Math.sin(c.ang + 1.35);
+                    const u0 = c.cx - cb * c.L * 0.4, v0 = c.cy - sb * c.L * 0.4;
+                    tsCutLine(u0, v0, u0 + cb * c.L * 0.8 * k2, v0 + sb * c.L * 0.8 * k2, w * 0.85, al, true);
+                }
+            }
+            // Tia lửa tại điểm cắt
+            if (age < 7) {
+                const sk = age / 7, sx = x0 + ca * c.L * 0.5, sy = y0 + sa * c.L * 0.5;
+                const n = c.cross ? 7 : 4;
+                ctx.fillStyle = `rgba(255, 255, 255, ${0.9 * (1 - sk) * a})`;
+                ctx.beginPath(); ctx.arc(sx, sy, (c.cross ? 3.2 : 2) * (1 - sk) + 0.5, 0, Math.PI * 2); ctx.fill();
+                ctx.strokeStyle = `rgba(233, 213, 255, ${0.85 * (1 - sk) * a})`; ctx.lineWidth = 1;
+                ctx.beginPath();
+                for (let q = 0; q < n; q++) {
+                    const qa = tsHash(sd + 7 + q, i) * Math.PI * 2, d0 = 2 + sk * 10, d1 = d0 + 3 + (1 - sk) * 4;
+                    ctx.moveTo(sx + Math.cos(qa) * d0, sy + Math.sin(qa) * d0);
+                    ctx.lineTo(sx + Math.cos(qa) * d1, sy + Math.sin(qa) * d1);
+                }
+                ctx.stroke();
+            }
         }
+        ctx.restore();
     } else { // nhát chém chẻ đôi
-        const k = o.final / 24;
+        const rx = R, ry = R, k = o.final / 24;
         ctx.globalCompositeOperation = 'lighter';
         ctx.strokeStyle = `rgba(255,255,255,${1 - k})`; ctx.lineWidth = 5 * (1 - k) + 1;
         ctx.beginPath(); ctx.moveTo(o.x - rx * 1.6, o.y + ry * 1.1); ctx.lineTo(o.x + rx * 1.6, o.y - ry * 1.1); ctx.stroke();
