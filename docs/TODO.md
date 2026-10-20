@@ -6,7 +6,7 @@
 
 ## 0. Chỉnh sửa gấp (làm TRƯỚC mục 1)
 - **Cân bằng mới (đặc tả: `docs/CAN_BANG_MOI.md`)** — làm TRƯỚC:
-- Sau đó: lỗi HUD Online → còn lại.
+- Còn lại: các mục bên dưới.
 
 ## 2. HUD còn sót
 - DJ, Móc Thép, Thiên Tài (chữ BR/LK, chế độ Mecha), Tiến Hóa vẫn dùng chữ → đổi sang biểu tượng.
@@ -20,5 +20,5 @@
 - Hiệu ứng kết liễu (Hoa Ảnh, Tsukiyo, Joker, Juggernaut, Pháo Phân Mảnh, Nhân Bản, Phi Công) bị băng rôn thắng hiệp che phần giữa.
 - Phi Công thắng ~68-72% trong mô phỏng bot (hơi mạnh) — cần chơi thử, có thể giảm sát thương tự ngắm của Phi Ảnh / tần suất ném bom.
 - Shop Tùy Biến: biểu tượng tròn hơi đè mép trên; thẻ "TỰ LẮP" hiện giá "0 CP" màu xanh.
-- Chưa thử thật chế độ Online cho các thay đổi gần đây.(Có rất nhiều lỗi về HUB bay loạn xạ và sai độ họa)
+- Online: đã sửa xe P2 bên khách bị giật/nhảy (dự đoán đầu vào), mốc thời gian, thanh máu đỏ, vòng HUD lệch khi rung màn hình — cần chơi thử thật 2 máy. Xe P1 bên khách còn hơi bước nhảy (~30 lần/s).
 ## 4. Y Cầu Cân bằng/chỉnh sửa
