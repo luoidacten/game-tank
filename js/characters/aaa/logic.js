@@ -67,6 +67,14 @@ Object.assign(Player.prototype, {
                     targetY += (Math.random() - 0.5) * 20;
 
                     mortars.push(new MortarMarker(targetX, targetY, this, false));
+                    // Full Evo: không tự đuổi -> thêm 2 quả phụ rơi 2 bên mục tiêu (không nổ bồi, rơi trễ 0.2s)
+                    if (this.hasUpgrade('evo_aaa_1') && this.hasUpgrade('evo_aaa_2')) {
+                        [-52, 52].forEach(off => {
+                            const m = new MortarMarker(Math.max(14, Math.min(canvas.width - 14, targetX + off)), targetY, this, false);
+                            m.echoLeft = 0; m.detonateTime += 200;
+                            mortars.push(m);
+                        });
+                    }
 
                     this.ammo--;
                     this.lastShot = now;

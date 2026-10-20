@@ -3,7 +3,7 @@
 // Giai đoạn 2: Đu Dây Đột Kích (tự lao theo xích) / Lôi Xích Hành Hình (kéo địch về)
 // ------------------------------------------
 // Toàn bộ trạng thái nằm trên player dưới dạng object/mảng thuần (đồng bộ online được):
-//   shPhase: 'ready' | 'fly' | 'hold' | 'zip' | 'zipBack' | 'drag' | 'dragBack' | 'retract' | 'cool'
+//   shPhase: 'ready' | 'aim' | 'fly' | 'hold' | 'zip' | 'zipBack' | 'drag' | 'dragBack' | 'retract' | 'cool'
 //   shHooks: [{ sid, pts:[{x,y}], x, y, vx, vy, b (lượt nảy còn lại), len, cap, hp, maxHp, st, truckId, hits:[] }]
 //     st: 'fly' | 'stuck' | 'enemy' | 'truck'
 // ==========================================
@@ -20,6 +20,7 @@ const SH_FLY_SLOW = 75;                    // nhấp nhanh: móc đi hết đư�
 const SH_FLY_FAST = 30;                    // tụ lực tối đa: chỉ 0.5s
 const SH_BREAK_TICKS = 45;                 // móc đã neo: giữ Bắn 0.75s -> tự cắt xích
 const SH_SIDE_HP = 0.25;                   // Full Evo: 2 móc phụ chỉ có 25% máu tối đa (dễ bắn đứt)
+const SH_AIM_DELAY = 20;                   // tụ lực (≥1 mốc): khoá hướng + cảnh báo đỏ 0.33s rồi mới phóng
 
 function shIsFull(p) { return p.hasUpgrade('evo_hook_1') && p.hasUpgrade('evo_hook_2'); }
 function shMaxBounces(p) { return shIsFull(p) ? 17 : (p.hasUpgrade('evo_hook_1') ? 15 : 9); }
@@ -515,7 +516,7 @@ CharHooks.register('steel_hook', {
         this.maxAmmo = 1;
         this.shBaseSpeed = this.speed;
         this.shPhase = 'ready'; this.shT = 0; this.shSwing = 0; this.shCharge = -1; this.shPrevS = false;
-        this.shHoldS = -1;
+        this.shHoldS = -1; this.shAimTier = 0; this.shAimCharge = 0;
         this.shHooks = []; this.shPinned = []; this.shSerial = 0; this.shDrag = null; this.shZip = null;
         this.shAuto = null; shSetAutoObj(this, null); this.shAutoT = 0; this.shTick = 0; this.shLaunchBounces = 0;
     },
@@ -527,7 +528,10 @@ CharHooks.register('steel_hook', {
         this.speed = (ph === 'ready' || ph === 'cool') ? this.shBaseSpeed : 0;
         if (ph === 'ready' || ph === 'cool') this.shSwing += SH_SWING_SPEED * (this.shCharge >= 0 ? 0.8 : 1);
 
-        if (ph === 'fly') {
+        if (ph === 'aim') {
+            // Cảnh báo: đường xích đã khoá, đối thủ có ~0.33s để né
+            if (++this.shT >= SH_AIM_DELAY) { this.shT = 0; shLaunch(this, this.shAimTier || 0, this.shAimCharge || 0); }
+        } else if (ph === 'fly') {
             this.shHooks.forEach(h => { if (h.st === 'fly') shFlyStep(this, h); if (h.flash > 0) h.flash--; });
             if (this.shHooks.every(h => h.st !== 'fly')) { this.shPhase = 'hold'; this.shT = 0; }
         } else if (ph === 'hold') {
@@ -604,7 +608,11 @@ CharHooks.register('steel_hook', {
                 }
             } else if (release && this.shCharge >= 0) {
                 const tier = Math.min(4, Math.floor(this.shCharge / SH_TIER_TICKS));
-                shLaunch(this, tier, this.shCharge);
+                if (tier >= 1) {
+                    // Tụ lực -> móc bay nhanh: khoá hướng, hiện cảnh báo rồi mới phóng
+                    this.shPhase = 'aim'; this.shT = 0; this.shAimTier = tier; this.shAimCharge = this.shCharge;
+                    if (soundSystem && !soundSystem.muted) soundSystem.playClick();
+                } else shLaunch(this, tier, this.shCharge);
                 this.shCharge = -1;
             }
             this.shHoldS = -1;

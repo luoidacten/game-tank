@@ -187,6 +187,35 @@ Object.assign(CharHooks.registry.steel_hook, {
             shDrawHookHead(hx, hy, Math.atan2(d.y, d.x), scale, 0, charging && tier >= 4 ? '#ffffff' : SH_GLOW);
         }
 
+        // --- Cảnh báo trước khi phóng (đã tụ lực): đường xích khoá màu đỏ nhấp nháy ---
+        if (ph === 'aim') {
+            const ang = shAngle(this);
+            const bounces = shBouncesForTier(this, this.shAimTier || 0);
+            const angs = shIsFull(this) ? [ang, ang - SH_SIDE_ANGLE, ang + SH_SIDE_ANGLE] : [ang];
+            const k = Math.min(1, (this.shT || 0) / SH_AIM_DELAY);
+            const blink = 0.55 + 0.45 * Math.abs(Math.sin((this.shT || 0) * 0.6));
+            angs.forEach((a, i) => {
+                const pts = shPredict(this, Math.max(-1.4, Math.min(1.4, a)), bounces, Math.min(900, 600 + 220 * bounces));
+                ctx.save();
+                ctx.shadowColor = '#ff3355'; ctx.shadowBlur = 10;
+                ctx.strokeStyle = `rgba(255,60,90,${(i ? 0.5 : 0.85) * blink})`;
+                ctx.lineWidth = 2 + 3 * k;
+                ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(q => ctx.lineTo(q.x, q.y)); ctx.stroke();
+                ctx.shadowBlur = 0;
+                pts.forEach(q => { if (q.bounce) { ctx.fillStyle = 'rgba(255,220,120,0.9)'; ctx.beginPath(); ctx.arc(q.x, q.y, 3.5, 0, Math.PI * 2); ctx.fill(); } });
+                const e = pts[pts.length - 1];
+                ctx.strokeStyle = `rgba(255,80,100,${blink})`; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.arc(e.x, e.y, 14 - 8 * k, 0, Math.PI * 2); ctx.stroke();
+                ctx.restore();
+            });
+            const d = shDir(this, ang);
+            const hx = n.x + d.x * 24, hy = n.y + d.y * 24;
+            shDrawChain([n, { x: hx, y: hy }], 1);
+            shDrawHookHead(hx, hy, Math.atan2(d.y, d.x), scale, 4, '#ff6b81');
+            ctx.save(); ctx.fillStyle = `rgba(255,90,110,${blink})`; ctx.font = 'bold 16px sans-serif'; ctx.textAlign = 'center';
+            ctx.fillText('!', n.x, n.y + fwd * 40); ctx.restore();
+        }
+
         // --- Các móc đang ra ngoài ---
         (this.shHooks || []).forEach(h => {
             shDrawChain(shPath(h), 1, h.st !== 'fly');

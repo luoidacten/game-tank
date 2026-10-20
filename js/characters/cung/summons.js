@@ -4,7 +4,7 @@
 // ==========================================
 
 // Mưa Tên.
-//  isGlobal (Full Evo): phủ KHẮP bề ngang sân — rải đều theo cột (không bỏ sót góc nào), rơi trên làn địch,
+//  isGlobal (Full Evo): phủ KHẮP sân — rải đều theo cột (không bỏ sót góc nào), điểm rơi khắp bề dọc sân (3/5 trên làn địch),
 //    số mũi tăng theo sát thương (không giới hạn), mỗi mũi sát thương nhỏ + có vòng cảnh báo để né.
 //  cục bộ (Evo 2): trút xuống vùng hồng tâm Thiên Tiễn.
 class ArrowRain {
@@ -16,7 +16,7 @@ class ArrowRain {
         this.age = 0;
         this.fired = 0;
         const d = owner.damage;
-        if (isGlobal) { this.duration = 240; this.totalArrows = Math.round(40 + d * 30); this.dropDmg = d * 0.25; }
+        if (isGlobal) { this.duration = 240; this.totalArrows = Math.round(60 + d * 45); this.dropDmg = d * 0.25; }
         else { this.duration = 90; this.totalArrows = Math.round(14 + d * 8); this.dropDmg = d * 0.4; }
         this.interval = this.duration / this.totalArrows;
         this.acc = 0;
@@ -42,7 +42,9 @@ class ArrowRain {
             const cols = 9; // 9 cột, hoán vị (i*4 mod 9) -> mỗi đợt quét đủ cả bề ngang
             const col = (i * 4 + Math.floor(i / cols)) % cols;
             x = (col + 0.5 + (Math.random() - 0.5) * 0.9) / cols * canvas.width;
-            y = enemy ? enemy.y + enemy.h / 2 + (Math.random() - 0.5) * 14 : canvas.height / 2;
+            // Điểm cảnh báo rải KHẮP sân (cả bề ngang lẫn bề dọc); 3/5 số mũi vẫn rơi trên làn địch
+            if (enemy && i % 5 < 3) y = enemy.y + enemy.h / 2 + (Math.random() - 0.5) * 14;
+            else y = 12 + Math.random() * (canvas.height - 24);
         } else {
             const a = Math.random() * Math.PI * 2, rr = Math.sqrt(Math.random()) * this.radius;
             x = this.x + Math.cos(a) * rr * 1.2;

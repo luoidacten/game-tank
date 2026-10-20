@@ -76,8 +76,8 @@ const EVOLUTIONS = {
         { id: 'evo_ghost_2', name: 'Ảo Ảnh', desc: 'Chu kỳ Vô ảnh nhanh hơn. Mỗi 12s triệu hồi Hư Ảnh bắn phụ.', cost: 120, type: 'evo' }
     ],
     aaa: [
-        { id: 'evo_aaa_1', name: 'Nhắm Đánh Dấu', desc: 'Pháo kích tự ghim mục tiêu. Tự bắn thường: 3 tia liên tiếp. Pháo kích nổ bồi 1 lần tại chỗ (có cảnh báo, 50% dame). FULL EVO: nổ bồi 2 lần.', cost: 80, type: 'evo' },
-        { id: 'evo_aaa_2', name: 'Mưa Tên Lửa', desc: 'Tự bắn -> Rơi 3 bom ngẫu nhiên trên làn địch. Pháo kích nổ bồi 1 lần tại chỗ (có cảnh báo, 50% dame). FULL EVO: nổ bồi 2 lần, nổ nhanh hơn.', cost: 100, type: 'evo' }
+        { id: 'evo_aaa_1', name: 'Nhắm Đánh Dấu', desc: 'Pháo kích tự ghim mục tiêu. Tự bắn thường: 3 tia liên tiếp. FULL EVO: pháo kích KHÔNG tự đuổi nữa nhưng rơi thêm 2 quả phụ 2 bên mục tiêu.', cost: 80, type: 'evo' },
+        { id: 'evo_aaa_2', name: 'Mưa Tên Lửa', desc: 'Tự bắn -> Rơi 3 bom ngẫu nhiên trên làn địch. Pháo kích nổ bồi 1 lần tại chỗ (có cảnh báo, 50% dame). FULL EVO: nổ bồi 2 lần, nổ nhanh hơn (0.8s), không tự đuổi, +2 quả phụ quanh mục tiêu.', cost: 100, type: 'evo' }
     ],
     blade_god: [
         { id: 'evo_blade_1', name: 'Kiếm Thế Vô Chủ', desc: 'Quang Kiếm tự rải ngẫu nhiên trên sân. Nội tại Quang Kiếm Loạn Ảnh: mỗi 10s 1 Quang Kiếm VIP bay quanh xe 3s, lao tới chém tan mọi loại đạn bay. Full Evo: Quang & Ám Kiếm tự xuất hiện, lơ lửng 2s rồi tự phóng; 2 nội tại mạnh hơn.', cost: 150, type: 'evo' },
@@ -88,8 +88,8 @@ const EVOLUTIONS = {
         { id: 'evo_vk_2', name: 'Kiếm Thế Hoàn Chỉnh', desc: 'Trong Kiếm Thế: Có thể di chuyển siêu chậm, đạn xuyên thấu. Nhả nút phóng Đại Kiếm.', cost: 150, type: 'evo' }
     ],
     water_gun: [
-        { id: 'evo_water_1', name: 'Vòi Rồng', desc: 'Giữ bắn -> Phun liên tục (10%/0.5s), vừa đi vừa phun chậm. Nghỉ bắn hồi nội năng nhanh (15%/s).', cost: 100, type: 'evo' },
-        { id: 'evo_water_2', name: 'Vòi Cao Áp', desc: 'Tự hồi nội năng (0.5%/s) kể cả khi đang bắn. Đạn làm chậm và xuyên thấu.', cost: 120, type: 'evo' }
+        { id: 'evo_water_1', name: 'Vòi Rồng', desc: 'Giữ bắn: sau phát Laser nước mở màn (to, mạnh) -> Vòi Rồng phun liên tục như tia laser (hitscan dọc cột, 0.125 dame/0.1s, 2%/0.1s nội năng; cột tia trễ theo nòng nên né được, tường Sniper chặn), vừa đi vừa phun chậm. Nghỉ bắn hồi nội năng nhanh (15%/s).', cost: 100, type: 'evo' },
+        { id: 'evo_water_2', name: 'Vòi Cao Áp', desc: 'Tự hồi nội năng (0.5%/s) kể cả khi đang bắn. Đạn & tia Vòi Rồng làm chậm và xuyên thấu.', cost: 120, type: 'evo' }
     ],
     furnace: [
         { id: 'evo_furnace_1', name: 'Nhiệt Năng', desc: 'Giữ bắn 1s -> Bắn tia lửa liên tục, hao năng lượng cực nhanh.', cost: 100, type: 'evo' },
@@ -114,7 +114,7 @@ const EVOLUTIONS = {
     ],
     cung: [
         { id: 'evo_cung_1', name: 'Cung Thần', desc: 'Tụ Lực kéo nhanh hơn & nhịp nhanh hơn, căng tối đa thì Xuyên Thủng. Liên Hoàn: loạt 7 mũi. Bắn 3 Mũi -> 5 mũi tỏa.', cost: 80, type: 'evo' },
-        { id: 'evo_cung_2', name: 'Mưa Tên', desc: 'Thiên Tiễn kéo theo trận Mưa Tên trút xuống hồng tâm 1.5s. Hồi Ngắm 7s. FULL EVO (Vạn Tiễn): Mưa Tên phủ KHẮP bề ngang sân mỗi 12s (số mũi tăng theo dame), Ngắm hồi 5s, Nhạy Bén hồi 5s.', cost: 120, type: 'evo' }
+        { id: 'evo_cung_2', name: 'Mưa Tên', desc: 'Thiên Tiễn kéo theo trận Mưa Tên trút xuống hồng tâm 1.5s. Hồi Ngắm 7s. FULL EVO (Vạn Tiễn): Mưa Tên phủ KHẮP sân mỗi 12s — điểm cảnh báo rải toàn bản đồ, nhiều mũi trên làn địch (số mũi tăng theo dame), Ngắm hồi 5s, Nhạy Bén hồi 5s.', cost: 120, type: 'evo' }
     ],
     mirror: [
         { id: 'evo_mirror_1', name: 'Tái Lập', desc: 'CD Đổi còn 3s. Sau khi đổi: Tăng Tốc, Dame và Bất tử 0.5s.', cost: 80, type: 'evo' },

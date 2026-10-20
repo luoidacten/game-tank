@@ -84,6 +84,7 @@ function startRound() {
     shadowTraps = [];
     shortgunFireZones = [];
     p1.setupForNewRound(); p2.setupForNewRound();
+    if (typeof applyCollabBonus === 'function') applyCollabBonus();
     lastFixedLoopTime = performance.now();
     fixedPhysicsAccumulator = 0;
 
@@ -278,6 +279,7 @@ function startBattle() {
     gameState.p2Score = 0;
     gameState.p1Coins = 0;
     gameState.p2Coins = 0;
+    gameState.collabBonusDone = false;
     gameState.isPaused = false;
 
     p1 = new Player(1, "#3498db");

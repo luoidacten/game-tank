@@ -19,16 +19,17 @@ class MortarMarker {
         // [FIX] Đếm theo tick (trước dùng Date.now + setTimeout: nổ bồi không cảnh báo, lặp cả khi
         // hết round / sang round mới, mỗi quả bom tự bắn cũng nổ bồi -> "nổ lặp lại" ngoài ý muốn)
         this.age = 0;
-        this.detonateTime = isAuto ? 5000 : (isFullEvo ? 500 : 1500); // ms (bot đọc trường này)
+        this.detonateTime = isAuto ? 5000 : (isFullEvo ? 800 : 1500); // ms (bot đọc trường này)
         this.spawnTime = Date.now();
         this.active = true;
         this.isAuto = isAuto;
         this.echoCount = 0;
-        // [MỚI] Nổ bồi: có 1 Evo -> lặp 1 lần, Full Evo -> lặp 2 lần (mỗi lần có cảnh báo, 50% dame)
-        this.echoLeft = isAuto ? 0 : (isFullEvo ? 2 : ((hasEvo1 || hasEvo2) ? 1 : 0));
+        // Nổ bồi: chỉ Evo 2 -> lặp 1 lần, Full Evo -> lặp 2 lần (mỗi lần có cảnh báo, 50% dame)
+        this.echoLeft = isAuto ? 0 : (isFullEvo ? 2 : (hasEvo2 ? 1 : 0));
         this.baseDmg = 0;
 
-        if (hasEvo1 && !isAuto) {
+        // Evo 1: ghim đuổi mục tiêu. Full Evo KHÔNG đuổi nữa (bù bằng 2 quả phụ rơi quanh mục tiêu)
+        if (hasEvo1 && !isFullEvo && !isAuto) {
             this.tracking = true;
         }
     }

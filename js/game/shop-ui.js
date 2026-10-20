@@ -27,9 +27,29 @@ function shopItemPrice(player, item) {
 
 // Huy hiệu vai trò của body (vai trò chính đứng đầu, nổi bật hơn)
 const ROLE_ICON = { 'Đối Đầu': '⚔️', 'Kiểm Soát': '🕸️', 'Cơ Động': '⚡', 'Sinh Tồn': '🛡️' };
+// Tướng Collab (rất mạnh): huy hiệu riêng ở phần chọn tướng; chọn tướng Collab -> đối thủ được bù tiền đầu game
+const COLLAB_BONUS = { kazuki: 150, joker: 150, raven_oca: 120, chrononeo: 150 };
+function collabBonusOf(id) { return COLLAB_BONUS[id] || 0; }
+function collabBadge(mod) {
+    const b = mod && collabBonusOf(mod.id);
+    return b ? `<div class="role-badges"><span class="role-badge main" style="background:linear-gradient(90deg,#ff2bd6,#ffb300);color:#fff;border-color:#ffd166;box-shadow:0 0 8px #ff2bd6">★ COLLAB</span><span class="role-badge" style="color:#ffd166;border-color:#ffb300">Đối thủ +$${b}</span></div>` : '';
+}
+// Gọi ở đầu hiệp 1 (1 lần/trận): bù tiền cho đối thủ của tướng Collab
+function applyCollabBonus() {
+    if (gameState.round !== 1 || gameState.collabBonusDone || !p1 || !p2) return;
+    gameState.collabBonusDone = true;
+    const isGuest = typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'guest';
+    [[p1, p2], [p2, p1]].forEach(([pick, opp]) => {
+        const b = collabBonusOf(pick.weapon);
+        if (!b) return;
+        if (!isGuest) { if (opp.id === 1) gameState.p1Coins += b; else gameState.p2Coins += b; } // tiền đồng bộ từ host
+        addFloatingText(opp.x + opp.w / 2, opp.id === 1 ? opp.y - 26 : opp.y + opp.h + 30, `+$${b} bù Collab`, '#ffd166', 16);
+    });
+    if (typeof updateScoreBoard === 'function') updateScoreBoard();
+}
 function roleBadges(mod) {
-    if (!mod || !mod.role || !mod.role.length) return '';
-    return '<div class="role-badges">' + mod.role.map((r, i) =>
+    if (!mod || !mod.role || !mod.role.length) return collabBadge(mod);
+    return collabBadge(mod) + '<div class="role-badges">' + mod.role.map((r, i) =>
         `<span class="role-badge${i === 0 ? ' main' : ''}" data-role="${r}">${ROLE_ICON[r] || ''} ${r}</span>`).join('') + '</div>';
 }
 
@@ -129,8 +149,9 @@ function renderStandardCards(playerId, list) {
 
     shuffled.forEach(mod => {
         const div = document.createElement('div');
-        div.className = 'card';
-        div.innerHTML = `<h4>${mod.name}</h4>${roleBadges(mod)}<p>${mod.desc}</p>`;
+        div.className = 'card' + (collabBonusOf(mod.id) ? ' collab-card' : '');
+        if (collabBonusOf(mod.id)) { div.style.border = '2px solid #ff2bd6'; div.style.boxShadow = '0 0 14px rgba(255,43,214,0.65), inset 0 0 10px rgba(255,179,0,0.25)'; }
+        div.innerHTML = `<h4>${collabBonusOf(mod.id) ? '★ ' : ''}${mod.name}</h4>${roleBadges(mod)}<p>${mod.desc}</p>`;
         div.onclick = () => {
             player.addUpgrade(mod.id); soundSystem.playPowerup();
             container.innerHTML = '';
