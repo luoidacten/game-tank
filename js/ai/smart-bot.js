@@ -428,3 +428,15 @@ function botShopBuy(playerId) {
     }
     if (typeof updateShopTitle === 'function') updateShopTitle();
 }
+
+// Nhện Độc: giữ 0.5s Cú Vồ Đoạt Mệnh khi địch đang Hóa Kén / có tầng Tơ & thẳng hàng (arBotHold)
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon === 'arachnid' && typeof arBotHold === 'function') {
+            if (this.arHold > 0) { this.arHold++; inp.s = this.arHold <= 34; if (this.arHold > 38) { this.arHold = 0; this.tapCool = 6; } return; }
+            if (arBotHold(bot, enemy, aligned)) { this.arHold = 1; inp.s = true; return; }
+        }
+        return f.call(this, bot, enemy, aligned, inp);
+    };
+})();

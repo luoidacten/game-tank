@@ -276,4 +276,8 @@ const EVOLUTIONS = {
         { id: 'evo_punch_1', name: 'Đấm Bồi Hai Tay', desc: 'Nạp đạn chỉ 1.5s. Trong 0.4s sau Đấm Thường, nhấp tiếp -> phóng thêm 4 luồng quyền phong nhỏ liên tiếp (tổng +1.2 st). Thú Vị tích +30% mỗi 1 dame nhận; hồi máu chỉ tốn 7% Thú Vị / 1 HP.', cost: 100, type: 'evo' },
         { id: 'evo_punch_2', name: 'Nhảy Liên Hoàn Nghiêm Túc', desc: 'Khi đang tụ Đấm Nghiêm Túc: bấm Trái/Phải -> bật nhảy ngang 120px, đường cảnh báo di chuyển theo. FULL EVO (DEATH PUNCH): giữ chỉ 0.5s, hồi 8s, Thú Vị +40% mỗi 1 dame; Thú Vị không giảm khi hồi máu (5s không bị đánh tự hồi +0.5 HP/s); Giáp Ảo tồn tại vĩnh viễn; khi tụ hút nhẹ địch về tâm đường cảnh báo; địch trúng tâm cú Đấm Nghiêm Túc mà máu <= 35% -> "DEATH (TỬ)" HẠ GỤC NGAY (xuyên Khiên & Bất tử tạm thời).', cost: 120, type: 'evo' },
     ],
+    arachnid: [
+        { id: 'evo_spider_1', name: 'Tơ Trói Thần Kinh', desc: 'Chỉ cần 3 tầng Tơ Quấn là Hóa Kén. Tầng Tơ duy trì 8s. Địch đứng trên Vùng Tơ Nhện quá 2s liên tục -> +1 tầng. Phá Kén bằng Cú Vồ: địch bị Câm Lặng thêm 1.5s và nhiễm Kịch Độc (0.3 HP/s trong 3s).', cost: 90, type: 'evo' },
+        { id: 'evo_spider_2', name: 'Ổ Nhện Phục Kích', desc: 'Băng đạn 4 viên. Mỗi Vùng Tơ Nhện xuất hiện hoặc khi địch bị Hóa Kén -> nở 2 Nhện Con (HP 0.8, bò tới cắn 0.3 st & làm mới thời gian tầng Tơ; tối đa 4 con). FULL EVO (Nữ Hoàng Nhện Độc): đầu hiệp rải sẵn 2 Vùng Tơ lớn bên sân địch; đứng trên tơ giảm 25% st nhận; Hóa Kén kéo dài 2.25s & xoá sạch Khiên; ngưỡng Xử Tử của Cú Vồ tăng lên 25% Max HP; địch chưa trong kén nhưng có >= 2 tầng Tơ -> Cú Vồ bẻ lái tìm mục tiêu và đóng kén ngay khi chạm.', cost: 120, type: 'evo' },
+    ],
 };
