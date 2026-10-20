@@ -60,7 +60,7 @@ const MODULES = {
         {
             id: 'paradox',
             name: 'Paradox',
-            desc: 'HP:6 | Dame:1.2 | Đạn:5. Có bóng đi sau 3s. Giữ 0.2s tua ngược & tự xả đạn lặp lại (CD: 12s/7s). Giữ tới mốc trống cuối: đặt Neo Thời Không (10s, CD 20s) - lần tua tới về neo (vị trí, máu, đạn).',
+            desc: 'HP:6 | Dame:1.2 | Đạn:5. Có bóng đi sau 3s. Giữ 0.2s tua ngược & tự xả đạn lặp lại (CD: 12s/7s). Giữ tới mốc trống cuối: đặt Neo Thời Không (10s, CD 20s) - lần tua tới về neo (vị trí, máu, đạn). Mỗi lần tua ngược/về neo để lại 1 Vết Nứt Thời Gian (10s, tối đa 3): khi đặt neo, tua ngược hoặc bóng 3s tái hiện phát bắn, mọi vết nứt cùng khai hoả (tụ sáng 0.2s, 25% dame; Full Evo 50%).',
             type: 'body', role: ['Sinh Tồn', 'Cơ Động', 'Kiểm Soát'],
             size: { w: 30, h: 30 },
             stats: { hp: 6, dmg: 1.2, ammo: 5 }
@@ -68,7 +68,7 @@ const MODULES = {
         {
             id: 'magician',
             name: 'Nhà Ảo Thuật',
-            desc: 'HP:3 | Dame:1 | Rất Nhanh | Đạn:7. Giữ bắn 0.5s tạo Phân Ảnh + Khiên (CD riêng 10s): +Đi = Lướt & Tàng hình, Đứng = Vô địch. Thoát Chết: đòn chí mạng -> dịch chuyển đi chỗ khác, để lại phân ảnh mồi (1 lần/hiệp). Mưa mũ ảo thuật khi tạo bóng.',
+            desc: 'HP:3 | Dame:1 | Rất Nhanh | Đạn:7. Đánh thường: Phóng Bài (lá bài xoay). Giữ bắn 0.5s tạo Phân Ảnh + Khiên (CD riêng 10s): +Đi = Lướt & Tàng hình, Đứng = Vô địch. Phân ảnh giống hệt bản thể (cùng hình, thanh máu, đạn, khiên). Có >= 2 phân ảnh: địch thấy Khiên Giả & Số Đạn Giả. Thoát Chết: đòn chí mạng -> dịch chuyển đi chỗ khác, để lại phân ảnh mồi (1 lần/hiệp). Mưa mũ ảo thuật khi tạo bóng.',
             type: 'body', role: ['Cơ Động', 'Sinh Tồn'],
             size: { w: 26, h: 26 },
             stats: { hp: 3, dmg: 1.0, ammo: 7, speedMult: 1.35 }

@@ -126,11 +126,11 @@ const EVOLUTIONS = {
     ],
     paradox: [
         { id: 'evo_paradox_1', name: 'Dấu Ấn Thời Gian', type: 'evo', desc: 'Bắn trúng địch tích ấn (Max 3). Đủ ấn tạo Bóng Đứng Yên + Choáng. Kích hoạt tua ngược kéo địch về Bóng Đứng.', cost: 100 },
-        { id: 'evo_paradox_2', name: 'Nghịch Đảo', type: 'evo', desc: 'Hồi chiêu Tua Ngược còn 10s. Kéo địch về gây Làm Chậm. Đủ 2 Evo: Kéo địch về Bóng 5s (Choáng 0.5s) hoặc Bóng Đứng (Choáng 1.5s, 2 hit tạo bóng).', cost: 120 }
+        { id: 'evo_paradox_2', name: 'Nghịch Đảo', type: 'evo', desc: 'Hồi chiêu Tua Ngược còn 10s. Kéo địch về gây Làm Chậm. Đủ 2 Evo: Kéo địch về Bóng 5s (Choáng 0.5s) hoặc Bóng Đứng (Choáng 1.5s, 2 hit tạo bóng). Đủ 2 Evo: Vết Nứt Thời Gian bắn 50% dame (gốc 25%).', cost: 120 }
     ],
     magician: [
-        { id: 'evo_mag_1', name: 'Hoán Đổi Chủ Động', type: 'evo', desc: 'Giữ bắn 1s: Tàng hình & Đổi vị trí với Phân ảnh (+1 Khiên, dùng chung hồi chiêu 10s với Phân Ảnh). Đổi với bóng Đứng: Bóng tự đi. Đổi bóng Đi: Cả hai tăng tốc. Đủ 2 Evo: Thoát Chết 2 lần/hiệp.', cost: 100 },
-        { id: 'evo_mag_2', name: 'Loạn Ảnh & Suy Yếu', type: 'evo', desc: 'Bắn trúng +1, Địch phá bóng +3 stack Suy Yếu (Nhận thêm dame). Đủ 3 stack: Địch bị Slow. Đạn trúng địch gây Loạn Phím. Đủ 2 Evo: Thoát Chết 2 lần/hiệp.', cost: 120 }
+        { id: 'evo_mag_1', name: 'Hoán Đổi Chủ Động', type: 'evo', desc: 'Bản thể & phân ảnh phóng 3 lá bài nối đuôi theo trục dọc (mỗi lá 50% dame). Giữ bắn 1s: Tàng hình & Đổi vị trí với Phân ảnh (+1 Khiên, dùng chung hồi chiêu 10s với Phân Ảnh). Đổi với bóng Đứng: Bóng tự đi. Đổi bóng Đi: Cả hai tăng tốc. Đủ 2 Evo: Thoát Chết 2 lần/hiệp.', cost: 100 },
+        { id: 'evo_mag_2', name: 'Loạn Ảnh & Suy Yếu', type: 'evo', desc: 'Đầu hiệp tạo 1 Ảo Ảnh Hoàn Hảo (50% máu & dame, tự đi, tự phóng bài, đôi khi đứng im giả dạng; bị phá hồi sinh sau 30s). Bắn trúng +1, Địch phá bóng +3 stack Suy Yếu (Nhận thêm dame). Đủ 3 stack: Địch bị Slow. Đạn trúng địch gây Loạn Phím. Đủ 2 Evo: 2 Ảo Ảnh Hoàn Hảo (hồi sinh 20s), Thoát Chết 2 lần/hiệp.', cost: 120 }
     ],
     inventor: [
         { id: 'evo_inv_1', name: 'Cải Tiến Và Tiến Hóa', desc: 'Drone nhận 75% chỉ số. Drone hồi sinh nhanh. Thắng +6 LK, Crate +2 LK, Xe tiền +3 LK.', cost: 80, type: 'evo' },

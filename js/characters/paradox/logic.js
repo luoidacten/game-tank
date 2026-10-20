@@ -2,7 +2,33 @@
 // paradox (paradox) — Logic (cập nhật, bắn, kỹ năng)
 // ==========================================
 
+// ------------------------------------------
+// VẾT NỨT THỜI GIAN: mỗi lần tua ngược / về neo để lại 1 vết nứt ở chỗ cũ (tồn tại 10s, tối đa 3).
+// Khi Paradox khai hoả "dòng thời gian" (đặt neo, về neo / tua ngược, phát bắn tái hiện 3s của Evo 2)
+// mọi vết nứt còn sống cùng khai hoả: tụ sáng 0.2s (cảnh báo) rồi bắn 1 viên 25% dame (Full Evo 50%).
+// ------------------------------------------
+const PDX_RIFT_MAX = 3;
+const PDX_RIFT_LIFE = 600;
+
 Object.assign(Player.prototype, {
+    paradoxSpawnRift(cx, cy) {
+        if (typeof bodyEffects === 'undefined' || typeof PdxRift === 'undefined') return;
+        const mine = bodyEffects.filter(e => e instanceof PdxRift && e.active && e.owner === this);
+        while (mine.length >= PDX_RIFT_MAX) mine.shift().active = false;
+        bodyEffects.push(new PdxRift(this, cx, cy));
+    },
+
+    paradoxFireRifts() {
+        if (typeof bodyEffects === 'undefined' || typeof PdxRift === 'undefined') return 0;
+        let n = 0;
+        for (const e of bodyEffects) {
+            if (e instanceof PdxRift && e.active && e.owner === this && e.cd <= 0 && e.fireIn <= 0) {
+                e.fireIn = 12; e.cd = 30; n++;
+            }
+        }
+        return n;
+    },
+
     // [setupForNewRound] paradox
     setupParadox() {
         if (this.weapon === 'paradox') {
@@ -47,6 +73,7 @@ Object.assign(Player.prototype, {
                     });
 
                     explosions.push(new Explosion(oldest.x + this.w / 2, oldest.y + this.h / 2, 20, 'cyan', 0, this));
+                    this.paradoxFireRifts(); // dự đoán 3s khai hoả -> các vết nứt cùng bắn
                 }
             }
 
@@ -106,6 +133,7 @@ Object.assign(Player.prototype, {
             }
         };
 
+        const riftX = this.x + this.w / 2, riftY = this.y + this.h / 2;
         if (pullOnly) {
             // MỐC 2 (Full Evo): chỉ kéo đối thủ
             pullEnemy();
@@ -119,6 +147,8 @@ Object.assign(Player.prototype, {
             explosions.push(new Explosion(this.x + this.w / 2, this.y + this.h / 2, 70, '#88aaff', 0, this));
             if (typeof addFloatingText === 'function') addFloatingText(this.x + this.w / 2, this.y - 20, 'VỀ NEO! ⚓', '#88aaff', 14);
             if (hasEvo1) pullEnemy();
+            this.paradoxSpawnRift(riftX, riftY);
+            this.paradoxFireRifts();
         } else {
             // MỐC 1: Tua lại bản thân 3s
             this.x = pastSelf.x;
@@ -139,6 +169,8 @@ Object.assign(Player.prototype, {
                 }
             }
             if (hasEvo1) pullEnemy();
+            this.paradoxSpawnRift(riftX, riftY);
+            this.paradoxFireRifts();
         }
 
         // Hồi chiêu: Evo 2 còn 7s (420 frames), gốc 12s (720 frames)
@@ -168,6 +200,7 @@ Object.assign(Player.prototype, {
                         this.paradoxAnchorCD = 1200;
                         explosions.push(new Explosion(this.x + this.w / 2, this.y + this.h / 2, 45, '#88aaff', 0, this));
                         if (typeof addFloatingText === 'function') addFloatingText(this.x + this.w / 2, this.y - 20, 'NEO THỜI KHÔNG ⚓', '#88aaff', 14);
+                        this.paradoxFireRifts(); // khai hoả neo -> các vết nứt cùng bắn
                     } else if (rewindReady && c >= m.rewind && this.paradoxHistory.length > 0) {
                         this.paradoxRewind(m.pull > 0 && c >= m.pull);
                     } else if (c < m.rewind || !rewindReady) {

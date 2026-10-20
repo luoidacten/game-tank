@@ -185,95 +185,105 @@ function magRegisterHUD() {
                 : { pct: canSwap ? 0.5 : 1, segments: canSwap ? 2 : 1, lit: 1, ready: !canSwap, color: '#e056fd', label: 'PHÂN ẢNH', btnIcon: '🎩' };
             return { pct: Math.min(1, held / 30) * (canSwap ? 0.5 : 1), color: '#e056fd', label: cd > 0 ? `PHÂN ẢNH ⌛${Math.ceil(cd / 60)}s` : 'PHÂN ẢNH' };
         }
-        if (cd > 0) return { pct: 1 - cd / MAG_CLONE_CD, ready: false, color: '#b98cff', label: `PHÂN ẢNH ${Math.ceil(cd / 60)}s` };
+        // idle: hồi chiêu chỉ hiện ở nút Bắn, không vẽ vòng cạnh xe (không lộ đâu là bản thể)
+        if (cd > 0) return { pct: 1 - cd / MAG_CLONE_CD, ready: false, color: '#b98cff', label: `PHÂN ẢNH ${Math.ceil(cd / 60)}s`, idle: true };
         return { pct: 1, ready: false, color: '#e056fd', label: 'PHÂN ẢNH ✓', idle: true, btnIcon: '🎩' };
     });
 }
 if (typeof window !== 'undefined') window.addEventListener('load', magRegisterHUD);
 
+// ------------------------------------------
+// PHÂN ẢNH KHÓ PHÂN BIỆT: vẽ bằng đúng art xe + đúng HUD chung (drawTankHUD) như bản thể.
+// Phân ảnh thường hiện máu = máu bản thể; Ảo Ảnh Hoàn Hảo hiện máu riêng quy đổi theo thang máu bản thể.
+// Lớp vẽ là thực thể bodyEffects (dữ liệu thuần: owner) -> vẫn vẽ khi bản thể tàng hình & đồng bộ online.
+// ------------------------------------------
+function magOnline() { return typeof onlineManager !== 'undefined' && onlineManager && onlineManager.isOnline; }
+// Người đang xem có phải chủ xe không (chủ xe luôn thấy chỉ số thật của mình)
+function magViewerOwns(p) {
+    if (magOnline()) return onlineManager.role === 'host' ? p.id === 1 : p.id === 2;
+    const bot = typeof botAI !== 'undefined' && botAI.enabled;
+    return bot && p.id === 1;
+}
+function magFakeOn(p) { return p && p.weapon === 'magician' && (p.magFakeShield >= 0 || p.magFakeAmmo >= 0); }
+function magShownShield(p) { return p.magFakeShield >= 0 ? p.magFakeShield : (p.shield || 0); }
+function magHudView(p, over) { const v = Object.create(p); Object.assign(v, over); return v; }
+function magShieldRing(x, y, w, h) {
+    ctx.save();
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = '#3498db'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(x + w / 2, y + h / 2, w / 1.2, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+}
+
+class MagIllusionLayer {
+    constructor(owner) { this.owner = owner; this.active = true; }
+    update() { if (!this.owner || this.owner.weapon !== 'magician') this.active = false; }
+    draw() {
+        const p = this.owner;
+        if (!p || p.weapon !== 'magician' || p.hp <= 0) return;
+        const online = magOnline();
+        const mineOnline = online && magViewerOwns(p);
+        const owns = magViewerOwns(p);
+        // Khiên giả trên thân bản thể (địch thấy vòng khiên dù không có khiên)
+        if (magFakeOn(p) && !owns && !(p.shield > 0) && !(p.invisTimer > 0) && magShownShield(p) > 0) magShieldRing(p.x, p.y, p.w, p.h);
+        if (!p.illusions) return;
+        for (const ill of p.illusions) {
+            const hidden = ill.invisTimer > 0;
+            if (hidden && online && !mineOnline) continue; // giống bản thể tàng hình: ẩn hẳn với đối thủ online
+            ctx.save();
+            ctx.globalAlpha = hidden ? 0.28 : 1;
+            if (!(typeof coreSmallArtAt === 'function' && coreSmallArtAt(p, ill.x, ill.y, ctx.globalAlpha))) {
+                ctx.fillStyle = p.color;
+                ctx.fillRect(ill.x, ill.y, ill.w, ill.h);
+            }
+            const sh = magShownShield(p);
+            if (sh > 0) magShieldRing(ill.x, ill.y, ill.w, ill.h);
+            ctx.restore();
+            if (hidden) continue;
+            // HUD giống hệt bản thể
+            if (typeof drawTankHUD === 'function') {
+                const hp = ill.perfect ? Math.max(0, ill.hp) / Math.max(0.01, ill.maxHp) * p.maxHp : p.hp;
+                const v = magHudView(p, {
+                    x: ill.x, y: ill.y, hp, shield: sh,
+                    ammo: Math.max(0, Math.min(p.maxAmmo, ill.ammo)), lastShot: ill.lastShot || p.lastShot,
+                    ghostHp: ill.ghostHp === undefined ? hp : ill.ghostHp, __magView: true
+                });
+                try { drawTankHUD(v); magDrawEscapeHats(v); } catch (e) { }
+                ill.ghostHp = v.ghostHp;
+            }
+        }
+    }
+}
+
+// HUD bản thể: địch thấy khiên giả & số đạn giả khi có >= 2 phân ảnh
+function magWrapHUD() {
+    if (typeof drawTankHUD !== 'function' || drawTankHUD.__mag) return;
+    const orig = drawTankHUD;
+    const wrapped = function (p) {
+        if (p && !p.__magView && magFakeOn(p) && !magViewerOwns(p)) {
+            const v = magHudView(p, { __magView: true, ghostHp: p.ghostHp });
+            if (p.magFakeShield >= 0) v.shield = p.magFakeShield;
+            if (p.magFakeAmmo >= 0) v.ammo = Math.min(p.maxAmmo, p.magFakeAmmo);
+            const r = orig(v);
+            p.ghostHp = v.ghostHp;
+            return r;
+        }
+        return orig(p);
+    };
+    wrapped.__mag = true;
+    drawTankHUD = wrapped;
+}
+if (typeof window !== 'undefined') window.addEventListener('load', magWrapHUD);
+
 Object.assign(Player.prototype, {
-    // [draw] magician
+    // [draw] magician — phân ảnh do MagIllusionLayer vẽ; ở đây chỉ còn đạn ảo
     drawMagician() {
         if (this.weapon === 'magician') {
             // Bản thể thật tàng hình
             if (this.invisTimer > 0) ctx.globalAlpha = 0.2;
 
-            // Vẽ các phân ảnh
-            for (let ill of this.illusions) {
-                ctx.save();
-                // Nếu bản thể thật đang tàng hình, bóng cũng tàng hình theo. Nếu không, đậm 100%
-                // (Phân ảnh mồi của Thoát Chết luôn rõ nét để đánh lừa địch)
-                if (ill.invisTimer > 0 || (this.invisTimer > 0 && !ill.decoy)) {
-                    ctx.globalAlpha = 0.2;
-                } else {
-                    ctx.globalAlpha = 1.0; // KHÔNG BAO GIỜ BỊ MỜ SAU 5 GIÂY, LUÔN ĐẬM 100%
-                }
-
-                // Phân ảnh: giống hệt xe thật (art mới), fallback khối cũ
-                if (!((typeof coreSmallArtAt === 'function') && coreSmallArtAt(this, ill.x, ill.y, 1))) {
-                    ctx.fillStyle = this.color;
-                    ctx.fillRect(ill.x, ill.y, ill.w, ill.h);
-                    ctx.fillStyle = "#fff";
-                    let cbx = ill.x + ill.w / 2 - 4;
-                    let cby = (this.id === 1) ? ill.y - 20 : ill.y + ill.h;
-                    ctx.fillRect(cbx, cby, 8, 20);
-                }
-
-                // ==========================================
-                // --- VẼ THANH MÁU & ĐẠN CHO PHÂN ẢNH ---
-                // ==========================================
-                let isP1 = (this.id === 1);
-                let hpY, ammoY;
-
-                // 1. CĂN CHỈNH CHIỀU DỌC (TỌA ĐỘ Y)
-                if (isP1) {
-                    // PLAYER 1 (Bên Xanh - Nằm dưới màn hình)
-                    // -> Thanh chỉ số nằm DƯỚI chân xe tăng
-                    hpY = ill.y + ill.h + 6;
-                    ammoY = ill.y + ill.h + 12;
-                } else {
-                    // PLAYER 2 (Bên Đỏ - Nằm trên màn hình)
-                    // -> Thanh chỉ số nằm TRÊN đầu xe tăng (Ngược lại)
-                    hpY = ill.y - 13;
-                    ammoY = ill.y - 6;
-                }
-
-                let hpRatio = Math.max(0, ill.hp / ill.maxHp);
-                let hpWidth = ill.w * hpRatio;
-
-                // 2. VẼ THANH MÁU
-                ctx.fillStyle = "red"; // Nền đỏ (Máu đã mất)
-                ctx.fillRect(ill.x, hpY, ill.w, 4);
-
-                ctx.fillStyle = "#0f0"; // Máu xanh
-                if (isP1) {
-                    // P1: Máu tụt từ phải qua trái (Căn lề trái)
-                    ctx.fillRect(ill.x, hpY, hpWidth, 4);
-                } else {
-                    // P2: Máu tụt từ trái qua phải (Căn lề phải, đối xứng với P1)
-                    ctx.fillRect(ill.x + ill.w - hpWidth, hpY, hpWidth, 4);
-                }
-
-                // 3. VẼ THANH ĐẠN
-                let ammoW = ill.w / ill.maxAmmo;
-                ctx.fillStyle = "yellow";
-                for (let j = 0; j < ill.ammo; j++) {
-                    let ammoX;
-                    if (isP1) {
-                        // P1: Đạn xếp từ trái sang phải
-                        ammoX = ill.x + j * ammoW + 1;
-                    } else {
-                        // P2: Đạn xếp từ phải sang trái (Ngược lại)
-                        ammoX = ill.x + ill.w - (j + 1) * ammoW + 1;
-                    }
-                    ctx.fillRect(ammoX, ammoY, ammoW - 1, 3);
-                }
-                ctx.restore(); // [FIX] thiếu restore -> độ mờ 0.2 lan ra toàn bản đồ & rò save() mỗi khung hình
-            }
-
-            // Vẽ Đạn Giả & Đạn Hù Dọa
+            // Vẽ Đạn Giả & Đạn Hù Dọa (lá bài ảo, mờ hơn)
             if (this.fakeBullets && this.fakeBullets.length > 0) {
-                // Đạn ảo: cùng hình sao chổi tím như đạn thật nhưng mờ hơn
                 for (let fb of this.fakeBullets) {
                     if (typeof drawBulletArt === 'function') {
                         ctx.save(); ctx.globalAlpha *= 0.7;

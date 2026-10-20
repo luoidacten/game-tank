@@ -455,6 +455,12 @@ function checkHits(attacker, victim) {
                 // Phân ảnh đang không tàng hình mới ăn đạn
                 if (ill.invisTimer <= 0 && rectIntersect(b.x, b.y, b.w, b.h, ill.x, ill.y, ill.w, ill.h)) {
                     hitIllusion = true;
+                    // Ảo Ảnh Hoàn Hảo (Evo 2) có máu riêng: chưa hết máu thì chỉ ăn đạn
+                    if (ill.perfect && (ill.hp -= (b.dmg || 1)) > 0) {
+                        if (typeof spawnSparkParticles === 'function') spawnSparkParticles(b.x, b.y, '#e056fd', 6);
+                        if (!b.isPiercing) { attacker.bullets.splice(i, 1); i--; }
+                        break;
+                    }
                     victim.illusions.splice(j, 1); // Xóa bóng
 
                     // NỘI TẠI 1: BẪY NỔ (Choáng + Phản dame + Khói Làm Chậm 2s)
@@ -570,7 +576,7 @@ function checkHits(attacker, victim) {
             if (b.createAcidZone) iceZones.push(new AcidZone(b.x, b.y, attacker));
 
             // Magician Stacks
-            if (attacker.weapon === 'magician' && attacker.hasUpgrade('evo_mag_2')) {
+            if (attacker.weapon === 'magician' && attacker.hasUpgrade('evo_mag_2') && !b.magNoStack) {
                 victim.vulnerableStacks += 1;
                 victim.confusionStacks += 1;
                 if (victim.vulnerableStacks >= 3) {
@@ -581,7 +587,7 @@ function checkHits(attacker, victim) {
             // Damage synthesis
             let finalDmg = currentFinalDmg;
 
-            if (attacker.weapon === 'magician' && attacker.hasUpgrade('evo_mag_2')) {
+            if (attacker.weapon === 'magician' && attacker.hasUpgrade('evo_mag_2') && !b.magNoStack) {
                 finalDmg += (victim.vulnerableStacks * 0.1);
             }
 
