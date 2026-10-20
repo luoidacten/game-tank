@@ -61,7 +61,20 @@ Vật triệu hồi: Búp Bê L & R (mặt 5), Phân Ảnh Vũ Khí (Full Evo).
 | Evo | Giá | Hiệu ứng |
 |---|---|---|
 | Reroll — Đổi Vận (`evo_coc_1`) | $50 | Giữ bắn 0.6s để chủ động ReRoll vũ khí (CD 10s), không ra lại vũ khí đang cầm, làm mới đạn/hồi chiêu và bộ đếm 12s. |
-| 1 Và 6 — Đỉnh Cao Vận Mệnh (`evo_coc_2`) | $110 | 1) Cường hóa 6 vũ khí: Lục lướt xa hơn, phát thứ 3 mỗi chuỗi xuyên khiên; SMG chỉ cần trúng ≥ 35% (7 viên) là hồi đầy, phạt nạp hỏng 2.5s; Pháo để lại vùng lửa 2s, băng 3 viên; Dao lao xa hơn, Chí Mạng x3 lên 50% & hồi 0.25 HP khi chí mạng; Búp Bê L CD 3.5s (tia to hơn), R bắn 4 viên làm chậm nhẹ; Súng Vàng xuyên mọi vật cản, nạp 1.8s, trúng địch +$10. 2) Xúc Xắc Nội Tại mới: mỗi lần roll vũ khí lắc thêm 1 xúc xắc phụ cấp 1 trong 6 nội tại trong 12s: *(1: Nhận 1 Khiên | … — PHẦN CÒN LẠI BỊ CẮT, chờ người dùng gửi bổ sung)* |
-| FULL EVO | — | *(chưa có — chờ người dùng gửi; có nhắc "Phân Ảnh Vũ Khí")* |
+| 1 Và 6 — Đỉnh Cao Vận Mệnh (`evo_coc_2`) | $110 | 1) Cường hóa 6 vũ khí: Lục lướt xa hơn, phát thứ 3 mỗi chuỗi xuyên khiên; SMG chỉ cần trúng ≥ 35% (7 viên) là hồi đầy, phạt nạp hỏng 2.5s; Pháo để lại vùng lửa 2s, băng 3 viên; Dao lao xa hơn, Chí Mạng x3 lên 50% & hồi 0.25 HP khi chí mạng; Búp Bê L CD 3.5s (tia to hơn), R bắn 4 viên làm chậm nhẹ; Súng Vàng xuyên mọi vật cản, nạp 1.8s, trúng địch +$10. 2) Xúc Xắc Nội Tại (xem mục bên dưới). |
+| FULL EVO (Bậc Thầy Định Mệnh) | — | Xem mục bên dưới. |
 
 - Kết liễu: **ĐỊNH MỆNH AN BÀI** (xúc xắc khổng lồ rơi từ trời đè bẹp mục tiêu và nổ tung số 6).
+
+### Xúc Xắc Nội Tại (Evo 2 — `evo_coc_2`)
+Mỗi lần roll vũ khí (đầu hiệp, mỗi 12s, hoặc ReRoll Evo 1), 1 Xúc Xắc Phụ màu Tím/Vàng lăn kèm, trao 1 trong 6 nội tại trong suốt 12s cầm vũ khí đó (không ra trùng nội tại lượt trước):
+- ⚀ **Khiên Phản Chấn:** nhận ngay 1 Khiên (tối đa cộng dồn 2 nếu ra lại). Trong 12s: khiên này vỡ bởi đòn địch → sóng xung kích xóa đạn thường địch trong 120px, +30% tốc chạy 2s, bắn trả 1 tia năng lượng tự ngắm 1.0 dame.
+- ⚁ **Huyết Mạch Tái Sinh:** hồi ngay +0.5 HP (đầy máu → +0.75 Giáp Trắng). Trong 12s: 25% Hút Máu trên mọi sát thương của vũ khí đang cầm (kể cả Búp Bê L/R, Dao); mọi nguồn hồi máu +30%.
+- ⚂ **Hàn Băng Trói Buộc:** mọi đòn của vũ khí (và Búp Bê) làm chậm 35% 2s. Trúng địch đang bị chậm đủ 3 lần (1 lần nếu cầm Đại Pháo / Búp Bê L / Súng Vàng) → Đóng Băng 0.75s + 0.5 sát thương chuẩn (hồi đóng băng trên cùng mục tiêu 4s).
+- ⚃ **Hỏa Ngục Thiêu Đốt:** đòn trúng thiêu đốt 0.25 HP/s trong 3s (cộng dồn tối đa 2 tầng) + Xé Giáp (+15% sát thương nhận từ mọi nguồn). Vệt Lửa: khi di chuyển/lướt (nhất là Lục, Dao) để lại vệt lửa 2s, +15% tốc chạy cho bản thân và đốt vật triệu hồi địch đi qua.
+- ⚄ **Giáp Gai Phản Nghịch:** giảm 20% sát thương nhận & miễn Làm Chậm. Mỗi khi nhận sát thương (kể cả mất Khiên): phản 35% sát thương gốc vào xe địch bằng tia sét đỏ không thể né, đồng thời giảm 0.5s hồi chiêu ReRoll (Evo 1).
+- ⚅ **Thời Khắc Hoàng Kim (Độc Đắc):** +30% tốc bắn, +40% tốc nạp / hồi chiêu vũ khí (kể cả Búp Bê L&R, Dao), +25% tốc đạn. Trúng tướng địch: 35% rơi +$5 (Súng Vàng / Pháo: 100%), 20% không tốn đạn phát đó.
+
+### FULL EVO — Bậc Thầy Định Mệnh
+- **Song Xúc Xắc Nội Tại:** mỗi lần roll vũ khí tung 2 Xúc Xắc Phụ cùng lúc → 2 nội tại khác nhau song song trong 12s; mọi thông số 6 nội tại mạnh hơn +25%.
+- **Phân Ảnh Vũ Khí:** một Phân Ảnh cầm 1 vũ khí khác với vũ khí bạn đang cầm và chiến đấu bên cạnh; Phân Ảnh thừa hưởng 100% các nội tại Xúc Xắc Phụ bạn đang có (vd: Hàn Băng + Hoàng Kim → Phân Ảnh cầm SMG cũng bắn siêu nhanh và làm đóng băng).
