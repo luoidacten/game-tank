@@ -62,7 +62,7 @@ registerTankArt('boomerang', (p, k) => {
     // 2 giá gắn: trái = Thẳng, phải = Vòng Cung
     const mounts = [
         { x: -7, st: p.bmSSt, cd: p.bmSCd, max: (p.bmSCd || 0) > 60 ? (k.evo1 ? 270 : 480) : 30, col: BM_GREEN, sh: bmShapeV },
-        { x: 7, st: p.bmCSt, cd: 0, max: 1, col: BM_CYAN, sh: bmShapeC },
+        { x: 7, st: p.bmCSt, cd: p.bmCCd, max: (p.bmCCd || 0) > 6 ? BM_CURVE_MISS_CD : 6, col: BM_CYAN, sh: bmShapeC },
     ];
     mounts.forEach((m, i) => {
         const sel = (p.bmSel || 0) === i;
@@ -141,14 +141,37 @@ function bmDrawStraight(b) {
     ctx.restore();
 }
 
-// ---------- Chiếc Vòng Cung ----------
+// ---------- Chiếc Vòng Cung (quỹ đạo elip báo trước) ----------
 function bmDrawCurve(b) {
+    const t = bmNow(), TAU = Math.PI * 2;
     ctx.save();
+    // cả elip: nét đứt mờ cho địch đọc đường né
+    ctx.strokeStyle = 'rgba(103, 232, 249, 0.16)'; ctx.lineWidth = 1.5; ctx.setLineDash([5, 7]);
+    ctx.beginPath(); ctx.ellipse(b.x0, b.cy, Math.max(1, b.b), Math.abs(b.ay), 0, 0, TAU); ctx.stroke();
+    // phần còn lại phía trước: sáng hơn, nét đứt chạy theo hướng bay
+    const th0 = b.th || 0, n = 40;
+    ctx.strokeStyle = th0 < Math.PI ? 'rgba(103, 232, 249, 0.5)' : 'rgba(103, 232, 249, 0.38)';
+    ctx.lineWidth = 2; ctx.lineDashOffset = -t * 40; ctx.shadowBlur = 6; ctx.shadowColor = BM_CYAN;
+    ctx.beginPath();
+    for (let i = 0; i <= n; i++) {
+        const th = th0 + (TAU - th0) * i / n, p = b.pos(th);
+        const x = p.x + (i === 0 ? (b.bend || 0) : 0);
+        if (i === 0) ctx.moveTo(b.x, b.y); else ctx.lineTo(x, p.y);
+    }
+    ctx.stroke(); ctx.setLineDash([]); ctx.shadowBlur = 0;
+    // đỉnh ném (điểm đón): vòng đánh dấu
+    const o = bmTeam(b.team);
+    const cr = o ? bmCurveCatchR(o) * 0.6 + 8 : 16, ret = th0 > Math.PI;
+    ctx.strokeStyle = `rgba(165, 243, 252, ${ret ? 0.55 + 0.25 * Math.sin(t * 10) : 0.3})`; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.ellipse(b.x0 + (b.bend || 0), b.y0, cr, cr * 0.38, 0, 0, TAU); ctx.stroke();
+    // vệt mờ phía sau
     ctx.globalAlpha = 0.22;
-    ctx.fillStyle = BM_CYAN;
-    if (b.st === 'sweep') { ctx.fillRect(Math.min(b.x, b.ax), b.y - 2, Math.abs(b.x - b.ax), 4); }
+    for (let i = 1; i <= 3; i++) {
+        const p = b.pos(Math.max(0, th0 - i * 0.07));
+        ctx.save(); ctx.translate(p.x + (b.bend || 0), p.y); ctx.rotate(b.ang - i * 0.4 * b.side); bmShapeC(9, BM_CYAN, 0); ctx.restore();
+    }
     ctx.globalAlpha = 1;
-    ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(b.ang); bmShapeC(b.st === 'sweep' ? 11 : 9, BM_CYAN, 12); ctx.restore();
+    ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(b.ang); bmShapeC(10, BM_CYAN, 12); ctx.restore();
     ctx.restore();
 }
 
@@ -279,6 +302,7 @@ function bmRegisterHUD() {
             return { pct: k, ready: false, color: i ? BM_GREEN : BM_CYAN, label: 'ĐỔI...', btnIcon: '🔄', segments: 2, lit };
         }
         if (st === 'hand') return { pct: 1, ready: true, color: col, label: name, btnIcon: icon, segments: 2, lit };
+        if (st === 'cd' && i && p.bmCCd > 6) return { pct: 1 - p.bmCCd / BM_CURVE_MISS_CD, ready: false, color: '#f87171', label: 'TRƯỢT ' + Math.ceil(p.bmCCd / 60) + 's', btnIcon: icon, dim: true, segments: 2, lit };
         if (st === 'cd' && !i && p.bmSCd > 30) { const M = bmE1(p) ? 270 : 480; return { pct: 1 - p.bmSCd / M, ready: false, color: '#f87171', label: 'NHẶT ' + Math.ceil(p.bmSCd / 60) + 's', btnIcon: icon, dim: true, segments: 2, lit }; }
         return { pct: 0.5, ready: false, color: col, label: name + ' ĐANG BAY', btnIcon: icon, dim: true, segments: 2, lit };
     });

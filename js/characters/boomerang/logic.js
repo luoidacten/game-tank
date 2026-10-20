@@ -6,8 +6,9 @@
 //  • Chiếc 1 — THẲNG (BmStraight): bay dọc theo x cố định (1.0x mọi thứ xuyên qua) -> tới làn địch/biên dừng lại,
 //    phóng to r=55 xoay 2.0s (0.25x / 0.2s, chậm nhẹ) -> bay ngược về cùng trục x (1.0x, vạch chỉ đường xanh lá).
 //    BẮT (chạm xe) -> hồi 0.5s + HỨNG KHỞI 3s (+25% tốc & dame cả 2 chiếc). LỌT (qua lưng chạm biên sau) -> hồi 8s.
-//  • Chiếc 2 — VÒNG CUNG (BmCurve): Bezier lượn ra cánh (ưu tiên phía địch / hướng đang chạy) tới mép làn địch,
-//    quét ngang làn từ bên hông (1.2x), rồi tự bay về tay trong 1–2s (0.8x nếu quệt trúng).
+//  • Chiếc 2 — VÒNG CUNG (BmCurve): bay theo quỹ đạo ELIP cố định (đỉnh = điểm ném & mép xa làn địch), phình ra cánh
+//    (ưu tiên phía địch / hướng đang chạy); nửa đi 1.2x, nửa về 0.8x, có vạch nét đứt báo trước để địch né.
+//    Về đỉnh ném: xe chạm -> bắt (về tay ngay); không chạm -> TRƯỢT, hồi 2s. Full Evo: đoạn cuối bẻ lái về phía xe.
 //  • Evo 2: chiếc Thẳng đang xoay hút nhẹ + xé giáp (+15% st nhận); 2 chiếc vòng cung đối xứng; ĐIỂM GIAO CẮT.
 //  • Full Evo: chiếc Thẳng về bẻ lái về phía xe, xoay 2.5s, phá đạn nhỏ; buff cộng 2 tầng (+60%), Khiên Gió; giao cắt
 //    bắn 6 lưỡi gió 360°.
@@ -170,70 +171,75 @@ function bmOnCatch(o) {
     bmSfx('playPowerup');
 }
 
-// ---------- Chiếc 2: Boomerang Vòng Cung ----------
+// ---------- Chiếc 2: Boomerang Vòng Cung (quỹ đạo ELIP) ----------
+// Elip có trục lớn dọc: đỉnh A = vị trí ném (tâm xe lúc ném), đỉnh B = mép xa của làn địch; phình sang 1 bên
+// (bán trục nhỏ ~85px, kẹp trong màn hình). Bay ĐI theo nửa elip phía side (1.2x), VỀ theo nửa còn lại (0.8x),
+// tốc độ đều trên quỹ đạo. Về tới đỉnh A: xe chạm -> BẮT (về tay ngay); không chạm -> TRƯỢT, hồi thêm 2s.
+// Tham số: th ∈ [0, 2π]; x = x0 + side·b·sin(th) (+ bẻ lái Full Evo), y = cy + (y0 - cy)·cos(th).
+const BM_CURVE_MISS_CD = 120;
+function bmCurveCatchR(o) { return 16 + (bmE1(o) ? 25 : 0); }
 class BmCurve {
-    constructor(owner, side) {
-        const e = bmEnemyOf(owner.id), W = canvas.width, fast = bmE1(owner);
-        this.team = owner.id; this.side = side;
-        this.x = owner.x + owner.w / 2; this.y = owner.y + owner.h / 2;
-        this.x0 = this.x; this.y0 = this.y;
-        const ey = e && e.hp > 0 ? e.y + e.h / 2 : (owner.id === 1 ? 40 : canvas.height - 40);
-        const ex = e && e.hp > 0 ? e.x + e.w / 2 : W / 2;
-        this.ey = ey;
-        this.cx = side > 0 ? W + 10 : -10; this.cy = (this.y0 + ey) / 2;          // điểm neo Bezier ngoài biên
-        this.ax = side > 0 ? W - 12 : 12;                                           // điểm vào làn từ mạn sườn
-        this.bx = Math.max(12, Math.min(W - 12, ex - side * 90));                  // cuối lượt quét ngang
-        this.outN = fast ? 20 : 27; this.sweepV = fast ? 14 : 10.5;
-        this.st = 'out'; this.t = 0; this.retN = 0; this.retLeft = 0;
+    constructor(owner, side, twin) {
+        const e = bmEnemyOf(owner.id), W = canvas.width, H = canvas.height, fast = bmE1(owner);
+        this.team = owner.id;
+        this.x0 = owner.x + owner.w / 2; this.y0 = owner.y + owner.h / 2;
+        // đỉnh xa B = mép xa của làn địch
+        const yB = owner.id === 1 ? (e ? e.y - 4 : 22) : (e ? e.y + e.h + 4 : H - 22);
+        this.yB = owner.id === 1 ? Math.max(14, yB) : Math.min(H - 14, yB);
+        this.cy = (this.y0 + this.yB) / 2; this.ay = this.y0 - this.cy;          // bán trục lớn (có dấu)
+        const room = s => s > 0 ? W - 6 - this.x0 : this.x0 - 6;
+        if (!twin && room(side) < 55 && room(-side) > room(side)) side = -side;   // sát tường -> phình sang phía rộng
+        this.side = side;
+        this.b = Math.max(12, Math.min(85, room(side)));                            // bán trục nhỏ
+        const A = Math.abs(this.ay), B = this.b;
+        const per = Math.PI * (3 * (A + B) - Math.sqrt((3 * A + B) * (A + 3 * B)));  // chu vi (Ramanujan)
+        this.v = per / (fast ? 68 : 92);                                           // ~1.53s / Evo 1 ~1.13s
+        this.th = 0; this.bend = 0; this.t = 0;
+        this.x = this.x0; this.y = this.y0;
         this.hitOut = false; this.hitRet = false; this.combo = false;
         this.r = 11; this.ang = 0; this.active = true;
     }
+    pos(th) { return { x: this.x0 + this.side * this.b * Math.sin(th), y: this.cy + this.ay * Math.cos(th) }; }
     update() {
         const o = bmTeam(this.team), e = bmEnemyOf(this.team);
-        if (!o || !bmIs(o) || gameState.phase !== 'playing') { this.finish(o); return; }
+        if (!o || !bmIs(o) || gameState.phase !== 'playing') { this.finish(o, 'drop'); return; }
         this.t++; this.ang += 0.4 * this.side;
-        if (this.st === 'out') {
-            const k = Math.min(1, this.t / this.outN), a = 1 - k;
-            this.x = a * a * this.x0 + 2 * a * k * this.cx + k * k * this.ax;
-            this.y = a * a * this.y0 + 2 * a * k * this.cy + k * k * this.ey;
-            this.x = Math.max(-20, Math.min(canvas.width + 20, this.x));
-            if (k >= 1) { this.st = 'sweep'; this.t = 0; }
-        } else if (this.st === 'sweep') {
-            const dx = this.bx - this.x;
-            this.x += Math.sign(dx) * Math.min(Math.abs(dx), this.sweepV);
-            this.y = this.ey + Math.sin(Math.min(1, Math.abs(this.x - this.ax) / Math.max(1, Math.abs(this.bx - this.ax))) * Math.PI) * (this.team === 1 ? 6 : -6);
-            if (!this.hitOut && e && e.hp > 0 && bmHitR(this.x, this.y, this.r + 3, e)) {
-                this.hitOut = true; bmHitEnemy(o, e, bmDmg(o, 1.2), BM_CYAN);
-                if (bmE1(o)) { e.bmSlowT = 90; addFloatingText(e.x + e.w / 2, e.y + (e.id === 1 ? -14 : e.h + 18), 'CHẬM 35%', BM_CYAN, 10); }
-            }
-            bmHitWorld(o, this.x, this.y, this.r + 3, bmDmg(o, 1.2));
-            if (Math.abs(this.bx - this.x) < 0.5 || this.t > 90) this.startRet(o);
-        } else {
-            const tx = o.x + o.w / 2, ty = o.y + o.h / 2;
-            const d = Math.hypot(tx - this.x, ty - this.y);
-            this.retLeft = Math.max(1, this.retLeft - 1);
-            const v = Math.max(3, d / this.retLeft);
-            if (d <= v + o.w / 2 * 0.6 || this.t > 200) { this.finish(o, true); return; }
-            this.x += (tx - this.x) / d * v; this.y += (ty - this.y) / d * v;
-            if (!this.hitRet && e && e.hp > 0 && bmHitR(this.x, this.y, this.r + 2, e)) { this.hitRet = true; bmHitEnemy(o, e, bmDmg(o, 0.8), BM_CYAN); }
-            bmHitWorld(o, this.x, this.y, this.r + 2, bmDmg(o, 0.8));
+        const sp = Math.hypot(this.b * Math.cos(this.th), this.ay * Math.sin(this.th));
+        this.th = Math.min(Math.PI * 2, this.th + this.v / Math.max(4, sp));
+        const p = this.pos(this.th);
+        // Full Evo: đoạn cuối bẻ lái nhẹ về phía xe cho dễ bắt
+        if (bmFull(o) && o.hp > 0 && this.th > Math.PI * 1.6) {
+            const w = Math.min(1, (this.th - Math.PI * 1.6) / (Math.PI * 0.4));
+            const want = Math.max(-110, Math.min(110, o.x + o.w / 2 - this.x0)) * w;
+            this.bend += Math.sign(want - this.bend) * Math.min(Math.abs(want - this.bend), 5);
         }
+        this.x = Math.max(4, Math.min(canvas.width - 4, p.x + this.bend)); this.y = p.y;
+        const out = this.th < Math.PI, m = out ? 1.2 : 0.8;
+        if (e && e.hp > 0 && !(out ? this.hitOut : this.hitRet) && bmHitR(this.x, this.y, this.r + 2, e)) {
+            if (out) this.hitOut = true; else this.hitRet = true;
+            bmHitEnemy(o, e, bmDmg(o, m), BM_CYAN);
+            if (out && bmE1(o)) { e.bmSlowT = 90; addFloatingText(e.x + e.w / 2, e.y + (e.id === 1 ? -14 : e.h + 18), 'CHẬM 35%', BM_CYAN, 10); }
+        }
+        bmHitWorld(o, this.x, this.y, this.r + 2, bmDmg(o, m));
         if (bmE2(o) && !this.combo) bmTryCross(o, this);
+        if (!this.active) return;
+        // đón: đoạn về gần đỉnh A
+        if (this.th > Math.PI * 1.5 && o.hp > 0 && bmHitR(this.x, this.y, this.r + bmCurveCatchR(o), o)) { this.finish(o, 'catch'); return; }
+        if (this.th >= Math.PI * 2) this.finish(o, 'miss');
     }
-    startRet(o) {
-        this.st = 'ret'; this.t = 0;
-        const d = Math.hypot(o.x + o.w / 2 - this.x, o.y + o.h / 2 - this.y);
-        const k = Math.min(1, d / 520);
-        this.retLeft = Math.round((bmE1(o) ? 36 + 36 * k : 60 + 60 * k));
-    }
-    finish(o, caught) {
+    finish(o, how) {
         if (!this.active) return;
         this.active = false;
         if (!o || !bmIs(o)) return;
+        if (how === 'catch') spawnSparkParticles(this.x, this.y, BM_CYAN, 6);
+        if (how === 'miss') { o.bmCMiss = true; spawnSparkParticles(this.x, this.y, '#94a3b8', 6); }
         // Evo 2: 2 chiếc đối xứng -> chỉ về tay khi cả 2 đã về
         if (bodyEffects.some(b => b !== this && b.active && b instanceof BmCurve && b.team === this.team)) return;
-        o.bmCSt = 'cd'; o.bmCCd = 6;
-        if (caught) spawnSparkParticles(o.x + o.w / 2, o.y + o.h / 2, BM_CYAN, 5);
+        if (o.bmCMiss && how !== 'drop') {
+            o.bmCSt = 'cd'; o.bmCCd = BM_CURVE_MISS_CD;
+            addFloatingText(this.x0, o.id === 1 ? o.y - 16 : o.y + o.h + 20, 'TRƯỢT +2s', '#f87171', 12);
+        } else { o.bmCSt = 'hand'; o.bmCCd = 0; }
+        o.bmCMiss = false;
     }
     draw() { if (typeof bmDrawCurve === 'function') bmDrawCurve(this); }
 }
@@ -308,8 +314,10 @@ function bmThrow(p, i) {
         if (e && e.hp > 0 && Math.abs(e.x + e.w / 2 - cx) > 24) side = Math.sign(e.x + e.w / 2 - cx);
         if (!side && Math.abs(p._vx || 0) > 0.3) side = Math.sign(p._vx);
         if (!side) side = cx < canvas.width / 2 ? 1 : -1;
-        bodyEffects.push(new BmCurve(p, side));
-        if (bmE2(p)) bodyEffects.push(new BmCurve(p, -side));
+        p.bmCMiss = false;
+        const c1 = new BmCurve(p, side, bmE2(p));
+        bodyEffects.push(c1);
+        if (bmE2(p)) bodyEffects.push(new BmCurve(p, -c1.side, true));
     }
     p.bmThrowFx = 10;
     bmSfx('playShoot');
@@ -319,7 +327,7 @@ function bmThrow(p, i) {
 CharHooks.register('boomerang', {
     setup() {
         this.maxAmmo = 0; this.ammo = 0;
-        this.bmSel = 0; this.bmSSt = 'hand'; this.bmCSt = 'hand'; this.bmSCd = 0; this.bmCCd = 0;
+        this.bmSel = 0; this.bmSSt = 'hand'; this.bmCSt = 'hand'; this.bmSCd = 0; this.bmCCd = 0; this.bmCMiss = false;
         this.bmHold = 0; this.bmPrevS = false; this.bmUsed = false;
         this.bmBuffT = 0; this.bmBuffN = 0; this.bmShieldCd = 0; this.bmCatchFx = 0; this.bmThrowFx = 0; this.bmSwFx = 0;
     },
@@ -354,7 +362,8 @@ CharHooks.register('boomerang', {
             if (!this.bmUsed) {
                 const i = this.bmSel || 0;
                 if (bmInHand(this, i)) bmThrow(this, i);
-                else bmTxt(this, i === 0 && this.bmSSt === 'cd' ? 'HỒI ' + Math.ceil(this.bmSCd / 60) + 's' : 'ĐANG BAY · GIỮ ĐỂ ĐỔI', '#94a3b8', 9);
+                else { const cd = i === 0 ? (this.bmSSt === 'cd' ? this.bmSCd : 0) : (this.bmCSt === 'cd' ? this.bmCCd : 0);
+                    bmTxt(this, cd > 0 ? 'HỒI ' + Math.ceil(cd / 60) + 's' : 'ĐANG BAY · GIỮ ĐỂ ĐỔI', '#94a3b8', 9); }
             }
             this.bmHold = 0;
         }
@@ -366,6 +375,7 @@ CharHooks.register('boomerang', {
 function boomBotCatchX(bot) {
     if (typeof bodyEffects === 'undefined') return null;
     for (const s of bodyEffects) if (s instanceof BmStraight && s.active && s.team === bot.id && (s.st === 'ret' || (s.st === 'spin' && s.spinT > s.spinMax - 50))) return s.x;
+    for (const c of bodyEffects) if (c instanceof BmCurve && c.active && c.team === bot.id && c.th > Math.PI * 1.1) return c.x0; // về đỉnh ném để bắt Nguyệt Luân
     return null;
 }
 // Bot: chiếc đang chọn không trên tay mà chiếc kia có -> giữ để đổi
