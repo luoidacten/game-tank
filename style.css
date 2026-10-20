@@ -765,7 +765,7 @@ canvas {
     color: #94a3b8;
     letter-spacing: 2.5px;
     text-transform: uppercase;
-    font-family: 'Rajdhani', sans-serif;
+    font-family: 'Be Vietnam Pro', 'Rajdhani', sans-serif; /* font có đủ dấu tiếng Việt */
     margin-top: -6px;
 }
 
