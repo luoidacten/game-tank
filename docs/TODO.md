@@ -8,7 +8,6 @@
 
 ## 1. Body mới ưu tiên (phần Đồ họa đã XONG → làm tiếp mục này)
 Đặc tả đầy đủ: **`docs/BODY_MOI_UU_TIEN.md`**. Làm lần lượt từng body (theo `tools/agents/common.md`), mỗi body xong thì gộp → smoke test → push:
-- Phi Công (`jet_pilot`) — tách Chân & Phi Ảnh, chuyển điều khiển, hợp nhất.
 
 
 ## 2. HUD còn sót
@@ -27,7 +26,8 @@
 - Bot Sấm Chớp chưa biết dùng Lôi Trảm;(đúng) bot DJ có thể mất đạn khi bấm hụt nốt.(không cần)
 - Gemini Full Evo từng thắng 95% trong mô phỏng → đã giảm (AI cấp 4, bùng nổ x1.3); cần chơi thử. Một số đòn đặc biệt (tia riêng của body, Gojo...) chưa trúng xe AI của Gemini.) (AI sẻ dần chậm lại khi né quá nhiều hoặc sẻ chặm đi khi né các đòn lazer (giống người chơi thôi)
 - Chữ nổi (floating text) bị lộn ngược ở phía P2 (vd "1.0 ỨT") — cần kiểm tra.
-- Hiệu ứng kết liễu (Hoa Ảnh, Tsukiyo, Joker, Juggernaut, Pháo Phân Mảnh, Nhân Bản) bị băng rôn thắng hiệp che phần giữa.
+- Hiệu ứng kết liễu (Hoa Ảnh, Tsukiyo, Joker, Juggernaut, Pháo Phân Mảnh, Nhân Bản, Phi Công) bị băng rôn thắng hiệp che phần giữa.
+- Phi Công thắng ~68-72% trong mô phỏng bot (hơi mạnh) — cần chơi thử, có thể giảm sát thương tự ngắm của Phi Ảnh / tần suất ném bom.
 - Chưa thử thật chế độ Online cho các thay đổi gần đây.(Có rất nhiều lỗi về HUB bay loạn xạ và sai độ họa)
 ## 4. Y Cầu Cân bằng/chỉnh sửa
 - Mốc Sát: khi nhấn giữ làm mốc bay nhanh hơn thì sẻ cần có Cảnh báo để có thể né và sẻ có 1 độ trể nhỏ
