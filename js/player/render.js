@@ -123,7 +123,9 @@ Object.assign(Player.prototype, {
         // Hiệu ứng Lưới Điện & Ép Xung của Nhà Phát Minh
         this.drawInventor3();
 
-        if (this.shield > 0) {
+        // Khiên: bong bóng năng lượng lục giác + hiệu ứng vỡ lớp (js/render/tank-hud.js)
+        if (typeof drawShieldBubble === 'function') drawShieldBubble(this);
+        else if (this.shield > 0) {
             ctx.strokeStyle = '#3498db'; ctx.lineWidth = 2;
             ctx.beginPath(); ctx.arc(this.x + this.w / 2, this.y + this.h / 2, this.w / 1.2, 0, Math.PI * 2); ctx.stroke();
         }

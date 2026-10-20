@@ -463,3 +463,118 @@ function hudExtraPips(p, i, n, lit, color, o) {
     }
     ctx.restore();
 }
+
+// ==========================================
+// KHIÊN — bong bóng năng lượng lục giác neon (chỉ vẽ, dùng chung mọi body)
+// • Lõi gradient mềm, viền sáng, nhịp thở nhẹ, vệt sáng quét qua, lưới tổ ong mờ.
+// • Số lớp = số viền lục giác xếp chồng (tối đa 4) + chấm sáng ở các đỉnh (tối đa 6; số chính xác ở HUD).
+// • Mất 1 lớp: chớp sáng + vết nứt + mảnh vỡ văng ra (~0.4s).
+// Cache hiệu ứng chỉ ở phía render (theo p.id), không thuộc state game -> host & guest như nhau.
+// ==========================================
+const SHIELD_FX = {};
+function shieldHexPath(cx, cy, r, rot) {
+    ctx.beginPath();
+    for (let i = 0; i < 6; i++) {
+        const a = rot + i * Math.PI / 3;
+        const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r;
+        if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y);
+    }
+    ctx.closePath();
+}
+function drawShieldBubble(p) {
+    if (!p) return;
+    const key = p.id || 0;
+    const fx = SHIELD_FX[key] || (SHIELD_FX[key] = { last: 0, brk: 0, seed: 0 });
+    const n = Math.max(0, Math.ceil(p.shield || 0));
+    const now = Date.now();
+    if (n < fx.last && p.hp > 0) { fx.brk = now; fx.seed = (fx.seed + 1.7) % 6.28; }
+    fx.last = n;
+    const brkAge = fx.brk ? (now - fx.brk) / 420 : 2; // 0..1 trong lúc vỡ
+    if (n <= 0 && !(brkAge >= 0 && brkAge < 1)) return;
+
+    const cx = p.x + p.w / 2, cy = p.y + p.h / 2;
+    const R0 = Math.max(p.w, p.h) * 0.62 + 7;
+    const t = now / 1000;
+    const R = R0 * (1 + Math.sin(t * 3.2 + key) * 0.035);
+    const rot = Math.PI / 6;
+    ctx.save();
+    ctx.globalAlpha = 1;
+    if (n > 0) {
+        // Lõi bong bóng: tâm trong suốt -> mép xanh neon
+        const g = ctx.createRadialGradient(cx, cy, R * 0.35, cx, cy, R);
+        g.addColorStop(0, 'rgba(56,189,248,0)');
+        g.addColorStop(0.75, 'rgba(56,189,248,0.10)');
+        g.addColorStop(1, 'rgba(103,232,249,0.32)');
+        ctx.fillStyle = g;
+        shieldHexPath(cx, cy, R, rot); ctx.fill();
+        // Vệt sáng quét chéo + lưới tổ ong (clip trong lục giác)
+        ctx.save();
+        shieldHexPath(cx, cy, R, rot); ctx.clip();
+        const sw = ((t * 0.55 + key * 0.3) % 1.6) - 0.3;
+        const sx = cx - R + sw * 2 * R;
+        const sg = ctx.createLinearGradient(sx - 12, cy, sx + 12, cy);
+        sg.addColorStop(0, 'rgba(255,255,255,0)'); sg.addColorStop(0.5, 'rgba(224,250,255,0.4)'); sg.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = sg;
+        ctx.beginPath(); ctx.moveTo(sx - 4, cy - R); ctx.lineTo(sx + 12, cy - R); ctx.lineTo(sx + 4, cy + R); ctx.lineTo(sx - 12, cy + R); ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = 'rgba(165,243,252,0.14)'; ctx.lineWidth = 0.8;
+        shieldHexPath(cx, cy, R * 0.55, rot); ctx.stroke();
+        ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+            const a = rot + i * Math.PI / 3;
+            ctx.moveTo(cx + Math.cos(a) * R * 0.55, cy + Math.sin(a) * R * 0.55); ctx.lineTo(cx + Math.cos(a) * R, cy + Math.sin(a) * R);
+        }
+        ctx.stroke();
+        ctx.restore();
+        // Viền chồng lớp: 1 viền / lớp (tối đa 4), viền trong sáng nhất
+        const rims = Math.min(4, n);
+        ctx.shadowColor = '#22d3ee';
+        for (let i = rims - 1; i >= 0; i--) {
+            ctx.shadowBlur = i === 0 ? 12 : 5;
+            ctx.strokeStyle = i === 0 ? 'rgba(165,243,252,0.95)' : `rgba(34,211,238,${0.7 - i * 0.13})`;
+            ctx.lineWidth = i === 0 ? 1.8 : 1.1;
+            shieldHexPath(cx, cy, R + i * 3.2, rot); ctx.stroke();
+        }
+        // Điểm sáng chạy quanh viền
+        ctx.shadowBlur = 8;
+        const ha = rot + ((t * 0.5) % 1) * Math.PI * 2;
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        ctx.beginPath(); ctx.arc(cx + Math.cos(ha) * R * 0.9, cy + Math.sin(ha) * R * 0.9, 1.6, 0, Math.PI * 2); ctx.fill();
+        // Chấm đếm lớp ở 6 đỉnh
+        ctx.shadowBlur = 4;
+        const pips = Math.min(6, n);
+        for (let i = 0; i < 6; i++) {
+            const a = rot + i * Math.PI / 3, on = i < pips;
+            ctx.fillStyle = on ? '#e0faff' : 'rgba(103,232,249,0.25)';
+            ctx.beginPath(); ctx.arc(cx + Math.cos(a) * R, cy + Math.sin(a) * R, on ? 1.8 : 1.1, 0, Math.PI * 2); ctx.fill();
+        }
+    }
+    // Vỡ lớp: chớp sáng + viền nở + vết nứt + mảnh vỡ
+    if (brkAge >= 0 && brkAge < 1) {
+        const a = 1 - brkAge;
+        ctx.shadowBlur = 0;
+        ctx.globalCompositeOperation = 'lighter';
+        const fg = ctx.createRadialGradient(cx, cy, 0, cx, cy, R0 * 1.3);
+        fg.addColorStop(0, `rgba(224,250,255,${0.45 * a * a})`); fg.addColorStop(1, 'rgba(34,211,238,0)');
+        ctx.fillStyle = fg;
+        ctx.beginPath(); ctx.arc(cx, cy, R0 * 1.3, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = `rgba(165,243,252,${a})`; ctx.lineWidth = 2 * a + 0.5;
+        shieldHexPath(cx, cy, R0 * (1 + brkAge * 0.45), rot); ctx.stroke();
+        ctx.strokeStyle = `rgba(255,255,255,${a})`; ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        for (let i = 0; i < 5; i++) {
+            const ang = fx.seed + i * 1.26;
+            ctx.moveTo(cx + Math.cos(ang) * R0 * 0.25, cy + Math.sin(ang) * R0 * 0.25);
+            for (let s = 1; s <= 3; s++) {
+                const rr = R0 * (0.25 + s * 0.26), j = (s % 2 ? 0.22 : -0.22);
+                ctx.lineTo(cx + Math.cos(ang + j) * rr, cy + Math.sin(ang + j) * rr);
+            }
+        }
+        ctx.stroke();
+        ctx.fillStyle = `rgba(103,232,249,${a})`;
+        for (let i = 0; i < 8; i++) {
+            const ang = fx.seed * 2 + i * Math.PI / 4, d = R0 * (0.9 + brkAge * 0.9);
+            shieldHexPath(cx + Math.cos(ang) * d, cy + Math.sin(ang) * d, 2.6 * a + 0.6, ang); ctx.fill();
+        }
+    }
+    ctx.restore();
+}
