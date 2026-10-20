@@ -30,6 +30,7 @@ const BOT_FIRE_STYLE = {
 };
 BOT_FIRE_STYLE.steel_hook = 'hold:30'; // Móc Thép: tụ 1 mốc rồi nhả; nhấp lại để kích hoạt giai đoạn 2
 BOT_FIRE_STYLE.lazer_beam = 'stream'; // Tia Lazer: giữ liên tục khi thẳng hàng
+BOT_FIRE_STYLE.tat_sat = 'hold:40'; // Tất Sát: tụ tới 1 trong 3 mốc (tatBotHoldN) rồi nhả
 
 const BOT_CRATE_VALUE = { coin: 0.7, hp: 0.6, ammo: 0.45, shield: 0.85, dmg: 0.75, gear: 0.5, boom: -2, bullets: -0.4 };
 
@@ -267,7 +268,9 @@ class SmartBot {
             return;
         }
         if (style.startsWith('hold:')) {
-            const n = (bot.weapon === 'storm' && typeof stBotHoldN === 'function') ? (this.stHoldN || (this.stHoldN = stBotHoldN(bot))) : +style.slice(5); // Cuồng Phong: lúc tụ 50% / 100%
+            const n = (bot.weapon === 'storm' && typeof stBotHoldN === 'function') ? (this.stHoldN || (this.stHoldN = stBotHoldN(bot)))
+                : (bot.weapon === 'tat_sat' && typeof tatBotHoldN === 'function') ? (this.stHoldN || (this.stHoldN = tatBotHoldN(bot))) // Tất Sát: 3 mốc
+                : +style.slice(5); // Cuồng Phong: lúc tụ 50% / 100%
             if (this.hold > 0) { // đang nạp: nhả khi đủ lực VÀ thẳng hàng
                 this.hold++;
                 if ((this.hold >= n && aligned) || this.hold > n + 120) { this.hold = 0; this.stHoldN = 0; inp.s = false; this.tapCool = 6; this.nextShot(enemy); return; }

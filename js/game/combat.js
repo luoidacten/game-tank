@@ -429,6 +429,7 @@ function checkHits(attacker, victim) {
         // --- 2. KIỂM TRA VA CHẠM VỚI PLAYER ---
         if (victim.weapon === 'ghost' && victim.isGhostActive) continue;
         if (victim.weapon === 'storm' && victim.stHidden) continue; // Cuồng Phong ẩn trong Gió Lốc / Lôi Bão: không thể bị nhắm
+        if (victim.weapon === 'tat_sat' && victim.tatHidden) continue; // Tất Sát ẩn thân (Liên Hoàn Trảm): không thể bị nhắm
 // cho mirror
         // ĐỊCH PHÁ ẢNH CHIẾU TAN VỠ (Shattered Clone) CỦA MIRROR
         if (victim.weapon === 'mirror' && victim.shatteredClone && victim.shatteredClone.active) {
