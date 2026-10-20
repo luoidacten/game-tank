@@ -287,6 +287,12 @@ class SmartBot {
             if (this.hold > 0) { this.hold++; inp.s = this.hold <= 64; if (this.hold > 68) { this.hold = 0; this.tapCool = 6; } return; }
             if (this.tapCool <= 0 && typeof clBotWantsClone === 'function' && clBotWantsClone(bot)) { this.hold = 1; inp.s = true; return; }
         }
+        // Phi Công: giữ 0.5s Cất Cánh / đổi điều khiển, giữ 1s Hợp Nhất khẩn cấp
+        if (bot.weapon === 'jet_pilot') {
+            if (this.hold > 0) { this.hold++; const n = this.jpHoldN || 34; inp.s = this.hold <= n; if (this.hold > n + 4) { this.hold = 0; this.tapCool = 6; } return; }
+            const n = this.tapCool <= 0 && typeof jpBotHold === 'function' ? jpBotHold(bot) : 0;
+            if (n) { this.jpHoldN = n; this.hold = 1; inp.s = true; return; }
+        }
         // tap
         if (bot.weapon === 'overload' && (bot.ovMain || 0) < 1 && (bot.ammo || 0) > 0) { inp.s = false; return; } // Quá Tải: chờ thanh chính đầy
         if (this.tapCool > 0) { this.tapCool--; inp.s = this.tapCool > 6; return; }

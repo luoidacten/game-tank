@@ -220,6 +220,8 @@ function renderFrame() {
     if (typeof cgFxOver === 'function') cgFxOver();
     // Lớp phủ kết liễu Nhân Bản (VÔ HẠN) - js/characters/clone/render.js
     if (typeof clFxOver === 'function') clFxOver();
+    // Lớp phủ kết liễu Phi Công (BÁ CHỦ BẦU TRỜI) - js/characters/jet_pilot/render.js
+    if (typeof jpFxOver === 'function') jpFxOver();
 
     // Particles & Floating Numbers
     updateAndDrawParticles();

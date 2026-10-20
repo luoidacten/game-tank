@@ -33,6 +33,7 @@ const NET_CLASSES = {
     JgSlug, JgWave, JgImpact, JgFinisher,
     CgFinisher,
     ClClone, ClFinisher,
+    JpBomb, JpFlyby, JpFinisher,
 };
 
 // Biến toàn cục cần đồng bộ: [tên, getter, setter]

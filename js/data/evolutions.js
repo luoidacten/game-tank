@@ -264,4 +264,8 @@ const EVOLUTIONS = {
         { id: 'evo_clone_1', name: 'Nhân Bản Song Song', desc: 'CLONE HOÀN HẢO: đầu mỗi hiệp tự tạo 1 Clone Hoàn Hảo cùng kích thước & 100% chỉ số của bạn (HP 6 | Dame 1 | Đạn 4), tự di chuyển & bắn. Khi bạn nhận đòn chí mạng -> HỒI SINH vào vị trí Clone Hoàn Hảo (máu = máu còn lại của clone), clone đó biến mất. Còn Clone Hoàn Hảo -> nó gánh thay phản phệ Gánh Chịu của clone thường.', cost: 90, type: 'evo' },
         { id: 'evo_clone_2', name: 'Khuếch Đại Bản Sao', desc: 'Clone Thường hưởng 50% chỉ số của bạn (bắn đau & trâu gấp đôi). Miễn trừ phản phệ: 2 lần đầu có Clone bị tiêu diệt mỗi hiệp không gây sát thương Gánh Chịu. FULL EVO (Quân Đoàn Bất Tử): miễn 4 lần Gánh Chịu mỗi hiệp; 2 Clone Hoàn Hảo cùng lúc (hồi sinh tới 2 lần), mỗi con 200% Max HP; Clone Thường hưởng 80% chỉ số.', cost: 110, type: 'evo' },
     ],
+    jet_pilot: [
+        { id: 'evo_pilot_1', name: 'Phi Đội Ánh Sao', desc: 'CƯỜNG HÓA TOÀN DIỆN: mọi hỏa lực của Hợp Nhất, Chân & Phi Ảnh +15% sát thương, AI bắn/pháo cối dày hơn, sóng Cất Cánh rộng hơn. VỆT LỬA THIÊU ĐỐT: bom của Phi Ảnh (oanh tạc định kỳ lẫn khi Hợp Nhất) để lại Vệt Lửa đốt máu theo thời gian.', cost: 90, type: 'evo' },
+        { id: 'evo_pilot_2', name: 'AI Tự Hành', desc: 'HỎA LỰC TOÀN PHẦN: AI của cả Chân lẫn Phi Ảnh LUÔN bật kể cả khi bạn đang lái (pháo cối + tự nhắm + oanh tạc), Chân nạp đạn nhanh hơn. AI CHIẾN THUẬT: lái Phi Ảnh -> Chân tự lách né đạn; lái Chân -> Phi Ảnh tự bay ép góc sát sườn địch. FULL EVO (Bá Chủ Bầu Trời): +2 Max HP (10 HP), +25% sát thương, hồi Cất Cánh 15s / Hợp Nhất 30s, oanh tạc 3.5–5.5s/lần với bom dày hơn, thảm bom Hợp Nhất 7 quả.', cost: 120, type: 'evo' },
+    ],
 };
