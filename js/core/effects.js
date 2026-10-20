@@ -149,6 +149,8 @@ function addFloatingText(x, y, text, color = '#fff', size = 14) {
         baseX: x,
         x: x + (Math.random() - 0.5) * 12,
         y: y + Math.min(stackOffset, 48),
+        y0: y + Math.min(stackOffset, 48),
+        side: (typeof canvas !== 'undefined' && y < canvas.height / 2) ? 2 : 1, // nửa sân P2 (trên) hay P1 (dưới)
         text: text,
         color: color,
         size: size,
@@ -158,6 +160,12 @@ function addFloatingText(x, y, text, color = '#fff', size = 14) {
     });
 }
 function updateAndDrawFloatingTexts() {
+    // Chữ luôn đọc xuôi theo góc nhìn người chơi:
+    // - Khách online: cả sân bị xoay 180° -> xoay ngược mọi chữ.
+    // - 2 người cùng máy: P2 ngồi đối diện -> chữ ở nửa sân P2 xoay 180° cho P2 đọc.
+    const ftGuest = (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'guest');
+    const ftLocal2P = !(typeof onlineManager !== 'undefined' && onlineManager.isOnline) &&
+        !(typeof botAI !== 'undefined' && botAI.enabled);
     for (let i = floatingTexts.length - 1; i >= 0; i--) {
         let ft = floatingTexts[i];
         ft.y += ft.vy;
@@ -178,7 +186,10 @@ function updateAndDrawFloatingTexts() {
         // Giữ chữ nằm trong sân đấu (không tràn ra mép trái/phải/trên/dưới)
         let halfW = (ctx.measureText(ft.text).width * pop) / 2 + 4;
         let drawX = Math.max(halfW, Math.min(canvas.width - halfW, ft.x));
-        let drawY = Math.max(ft.size, Math.min(canvas.height - ft.size, ft.y));
+        const flipT = ftGuest || (ftLocal2P && ft.side === 2);
+        // Chữ bị xoay thì trôi "lên" theo hướng của người đọc (xuống trên màn hình gốc)
+        let fy = (flipT && typeof ft.y0 === 'number') ? ft.y0 + (ft.y0 - ft.y) : ft.y;
+        let drawY = Math.max(ft.size, Math.min(canvas.height - ft.size, fy));
         ctx.translate(drawX, drawY);
         ctx.scale(pop, pop);
         ctx.lineJoin = 'round';
@@ -187,7 +198,7 @@ function updateAndDrawFloatingTexts() {
         ctx.fillStyle = ft.color;
         ctx.shadowBlur = 8;
         ctx.shadowColor = ft.color;
-        if (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'guest') ctx.rotate(Math.PI);
+        if (flipT) ctx.rotate(Math.PI);
         ctx.strokeText(ft.text, 0, 0);
         ctx.fillText(ft.text, 0, 0);
         ctx.restore();
