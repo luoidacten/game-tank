@@ -266,3 +266,20 @@ Object.assign(Player.prototype, {
         }
     }
 });
+
+// takeDamage: kết liễu CUỒNG PHONG / THIÊN PHONG (nối tiếp wrapper sẵn có)
+(function () {
+    const orig = Player.prototype.takeDamage;
+    Player.prototype.takeDamage = function (amount, attacker) {
+        const before = this.hp;
+        const r = orig.apply(this, arguments);
+        if (before > 0 && this.hp <= 0 && attacker && attacker !== this && attacker.weapon === 'storm'
+            && typeof bodyEffects !== 'undefined' && !bodyEffects.some(e => e instanceof StFinisher)) {
+            bodyEffects.push(new StFinisher(attacker, this));
+            triggerScreenShake(8, 12);
+            if (typeof spawnSparkParticles === 'function') spawnSparkParticles(this.x + this.w / 2, this.y + this.h / 2, '#5eead4', 24);
+            if (typeof soundSystem !== 'undefined' && soundSystem && !soundSystem.muted && soundSystem.playExplosion) soundSystem.playExplosion();
+        }
+        return r;
+    };
+})();

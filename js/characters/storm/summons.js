@@ -148,6 +148,37 @@ class StormSlash {
         ctx.globalAlpha = 0.18 * (1 - k * 0.5);
         ctx.fillStyle = `${this.color} 1)`;
         ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2); ctx.fill();
+        ctx.globalCompositeOperation = 'lighter';
+        // Xoắn ốc gió bên trong + lõi sáng
+        for (let a = 0; a < 5; a++) {
+            const base = a * Math.PI * 2 / 5 - spin * 1.4;
+            ctx.globalAlpha = 0.45 * (1 - k * 0.6);
+            ctx.strokeStyle = a % 2 ? '#ffffff' : `${this.color} 1)`; ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let i = 0; i <= 10; i++) {
+                const f = i / 10, rr = this.r * (0.1 + f * 0.75), th = base + f * 2.4;
+                const x = this.x + Math.cos(th) * rr, y = this.y + Math.sin(th) * rr;
+                if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+        }
+        const cg = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.r * 0.4);
+        cg.addColorStop(0, `rgba(255,255,255,${0.6 * (1 - k)})`); cg.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.globalAlpha = 1; ctx.fillStyle = cg; ctx.beginPath(); ctx.arc(this.x, this.y, this.r * 0.4, 0, Math.PI * 2); ctx.fill();
+        // Hút (Evo 1): vệt gió dồn vào tâm
+        if (this.isVacuum) {
+            for (let i = 0; i < 10; i++) {
+                const th = i * 0.628 + spin * 0.5, r1 = this.maxR * (1.15 - k * 0.5), r2 = r1 * 0.7;
+                ctx.globalAlpha = 0.55; ctx.strokeStyle = '#ccfbf1'; ctx.lineWidth = 1.5;
+                ctx.beginPath(); ctx.moveTo(this.x + Math.cos(th) * r1, this.y + Math.sin(th) * r1); ctx.lineTo(this.x + Math.cos(th + 0.25) * r2, this.y + Math.sin(th + 0.25) * r2); ctx.stroke();
+            }
+        }
+        // Mảnh vụn văng ra theo vòng chém
+        for (let i = 0; i < 12; i++) {
+            const th = i * 0.5236 + spin * 0.8, rr = this.r * (0.9 + (i % 3) * 0.08);
+            ctx.globalAlpha = 0.8 * (1 - k * 0.5); ctx.fillStyle = i % 2 ? '#e2e8f0' : `${this.color} 1)`;
+            ctx.fillRect(this.x + Math.cos(th) * rr - 1.5, this.y + Math.sin(th) * rr - 1.5, 3, 3);
+        }
         for (let b = 0; b < 3; b++) {
             const head = spin + b * (Math.PI * 2 / 3);
             for (let i = 0; i < 6; i++) {
@@ -163,4 +194,28 @@ class StormSlash {
         }
         ctx.restore();
     }
+}
+
+// ---------- Entity: kết liễu CUỒNG PHONG / THIÊN PHONG (Full Evo) — dữ liệu thuần ----------
+class StFinisher {
+    constructor(owner, victim) {
+        this.team = owner.id;
+        this.full = !!(owner.hasUpgrade && owner.hasUpgrade('evo_storm_1') && owner.hasUpgrade('evo_storm_2'));
+        this.x = victim.x + victim.w / 2; this.y = victim.y + victim.h / 2;
+        this.t = 0; this.dur = this.full ? 170 : 140; this.active = true;
+    }
+    update() {
+        this.t++;
+        const o = this.team === 1 ? p1 : p2;
+        if (!this.full) {
+            if (this.t === 12 || this.t === 50) triggerScreenShake(7, 12);
+        } else if (this.t >= 20 && this.t < 120 && (this.t - 20) % 12 === 0) {
+            // sét giáng vào mắt bão
+            triggerScreenShake(9, 8);
+            explosions.push(new Explosion(this.x, this.y, 34, 'rgba(167, 139, 250,', 0, o));
+        }
+        if (this.t >= this.dur) this.active = false;
+    }
+    draw() { }
+    drawOver() { if (typeof stDrawFinisherOver === 'function') stDrawFinisherOver(this); }
 }

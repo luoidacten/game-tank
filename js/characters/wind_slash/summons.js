@@ -64,3 +64,24 @@ class WindWall {
         ctx.restore();
     }
 }
+
+// ---------- Entity: kết liễu PHONG TRẢM (dữ liệu thuần, đồng bộ online) ----------
+class WsFinisher {
+    constructor(owner, victim) {
+        this.team = owner.id;
+        this.x = victim.x + victim.w / 2; this.y = victim.y + victim.h / 2;
+        this.t = 0; this.dur = 130; this.active = true;
+    }
+    update() {
+        this.t++;
+        // lưỡi gió khổng lồ quét qua nạn nhân
+        if (this.t === 20) {
+            triggerScreenShake(9, 14);
+            if (typeof spawnSparkParticles === 'function') spawnSparkParticles(this.x, this.y, '#a7f3d0', 26);
+            explosions.push(new Explosion(this.x, this.y, 46, 'rgba(167, 243, 208,', 0, this.team === 1 ? p1 : p2));
+        }
+        if (this.t >= this.dur) this.active = false;
+    }
+    draw() { }
+    drawOver() { if (typeof wsDrawFinisherOver === 'function') wsDrawFinisherOver(this); }
+}

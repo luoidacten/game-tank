@@ -100,3 +100,19 @@ Object.assign(Player.prototype, {
         }
     }
 });
+
+// takeDamage: kết liễu PHONG TRẢM (nối tiếp wrapper sẵn có)
+(function () {
+    const orig = Player.prototype.takeDamage;
+    Player.prototype.takeDamage = function (amount, attacker) {
+        const before = this.hp;
+        const r = orig.apply(this, arguments);
+        if (before > 0 && this.hp <= 0 && attacker && attacker !== this && attacker.weapon === 'wind_slash'
+            && typeof bodyEffects !== 'undefined' && !bodyEffects.some(e => e instanceof WsFinisher)) {
+            bodyEffects.push(new WsFinisher(attacker, this));
+            triggerScreenShake(6, 10);
+            if (typeof soundSystem !== 'undefined' && soundSystem && !soundSystem.muted && soundSystem.playExplosion) soundSystem.playExplosion();
+        }
+        return r;
+    };
+})();

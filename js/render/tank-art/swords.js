@@ -798,6 +798,17 @@ function swDrawVortex(cx, cy, R, team, alpha, t, spin = 1) {
     ctx.strokeStyle = team; ctx.lineWidth = 1.6; ctx.globalAlpha *= 0.8;
     ctx.beginPath(); ctx.arc(0, 0, R * 0.98, t * 5 * spin, t * 5 * spin + 1.6); ctx.stroke();
     ctx.beginPath(); ctx.arc(0, 0, R * 0.98, t * 5 * spin + Math.PI, t * 5 * spin + Math.PI + 1.6); ctx.stroke();
+    // Dải gió mỏng bên ngoài + mảnh vụn bay quanh
+    ctx.strokeStyle = 'rgba(204, 251, 241, 0.55)'; ctx.lineWidth = 1;
+    for (let a = 0; a < 3; a++) {
+        const b0 = a * 2.094 - t * 9 * spin;
+        ctx.beginPath(); ctx.arc(0, 0, R * 1.2, b0, b0 + 0.9); ctx.stroke();
+    }
+    for (let j = 0; j < 8; j++) {
+        const ang = t * (6 + (j % 3)) * spin + j * 0.785, rr = R * (0.7 + (j % 4) * 0.15);
+        ctx.fillStyle = j % 2 ? 'rgba(226, 232, 240, 0.85)' : 'rgba(94, 234, 212, 0.9)';
+        ctx.fillRect(Math.cos(ang) * rr - 1.2, Math.sin(ang) * rr - 1.2, 2.4, 2.4);
+    }
     // Mắt bão
     ctx.globalCompositeOperation = 'source-over';
     ctx.fillStyle = '#f0fdfa';
@@ -1105,6 +1116,8 @@ registerTankArt('wind_slash', (p, k) => {
 registerTankArt('storm', (p, k) => {
     const ch = Math.min(1, p.stormChargeRatio || 0);
     const spin = k.t * (5 + ch * 22);
+    // Lao thân: xe xoay tít, mờ dần hòa vào lốc xoáy (vẽ lốc ở drawStorm)
+    if (p.stormDashState === 1) { ctx.rotate(k.t * 40); ctx.globalAlpha *= 0.4; ctx.scale(0.8, 0.8); }
     // Hai cánh quạt
     for (const sx of [-1, 1]) {
         ctx.save();
