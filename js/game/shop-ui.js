@@ -28,7 +28,7 @@ function shopItemPrice(player, item) {
 // Huy hiệu vai trò của body (vai trò chính đứng đầu, nổi bật hơn)
 const ROLE_ICON = { 'Đối Đầu': '⚔️', 'Kiểm Soát': '🕸️', 'Cơ Động': '⚡', 'Sinh Tồn': '🛡️' };
 // Tướng Collab (rất mạnh): huy hiệu riêng ở phần chọn tướng; chọn tướng Collab -> đối thủ được bù tiền đầu game
-const COLLAB_BONUS = { kazuki: 150, joker: 150, raven_oca: 120, chrononeo: 150 };
+const COLLAB_BONUS = { kazuki: 150, joker: 150, raven_oca: 120, chrononeo: 150, tsukiyo: 150 };
 function collabBonusOf(id) { return COLLAB_BONUS[id] || 0; }
 function collabBadge(mod) {
     const b = mod && collabBonusOf(mod.id);
