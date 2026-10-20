@@ -330,8 +330,8 @@ Object.assign(Player.prototype, {
                     if (Math.random() < 0.015) wantToShoot = true; // Bắn hên xui (Base)
                 }
 
-                if (wantToShoot && ill.ammo > 0 && now - ill.lastShot > (ill.perfect ? 900 : 500)) {
-                    magIllShot(this, ill, this.damage * (ill.perfect ? 0.5 : 0.25));
+                if (wantToShoot && ill.ammo > 0 && now - ill.lastShot > (ill.perfect ? 1400 : 700)) {
+                    magIllShot(this, ill, this.damage * (ill.perfect ? 0.35 : 0.2));
                     ill.ammo--;
                     ill.lastShot = now;
                 }
