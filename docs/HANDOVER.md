@@ -2,9 +2,9 @@
 
 ## Trạng thái
 - Nhánh làm việc: `claude/peaceful-goodall-w1qjps` — mọi thứ đã push.
-- 58 body + **Hệ thống 150 Lõi Công Nghệ G.E.A.R (`#1 – #150`)** tại `js/data/gears.js` & `js/game/gear-system.js` (chi tiết nhật ký ở `NOTE_Antigravity.md`).
+- 67 body + **Hệ thống 150 Lõi Công Nghệ G.E.A.R (`#1 – #150`)** tại `js/data/gears.js` & `js/game/gear-system.js` (chi tiết nhật ký ở `NOTE_Antigravity.md`).
 - Danh sách việc còn lại: **`docs/TODO.md`** (theo thứ tự ưu tiên).
-- Cẩm nang body (tự sinh): `docs/BODIES.md`. Đặc tả body mới người dùng gửi: `docs/BODY_MOI_DAC_TA.md` (đã làm), `docs/BODY_MOI_UU_TIEN.md` (đã làm xong 7 body).
+- Cẩm nang body (tự sinh): `docs/BODIES.md`. Các bản đặc tả người dùng gửi đã làm xong và đã xoá khỏi `docs/` (xem lịch sử git nếu cần).
 - Người dùng muốn: **làm từng việc một** (tiết kiệm token), xong việc nào thì gộp → smoke test → push → cập nhật `docs/TODO.md` + `docs/BODIES.md`, rồi tự làm việc kế tiếp.
 
 ## Công cụ (thư mục `tools/`)
@@ -32,4 +32,4 @@ Chromium: `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`, Playwright: `req
 - Đòn hitscan phải có cảnh báo (`scheduleHitscan`) và bị tường Sniper chặn (`sniperWallBlockY`).
 
 ## Việc kế tiếp
-Đồ họa đã xong toàn bộ (art xe hỗ trợ & vật triệu hồi ở `js/render/tank-art/support_summons.js`). Tiếp theo: `docs/TODO.md` mục 1 — 7 body mới trong `docs/BODY_MOI_UU_TIEN.md`, làm lần lượt từng body theo `tools/agents/common.md`.
+Xem `docs/TODO.md`. Đang chờ người dùng chơi thử các mục ở phần "Ghi chú / cần xác nhận"; hệ thống G.E.A.R mới cần kiểm tra lỗi & bổ sung hình ảnh hiệu ứng.

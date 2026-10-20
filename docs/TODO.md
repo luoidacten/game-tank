@@ -6,6 +6,7 @@
 
 ## 0. Chỉnh sửa gấp (làm TRƯỚC mục 1)
 - [x] Hệ thống 150 Lõi Công Nghệ G.E.A.R (`#1 – #150`), lọc theo giai đoạn (`EARLY`, `EARLY_MID`, `MID_LATE`, `ALL`), khóa dòng (`familyId`), khóa chéo (`incompatibleWith`), nút Đổi lại (`🔄 ĐỔI LẠI`) từng ô nâng cấp và chặn bấm Bắn bỏ qua chọn G.E.A.R (chi tiết: `NOTE_Antigravity.md`).
+- G.E.A.R: kiểm tra lỗi toàn bộ 150 lõi (cả online) & bổ sung hình ảnh cho các lõi chưa có hiệu ứng (đang làm).
 - Còn lại: các mục bên dưới.
 
 
