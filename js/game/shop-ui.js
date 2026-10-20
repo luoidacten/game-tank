@@ -149,7 +149,7 @@ function renderStandardCards(playerId, list) {
 
     shuffled.forEach(mod => {
         const div = document.createElement('div');
-        div.className = 'card' + (collabBonusOf(mod.id) ? ' collab-card' : '');
+        div.className = 'card pick-card' + (collabBonusOf(mod.id) ? ' collab-card' : '');
         if (collabBonusOf(mod.id)) { div.style.border = '2px solid #ff2bd6'; div.style.boxShadow = '0 0 14px rgba(255,43,214,0.65), inset 0 0 10px rgba(255,179,0,0.25)'; }
         div.innerHTML = `<h4>${collabBonusOf(mod.id) ? '★ ' : ''}${mod.name}</h4>${roleBadges(mod)}<p>${mod.desc}</p>`;
         div.onclick = () => {
@@ -208,6 +208,7 @@ function renderShop(playerId, keepItems = false) {
             let upgradeBtn = document.createElement('div');
             upgradeBtn.className = 'card';
             upgradeBtn.style.border = '2px solid gold';
+            upgradeBtn.dataset.icon = '📈';
             upgradeBtn.innerHTML = `<h4>CẤP ĐỘ ${nextLvl}</h4><p>+1 HP, Dame, Đạn, Tốc.${bonusText}</p><p style="color:#f1c40f;">$${cost}</p>`;
             upgradeBtn.onclick = () => {
                 let curMoney = (playerId === 'p1') ? gameState.p1Coins : gameState.p2Coins;
@@ -226,6 +227,7 @@ function renderShop(playerId, keepItems = false) {
             winBtn.className = 'card';
             winBtn.style.background = '#f39c12';
             winBtn.style.border = '3px solid white';
+            winBtn.dataset.icon = '👑';
             winBtn.innerHTML = `<h4>PAY TO WIN</h4><p>THẮNG LUÔN.</p><p style="color:white; font-size:1.2em">$500</p>`;
             winBtn.onclick = () => {
                 let curMoney = (playerId === 'p1') ? gameState.p1Coins : gameState.p2Coins;
@@ -279,6 +281,7 @@ function renderShop(playerId, keepItems = false) {
         if (player.boughtShopItems && player.boughtShopItems.includes(item.id)) {
             card.className = 'card sold';
             card.innerHTML = `<h4>${item.name}</h4><p>ĐÃ MUA</p>`;
+            card.dataset.icon = SHOP_ICON[item.id] || (item.type === 'evo' ? '🧬' : '');
         } else {
             if (item.type === 'evo') card.className = 'card evo-card';
             else card.className = 'card';
@@ -290,6 +293,7 @@ function renderShop(playerId, keepItems = false) {
             if (item.id === 'damage') extra = `<br><span style="color:#facc15">Lần này: x${feetDamageMult(owned + 1).toFixed(2)} sát thương</span>`;
             if (item.id === 'interest') extra = `<br><span style="color:#facc15">Mỗi hiệp: ${interestIncome(owned, player.weapon === 'money_tank')}$ → ${interestIncome(owned + 1, player.weapon === 'money_tank')}$</span>`;
             card.innerHTML = `<h4>${item.name}${lvlTxt}</h4><p>${item.desc}${extra}</p><p style="color:#f1c40f; font-weight:bold">$${price}</p>`;
+            card.dataset.icon = SHOP_ICON[item.id] || (item.type === 'evo' ? '🧬' : '');
 
             card.onclick = () => {
                 const currentCoin = (playerId === 'p1') ? gameState.p1Coins : gameState.p2Coins;
@@ -723,3 +727,99 @@ function handlePlayerReady(pid) {
         }
     }
 }
+
+
+// ==========================================
+// Trang trí thẻ shop (neon-cyber): icon, nhãn giá, trạng thái mua được / thiếu tiền / đã có / khoá.
+// Chạy tự động sau mỗi lần một bảng shop (kể cả bảng riêng của body) vẽ lại -> không đổi logic mua bán.
+// ==========================================
+const SHOP_ICON = { speed: '⚡', armor: '🛡️', damage: '⛓️', interest: '💹' };
+const SHOP_LEAD_EMOJI = /^\s*((?:\p{Extended_Pictographic}|\p{Regional_Indicator})(?:️|‍\p{Extended_Pictographic})*)\s*/u;
+const SHOP_PRICE_RE = /\$\s?(\d+)|(-?\d+)\s*(LK|LINH KIỆN|Bánh Răng|CP)\b|^\s*(\d+)\s*(LK|CP)\s*$/i;
+
+function shopWallet(player, playerId, unit) {
+    unit = (unit || '$').toUpperCase();
+    if (unit === '$') return playerId === 'p1' ? gameState.p1Coins : gameState.p2Coins;
+    if (unit === 'LK' || unit === 'LINH KIỆN') return player.components || 0;
+    if (unit === 'BÁNH RĂNG') return player.gears || 0;
+    if (unit === 'CP') return player.cuData ? (player.cuData.cp || 0) : 0;
+    return null;
+}
+
+function polishShopContainer(container) {
+    if (!container || !container.firstElementChild) return;
+    if (container.querySelector('.pick-card')) { container.classList.remove('shop-mode'); return; }
+    container.classList.add('shop-mode');
+    const playerId = container.id.startsWith('p2') ? 'p2' : 'p1';
+    const player = playerId === 'p1' ? p1 : p2;
+    for (const card of container.children) {
+        if (!card.classList.contains('card') || card.dataset.polished) continue;
+        card.dataset.polished = '1';
+        card.classList.add('shop-card');
+        const h4 = card.querySelector('h4');
+        const title = h4 ? h4.textContent : '';
+        const txt = card.textContent;
+        let kind = '';
+        if (card.id && card.id.startsWith('ready-btn')) kind = 'ready';
+        else if (/QUAY LẠI/.test(title)) kind = 'back';
+        else if (/REROLL|ĐỔI HÀNG/.test(title)) kind = 'reroll';
+        if (kind) card.classList.add('shop-' + kind);
+        if (card.classList.contains('sold')) card.classList.add(/🔒/.test(txt) ? 'is-locked' : (/ĐÃ MUA|✔|ĐÃ CHỌN/.test(txt) ? 'is-owned' : (/—/.test(txt) ? 'is-muted' : 'is-info')));
+        else if (/🔒/.test(txt) && !/✔|★/.test(txt)) card.classList.add('is-locked');
+
+        // Màu nhấn lấy từ viền / nền inline cũ, rồi bỏ style inline để CSS chung lo phần còn lại
+        const st = card.style;
+        const accent = (kind === 'ready' ? '#22c55e' : '') || (st.borderColor && st.borderColor !== 'initial' ? st.borderColor : '') ||
+            (/^(#|rgb)/.test(st.backgroundColor || '') ? st.backgroundColor : '') ||
+            ({ ready: '#22c55e', back: '#f87171', reroll: '#f43f5e' })[kind] ||
+            (card.classList.contains('evo-card') ? '#d946ef' : '#00f0ff');
+        if (st.borderStyle === 'dashed') card.classList.add('is-locked');
+        card.style.cssText = '';
+        card.style.setProperty('--accent', accent);
+
+        // Icon: emoji đầu tiêu đề -> huy hiệu tròn; hoặc icon mặc định theo loại
+        let icon = card.dataset.icon || '';
+        if (h4) {
+            const m = h4.innerHTML.match(SHOP_LEAD_EMOJI);
+            if (m) { if (!icon) icon = m[1]; h4.innerHTML = h4.innerHTML.slice(m[0].length); }
+        }
+        const tag = card.querySelector(':scope > span');
+        if (!icon && tag) icon = ({ 'DRONE': '🛸', 'BẢN THÂN': '🔧', 'EVO 2': '🧬', 'TỐI THƯỢNG': '⭐', 'ROBOT MODULE': '🤖' })[tag.textContent.replace(/[\[\]]/g, '').trim()] || '';
+        if (!icon) icon = ({ ready: '✔', back: '↩', reroll: '🔄' })[kind] || (card.classList.contains('evo-card') ? '🧬' : '');
+        if (icon) {
+            const ico = document.createElement('div');
+            ico.className = 'card-ico';
+            ico.textContent = icon;
+            card.insertBefore(ico, card.firstChild);
+        }
+        if (tag && tag !== h4) tag.classList.add('cat-tag');
+
+        // Nhãn giá / trạng thái ở cuối thẻ
+        const ps = card.querySelectorAll(':scope > p');
+        const last = ps.length ? ps[ps.length - 1] : null;
+        if (last && (ps.length > 1 || kind)) {
+            const t = last.textContent.trim();
+            const m = t.match(SHOP_PRICE_RE);
+            if (m && kind !== 'back') {
+                last.classList.add('price-tag');
+                last.style.color = '';
+                const amount = Math.abs(parseInt(m[1] || m[2] || m[4], 10));
+                const unit = m[1] ? '$' : (m[3] || m[5]);
+                const have = shopWallet(player, playerId, unit);
+                if (have !== null && !card.classList.contains('sold')) card.classList.add(have >= amount ? 'can-buy' : 'cant-buy');
+            } else if (t.length <= 40) {
+                last.classList.add('status-tag');
+            }
+        }
+    }
+}
+
+(function initShopPolish() {
+    const run = () => ['p1-upgrades', 'p2-upgrades'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el || el._shopObs) return;
+        el._shopObs = new MutationObserver(() => polishShopContainer(el));
+        el._shopObs.observe(el, { childList: true });
+    });
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run); else run();
+})();

@@ -69,6 +69,8 @@ class OnlineMultiplayerManager {
         if (transportId && data._from && this.role === 'host') this.peerToClient[transportId] = data._from;
         this.lastHeard = Date.now();
 
+        // Thăm dò Ghép nhanh: trả lời riêng kết nối thăm dò, không tính là người chơi
+        if (data.type === 'QM_PROBE') { this.answerQuickProbe(transportId); return; }
         if (data.type === 'PING') { this.sendNetworkMessage({ type: 'PONG', t: data.t }); return; }
         if (data.type === 'PONG') { this.onPong(data.t); return; }
 
@@ -184,6 +186,7 @@ class OnlineMultiplayerManager {
             tabQuickMatch.addEventListener('click', () => {
                 if (soundSystem && !soundSystem.muted) soundSystem.playClick();
                 this.switchTab('quick');
+                this.probeQuickMatch();
             });
         }
 
@@ -534,6 +537,9 @@ class OnlineMultiplayerManager {
                 break;
 
             case 'ROOM_FULL':
+                if (this.isQuickMatch && (!data.targetId || data.targetId === this.clientId)) {
+                    this.setQuickNotice('busy', '🟠 Phòng ghép công khai đang có trận. Hãy thử lại sau ít phút hoặc tạo phòng riêng mời bạn bè.');
+                }
                 if (!data.targetId || data.targetId === this.clientId) {
                     this.showJoinError(`⚠️ Phòng "${data.code || this.roomCode}" đã đủ 2 người chơi!`);
                     this.cleanup(true);
@@ -653,6 +659,9 @@ class OnlineMultiplayerManager {
         const statusText = document.getElementById('quickMatchStatusText');
         if (loadQuick) loadQuick.style.display = 'flex';
         if (statusText) statusText.innerText = '⚡ Đang quét tìm các phòng .IO đang chờ...';
+        this.qmStart = Date.now();
+        this.qmPhase = 'search';
+        this.startQuickTicker();
 
         const quickCode = 'CY-IO-PUBLIC';
         this.role = 'guest';
@@ -684,6 +693,7 @@ class OnlineMultiplayerManager {
                     });
                     this.hostConn.on('data', (data) => {
                         clearTimeout(quickTimeout);
+                        if (this.qmPhase === 'search') this.qmPhase = 'joined';
                         this.receive(data, quickCode);
                     });
                 } catch(e){}
@@ -708,6 +718,11 @@ class OnlineMultiplayerManager {
         const loadQuick = document.getElementById('quickMatchLoading');
         const statusText = document.getElementById('quickMatchStatusText');
         if (statusText) statusText.innerText = 'Đã mở phòng .IO! Đang chờ đối thủ vào ghép trận...';
+        this.isQuickMatch = true;
+        this.qmPhase = 'hosting';
+        this.qmHostSince = Date.now();
+        this.qmProbePeers = {};
+        this.startQuickTicker();
 
         this.setupLocalBroadcastChannel(code);
 
@@ -736,6 +751,96 @@ class OnlineMultiplayerManager {
         }
     }
 
+    // ===== GHÉP NHANH: thông báo trạng thái (không có máy chủ đếm người -> thăm dò phòng công khai) =====
+    setQuickNotice(kind, html) {
+        for (const id of ['quickMatchNotice', 'lobbyQuickNotice']) {
+            const el = document.getElementById(id);
+            if (!el) continue;
+            if (id === 'lobbyQuickNotice' && !this.isQuickMatch) { el.style.display = 'none'; continue; }
+            el.style.display = 'block';
+            el.className = 'qm-notice qm-' + kind;
+            el.innerHTML = html;
+        }
+    }
+
+    fmtElapsed(ms) {
+        const s = Math.max(0, Math.floor(ms / 1000));
+        return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+    }
+
+    // Host phòng công khai trả lời kết nối thăm dò: có đang chờ người ghép không
+    answerQuickProbe(tid) {
+        if (this.role !== 'host' || !tid) return;
+        const conn = this.connections[tid];
+        if (!this.qmProbePeers) this.qmProbePeers = {};
+        this.qmProbePeers[tid] = true;
+        const waiting = !this.matchActive && this.playersLobbyData.length < 2;
+        try { if (conn && conn.open) conn.send({ type: 'QM_STATUS', waiting, waitMs: this.qmHostSince ? Date.now() - this.qmHostSince : 0 }); } catch (e) {}
+    }
+
+    // Thăm dò (không vào phòng) xem có ai đang mở phòng Ghép nhanh không
+    probeQuickMatch() {
+        if (this.qmProbeBusy || (this.isQuickMatch && this.qmPhase)) return;
+        if (typeof Peer === 'undefined') {
+            this.setQuickNotice('none', '⚪ Không kết nối được máy chủ ghép. Bấm tìm để mở phòng chờ trên máy này, hoặc mời bạn bè bằng mã phòng.');
+            return;
+        }
+        this.qmProbeBusy = true;
+        this.setQuickNotice('scan', '🔎 Đang kiểm tra phòng ghép công khai...');
+        let probe = null, done = false;
+        const finish = (kind, html) => {
+            if (done) return;
+            done = true;
+            this.qmProbeBusy = false;
+            clearTimeout(t);
+            try { if (probe) probe.destroy(); } catch (e) {}
+            if (!(this.isQuickMatch && this.qmPhase)) this.setQuickNotice(kind, html);
+        };
+        const NONE = '⚪ Chưa có ai đang ghép. Bấm <b>TÌM TRẬN</b> để mở phòng và chờ, hoặc mời bạn bè.';
+        const t = setTimeout(() => finish('none', NONE), 5000);
+        try {
+            probe = new Peer(undefined, PEER_CONFIG);
+            probe.on('open', () => {
+                try {
+                    const c = probe.connect('CY-IO-PUBLIC', { reliable: true });
+                    c.on('open', () => { try { c.send({ type: 'QM_PROBE' }); } catch (e) {} });
+                    c.on('data', (d) => {
+                        if (!d || d.type !== 'QM_STATUS') return;
+                        if (d.waiting) finish('found', `🟢 Có <b>1 người</b> đang chờ ghép (đã chờ ${this.fmtElapsed(d.waitMs || 0)}). Bấm <b>TÌM TRẬN</b> để vào ngay!`);
+                        else finish('busy', '🟠 Phòng ghép công khai đang có trận. Bấm tìm để thử lại, hoặc mời bạn bè.');
+                    });
+                } catch (e) { finish('none', NONE); }
+            });
+            probe.on('error', (err) => {
+                if (err && err.type === 'peer-unavailable') finish('none', NONE);
+                else finish('none', '⚪ Không kiểm tra được (mạng/máy chủ bận). Bạn vẫn có thể bấm tìm trận.');
+            });
+        } catch (e) { finish('none', NONE); }
+    }
+
+    // Cập nhật thông báo mỗi giây khi đang tìm / đang chờ trong phòng công khai
+    startQuickTicker() {
+        if (this.qmTicker) clearInterval(this.qmTicker);
+        const tick = () => {
+            const modal = document.getElementById('onlineModal');
+            const open = !modal || modal.style.display !== 'none';
+            if (!this.isQuickMatch || !this.qmPhase || this.matchActive || !open) {
+                clearInterval(this.qmTicker); this.qmTicker = null;
+                return;
+            }
+            if (this.qmPhase === 'search') {
+                this.setQuickNotice('scan', `🔎 Đang tìm đối thủ... ${this.fmtElapsed(Date.now() - this.qmStart)}`);
+            } else if (this.qmPhase === 'joined' || (this.role === 'guest' && this.isJoinedSuccess)) {
+                this.setQuickNotice('found', '✅ Đã tìm thấy người đang chờ — đã vào phòng của họ! Chờ chủ phòng bắt đầu.');
+            } else if (this.role === 'host') {
+                if (this.playersLobbyData.length >= 2) this.setQuickNotice('found', '✅ Đã ghép được đối thủ! Bấm BẮT ĐẦU để vào trận.');
+                else this.setQuickNotice('wait', `⏳ Chưa có ai khác đang ghép — bạn đang mở phòng công khai và chờ người tiếp theo (${this.fmtElapsed(Date.now() - (this.qmHostSince || this.qmStart))}). Có thể mời bạn bè bấm Ghép nhanh.`);
+            }
+        };
+        tick();
+        this.qmTicker = setInterval(tick, 1000);
+    }
+
     showLobbyView() {
         const viewCreate = document.getElementById('createRoomView');
         const viewJoin = document.getElementById('joinRoomView');
@@ -748,6 +853,8 @@ class OnlineMultiplayerManager {
         if (viewQuick) viewQuick.style.display = 'none';
         if (viewLobby) viewLobby.style.display = 'flex';
         if (displayCode) displayCode.innerText = this.roomCode || 'CY-0000';
+        const qmLobby = document.getElementById('lobbyQuickNotice');
+        if (qmLobby && !this.isQuickMatch) qmLobby.style.display = 'none';
 
         this.startPingMonitor();
     }
@@ -937,6 +1044,9 @@ class OnlineMultiplayerManager {
     onHostConnClosed(peerId) {
         delete this.connections[peerId];
         const cid = this.peerToClient[peerId] || peerId;
+        if (this.qmProbePeers && this.qmProbePeers[peerId]) { delete this.qmProbePeers[peerId]; return; }
+        // Kết nối lạ (vd. thăm dò Ghép nhanh) đóng giữa trận -> không phải đối thủ rời đi
+        if (this.matchActive && !this.playersLobbyData.some(p => p.id === cid || p.id === peerId)) return;
         if (this.matchActive) {
             // BroadcastChannel có thể vẫn sống (cùng máy) – heartbeat sẽ quyết định
             if (!this.broadcastChannel) this.onDisconnected();
@@ -989,6 +1099,8 @@ class OnlineMultiplayerManager {
         this.roomCode = null;
         this.myPeerId = null;
         this.isJoinedSuccess = false;
+        this.isQuickMatch = false;
+        this.qmPhase = null;
         this.playersLobbyData = [];
         this.guestDestroyedCrates = null;
         this.seenSeq = {};
