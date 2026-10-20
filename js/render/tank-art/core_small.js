@@ -89,7 +89,53 @@
     // =====================================================================
     // 1. CƠ BẢN (basic) — thân vuông trơn, tháp tròn, nòng chuẩn
     // =====================================================================
+    // Dạng MAIN (Thức Tỉnh "Hồi Ức"): thân đỏ thẫm viền vàng, tháp gai, hào quang lửa cháy rực
+    const drawMainForm = (p, k) => {
+        const t = k.t, fin = !!p.mainFinal;
+        // Hào quang lửa (lưỡi lửa bốc về phía trước)
+        ctx.save(); ctx.globalCompositeOperation = 'lighter';
+        ctx.fillStyle = rad(0, 0, 4, 26, ['rgba(255,200,80,0.45)', 'rgba(255,90,0,0.22)', 'rgba(255,40,0,0)']);
+        circ(0, 0, 26); ctx.fill();
+        const n = fin ? 11 : 9;
+        for (let i = 0; i < n; i++) {
+            const a = (i / n) * TAU + Math.sin(t * 2 + i) * 0.1;
+            const fl = 7 + 5 * (0.5 + 0.5 * Math.sin(t * 9 + i * 1.7)) + (fin ? 3 : 0);
+            const bx = Math.cos(a) * 15, by = Math.sin(a) * 15;
+            ctx.save(); ctx.translate(bx, by); ctx.rotate(a + PI / 2);
+            ctx.fillStyle = lin(0, 0, 0, -fl, [i % 2 ? 'rgba(255,220,120,0.9)' : 'rgba(255,150,40,0.9)', 'rgba(255,60,0,0)']);
+            ctx.beginPath(); ctx.moveTo(-3.2, 0); ctx.quadraticCurveTo(-1, -fl * 0.6, 0, -fl); ctx.quadraticCurveTo(1, -fl * 0.6, 3.2, 0); ctx.closePath(); ctx.fill();
+            ctx.restore();
+        }
+        ctx.restore();
+        tracks(-15, 5.5, -14, 15, k, '#1a0d08', '#7a3a12');
+        // Giáp hông vàng kim
+        ['l', 'r'].forEach(sd => {
+            const x = sd === 'l' ? -16 : 12;
+            ctx.fillStyle = TA.metal(x, x + 4, '#7a4a05', '#ffd56a');
+            TA.rr(x, -9, 4, 18, 1.5); ctx.fill(); stroke('#3a1a02', 0.8);
+        });
+        // Thân đỏ thẫm
+        ctx.fillStyle = TA.metal(-11, 11, '#5a0f0a', '#d8432a');
+        TA.rr(-10.5, -12, 21, 25, 4); ctx.fill();
+        TA.glow('#ffb020', 8); stroke('#ffd56a', 1.6); TA.noGlow();
+        // Vệt chữ V vàng (biểu tượng nhân vật chính)
+        ctx.fillStyle = '#ffd56a'; poly([[-8, -10], [-5, -10], [0, -4], [5, -10], [8, -10], [0, 0]]); ctx.fill();
+        // Nòng vàng
+        gun(0, -5, 12, 5.6, k, '#ffe08a');
+        ctx.fillStyle = '#b45309'; TA.rr(-3.8, -12, 7.6, 2.2, 0.8); ctx.fill();
+        // Tháp gai
+        ctx.fillStyle = '#ffb020'; star(0, 2, 9.5, 8, 0.62); ctx.fill(); stroke('#7a2a02', 0.8);
+        ctx.fillStyle = rad(-2, 0, 1, 7, ['#fff1c1', '#ff8a00', '#7a1a02']);
+        circ(0, 2, 6.2); ctx.fill(); stroke('#3a0a02', 1);
+        const pulse = 0.7 + 0.3 * Math.sin(t * 6);
+        ctx.save(); ctx.globalAlpha *= pulse; lamp(0, 2, 2.4, '#fff3b0', 14); ctx.restore();
+        if (fin) { // Cơ Hội Cuối: vòng ánh kim xoay
+            ctx.save(); ctx.rotate(t * 3); ctx.strokeStyle = 'rgba(127,246,255,0.8)'; ctx.lineWidth = 1.2; ctx.setLineDash([4, 4]);
+            ctx.beginPath(); ctx.arc(0, 0, 20, 0, TAU); ctx.stroke(); ctx.restore();
+        }
+    };
     registerTankArt('basic', (p, k) => {
+        if (p.mainAwakened) return drawMainForm(p, k);
         tracks(-15, 5.5, -14, 15, k);
         // Thân
         ctx.fillStyle = TA.metal(-11, 11, '#3f4754', '#9aa3b0');
@@ -123,6 +169,12 @@
     });
     registerBulletArt('basic', (b, color, o, k) => {
         if (b.isRocket || b.isExplosive || b.isIce) return false;
+        if (o.mainAwakened) { // MAIN: đạn vàng ánh kim lõi đỏ rực (Hợp Nhất: to hơn, có quầng lửa)
+            const r = k.r * (b.mainUnity ? 1.05 : 1.25);
+            ctx.save(); ctx.globalAlpha *= 0.55; comet(tailLen(k) * 1.6, r * 1.7, '#ff5a00', '#ff2a00', { blur: 10 }); ctx.restore();
+            comet(tailLen(k) * 1.2, r, '#ffd56a', '#ff7a00', { glow: '#ffb020', core: '#fff6d0', blur: 16 });
+            return;
+        }
         const strong = o.hasUpgrade && o.hasUpgrade('evo_basic_1');
         const r = k.r * (strong ? 1.15 : 1);
         if (strong) { ctx.save(); ctx.globalAlpha *= 0.5; comet(tailLen(k) * 1.35, r * 1.5, color, color, { blur: 4 }); ctx.restore(); }

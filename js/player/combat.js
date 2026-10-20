@@ -183,21 +183,7 @@ Object.assign(Player.prototype, {
 
         let actualDmg = Math.max(0.05, amount);
 
-        // 6. Basic Evo 2 Revive
-        if (this.hasUpgrade('evo_basic_2') && this.hp - actualDmg <= 0 && !this.revived) {
-            this.hp = Math.max(1, Math.round(this.maxHp / 2));
-            this.revived = true;
-            this.invincibleTimer = 180;
-            this.damage *= 3;
-            this.shield = 5;
-            this.speed += 2;
-            this.ammo = 10;
-            addFloatingText(this.x + this.w / 2, this.y - 20, "REVIVED!", "#ffd700", 18);
-            explosions.push(new Explosion(this.x + this.w / 2, this.y + this.h / 2, 100, 'gold', 0, this));
-            soundSystem.playRevive();
-            triggerScreenShake(10, 15);
-            return actualDmg;
-        }
+        // (Basic Evo 2 "Hồi Ức" -> CharHooks beforeLethal: js/characters/basic/logic.js)
 
         // 5.1. GENIUS MECHA DAMAGE ABSORPTION
         if (this.weapon === 'genius' && this.isPilotingMecha) {

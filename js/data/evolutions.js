@@ -7,8 +7,8 @@
 // --- EVOLUTIONS ---
 const EVOLUTIONS = {
     basic: [
-        { id: 'evo_basic_1', name: 'Công Thủ Toàn Diện', desc: 'HP +2, Dame ×1.25', cost: 15, type: 'evo' },
-        { id: 'evo_basic_2', name: 'Thập Tử Nhất Sinh', desc: 'Về 0 HP -> Hồi 1 HP + Bất tử 3s', cost: 30, type: 'evo' } // UPDATE DESC
+        { id: 'evo_basic_1', name: 'Công Thủ Toàn Diện', desc: 'HP +2, Dame ×1.25 (Thiên Phú: có sẵn từ đầu trận)', cost: 15, type: 'evo' },
+        { id: 'evo_basic_2', name: 'Hồi Ức', desc: 'Lần đầu trong trận bị đối thủ hạ gục -> hồi sinh 100% máu, Thức Tỉnh MAIN vĩnh viễn (x2 Max HP, +1 Dame, 10 đạn), bất tử 3s (Thiên Phú: có sẵn)', cost: 30, type: 'evo' }
     ],
     money_tank: [
         { id: 'evo_money_atk', name: 'Tiền Tấn Công', desc: 'Mỗi 8s phóng 1 xe tiền trên 1 cột dọc ngẫu nhiên quanh địch, lao thẳng từ làn bạn sang (có CẢNH BÁO đường chạy 2s trước khi lao để né; tông trúng 1.5 dame, chạm tường nổ 1.5 dame, phá xe tiền/thùng trên đường). Phá xe tiền bằng đạn -> bắn chùm đạn vào địch.', cost: 150, type: 'evo' },

@@ -35,6 +35,7 @@ const NET_CLASSES = {
     ClClone, ClFinisher,
     JpBomb, JpFlyby, JpFinisher,
     MapVehicle, MvShot, MvHealOrbs, MvAura,
+    MainAwakenFx,
 };
 
 // Biến toàn cục cần đồng bộ: [tên, getter, setter]
