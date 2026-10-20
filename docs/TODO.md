@@ -6,7 +6,6 @@
 
 ## 0. Chỉnh sửa gấp (làm TRƯỚC mục 1)
 - **Cân bằng mới (đặc tả: `docs/CAN_BANG_MOI.md`)** — làm TRƯỚC:
-  - Xe mới trên map (xe buff dame, xe hồi máu, xe tấn công nhiều biến thể, trâu dần theo hiệp) + 3 thùng mới (Băng, Miễn Nhiễm, Tốc) + Tiến Hóa ăn thùng mới.
 - Sau đó: UI shop đẹp + thông báo ghép trận nhanh → vụ nổ màu đặc trưng → chữ nổi lộn ngược P2 → lỗi HUD Online → Cơ Bản thành MAIN → còn lại.
 
 ## 2. HUD còn sót
