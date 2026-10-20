@@ -35,6 +35,7 @@ const NET_CLASSES = {
     ClClone, ClFinisher,
     JpBomb, JpFlyby, JpFinisher,
     WsFinisher, StFinisher,
+    OpPunchFx, OpFinisher,
     MapVehicle, MvShot, MvHealOrbs, MvAura,
     MainAwakenFx,
 };

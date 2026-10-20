@@ -268,4 +268,8 @@ const EVOLUTIONS = {
         { id: 'evo_pilot_1', name: 'Phi Đội Ánh Sao', desc: 'CƯỜNG HÓA TOÀN DIỆN: mọi hỏa lực của Hợp Nhất, Chân & Phi Ảnh +15% sát thương, AI bắn/pháo cối dày hơn, sóng Cất Cánh rộng hơn. VỆT LỬA THIÊU ĐỐT: bom của Phi Ảnh (oanh tạc định kỳ lẫn khi Hợp Nhất) để lại Vệt Lửa đốt máu theo thời gian.', cost: 90, type: 'evo' },
         { id: 'evo_pilot_2', name: 'AI Tự Hành', desc: 'HỎA LỰC TOÀN PHẦN: AI của cả Chân lẫn Phi Ảnh LUÔN bật kể cả khi bạn đang lái (pháo cối + tự nhắm + oanh tạc), Chân nạp đạn nhanh hơn. AI CHIẾN THUẬT: lái Phi Ảnh -> Chân tự lách né đạn; lái Chân -> Phi Ảnh tự bay ép góc sát sườn địch. FULL EVO (Bá Chủ Bầu Trời): +2 Max HP (10 HP), +25% sát thương, hồi Cất Cánh 15s / Hợp Nhất 30s, oanh tạc 3.5–5.5s/lần với bom dày hơn, thảm bom Hợp Nhất 7 quả.', cost: 120, type: 'evo' },
     ],
+    one_punch: [
+        { id: 'evo_punch_1', name: 'Đấm Bồi Hai Tay', desc: 'Nạp đạn chỉ 1.5s. Trong 0.4s sau Đấm Thường, nhấp tiếp -> phóng thêm 4 luồng quyền phong nhỏ liên tiếp (tổng +1.2 st). Thú Vị tích +30% mỗi 1 dame nhận; hồi máu chỉ tốn 7% Thú Vị / 1 HP.', cost: 100, type: 'evo' },
+        { id: 'evo_punch_2', name: 'Nhảy Liên Hoàn Nghiêm Túc', desc: 'Khi đang tụ Đấm Nghiêm Túc: bấm Trái/Phải -> bật nhảy ngang 120px, đường cảnh báo di chuyển theo. FULL EVO (DEATH PUNCH): giữ chỉ 0.5s, hồi 8s, Thú Vị +40% mỗi 1 dame; Thú Vị không giảm khi hồi máu (5s không bị đánh tự hồi +0.5 HP/s); Giáp Ảo tồn tại vĩnh viễn; khi tụ hút nhẹ địch về tâm đường cảnh báo; địch trúng tâm cú Đấm Nghiêm Túc mà máu <= 35% -> "DEATH (TỬ)" HẠ GỤC NGAY (xuyên Khiên & Bất tử tạm thời).', cost: 120, type: 'evo' },
+    ],
 };
