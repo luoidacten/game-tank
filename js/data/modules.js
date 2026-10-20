@@ -242,7 +242,7 @@ const MODULES = {
         {
             id: 'raven_oca',
             name: 'Raven - Oca',
-            desc: '"Cuộc săn bắt đầu, Oca tìm chúng!" HP:4 | Dame:0.5 (Tiểu Liên) / 4 (Sniper) | Đạn:10 / 4 | Tốc: 3.8. Giữ Bắn 0.4s đổi súng (hồi 4s). TIỂU LIÊN: nhấp xả loạt 3 viên; đổi sang -> lướt ngang. SNIPER: nhấp -> đứng yên ngắm 0.4s rồi bắn đạn cực nhanh; đổi sang -> thả Bom Khói 2s (đứng trong khói né mọi đạn). OCA (máu = 50% Raven, tự hồi sinh): khi cầm Tiểu Liên thì tàng hình, định kỳ lao cắn địch gây dame + làm chậm; khi cầm Sniper thì bay cao đánh dấu radar -> đạn Sniper tự khóa mục tiêu, xuyên vật thể & bay nhanh hơn.',
+            desc: '"Cuộc săn bắt đầu, Oca tìm chúng!" HP:4 | Dame:0.5 (Tiểu Liên) / 4 (Sniper) | Đạn:10 / 4 | Tốc: 3.8. Giữ Bắn 0.4s đổi súng (hồi 4s). TIỂU LIÊN: nhấp xả loạt 3 viên; đổi sang -> lướt ngang. SNIPER: nhấp -> đứng yên ngắm 0.4s rồi bắn đạn cực nhanh; đổi sang -> thả Bom Khói 2s (đứng trong khói né mọi đạn). OCA (máu = 50% Raven, tự hồi sinh): khi cầm Tiểu Liên thì tàng hình, định kỳ khóa vị trí địch (vạch ngắm đỏ) rồi lao THẲNG tới điểm đó cắn gây dame + làm chậm (không đổi hướng giữa chừng -> né được); dính EMP thì Oca bị vô hiệu tạm thời; khi cầm Sniper thì bay cao đánh dấu radar -> đạn Sniper tự khóa mục tiêu, xuyên vật thể & bay nhanh hơn.',
             type: 'body',
             role: ['Đối Đầu', 'Cơ Động', 'Kiểm Soát'],
             size: { w: 26, h: 26 },
@@ -348,7 +348,7 @@ const MODULES = {
         {
             id: 'jet_pilot',
             name: 'Phi Công',
-            desc: '"Chuẩn bị cất cánh!" HP:8 (6 + 2 máu xe lớn) | Dame:0.5 | Đạn:3 (Hợp Nhất) / 1 (Chân) / 6 (Phi Ảnh) | Tốc: 3.2. Nhấp: 1 TÊN LỬA chủ lực + 2 đạn phụ kẹp hai bên. Giữ 0.5s: CẤT CÁNH (hồi 20s) – sóng năng lượng phá đạn địch xung quanh, tách thành CHÂN (28×28, đạn 1, ăn đạn như thường) và PHI ẢNH (26×26, đạn 6, bay trên không, MIỄN NHIỄM đạn). Khi tách: giữ 0.5s đổi điều khiển. Tự lái Chân: Đạn Nổ diện rộng; Chân AI: pháo cối đánh dấu rơi xuống đầu địch. Tự lái Phi Ảnh: 3 đợt × 2 viên song song; Phi Ảnh AI: tự nhắm 3 viên/đợt + mỗi 5–8s bay oanh tạc rải bom. Giữ 1s: HỢP NHẤT KHẨN CẤP (hồi 40s) – Phi Ảnh thả thảm bom xuống làn địch rồi ghép lại, +1 Khiên. Hạ gục địch -> kết liễu BÁ CHỦ BẦU TRỜI.',
+            desc: '"Chuẩn bị cất cánh!" HP:8 (6 + 2 máu xe lớn) | Dame:0.5 | Đạn:3 (Hợp Nhất) / 1 (Chân) / 6 (Phi Ảnh) | Tốc: 3.2. Nhấp: 1 TÊN LỬA chủ lực + 2 đạn phụ kẹp hai bên. Giữ 0.5s: CẤT CÁNH (hồi 20s) – sóng năng lượng phá đạn địch xung quanh, tách thành CHÂN (28×28, đạn 1, ăn đạn như thường) và PHI ẢNH (26×26, đạn 6, bay trên không, MIỄN NHIỄM đạn). Khi tách: giữ 0.5s đổi điều khiển. Tự lái Chân: Đạn Nổ diện rộng; Chân AI: pháo cối đánh dấu rơi xuống đầu địch. Tự lái Phi Ảnh: 3 đợt × 2 viên song song; Phi Ảnh AI: tự nhắm 3 viên/đợt + mỗi 5–8s bay oanh tạc rải bom. Giữ 1s: HỢP NHẤT KHẨN CẤP (hồi 40s) – Phi Ảnh thả thảm bom xuống làn địch rồi ghép lại, +1 Khiên. Mọi bom oanh tạc đều có vòng cảnh báo ⚠ 1s trước khi nổ. Hạ gục địch -> kết liễu BÁ CHỦ BẦU TRỜI.',
             type: 'body', role: ['Kiểm Soát', 'Cơ Động', 'Đối Đầu'],
             size: { w: 34, h: 34 },
             stats: { hp: 6, dmg: 0.5, ammo: 3, speedMult: 0.914 }

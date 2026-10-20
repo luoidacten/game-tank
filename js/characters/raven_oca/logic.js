@@ -8,6 +8,8 @@
 // - Oca (máu = 50% / 80% Max HP Raven, tự hồi sinh): Tiểu Liên -> tàng hình, định kỳ lao cắn + làm chậm;
 //   Sniper -> bay cao đánh dấu radar: đạn Sniper tự khóa mục tiêu, xuyên vật thể, bay nhanh hơn.
 // - Evo 2: Oca định kỳ thả bom (vòng cảnh báo đỏ). Sniper gây Trọng Thương (khóa hồi máu 10s).
+// - Oca lao cắn: KHÓA vị trí mục tiêu trước (vạch ngắm 0.3s) rồi lao THẲNG tới điểm đó, không đổi hướng giữa chừng.
+// - EMP (Cuộn Quá Tải...) vô hiệu Oca: rơi lơ lửng tại chỗ, không lao/không thả bom/không radar — disableSummonEMP().
 // - Full Evo: Oca bất tử & không chặn đạn, vừa cắn vừa mưa bom, khóa mục tiêu vĩnh viễn cho cả 2 súng.
 // Mọi trạng thái là trường thuần trên player (đồng bộ online), bộ đếm theo tick.
 // ==========================================
@@ -18,6 +20,9 @@ const RV_BURST_GAP = 4;          // khoảng cách giữa các viên trong loạ
 const RV_SMOKE_W = 46, RV_SMOKE_H = 30; // bán kính vùng khói (ngang / dọc)
 const RV_OCA_R = 9;              // bán kính thân Oca (hitbox 18×18)
 const RV_GW_TICKS = 600;         // Trọng Thương 10s
+const RV_DIVE_AIM = 18;          // khóa mục tiêu 0.3s trước khi lao
+const RV_DIVE_SP = 7.5;
+const RV_BOMB_WARN = 60;         // bom Oca: cảnh báo tối thiểu 1s
 const RV_CYAN = '#22d3ee', RV_PINK = '#f472b6', RV_VIOLET = '#a78bfa';
 
 function rvE1(p) { return p.hasUpgrade('evo_raven_1'); }
@@ -31,9 +36,10 @@ function rvSmokeMax(p) { return rvE1(p) ? 240 : 120; }
 function rvOcaMaxHp(p) { return Math.max(0.5, p.maxHp * (rvE2(p) ? 0.8 : 0.5)); }
 function rvOcaAlive(p) { return p.rvOcaSt !== 'dead'; }
 // Radar khóa mục tiêu: Oca còn sống & Raven cầm Sniper (Full Evo: luôn luôn)
-function rvMarked(p) { const e = rvEnemy(p); return rvOcaAlive(p) && (p.rvMode === 'sniper' || rvFull(p)) && e && e.hp > 0; }
+function rvOcaEmpd(p) { return p.rvOcaEmp > 0; }
+function rvMarked(p) { const e = rvEnemy(p); return rvOcaAlive(p) && !rvOcaEmpd(p) && (p.rvMode === 'sniper' || rvFull(p)) && e && e.hp > 0; }
 // Oca đang tàng hình (Tiểu Liên, không lao cắn)
-function rvOcaHidden(p) { return p.rvMode === 'smg' && p.rvOcaSt !== 'dive' && p.rvOcaSt !== 'dead' && !(p.rvOcaFlash > 0); }
+function rvOcaHidden(p) { return p.rvMode === 'smg' && p.rvOcaSt !== 'dive' && p.rvOcaSt !== 'aim' && !rvOcaEmpd(p) && p.rvOcaSt !== 'dead' && !(p.rvOcaFlash > 0); }
 function rvHoverY(p) { return canvas.height / 2 + (p.rvMode === 'sniper' ? rvDir(p) * 46 : 0); }
 function rvInSmoke(p) {
     if (!(p.rvSmokeT > 0)) return false;
@@ -70,8 +76,10 @@ function rvFireSmg(p) {
     const sp = 7.5;
     let vx, vy;
     if (rvFull(p) && rvMarked(p)) {
-        const a = aimVelocity(m.x, m.y, rvEnemy(p), sp, true);
-        vx = a.vx; vy = a.vy;
+        // [CÂN BẰNG] tự ngắm KHÔNG đón đầu + tản mát nhẹ -> di chuyển liên tục là né được
+        const a = aimVelocity(m.x, m.y, rvEnemy(p), sp, false);
+        const ang = Math.atan2(a.vy, a.vx) + (Math.random() * 2 - 1) * 0.09;
+        vx = Math.cos(ang) * sp; vy = Math.sin(ang) * sp;
     } else {
         const spread = (Math.random() * 2 - 1) * 0.05;
         vx = Math.sin(spread) * sp; vy = d * Math.cos(spread) * sp;
@@ -179,9 +187,34 @@ function rvOcaBlock(p) {
     }
 }
 
+// ---------- EMP: vô hiệu Oca (gọi từ mọi hiệu ứng EMP) ----------
+// owner: chủ của vật triệu hồi (player). Nếu truyền (x, y, R) thì chỉ trúng khi Oca nằm trong bán kính
+// (hoặc force = true: chủ bị EMP -> toàn bộ vật triệu hồi). Trả về true nếu có vô hiệu được gì.
+function disableSummonEMP(owner, ticks, x, y, R, force) {
+    if (!owner || owner.weapon !== 'raven_oca' || !rvOcaAlive(owner)) return false;
+    if (!force && typeof x === 'number' && Math.hypot(owner.rvOcaX - x, owner.rvOcaY - y) > (R || 0) + RV_OCA_R) return false;
+    const T = ticks || 120;
+    owner.rvOcaEmp = Math.max(owner.rvOcaEmp || 0, T);
+    owner.rvOcaEmpMax = Math.max(owner.rvOcaEmp, owner.rvOcaEmpMax || 0);
+    if (owner.rvOcaSt === 'dive' || owner.rvOcaSt === 'aim') owner.rvOcaSt = 'back';
+    owner.rvOcaDiveCd = Math.max(owner.rvOcaDiveCd || 0, 30);
+    spawnSparkParticles(owner.rvOcaX, owner.rvOcaY, '#a5f3fc', 10);
+    addFloatingText(owner.rvOcaX, owner.rvOcaY - 14, 'OCA · EMP ⚡', '#c4b5fd', 12);
+    return true;
+}
+
 function rvOcaUpdate(p) {
     const e = rvEnemy(p);
     const full = rvFull(p);
+    // Đang dính EMP: rơi lơ lửng chậm tại chỗ, không làm gì khác
+    if (p.rvOcaEmp > 0 && p.rvOcaSt !== 'dead') {
+        p.rvOcaEmp--;
+        if (p.rvOcaEmp <= 0) p.rvOcaEmpMax = 0;
+        if (p.rvOcaHurt > 0) p.rvOcaHurt--;
+        p.rvOcaY += Math.sin(p.rvOcaEmp / 6) * 0.4;
+        rvOcaBlock(p);
+        return;
+    }
     p.rvOcaMaxHp = rvOcaMaxHp(p);
     if (p.rvOcaHurt > 0) p.rvOcaHurt--;
     if (p.rvOcaFlash > 0) p.rvOcaFlash--;
@@ -211,17 +244,26 @@ function rvOcaUpdate(p) {
         // Lao cắn: Tiểu Liên (Full Evo: mọi lúc)
         if (p.rvMode === 'smg' || full) {
             if (--p.rvOcaDiveCd <= 0 && e && e.hp > 0) {
-                p.rvOcaSt = 'dive'; p.rvOcaDiveT = 80;
+                // Khóa vị trí mục tiêu NGAY lúc này -> vạch ngắm ngắn rồi lao thẳng, không bám theo
+                p.rvOcaSt = 'aim'; p.rvOcaAimT = RV_DIVE_AIM;
+                p.rvOcaTX = ex; p.rvOcaTY = ey;
                 p.rvOcaFlash = 10;
             }
         }
+    } else if (p.rvOcaSt === 'aim') {
+        p.rvOcaX += (Math.random() - 0.5) * 0.8; // rung nhẹ báo hiệu
+        if (--p.rvOcaAimT <= 0) {
+            const dx = p.rvOcaTX - p.rvOcaX, dy = p.rvOcaTY - p.rvOcaY;
+            const L = Math.hypot(dx, dy) || 1;
+            p.rvOcaVX = dx / L * RV_DIVE_SP; p.rvOcaVY = dy / L * RV_DIVE_SP;
+            p.rvOcaDiveT = Math.min(90, Math.ceil(L / RV_DIVE_SP) + 6); // tới điểm khóa (+ trớn nhẹ)
+            p.rvOcaSt = 'dive';
+        }
     } else if (p.rvOcaSt === 'dive') {
-        const dx = ex - p.rvOcaX, dy = ey - p.rvOcaY;
-        const L = Math.hypot(dx, dy) || 1;
-        const sp = 7.5;
-        p.rvOcaX += dx / L * sp; p.rvOcaY += dy / L * sp;
+        p.rvOcaX += p.rvOcaVX || 0; p.rvOcaY += p.rvOcaVY || 0;
         p.rvOcaDiveT--;
-        if (e && e.hp > 0 && L < e.w / 2 + RV_OCA_R) {
+        const hit = e && e.hp > 0 && rectIntersect(p.rvOcaX - RV_OCA_R, p.rvOcaY - RV_OCA_R, RV_OCA_R * 2, RV_OCA_R * 2, e.x, e.y, e.w, e.h);
+        if (hit) {
             // Cắn + sóng xung kích làm chậm
             e.takeDamage(p.damage * 1.2, p);
             e.slowTimer = Math.max(e.slowTimer || 0, 72);
@@ -231,7 +273,7 @@ function rvOcaUpdate(p) {
             p.rvOcaSt = 'back';
             p.rvOcaDiveCd = full ? 150 : 210;
         } else if (p.rvOcaDiveT <= 0) {
-            p.rvOcaSt = 'back'; p.rvOcaDiveCd = 120;
+            p.rvOcaSt = 'back'; p.rvOcaDiveCd = full ? 120 : 150;
         }
     } else if (p.rvOcaSt === 'back') {
         const ty = rvHoverY(p);
@@ -248,7 +290,8 @@ function rvOcaUpdate(p) {
             const n = full ? 3 : 1;
             for (let i = 0; i < n; i++) {
                 const pt = laneTargetPoint(e, i === 0 ? 10 : 70);
-                p.rvBombs.push({ x: pt.x, y: pt.y, sx: p.rvOcaX, sy: p.rvOcaY, t: 60 + i * 14, max: 60 + i * 14 });
+                const T = RV_BOMB_WARN + i * 18; // mỗi quả cảnh báo >= 1s, rơi lần lượt
+                p.rvBombs.push({ x: pt.x, y: pt.y, sx: p.rvOcaX, sy: p.rvOcaY, t: T, max: T });
             }
             p.rvOcaBombCd = full ? 240 : 330;
         }
@@ -322,6 +365,8 @@ CharHooks.register('raven_oca', {
         this.rvOcaDiveCd = 150; this.rvOcaBombCd = 240; this.rvOcaRespawn = 0;
         this.rvOcaFlap = 0; this.rvOcaFace = 0; this.rvOcaHurt = 0; this.rvOcaFlash = 0; this.rvOcaDiveT = 0;
         this.rvBombs = [];
+        this.rvOcaEmp = 0; this.rvOcaEmpMax = 0; this.rvOcaAimT = 0;
+        this.rvOcaTX = 0; this.rvOcaTY = 0; this.rvOcaVX = 0; this.rvOcaVY = 0;
         this.rvGwT = 0; this.rvGwLock = 0;
         this.rvFx = [];
     },

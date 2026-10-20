@@ -99,6 +99,8 @@ function ovEmp(owner, x, y) {
             hits++;
         }
     }
+    // Vật triệu hồi lưu trên player (vd. Oca của Raven) -> helper chung
+    if (enemy && typeof disableSummonEMP === 'function' && disableSummonEMP(enemy, OV_EMP_TICKS, x, y, R, ownerHit)) hits++;
     if (hits) spawnSparkParticles(x, y, '#a5f3fc', 14);
 }
 
