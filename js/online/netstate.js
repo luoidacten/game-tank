@@ -40,6 +40,7 @@ const NET_CLASSES = {
     MapVehicle, MvShot, MvHealOrbs, MvAura,
     MainAwakenFx,
     GearSupportDrone, GearMine, GearBarrierWall, GearCenterPrism, GearMirage, GearPrankBox, GearStormBolt, GearFieldDevice,
+    BmStraight, BmCurve, BmBlast, BmFinisher,
 };
 
 // Biến toàn cục cần đồng bộ: [tên, getter, setter]

@@ -369,6 +369,14 @@ const MODULES = {
             size: { w: 30, h: 30 },
             stats: { hp: 8, dmg: 2.5, ammo: 1, speedMult: 1.0286 }
         },
+        {
+            id: 'boomerang',
+            name: 'Boomerang',
+            desc: '"Ném đi... và luôn quay về!" HP:4.5 | Dame:1.0 | Đạn: 2 Boomerang độc lập | Tốc: 3.9. Nhấp: ném chiếc đang chọn; giữ 0.4s: đổi chiếc. TRỌNG LUÂN (Thẳng): bay dọc theo trục x cố định gây 1x mọi thứ xuyên qua, tới làn địch dừng lại phóng to (r=55) xoay 2s (0.25x mỗi 0.2s, làm chậm nhẹ), rồi bay ngược về cùng trục x gây 1x (vạch chỉ đường xanh lá). BẮT được khi nó về -> hồi 0.5s + HỨNG KHỞI 3s (+25% tốc chạy & dame cả 2 chiếc); để lọt qua lưng -> rơi mất, hồi 8s. NGUYỆT LUÂN (Vòng Cung): lượn vòng ra cánh (ưu tiên phía địch / hướng đang chạy) rồi quét ngang làn địch từ mạn sườn 1.2x, sau đó tự bay về tay trong 1–2s (0.8x nếu quệt trúng). Hạ gục địch -> kết liễu KHÔNG LỐI THOÁT.',
+            type: 'body', role: ['Kiểm Soát', 'Cơ Động'],
+            size: { w: 28, h: 28 },
+            stats: { hp: 4.5, dmg: 1.0, ammo: 2, speedMult: 1.1143 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 30 },
