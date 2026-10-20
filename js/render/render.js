@@ -243,7 +243,28 @@ function renderFrame() {
     if (p2CoinEl && p2CoinEl.textContent !== String(gameState.p2Coins)) p2CoinEl.textContent = gameState.p2Coins;
 
     // Fatal Cinematic Victory Sequence
+    // Đang có hiệu ứng kết liễu (Hoa Ảnh, Tsukiyo, Joker...) -> băng rôn THẮNG chờ tới khi nó diễn xong
+    // (tối đa ~1.1s) để không che phần giữa; chỉ trễ phần hiển thị, không đổi thời gian hiệp.
     if (fatalCinematic.active) {
-        drawVictoryBanner(fatalCinematic.winnerId, fatalCinematic.timer, fatalCinematic.maxTimer);
+        const elapsed = fatalCinematic.maxTimer - fatalCinematic.timer;
+        if (elapsed < 3 || elapsed < victoryBannerStart) victoryBannerStart = -1; // hiệp mới (renderFrame không chạy giữa các hiệp)
+        if (victoryBannerStart < 0 && (elapsed >= VICTORY_BANNER_MAX_WAIT || (elapsed >= 3 && !finisherFxActive()))) victoryBannerStart = elapsed;
+        if (victoryBannerStart >= 0) {
+            const span = Math.max(20, fatalCinematic.maxTimer - victoryBannerStart);
+            drawVictoryBanner(fatalCinematic.winnerId, Math.max(0, span - (elapsed - victoryBannerStart)), span);
+        }
+    } else victoryBannerStart = -1;
+}
+
+// Băng rôn thắng hiệp: mốc bắt đầu hiện (tick trong fatalCinematic), -1 = chưa hiện
+let victoryBannerStart = -1;
+const VICTORY_BANNER_MAX_WAIT = 66;
+const FINISHER_FX_CLASSES = ['FsFinisher', 'TsFinisher', 'JkFinisher', 'JgFinisher', 'CgFinisher', 'ClFinisher', 'JpFinisher'];
+function finisherFxActive() {
+    if (typeof bodyEffects === 'undefined') return false;
+    for (const e of bodyEffects) {
+        if (!e || !e.active || !e.constructor) continue;
+        if (FINISHER_FX_CLASSES.includes(e.constructor.name)) return true;
     }
+    return false;
 }

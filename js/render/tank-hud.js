@@ -40,11 +40,11 @@ function hudTextFlip(p) {
 }
 
 // Khung toạ độ: lx = ngang (dương = bên phải người xem), d = khoảng cách ra xa xe
-function hudFrame(p) {
+function hudFrame(p, cxAt) {
     const flip = hudTextFlip(p);
     const dir = p.id === 1 ? 1 : -1;
     const edge = p.id === 1 ? p.y + p.h : p.y;
-    const cx = p.x + p.w / 2;
+    const cx = cxAt !== undefined ? cxAt : p.x + p.w / 2;
     const hx = flip ? -1 : 1;
     return {
         flip, dir, edge, cx, hx,
@@ -133,11 +133,60 @@ const HUD_GLYPH = {
         ctx.beginPath(); ctx.moveTo(x, y - 3.8); ctx.lineTo(x + 3.2, y - 2.4); ctx.lineTo(x + 2.6, y + 1.2); ctx.lineTo(x, y + 3.8);
         ctx.lineTo(x - 2.6, y + 1.2); ctx.lineTo(x - 3.2, y - 2.4); ctx.closePath(); ctx.fill();
     },
+    gear(x, y) { // bánh răng (Thiên Tài: Bánh Răng)
+        ctx.beginPath();
+        for (let i = 0; i < 16; i++) { const r = i % 4 < 2 ? 3.9 : 2.7, a = (i - 0.5) * Math.PI / 8; ctx.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r); }
+        ctx.closePath(); ctx.fill();
+        ctx.save(); ctx.fillStyle = 'rgba(6,10,20,0.95)'; ctx.beginPath(); ctx.arc(x, y, 1.2, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+    },
+    nut(x, y) { // đai ốc lục giác (Linh Kiện)
+        ctx.beginPath();
+        for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3; ctx.lineTo(x + Math.cos(a) * 3.6, y + Math.sin(a) * 3.6); }
+        ctx.closePath(); ctx.fill();
+        ctx.save(); ctx.fillStyle = 'rgba(6,10,20,0.95)'; ctx.beginPath(); ctx.arc(x, y, 1.4, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+    },
+    heart(x, y) { // máu tối đa
+        ctx.beginPath(); ctx.moveTo(x, y + 3.4);
+        ctx.bezierCurveTo(x - 4.6, y + 0.2, x - 2.6, y - 3.8, x, y - 1.4);
+        ctx.bezierCurveTo(x + 2.6, y - 3.8, x + 4.6, y + 0.2, x, y + 3.4); ctx.fill();
+    },
+    sword(x, y) { // sát thương
+        ctx.beginPath(); ctx.moveTo(x + 3.2, y - 3.2); ctx.lineTo(x - 1.6, y + 1.6); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x - 3, y - 0.2); ctx.lineTo(x + 0.2, y + 3); ctx.moveTo(x - 1.8, y + 1.8); ctx.lineTo(x - 3.4, y + 3.4); ctx.stroke();
+    },
+    check(x, y) { // trúng nhịp
+        ctx.beginPath(); ctx.moveTo(x - 3.2, y); ctx.lineTo(x - 0.8, y + 2.6); ctx.lineTo(x + 3.4, y - 2.8); ctx.stroke();
+    },
+    cross(x, y) { // hụt
+        ctx.beginPath(); ctx.moveTo(x - 2.8, y - 2.8); ctx.lineTo(x + 2.8, y + 2.8); ctx.moveTo(x + 2.8, y - 2.8); ctx.lineTo(x - 2.8, y + 2.8); ctx.stroke();
+    },
+    hook(x, y) { // móc câu (Móc Thép)
+        ctx.beginPath(); ctx.moveTo(x + 1.6, y - 3.8); ctx.lineTo(x + 1.6, y + 0.6); ctx.arc(x - 0.4, y + 0.6, 2, 0, Math.PI); ctx.lineTo(x - 2.4, y - 0.6); ctx.stroke();
+    },
+    scissors(x, y) { // cắt xích
+        ctx.beginPath(); ctx.arc(x - 2.2, y + 2.2, 1.4, 0, Math.PI * 2); ctx.arc(x + 2.2, y + 2.2, 1.4, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x - 1.4, y + 1.2); ctx.lineTo(x + 2.4, y - 3.6); ctx.moveTo(x + 1.4, y + 1.2); ctx.lineTo(x - 2.4, y - 3.6); ctx.stroke();
+    },
+    robot(x, y) { // Mecha
+        ctx.fillRect(x - 3, y - 2.2, 6, 4.8);
+        ctx.fillRect(x - 0.4, y - 4, 0.8, 1.8);
+        ctx.save(); ctx.fillStyle = 'rgba(6,10,20,0.95)'; ctx.fillRect(x - 2, y - 1, 1.3, 1.3); ctx.fillRect(x + 0.7, y - 1, 1.3, 1.3); ctx.restore();
+    },
     wall(x, y) { // gạch tường (Sniper)
         ctx.fillRect(x - 3.4, y - 3, 3, 2.4); ctx.fillRect(x + 0.4, y - 3, 3, 2.4);
         ctx.fillRect(x - 1.5, y - 0.2, 3, 2.4); ctx.fillRect(x - 3.4, y + 0.4, 1.4, 2.4); ctx.fillRect(x + 2, y + 0.4, 1.4, 2.4);
     },
 };
+
+// Vẽ biểu tượng luôn đứng chiều với người xem (xe có chữ lật 180° -> xoay biểu tượng theo)
+function hudGlyphAt(g, x, y, F) {
+    const fn = HUD_GLYPH[g];
+    if (!fn) return;
+    if (!F || !F.flip) { fn(x, y, F || { hx: 1, dir: 1, flip: false }); return; }
+    ctx.save(); ctx.translate(x, y); ctx.rotate(Math.PI);
+    fn(0, 0, { hx: 1, dir: 1, flip: false });
+    ctx.restore();
+}
 
 const sec = f => (f / 60).toFixed(1);
 // Danh sách hiệu ứng (ưu tiên từ trên xuống: khống chế -> sát thương theo thời gian -> buff)
@@ -194,7 +243,7 @@ function hudDrawChip(F, s, lx, dMid, w) {
     const gx = F.X(lx + 6), gy = F.Y(dMid);
     ctx.fillStyle = s.c; ctx.strokeStyle = s.c; ctx.lineWidth = 1.2; ctx.lineCap = 'round';
     ctx.shadowBlur = 4; ctx.shadowColor = s.c;
-    HUD_GLYPH[s.g](gx, gy, F);
+    hudGlyphAt(s.g, gx, gy, F);
     ctx.shadowBlur = 0;
     // nhãn + thời gian
     ctx.fillStyle = '#f1f5f9';
@@ -359,3 +408,58 @@ function hudRowY(p, row) {
     return p.id === 1 ? p.y + p.h + d : p.y - d;
 }
 
+
+// ---------- Hàng phụ (thanh / chip riêng của body), xếp ngoài HUD chung, không đè HP/đạn ----------
+// Hàng i cách mép xe d = 13.5 + 5i (P1 dưới gầm, P2 trên nóc). Sát mép màn hình chỉ còn ~8px -> tối đa
+// 1-2 thanh mảnh (i = 0 / 0.7). Chip (cao 11) & chấm đặt ở PHÍA TRƯỚC xe (hướng địch): o.d = hudNearD(p, off, h).
+function hudExtraD(i) { return 13.5 + (i || 0) * 5; }
+// d của 1 phần tử cao h đặt trước mũi xe, cách xe off px (d âm = phía địch)
+function hudNearD(p, off, h) { return -(p.h + (off || 0) + (h || 0)); }
+function hudBarWidth(p) { return Math.max(40, Math.min(54, p.w + 14)); }
+// Thanh tiến độ ở hàng phụ i: k 0..1; o.cx (vẽ tại toạ độ x khác, vd. bản sao), o.h, o.marks [0..1], o.bg
+function hudExtraBar(p, i, k, color, o) {
+    o = o || {};
+    const F = hudFrame(p, o.cx);
+    const BW = o.w || hudBarWidth(p), bx = -BW / 2, d = o.d !== undefined ? o.d : hudExtraD(i), h = o.h || 3;
+    ctx.save();
+    ctx.fillStyle = o.bg || 'rgba(4, 8, 18, 0.85)';
+    hudRRect(F, bx - 1, d - 1, BW + 2, h + 2, 1.5); ctx.fill();
+    ctx.fillStyle = color; ctx.shadowBlur = o.glow === 0 ? 0 : 5; ctx.shadowColor = color;
+    hudFill(F, bx, d, BW * Math.max(0, Math.min(1, k || 0)), h);
+    ctx.shadowBlur = 0;
+    if (o.marks) {
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        for (const m of o.marks) hudFill(F, bx + BW * m - 0.5, d - 1.5, 1, h + 3);
+    }
+    ctx.restore();
+    return { F, d, BW };
+}
+// Dãy chip nhỏ [biểu tượng + số] căn giữa ở hàng phụ i (o.d: đặt chỗ khác, vd. trước mũi xe). chips: [{ g, c, l }]
+function hudExtraChips(p, i, chips, o) {
+    o = o || {};
+    if (!chips || !chips.length) return;
+    const F = hudFrame(p);
+    ctx.save();
+    const ws = chips.map(s => hudChipWidth(s));
+    const total = ws.reduce((a, b) => a + b, 0) + 3 * (chips.length - 1);
+    let lx = -total / 2;
+    const dMid = (o.d !== undefined ? o.d : hudExtraD(i)) + 5.5;
+    chips.forEach((s, j) => { hudDrawChip(F, s, lx, dMid, ws[j]); lx += ws[j] + 3; });
+    ctx.restore();
+}
+// Dãy chấm (pip) ở hàng phụ i: n ô, lit sáng; o.active = chỉ số ô đang chọn (sáng mạnh)
+function hudExtraPips(p, i, n, lit, color, o) {
+    o = o || {};
+    const F = hudFrame(p, o.cx);
+    const pw = o.pw || 6, gap = o.gap || 2, h = o.h || 3;
+    const total = n * pw + (n - 1) * gap;
+    const d = o.d !== undefined ? o.d : hudExtraD(i);
+    ctx.save();
+    for (let j = 0; j < n; j++) {
+        const on = o.active !== undefined ? j === o.active : j < lit;
+        ctx.fillStyle = on ? color : 'rgba(255,255,255,0.16)';
+        ctx.shadowBlur = on ? 5 : 0; ctx.shadowColor = color;
+        hudRRect(F, -total / 2 + j * (pw + gap), d, pw, h, 1); ctx.fill();
+    }
+    ctx.restore();
+}

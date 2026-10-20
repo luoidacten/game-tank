@@ -120,27 +120,23 @@ Object.assign(Player.prototype, {
                 const fillRatio = Math.min(this.paradoxCharge / maxT, 1);
                 let cur = null;
                 for (const mk of marks) if (this.paradoxCharge >= mk.t) cur = mk;
-                ctx.fillStyle = 'rgba(0,0,0,0.5)';
-                ctx.fillRect(this.x, this.y - 10, this.w, 5);
-                ctx.fillStyle = cur ? cur.color : 'rgba(200,200,200,0.8)';
-                ctx.fillRect(this.x, this.y - 10, this.w * fillRatio, 5);
-                ctx.fillStyle = 'white';
-                for (const mk of marks) ctx.fillRect(this.x + this.w * (mk.t / maxT) - 1, this.y - 12, 2, 9);
+                // Thanh tụ ở hàng phụ của HUD chung (không đè thanh máu), vạch trắng = các mốc
+                const bar = hudExtraBar(this, 0, fillRatio, cur ? cur.color : 'rgba(200,200,200,0.8)', { h: 4, marks: marks.map(mk => mk.t / maxT) });
                 if (cur) {
-                    ctx.font = 'bold 9px Arial'; ctx.textAlign = 'center';
-                    ctx.fillText(cur.label, this.x + this.w / 2, this.y - 15);
+                    ctx.font = "700 9px 'Rajdhani', Arial"; ctx.fillStyle = cur.color === 'cyan' ? '#a5f3fc' : '#ffffff';
+                    ctx.shadowBlur = 4; ctx.shadowColor = cur.color;
+                    hudText(bar.F, cur.label, 0, hudNearD(this, 18));
+                    ctx.shadowBlur = 0;
                 }
             }
 
             // Vẽ hồi chiêu
             if (this.paradoxCooldown > 0) {
-                ctx.fillStyle = "gray";
                 let maxCd = this.hasUpgrade('evo_paradox_2') ? 420 : 720;
-                ctx.fillRect(this.x, this.y + this.h + 5, this.w * (this.paradoxCooldown / maxCd), 3);
+                hudExtraBar(this, this.paradoxCharge > 0 ? 0.9 : 0, this.paradoxCooldown / maxCd, '#94a3b8', { h: 2, glow: 0 });
             }
             if (this.paradoxAnchorCD > 0) {
-                ctx.fillStyle = "#5566aa";
-                ctx.fillRect(this.x, this.y + this.h + 9, this.w * (this.paradoxAnchorCD / 1200), 2);
+                hudExtraBar(this, 0, this.paradoxAnchorCD / 1200, '#5566aa', { h: 2, glow: 0, d: hudNearD(this, 3, 2) });
             }
 
             // NEO THỜI KHÔNG

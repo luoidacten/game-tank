@@ -23,9 +23,10 @@ Object.assign(Player.prototype, {
             }
 
             if (this.mirrorCharge > 0) {
-                ctx.fillStyle = "cyan";
-                ctx.fillRect(this.x, this.y - 10, this.w * (this.mirrorCharge / 60), 4);
-                ctx.fillRect(cx, cy - 10, this.w * (this.mirrorCharge / 60), 4);
+                // Thanh tụ ở hàng phụ HUD (dưới xe P1 / trên xe P2) cho cả xe thật lẫn bản sao
+                ctx.globalAlpha = 1;
+                hudExtraBar(this, 0, this.mirrorCharge / 60, '#00ffff', { h: 3 });
+                hudExtraBar(this, 0, this.mirrorCharge / 60, '#00ffff', { h: 3, cx: cx + this.w / 2 });
             }
             ctx.restore();
 

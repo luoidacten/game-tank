@@ -151,44 +151,72 @@ function djDrawLane(p, tick) {
         }
         ctx.shadowBlur = 0; ctx.globalAlpha = 1;
     }
+    // Khoá nhịp (LOẠN ÂM / LỠ NHỊP -> nạp đạn): khuông tối + biểu tượng câm + thanh nạp lại
+    if ((p.djLock || 0) > 0) {
+        ctx.fillStyle = 'rgba(8, 6, 22, 0.6)';
+        djRoundRect(cx - half, cy - h / 2, half * 2, h, 7); ctx.fill();
+        const lk = 1 - p.djLock / DJ_LOCK_TICKS;
+        ctx.fillStyle = 'rgba(148, 163, 184, 0.25)'; ctx.fillRect(cx - half + 7, cy + 4, half * 2 - 14, 2.5);
+        ctx.fillStyle = '#22d3ee'; ctx.shadowBlur = 6; ctx.shadowColor = '#22d3ee';
+        ctx.fillRect(cx - half + 7, cy + 4, (half * 2 - 14) * lk, 2.5);
+        ctx.shadowBlur = 0;
+        if (typeof hudGlyphAt === 'function') {
+            ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.4;
+            hudGlyphAt('silence', cx, cy - 2.5, { flip: hudTextFlip(p) });
+        }
+    }
     // Vòng tâm chuẩn
     ctx.strokeStyle = pc; ctx.lineWidth = 2; ctx.shadowBlur = 10; ctx.shadowColor = pc;
     ctx.beginPath(); ctx.arc(cx, cy, 5.5 + pulse * 2.5, 0, Math.PI * 2); ctx.stroke();
     ctx.shadowBlur = 0;
-    // Nhãn độ khó (trái) & lượt bảo hộ (phải)
-    ctx.font = 'bold 7px "Orbitron", Arial';
-    // Nhãn nằm phía "trên" khuông theo góc nhìn của người chơi (P2: phía y lớn hơn)
-    const labY = p.id === 1 ? cy - h / 2 - 2.5 : cy + h / 2 + 8.5;
-    const dotY = p.id === 1 ? cy - h / 2 - 4.5 : cy + h / 2 + 4.5;
-    ctx.textAlign = 'center'; ctx.fillStyle = diff.color;
-    drawWorldText(ctx, diff.short, cx - half + 9, labY);
+    // Mép ngoài khuông (phía người chơi nhìn "trên"): độ khó = vạch sóng (trái), bảo hộ = chấm xanh (phải)
+    const outY = p.id === 1 ? cy - h / 2 : cy + h / 2;
+    const od = p.id === 1 ? -1 : 1;
+    const di = Math.max(0, Math.min(DJ_DIFFS.length - 1, DJ_DIFFS.indexOf(diff)));
+    ctx.fillStyle = 'rgba(8, 6, 22, 0.78)';
+    djRoundRect(cx - half + 3, od < 0 ? outY - 7 : outY + 1, 22, 6, 2); ctx.fill();
+    for (let i = 0; i < DJ_DIFFS.length; i++) {
+        const bh = 2 + i * 1.2;
+        ctx.fillStyle = i <= di ? diff.color : 'rgba(255,255,255,0.15)';
+        ctx.fillRect(cx - half + 6 + i * 4.6, od < 0 ? outY - 2 - bh : outY + 2, 3, bh);
+    }
+    const dotY = outY + od * 4.5;
     const g = djMaxGuards(p);
     for (let i = 0; i < g; i++) {
         ctx.fillStyle = i < (p.djGuards || 0) ? '#4ade80' : 'rgba(255,255,255,0.15)';
         ctx.beginPath(); ctx.arc(cx + half - 4 - i * 5, dotY, 1.6, 0, Math.PI * 2); ctx.fill();
     }
-    // Combo
+    // Combo: thanh mảnh dọc đáy khuông (tiến tới bậc kế) + chấm bậc ở giữa mép ngoài
     const combo = p.djCombo || 0;
-    const ty = p.id === 1 ? cy - h / 2 - 3 : cy + h / 2 + 10;
-    if (combo > 0) {
-        ctx.textAlign = 'center';
-        ctx.font = `900 ${10 + Math.min(4, djTier(p) * 0.4) + pulse * 2}px "Orbitron", Arial`;
-        ctx.fillStyle = combo >= 120 ? '#ff7ae6' : (combo >= 60 ? '#ff9a3c' : (combo >= 30 ? '#facc15' : '#e2e8f0'));
-        ctx.shadowBlur = 8; ctx.shadowColor = ctx.fillStyle;
-        drawWorldText(ctx, `x${combo}`, cx, ty);
-        ctx.shadowBlur = 0;
+    const tier = djTier(p), maxTier = djFull(p) ? 12 : 10;
+    const cc = combo >= 120 ? '#ff7ae6' : (combo >= 60 ? '#ff9a3c' : (combo >= 30 ? '#facc15' : '#e2e8f0'));
+    const inY = p.id === 1 ? cy + h / 2 - 2.5 : cy - h / 2 + 1;
+    ctx.fillStyle = cc; ctx.shadowBlur = 6; ctx.shadowColor = cc;
+    ctx.fillRect(cx - half + 7, inY, (half * 2 - 14) * (tier >= maxTier ? 1 : (combo % 10) / 10), 1.5);
+    if (tier > 0) {
+        const sp = 4.2, x0 = cx - (maxTier - 1) * sp / 2;
+        for (let i = 0; i < maxTier; i++) {
+            ctx.fillStyle = i < tier ? cc : 'rgba(255,255,255,0.13)';
+            ctx.shadowBlur = i < tier ? 4 + pulse * 4 : 0;
+            ctx.beginPath(); ctx.arc(x0 + i * sp, dotY, i < tier ? 1.5 + pulse * 0.5 : 1.1, 0, Math.PI * 2); ctx.fill();
+        }
     }
-    // Phản hồi bấm
+    ctx.shadowBlur = 0;
+    // Phản hồi bấm: biểu tượng bật ra cạnh tâm (thay chữ)
     const fb = p.djFb;
-    if (fb && tick - fb.t < 24) {
+    if (fb && tick - fb.t < 24 && typeof hudGlyphAt === 'function') {
         const k = 1 - (tick - fb.t) / 24;
-        const txt = { perfect: 'PERFECT!', good: 'GOOD', miss: 'LOẠN ÂM', pass: 'LỠ NHỊP', guard: 'BẢO HỘ', auto: 'AUTO!' }[fb.k] || '';
+        const gl = { perfect: 'stun', good: 'check', miss: 'cross', pass: 'cross', guard: 'guard', auto: 'stun' }[fb.k] || 'check';
         const col = { perfect: '#ff2fd1', good: '#ffd60a', miss: '#94a3b8', pass: '#94a3b8', guard: '#4ade80', auto: '#facc15' }[fb.k] || '#fff';
+        const gx = cx + 22, gy = cy;
         ctx.globalAlpha = k;
-        ctx.font = 'bold 8px "Orbitron", Arial'; ctx.textAlign = 'center'; ctx.fillStyle = col;
-        const dy = (p.id === 1 ? -1 : 1) * (12 + (1 - k) * 8);
-        drawWorldText(ctx, txt, cx + half * 0.62, ty + dy * 0.4 + (p.id === 1 ? -2 : 2));
-        ctx.globalAlpha = 1;
+        ctx.translate(gx, gy); const sc = 1.3 + (1 - k) * 0.8; ctx.scale(sc, sc); ctx.translate(-gx, -gy);
+        ctx.fillStyle = 'rgba(8, 6, 22, 0.8)';
+        ctx.beginPath(); ctx.arc(gx, gy, 5.5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = col; ctx.strokeStyle = col; ctx.lineWidth = 1.5; ctx.lineCap = 'round';
+        ctx.shadowBlur = 8; ctx.shadowColor = col;
+        hudGlyphAt(gl, gx, gy, { flip: typeof hudTextFlip === 'function' && hudTextFlip(p) });
+        ctx.globalAlpha = 1; ctx.shadowBlur = 0;
     }
     ctx.restore();
 }
