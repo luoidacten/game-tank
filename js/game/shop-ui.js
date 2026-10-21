@@ -113,6 +113,7 @@ function showUpgradeScreen() {
             pl._gearShopRound = gameState.round;
             pl._gearFreeRerollAvailable = typeof pl.hasGear === 'function' && pl.hasGear('gear_starter_p');
             pl._gearFreeFootAvailable = typeof pl.hasGear === 'function' && pl.hasGear('gear_free_foot_s');
+            pl._gamblerFreeReroll = isGamblerBody(pl); // Nội tại Cờ Bạc: Reroll đầu tiên mỗi hiệp miễn phí
         }
     });
 
@@ -293,6 +294,14 @@ function renderStandardCards(playerId, list) {
     state.justRerolledSlot = -1;
 }
 
+// Nội tại Cờ Bạc (docs/BODY_MOI_4.md): Joker, Jack - 6 Lỗ, COC -> Reroll đầu tiên mỗi hiệp miễn phí, +1 ô lựa chọn shop & G.E.A.R
+const GAMBLER_BODIES = ['joker', 'jack_6_lo', 'coc'];
+function isGamblerBody(p) {
+    if (!p) return false;
+    if (GAMBLER_BODIES.includes(p.weapon)) return true;
+    return Array.isArray(p.upgrades) && p.upgrades.some(u => GAMBLER_BODIES.includes(u));
+}
+
 function renderShop(playerId, keepItems = false) {
     const container = document.getElementById(`${playerId}-upgrades`);
     if (!container) return;
@@ -309,11 +318,15 @@ function renderShop(playerId, keepItems = false) {
     if (player && typeof player.hasGear === 'function') {
         if (player.hasGear('gear_discount_g')) rerollMult *= 0.70;
     }
-    const rerollCost = player._gearFreeRerollAvailable ? 0 : Math.max(2, Math.round(5 * rerollMult));
-    rerollBtn.innerHTML = `<h4>REROLL</h4><p>Đổi hàng</p><p style="color:yellow">${rerollCost === 0 ? 'MIỄN PHÍ' : '$' + rerollCost}</p>`;
+    const gamblerFree = !!player._gamblerFreeReroll && isGamblerBody(player);
+    const rerollCost = (player._gearFreeRerollAvailable || gamblerFree) ? 0 : Math.max(2, Math.round(5 * rerollMult));
+    rerollBtn.innerHTML = `<h4>REROLL</h4><p>Đổi hàng</p><p style="color:yellow">${rerollCost === 0 ? 'MIỄN PHÍ' : '$' + rerollCost}</p>` +
+        (gamblerFree ? `<p class="gambler-free-tag" style="color:#fcd34d; font-size:10px; font-weight:bold; margin-top:2px;">🎲 Cờ Bạc: Reroll miễn phí</p>` : '');
     rerollBtn.onclick = () => {
         if ((playerId === 'p1' ? gameState.p1Coins : gameState.p2Coins) >= rerollCost) {
-            if (player._gearFreeRerollAvailable) {
+            if (gamblerFree) {
+                player._gamblerFreeReroll = false;
+            } else if (player._gearFreeRerollAvailable) {
                 player._gearFreeRerollAvailable = false;
             } else {
                 if (playerId === 'p1') gameState.p1Coins -= rerollCost; else gameState.p2Coins -= rerollCost;
@@ -400,10 +413,11 @@ function renderShop(playerId, keepItems = false) {
             let remainingPool = poolFeet.concat(availableEvos.filter(e => e.id !== guaranteedEvo.id));
             remainingPool.sort(() => 0.5 - Math.random());
             shopItems.push(remainingPool[0]);
+            if (isGamblerBody(player) && remainingPool[1]) shopItems.push(remainingPool[1]); // Cờ Bạc: +1 ô
             player.rerollCount = 0;
         } else {
             let generalPool = poolFeet.concat(availableEvos).sort(() => 0.5 - Math.random());
-            shopItems = generalPool.slice(0, 2);
+            shopItems = generalPool.slice(0, 2 + (isGamblerBody(player) ? 1 : 0)); // Cờ Bạc: +1 ô
             if (shopItems.some(it => it.type === 'evo')) player.rerollCount = 0;
         }
 

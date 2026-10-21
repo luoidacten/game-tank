@@ -172,6 +172,7 @@ function rollPlayerGearChoices(player, milestoneIdx) {
         for (let i = 0; i < copies; i++) weightedPool.push(g);
     });
 
+    const nPick = 3 + ((typeof isGamblerBody === 'function' && isGamblerBody(player)) ? 1 : 0); // Cờ Bạc: +1 lựa chọn
     const chosen = [];
     const usedIds = new Set();
     const usedFamiliesInHand = new Set();
@@ -183,16 +184,16 @@ function rollPlayerGearChoices(player, milestoneIdx) {
         usedIds.add(g.id);
         if (g.familyId) usedFamiliesInHand.add(g.familyId);
         chosen.push(g);
-        if (chosen.length >= 3) break;
+        if (chosen.length >= nPick) break;
     }
 
     // Nếu vẫn chưa đủ 3 (do lọc family trong cùng 1 lượt), lấy bù từ pool
-    if (chosen.length < 3) {
+    if (chosen.length < nPick) {
         for (const g of pool) {
             if (!usedIds.has(g.id)) {
                 usedIds.add(g.id);
                 chosen.push(g);
-                if (chosen.length >= 3) break;
+                if (chosen.length >= nPick) break;
             }
         }
     }

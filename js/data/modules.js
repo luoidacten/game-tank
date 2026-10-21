@@ -401,6 +401,14 @@ const MODULES = {
             size: { w: 26, h: 26 },
             stats: { hp: 4.0, dmg: 0.8, ammo: 4, speedMult: 1.0571 }
         },
+        {
+            id: 'jack_6_lo',
+            name: 'Jack - 6 Lỗ',
+            desc: '"MỘT VÁN NỮA, CƯỢC ĐI CƯỢC ĐI NÀO HAAHAHA!" HP:4.5 | Dame:1.0 | Đạn:4 (đôi khi 5–6) | Tốc: 3.6. NỘI TẠI CỜ BẠC: Reroll shop đầu tiên mỗi hiệp miễn phí, +1 ô lựa chọn shop & G.E.A.R. CHỈ SỐ BẤT ĐỊNH: đầu hiệp HP/Dame/Tốc random ±30% (tổng cân bằng). TUNG XU mỗi 3s: NGỬA -> LUCK 12s (xóa Nợ, +20% tốc, -15% st nhận, 20% né, Chí Mạng 50%); ÚP -> +1 NỢ (-4% tốc tối đa -40%, +5% st nhận). Đạn thường 25% Chí Mạng x2. Nhấp: HANDER xả ngẫu nhiên 1–4 viên hình nón; nạp 1.4s, 25% nhét lố 5–6 viên (Luck: 60% ra 6). Giữ 1s: THE BOY - Cò Quay Nga, không thể cất súng, mỗi nhấp bóp 1 lỗ (1s/lần): Phát 1 x6 đại đạn nổ homing | Phát 2–3 x2 nổ nhỏ | Phát 4–5 x1.5 "Nah, chán!" | trống "CẠCH!" | Phát 6 nổ ngược: Choáng 1.25s & tự nhận 2.0 st (bỏ qua khiên). Hồi 2s (nổ ngược: 6s). Hạ gục bằng The BOY -> kết liễu JACKPOT 777!',
+            type: 'body', role: ['Đối Đầu', 'Cơ Động'],
+            size: { w: 28, h: 28 },
+            stats: { hp: 4.5, dmg: 1.0, ammo: 4, speedMult: 1.0286 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 30 },

@@ -474,3 +474,16 @@ function botShopBuy(playerId) {
         return f.call(this, bot, enemy, aligned, inp);
     };
 })();
+
+// Jack - 6 Lỗ: giữ 1s rút The BOY (jlBotWantBoy), rồi nhấp bóp cò mỗi khi hồi xong
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon === 'jack_6_lo' && typeof jlBotWantBoy === 'function') {
+            if (this.jlB > 0) { this.jlB--; inp.s = this.jlB > 2; return; }
+            if (bot.jlMode === 'boy') { if (!(bot.jlPullCd > 0) && !bot.jlUsed) { this.jlB = 4; inp.s = true; } else inp.s = false; return; }
+            if (jlBotWantBoy(bot, enemy)) { this.jlB = 66; inp.s = true; return; }
+        }
+        return f.call(this, bot, enemy, aligned, inp);
+    };
+})();

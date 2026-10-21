@@ -242,6 +242,8 @@ function renderFrame() {
     if (typeof psyFxOver === 'function') psyFxOver();
     // Lớp phủ kết liễu Thợ May (ĐƯỜNG KIM MŨI CHỈ) - js/characters/tailor/render.js
     if (typeof tlFxOver === 'function') tlFxOver();
+    // Lớp phủ kết liễu Jack - 6 Lỗ (JACKPOT 777!) - js/characters/jack_6_lo/render.js
+    if (typeof jlFxOver === 'function') jlFxOver();
 
     // Particles & Floating Numbers
     updateAndDrawParticles();
@@ -275,7 +277,7 @@ function renderFrame() {
 // Băng rôn thắng hiệp: mốc bắt đầu hiện (tick trong fatalCinematic), -1 = chưa hiện
 let victoryBannerStart = -1;
 const VICTORY_BANNER_MAX_WAIT = 66;
-const FINISHER_FX_CLASSES = ['FsFinisher', 'TsFinisher', 'JkFinisher', 'JgFinisher', 'CgFinisher', 'ClFinisher', 'JpFinisher', 'WsFinisher', 'StFinisher', 'TatFinisher', 'OpFinisher', 'BmFinisher', 'ArFinisher', 'PsyFinisher', 'TlFinisher'];
+const FINISHER_FX_CLASSES = ['FsFinisher', 'TsFinisher', 'JkFinisher', 'JgFinisher', 'CgFinisher', 'ClFinisher', 'JpFinisher', 'WsFinisher', 'StFinisher', 'TatFinisher', 'OpFinisher', 'BmFinisher', 'ArFinisher', 'PsyFinisher', 'TlFinisher', 'JlFinisher'];
 function finisherFxActive() {
     if (typeof bodyEffects === 'undefined') return false;
     for (const e of bodyEffects) {
