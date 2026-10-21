@@ -13,7 +13,7 @@
   - Sandbox: bật/tắt lõi tiền/lãi thì nhận thưởng lại nhiều lần.
   - ~14 chỗ `hasGear('...')` trỏ tới id không tồn tại (đổi tên?).
   - Thiếu hình ảnh: Giáp Trắng (`gearWhiteShield`) không vẽ; #127 đường ray, #138 vùng Bullet Time, #45 màng hấp thụ, #141 buff Hộp Bí Ẩn, #119 không có phản hồi; #116/#81/#137/#108/#115 hình sơ sài; các buff theo thời gian/cộng dồn không có chỉ báo (#23 #24 #136 #142 #51 #52 #53 #59 #98 #148).
-- 5 body mới (đặc tả `docs/BODY_MOI_3.md`), làm từ dễ đến khó, xong cái nào push cái đó: ~~Nhện Độc~~ ✅ → ~~Boomerang~~ ✅ → ~~Thợ May~~ ✅ → ~~Siêu Năng~~ ✅ → Kusarigama (`kusarigama`).
+- 5 body mới (đặc tả `docs/BODY_MOI_3.md`), làm từ dễ đến khó, xong cái nào push cái đó: ~~Nhện Độc~~ ✅ → ~~Boomerang~~ ✅ → ~~Thợ May~~ ✅ → ~~Siêu Năng~~ ✅ → ~~Kusarigama~~ ✅.
 - Nhóm Cờ Bạc + 2 body mới (đặc tả `docs/BODY_MOI_4.md`): ~~nội tại Cờ Bạc~~ ✅; ~~Jack - 6 Lỗ~~ ✅; COC (`coc`).
 - Sau đó: thêm hiệu ứng kết liễu cho mọi body còn thiếu (trừ Cơ Bản); chữ thắng hiệp ("PLAYER X THẮNG") chỉ hiện sau khi kết liễu kết thúc 3s.
 - Còn lại: các mục bên dưới.
