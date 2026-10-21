@@ -38,7 +38,7 @@ const NET_CLASSES = {
     TatZone, TatPhantom, TatCombo, TatTrail, TatFinisher,
     OpPunchFx, OpFinisher,
     ArWeb, ArSpiderling, ArFinisher,
-    MapVehicle, MvShot, MvHealOrbs, MvAura,
+    MapVehicle, MvShot, MvHealOrbs, MvAura, CrLaser, CrTrapFx, CrAura,
     MainAwakenFx,
     GearSupportDrone, GearMine, GearBarrierWall, GearCenterPrism, GearMirage, GearPrankBox, GearStormBolt, GearFieldDevice,
     BmStraight, BmCurve, BmBlast, BmFinisher,

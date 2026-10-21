@@ -113,6 +113,12 @@ function psyDrawCap(b) {
             ctx.save(); ctx.fillStyle = '#334155'; ctx.strokeStyle = PSY_CYAN; ctx.lineWidth = 1.5;
             ctx.beginPath(); ctx.arc(cx, cy, 6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
             ctx.fillStyle = '#fb923c'; ctx.beginPath(); ctx.arc(cx + 3, cy - 4, 1.6, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+        } else if (b.psyEnv) {
+            // đạn môi trường (Xe Tấn Công / Thùng Đạn) bị bắt
+            const r = b.psyEnv === 'shell' ? 6 : (b.psyEnv === 'smg' ? 3 : 3.2);
+            ctx.save(); ctx.fillStyle = b.psyEnv === 'smg' ? '#ff4d4d' : '#ffb347'; ctx.strokeStyle = '#7a3a00'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#fff3c4'; ctx.beginPath(); ctx.arc(cx, cy, r * 0.45, 0, Math.PI * 2); ctx.fill(); ctx.restore();
         } else {
             const h = b.psyOH && BulletHooks.registry[b.psyOH];
             if (h && h.draw) { const hk = b.hook; b.hook = b.psyOH; try { h.draw(b); } finally { b.hook = hk; } }

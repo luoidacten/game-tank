@@ -116,7 +116,7 @@ const MODULES = {
         {
             id: 'evolution',
             name: 'Tiến Hóa',
-            desc: 'HP:2 | Dame:1 | Đạn:1 (Thuần Farm). Ăn/Phá Rương & Xe cộng vĩnh viễn chỉ số (Thùng Băng: tỉ lệ làm chậm khi bắn trúng; Miễn Nhiễm: +HP & lượt miễn nhiễm đầu hiệp; Tốc: +tốc chạy; Xe Buff/Hồi Máu/Tấn Công: +ST/+HP/+tốc). Rương Giả Mạo (Mimic). Late game bất khả chiến bại.',
+            desc: 'HP:2 | Dame:1 | Đạn:1 (Thuần Farm). Ăn/Phá Rương & Xe cộng vĩnh viễn chỉ số (Thùng Băng: tỉ lệ làm chậm khi bắn trúng; Miễn Nhiễm: +HP & lượt miễn nhiễm đầu hiệp; Tốc: +tốc chạy; Lazer: +ST; Khống Chế: +HP; Giáp Ảo: +HP & Giáp Trắng đầu hiệp; Giảm ST: giảm sát thương nhận vĩnh viễn (tối đa 10%); Xe Buff/Hồi Máu/Tấn Công: +ST/+HP/+tốc). Rương Giả Mạo (Mimic). Late game bất khả chiến bại.',
             type: 'body', role: ['Sinh Tồn', 'Đối Đầu'],
             size: { w: 30, h: 30 },
             stats: { hp: 2, dmg: 1, ammo: 1, speedMult: 1.0 }
@@ -388,7 +388,7 @@ const MODULES = {
         {
             id: 'psychokinesis',
             name: 'Siêu Năng',
-            desc: '"Tất cả... dừng lại cho ta!" HP:4 | Dame:0.85 | Đạn:6 (nạp 1.2s/viên) | Tốc: 3.65. Nhấp: ĐẠN NIỆM LỰC trôi lệch sang bên, lơ lửng giảm tốc 0.45s rồi vút đi (tốc 12); xả liên tiếp được nhiều viên. Giữ 1s (hồi 11s): VÙNG NIỆM LỰC r=135 theo xe tối đa 5s (xe -20% tốc): đạn bay thường của địch lọt vào bị thắng phanh, dừng lơ lửng lệch nhịp, hoá xanh lơ & thuộc về bạn (giữ nguyên st, cỡ, hiệu ứng; tối đa 15 viên). Không bắt được: hitscan / tia lazer, chiêu lao húc, siêu đạn không thể cản phá. Trong vùng: nhấp (hoặc hết giờ) -> PHẢN HỒI NGƯỢC QUỸ ĐẠO +30% tốc; giữ 1s -> KHOÁ TÂM TẤT SÁT: hiện đường ngắm rồi hội tụ về địch (homing nhẹ), hồi chiêu +2s. Hạ gục địch -> kết liễu TÂM NIỆM NGHIỀN NÁT.',
+            desc: '"Tất cả... dừng lại cho ta!" HP:4 | Dame:0.85 | Đạn:6 (nạp 1.2s/viên) | Tốc: 3.65. Nhấp: ĐẠN NIỆM LỰC trôi lệch sang bên, lơ lửng giảm tốc 0.45s rồi vút đi (tốc 12); xả liên tiếp được nhiều viên. Giữ 1s (hồi 11s): VÙNG NIỆM LỰC r=135 theo xe tối đa 5s (xe -20% tốc): đạn bay thường của địch (cả đạn Xe Tấn Công & chùm đạn Thùng Đạn) lọt vào bị thắng phanh, dừng lơ lửng lệch nhịp, hoá xanh lơ & thuộc về bạn (giữ nguyên st, cỡ, hiệu ứng; tối đa 15 viên). Không bắt được: hitscan / tia lazer, chiêu lao húc, siêu đạn không thể cản phá. Trong vùng: nhấp (hoặc hết giờ) -> PHẢN HỒI NGƯỢC QUỸ ĐẠO +30% tốc; giữ 1s -> KHOÁ TÂM TẤT SÁT: hiện đường ngắm rồi hội tụ về địch (homing nhẹ), hồi chiêu +2s. Hạ gục địch -> kết liễu TÂM NIỆM NGHIỀN NÁT.',
             type: 'body', role: ['Kiểm Soát'],
             size: { w: 28, h: 28 },
             stats: { hp: 4.0, dmg: 0.85, ammo: 6, speedMult: 1.0429 }
