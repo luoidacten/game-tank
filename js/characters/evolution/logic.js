@@ -90,6 +90,24 @@ Object.assign(Player.prototype, {
             const spdGain = 0.05 * mult;
             B.speed += spdGain; this.speed += spdGain;
             fx(`TIẾN HÓA TỐC: +${spdGain.toFixed(2)} SPEED »🧬`, '#38f0ff');
+        } else if (type === 'c_laser') {
+            const dmgGain = 0.15 * mult;
+            B.dmg += dmgGain; this.damage += dmgGain;
+            fx(`TIẾN HÓA LAZER: +${dmgGain.toFixed(2)} DMG ⚡🧬`, '#ff2d75');
+        } else if (type === 'c_trap') {
+            const hpGain = 0.4 * mult;
+            B.hp += hpGain; this.maxHp += hpGain; this.hp = Math.min(this.maxHp, this.hp + hpGain);
+            fx(`TIẾN HÓA BẪY: +${hpGain.toFixed(2)} HP ⛓🧬`, '#a3e635');
+        } else if (type === 'c_phantom') {
+            // Giáp Ảo: +HP & mỗi hiệp bắt đầu với +0.25 Giáp Trắng / thùng (tối đa 1.0)
+            const hpGain = 0.2 * mult;
+            B.phantomWs = Math.min(1, (B.phantomWs || 0) + 0.25 * mult);
+            B.hp += hpGain; this.maxHp += hpGain; this.hp = Math.min(this.maxHp, this.hp + hpGain);
+            fx(`TIẾN HÓA GIÁP ẢO: +${hpGain.toFixed(2)} HP, ${B.phantomWs.toFixed(2)} Giáp Trắng/hiệp 🛡🧬`, '#f8fafc');
+        } else if (type === 'c_guard') {
+            // Giảm Sát Thương: +2% giảm sát thương vĩnh viễn (tối đa 10%)
+            B.guardDr = Math.min(0.1, (B.guardDr || 0) + 0.02 * mult);
+            fx(`TIẾN HÓA GIÁP: -${Math.round(B.guardDr * 100)}% SÁT THƯƠNG NHẬN ⛊🧬`, '#818cf8');
         } else if (type === 'v_buff') {
             const dmgGain = 0.2 * mult;
             B.dmg += dmgGain; this.damage += dmgGain;

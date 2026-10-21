@@ -211,6 +211,32 @@ function psyCatchBombs(p, cx, cy, R) {
     }
 }
 
+// Bắt đạn của MÔI TRƯỜNG: đạn Xe Tấn Công (MvShot) + chùm đạn Thùng Đạn (CrateBurst) -> thành đạn Siêu Năng
+function psyCatchEnv(p, cx, cy, R) {
+    const mk = (x, y, sz, vx, vy, dmg, env) => {
+        const sp = Math.hypot(vx, vy), depth = 15 + Math.random() * 40;
+        spawnBullet(p, { x: x - sz / 2, y: y - sz / 2, w: sz, h: sz, vx, vy, dmg, hook: 'psy_cap', psyOH: '', psyOId: 0, psyCap: 1,
+            psyOVx: vx, psyOVy: vy, psyFr: Math.max(0.6, Math.min(0.95, depth / (sp + depth))), psyPh: Math.random() * 6.28, psyEnv: env, isPiercing: false });
+        p.psyCapN = (p.psyCapN || 0) + 1;
+        spawnSparkParticles(x, y, PSY_CYAN, 3);
+    };
+    for (const o of bodyEffects) {
+        if (!o || !o.active) continue;
+        if (typeof MvShot !== 'undefined' && o instanceof MvShot) {
+            if ((p.psyCapN || 0) >= psyCapMax(p) || Math.hypot(o.x - cx, o.y - cy) > R) continue;
+            o.active = false;
+            mk(o.x, o.y, Math.max(6, o.r * 2), o.vx, o.vy, o.dmg || 0.5, o.kind === 'shell' ? 'shell' : 'smg');
+        } else if (typeof CrateBurst !== 'undefined' && o instanceof CrateBurst && o.pellets) {
+            if (o.onlyEnemy && o.breakerId === p.id) continue; // chùm đạn phe mình -> để bay tiếp
+            for (const b of o.pellets) {
+                if (!b.on || (p.psyCapN || 0) >= psyCapMax(p) || Math.hypot(b.x - cx, b.y - cy) > R) continue;
+                b.on = false;
+                mk(b.x, b.y, 6, b.vx, b.vy, o.dmg || 0.75, 'pellet');
+            }
+        }
+    }
+}
+
 function psyFieldTick(p) {
     const e = psyEnemy(p), cx = psyCx(p), cy = psyCy(p), R = psyR(p), full = psyFull(p);
     const dx = p.x - (typeof p.psyLastX === 'number' ? p.psyLastX : p.x);
@@ -247,6 +273,7 @@ function psyFieldTick(p) {
         if ((p.psyCapN || 0) >= psyCapMax(p) || !psyCanCatch(b)) continue;
         psyCatch(p, e, i);
     }
+    psyCatchEnv(p, cx, cy, R);
     if (full) psyCatchBombs(p, cx, cy, R);
     if (psyE2(p) && e && e.hp > 0 && Math.hypot(psyCx(e) - cx, psyCy(e) - cy) < R + e.w / 2) addStatusSlow(e, 0.6);
     if (--p.psyField <= 0) psyReflect(p);

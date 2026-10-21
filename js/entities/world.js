@@ -33,6 +33,27 @@ class MovingObstacle {
     }
 }
 
+// ==========================================
+// BẢNG GACHA THÙNG TIẾP TẾ — trọng số xuất hiện của MỌI loại thùng (sửa tỉ lệ ở đây).
+// Tỉ lệ = trọng số / tổng. Thùng bánh răng (gear) cộng thêm khi trận có body chế tạo.
+// ==========================================
+const CRATE_WEIGHTS = {
+    coin: 25,    // $ tiền
+    hp: 20,      // + máu
+    ammo: 15,    // đạn
+    shield: 13,  // khiên
+    dmg: 10,     // +1 sát thương
+    boom: 9,     // thùng nổ (phản sát thương người phá)
+    bullets: 8,  // chùm đạn 360°
+    frost: 6,    // Băng: đóng băng đối thủ
+    haste: 6,    // Tốc: +40% tốc chạy 5s
+    immune: 5,   // Miễn Nhiễm ×3
+    phantom: 5,  // Giáp Ảo: Giáp Trắng 2.0 tan dần trong 5s
+    guard: 5,    // Giảm Sát Thương: -35% sát thương nhận 5s
+    trap: 5,     // Khống Chế: người phá bị choáng 1s (bẫy)
+    laser: 3,    // Lazer: cảnh báo cột dọc rồi bắn tia cực mạnh (HIẾM)
+};
+
 class Crate {
     constructor() {
         this.id = 'c_' + Math.random().toString(36).substr(2, 9);
@@ -48,7 +69,8 @@ class Crate {
         // [ĐỔI] Thùng bánh răng chỉ xuất hiện khi có Kỹ Sư / Kẻ Sáng Tạo / Thiên Tài / Nhà Phát Minh
         const hasMaker = ws.some(p => CRATE_GEAR_BODIES.includes(p.weapon));
         const hasEvo1 = ws.some(p => (p.weapon === 'inventor' && p.hasUpgrade('evo_inv_1')) || (p.weapon === 'genius' && p.hasUpgrade('evo_gen_1')));
-        const weights = { coin: 25, hp: 20, ammo: 15, shield: 13, dmg: 10, boom: 9, bullets: 8, frost: 6, immune: 5, haste: 6 };
+        // GACHA: bốc thăm theo trọng số trong bảng CRATE_WEIGHTS (thùng mạnh = hiếm)
+        const weights = Object.assign({}, CRATE_WEIGHTS);
         if (hasMaker) weights.gear = hasEvo1 ? 24 : 16;
         let total = 0; for (const k in weights) total += weights[k];
         let rand = Math.random() * total;
@@ -122,6 +144,8 @@ function crateOnBreak(c, opener) {
     }
     // Thùng Băng / Miễn Nhiễm / Tốc (js/entities/map-vehicles.js)
     if (typeof mvCrateBreak === 'function') mvCrateBreak(c, opener);
+    // Thùng Lazer / Khống Chế / Giáp Ảo / Giảm Sát Thương (js/entities/gacha-crates.js)
+    if (typeof crGachaBreak === 'function') crGachaBreak(c, opener, hasAllyCrate);
     if (typeof onGearCrateBroken === 'function') onGearCrateBroken(c, opener);
 }
 
