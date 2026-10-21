@@ -60,6 +60,7 @@ function ensurePlayerGearState(player) {
     if (!Array.isArray(player.equippedGears)) player.equippedGears = [];
     if (!Array.isArray(player.gearPickedMilestones)) player.gearPickedMilestones = [];
     if (!Array.isArray(player.gearFreeFeetUpgrades)) player.gearFreeFeetUpgrades = [];
+    if (!Array.isArray(player._appliedImmediateGearIds)) player._appliedImmediateGearIds = [];
     if (!Array.isArray(gameState.matchGearTiers) || gameState.matchGearTiers.length < 3) {
         gameState.matchGearTiers = generateMatchGearTiers();
     }
@@ -219,6 +220,10 @@ function applyGearImmediateEffect(player, gearId) {
     if (!player || !gearId) return;
     ensurePlayerGearState(player);
     syncPlayerBodyPreviewForGear(player);
+
+    // Chống cộng dồn tiền/lợi tức/cấp độ nhiều lần khi Bật -> Tắt -> Bật lại cùng 1 lõi trong Phòng Tập
+    if (player._appliedImmediateGearIds.includes(gearId)) return;
+    player._appliedImmediateGearIds.push(gearId);
 
     const opp = (player.id === 1) ? p2 : p1;
 
@@ -745,7 +750,7 @@ class GearBarrierWall {
         this.h = 10;
         this.x = owner ? Math.max(10, Math.min(canvas.width - this.w - 10, owner.x + owner.w / 2 - this.w / 2)) : 100;
         this.y = owner ? (owner.id === 1 ? owner.y - 24 : owner.y + owner.h + 14) : 100;
-        const hpMult = (owner && owner.hasGear && owner.hasGear('gear_summon_pack_g')) ? 1.35 : 1;
+        const hpMult = (owner && owner.hasGear && owner.hasGear('gear_summon_army_g')) ? 1.35 : 1;
         this.maxHp = 3.0 * hpMult;
         this.hp = this.maxHp;
         this.life = 360; // 6s
@@ -1032,7 +1037,7 @@ class GearStormBolt {
 
 function triggerGearSummonMartyr(owner, x, y) {
     if (!owner || !owner.hasGear) return;
-    if (!owner.hasGear('gear_summon_overload_p') && !owner.hasGear('gear_summon_martyr_p')) return;
+    if (!owner.hasGear('gear_summon_overload_p')) return;
     const enemy = owner.id === 1 ? p2 : p1;
     owner.gearWhiteShield = Math.min(5, (owner.gearWhiteShield || 0) + 0.4);
     addFloatingText(owner.x + owner.w / 2, owner.y - 14, '+0.4 GIÁP TRẮNG 🛡️', '#e2e8f0', 11);
@@ -1520,7 +1525,7 @@ function getGearDynamicDamageMult(attacker, victim, bullet = null) {
         if (hasEnemySummon) mult *= 1.30;
     }
     // #56 Bậc Thầy Phong Tỏa: địch đang chịu Khống Chế -> +20% sát thương
-    if ((attacker.hasGear('gear_ctrl_master_g') || attacker.hasGear('gear_ctrl_torment_g')) && victim && isPlayerAfflictedByCC(victim)) {
+    if (attacker.hasGear('gear_ctrl_master_g') && victim && isPlayerAfflictedByCC(victim)) {
         mult *= 1.20;
     }
     // #60 Ảo Ảnh Gia Tốc: phát bắn kế tiếp sau khi tạo Phân Ảnh +25% Sát thương
@@ -1731,7 +1736,7 @@ function applyGearsOnRoundSetup(p) {
     }
 
     // #63 Giáp Cốt Thép (+2.0 Max HP)
-    if (p.hasGear('gear_surv_plate_s') || p.hasGear('gear_surv_colossus_s')) {
+    if (p.hasGear('gear_surv_plate_s')) {
         p.maxHp += 2.0;
     }
 
@@ -1748,6 +1753,11 @@ function applyGearsOnRoundSetup(p) {
     // #69 Bầy Đàn Tối Thượng (+1 giới hạn triệu hồi)
     if (p.hasGear('gear_summon_overload_p')) {
         if (typeof p.maxSouls === 'number') p.maxSouls += 2;
+    }
+
+    // #94 Vòng Lặp Bất Tận (Chrononeo / Paradox / Portal): rút ngắn 20% thời gian hồi đạn/kỹ năng
+    if (p.hasGear('gear_hero_time_g')) {
+        p.reloadTime *= 0.80;
     }
 
     // #95 Gia Tộc Cơ Khí Alano (+3 Linh Kiện & Bánh Răng mỗi đầu hiệp)
@@ -1936,10 +1946,12 @@ function applyGearsOnRoundSetup(p) {
     p.gearThunderMagCd = 0;
     p.gearApexShockCd = 0;
     p.gearCloneArmyCd = 0;
+    p.gearHeroTimeCd = 0;
+    p.gearDjBeatCount = 0;
 
     // Triệu hồi đầu hiệp trên sân (chỉ tạo khi đang ở phase playing)
     if (typeof gameState !== 'undefined' && gameState.phase === 'playing' && typeof bodyEffects !== 'undefined') {
-        if (p.hasGear('gear_free_drone_g') || p.hasGear('gear_summon_pack_g')) {
+        if (p.hasGear('gear_free_drone_g')) {
             bodyEffects.push(new GearSupportDrone(p, 'free_drone'));
         }
         if (p.hasGear('gear_sup_shield_drone_g')) {
@@ -2037,6 +2049,35 @@ function updatePlayerGearsTick(p) {
             const dir = Math.sign(cx - (enemy.x + enemy.w / 2));
             enemy.x = Math.max(0, Math.min(canvas.width - enemy.w, enemy.x + dir * 30));
         }
+    }
+
+    // #94 Vòng Lặp Bất Tận: khi tua ngược hoặc nhảy không gian -> nhận +1.0 Giáp Trắng & bắn 2 mảnh thời gian
+    if ((p.gearHeroTimeCd || 0) > 0) p.gearHeroTimeCd--;
+    if (p.hasGear('gear_hero_time_g') && (p.gearHeroTimeCd || 0) <= 0 && (absStep > 60 || (p.paradoxRewindFlash || 0) > 0)) {
+        p.gearHeroTimeCd = 180;
+        p.gearWhiteShield = Math.min(4.0, (p.gearWhiteShield || 0) + 1.0 * getGearHealMult(p));
+        const dirY = p.id === 1 ? -1 : 1;
+        [-1.0, 1.0].forEach(vx => {
+            p.bullets.push({
+                x: p.x + p.w / 2 - 3, y: dirY < 0 ? p.y - 6 : p.y + p.h + 2,
+                w: 6, h: 9, vx: vx, vy: dirY * C.bulletSpeed * 1.25,
+                dmg: 0.4, owner: p, isGearBonusShot: true, _gearProcessed: true,
+                hitIds: [], bounceCount: 0
+            });
+        });
+        addFloatingText(p.x + p.w / 2, p.y - 16, 'VÒNG LẶP! +1.0 GIÁP ⏳', '#38bdf8', 12);
+    }
+
+    // #55 Mở Rộng Vùng Cấm: tăng +25% bán kính & +1.0s thời gian tồn tại cho các Vùng nguyên tố trên sân
+    if (p.hasGear('gear_ctrl_zone_s') && typeof bodyEffects !== 'undefined') {
+        bodyEffects.forEach(ef => {
+            if (ef && ef.active && ef.owner === p && !ef._gearCtrlZoneExpanded && typeof ef.r === 'number' && typeof ef.life === 'number') {
+                ef._gearCtrlZoneExpanded = true;
+                ef.r = Math.round(ef.r * 1.25);
+                ef.life += 60;
+                if (typeof ef.maxLife === 'number') ef.maxLife += 60;
+            }
+        });
     }
 
     if (absStep > 0.1 && absStep < 60) {
@@ -2231,9 +2272,9 @@ function updatePlayerGearsTick(p) {
         if (--p.gearFrenzyTimer <= 0) p.gearFrenzyStacks = 0;
     }
 
-    // #56 Xiềng Xích Đọa Đầy: địch đang dính CC chịu thêm 0.15 sát thương bóng tối mỗi giây
-    if (p.hasGear('gear_ctrl_torment_g') && enemy && enemy.hp > 0 && p.gearRoundTicks % 60 === 0 && isPlayerAfflictedByCC(enemy)) {
-        enemy.hp = Math.max(0.1, enemy.hp - 0.15);
+    // #56 Bậc Thầy Phong Tỏa: địch đang dính CC chịu thêm 0.15 sát thương bóng tối mỗi giây
+    if (p.hasGear('gear_ctrl_master_g') && enemy && enemy.hp > 0 && p.gearRoundTicks % 60 === 0 && isPlayerAfflictedByCC(enemy)) {
+        enemy.takeDamage(0.15, p, { isEnvironmental: true });
         addFloatingText(enemy.x + enemy.w / 2, enemy.y - 10, '-0.15 ⛓️', '#c084fc', 11);
     }
 
@@ -2256,7 +2297,7 @@ function updatePlayerGearsTick(p) {
     if ((p.gearFireTrailCd || 0) > 0) p.gearFireTrailCd--;
 
     // #64 Pháo Đài Sinh Học: khi máu < 50% Max HP, tự hồi +0.35 HP/giây
-    if ((p.hasGear('gear_surv_fortress_g') || p.hasGear('gear_surv_undying_g')) && p.gearRoundTicks % 30 === 0 && (p.hp / Math.max(1, p.maxHp)) < 0.5) {
+    if (p.hasGear('gear_surv_fortress_g') && p.gearRoundTicks % 30 === 0 && (p.hp / Math.max(1, p.maxHp)) < 0.5) {
         const heal = 0.175 * getGearHealMult(p);
         p.hp = Math.min(p.maxHp, p.hp + heal);
     }
@@ -2297,7 +2338,7 @@ function updatePlayerGearsTick(p) {
     }
 
     // #73 Tụ Lực Siêu Tốc: giảm 30% thời gian giữ nút Bắn để đạt tối đa lực tụ
-    if ((p.hasGear('gear_fast_charge_s') || p.hasGear('gear_charge_shield_g')) && inp && inp.s && p.gearRoundTicks % 3 === 0) {
+    if (p.hasGear('gear_fast_charge_s') && inp && inp.s && p.gearRoundTicks % 3 === 0) {
         if (typeof p.bowChargeTimer === 'number' && p.bowChargeTimer > 0) p.bowChargeTimer++;
         if (typeof p.lazerCharge === 'number' && p.lazerCharge > 0) p.lazerCharge++;
         if (typeof p.chargeLevel === 'number' && p.weapon !== 'wind_slash' && p.chargeLevel > 0) p.chargeLevel += 0.3;
@@ -2306,8 +2347,8 @@ function updatePlayerGearsTick(p) {
         if (typeof p.stormChargeTimer === 'number' && p.stormChargeTimer > 0) p.stormChargeTimer++;
     }
 
-    // #74 Bẫy Mìn Giữa Sân: mỗi 8s (480 ticks) thả 1 mìn tàng hình trên làn kẻ địch
-    if (p.hasGear('gear_minefield_s') || p.hasGear('gear_mine_layer_s')) {
+    // #74 Chuyên Gia Rải Mìn: mỗi 8s (480 ticks) thả 1 mìn tàng hình trên làn kẻ địch
+    if (p.hasGear('gear_minefield_s')) {
         if (--p.gearMineTimer <= 0) {
             p.gearMineTimer = 480;
             const activeMines = bodyEffects.filter(e => e instanceof GearMine && e.team === p.id && e.active);
@@ -2609,7 +2650,7 @@ function tickGearDebuffsOnTarget(p) {
 function getGearHealMult(p) {
     if (!p || !p.hasGear) return 1;
     let m = 1;
-    if ((p.hasGear('gear_surv_fortress_g') || p.hasGear('gear_surv_undying_g')) && (p.hp / Math.max(1, p.maxHp)) < 0.5) {
+    if (p.hasGear('gear_surv_fortress_g') && (p.hp / Math.max(1, p.maxHp)) < 0.5) {
         m *= 1.3;
     }
     if ((p.gearVenomStacks || 0) > 0) {
@@ -2748,6 +2789,22 @@ function onGearBulletSpawned(p, b) {
         b.dmg = (b.dmg || p.damage) + 0.8;
         b._gearTrueShot = true;
         addFloatingText(p.x + p.w / 2, p.y - 16, 'BÁCH PHÁT BÁCH TRÚNG! 🎯', '#facc15', 13);
+    }
+
+    // #96 Nhịp Điệu Hủy Diệt (DJ): mỗi nhịp thứ 4 phát sóng siêu trầm hồi +0.35 HP, làm chậm & gây 0.35 sát thương âm thanh
+    if (p.hasGear('gear_hero_dj_g') && !b.isGearBonusShot && !b.isGearDroneBullet) {
+        p.gearDjBeatCount = (p.gearDjBeatCount || 0) + 1;
+        if (p.gearDjBeatCount % 4 === 0) {
+            p.hp = Math.min(p.maxHp, p.hp + 0.35 * getGearHealMult(p));
+            const enemy = p.id === 1 ? p2 : p1;
+            const cx = p.x + p.w / 2, cy = p.y + p.h / 2;
+            explosions.push(new Explosion(cx, cy, 80, 'rgba(232, 121, 249,', 0, p));
+            if (enemy && enemy.hp > 0) {
+                enemy.takeDamage(0.35, p, { isEnvironmental: true });
+                enemy.slowTimer = Math.max(enemy.slowTimer || 0, 75);
+            }
+            addFloatingText(cx, p.y - 16, 'BASS DROP! +0.35 HP 🎵', '#e879f9', 12);
+        }
     }
 
     // #97 Xích Tử Thần Nung Đỏ: đạn Cấm Chế của Death Lock bay nhanh +35%
@@ -2976,10 +3033,10 @@ function onGearBulletHitPlayer(attacker, victim, b, dealtDmg) {
         }
     }
 
-    // #32 Đạn Băng Giá: làm chậm 20% trong 1.5s (CD 3s)
+    // #32 Đạn Băng Giá: làm chậm 20% trong 1.5s (CD 3s), tăng +30% thời gian nếu có #55 Mở Rộng Vùng Cấm
     if (attacker.hasGear('gear_frost_ammo_s') && (attacker.gearFrostAmmoCd || 0) <= 0) {
         attacker.gearFrostAmmoCd = 180;
-        const dur = attacker.hasGear('gear_ctrl_duration_s') ? 112 : 90;
+        const dur = attacker.hasGear('gear_ctrl_zone_s') ? 117 : 90;
         victim.slowTimer = Math.max(victim.slowTimer || 0, dur);
     }
 
@@ -3036,7 +3093,7 @@ function onGearBulletHitPlayer(attacker, victim, b, dealtDmg) {
     }
 
     // #58 Nhiễu Sóng Tâm Trí: làm chậm 30% tốc nạp / hồi năng lượng của địch trong 2.0s
-    if (attacker.hasGear('gear_ctrl_jammer_g') || attacker.hasGear('gear_ctrl_exhaust_s')) {
+    if (attacker.hasGear('gear_ctrl_jammer_g')) {
         victim.gearExhaustTimer = 120;
     }
 
@@ -3146,8 +3203,8 @@ function onGearBulletHitPlayer(attacker, victim, b, dealtDmg) {
             victim.takeDamage(0.9, attacker, { isEnvironmental: true });
             attacker.hp = Math.min(attacker.maxHp, attacker.hp + 0.4 * getGearHealMult(attacker));
             explosions.push(new Explosion(vcx, vcy, 50, 'rgba(74, 222, 128,', 0, attacker));
-            if (typeof AcidPool !== 'undefined' && typeof acidPools !== 'undefined') {
-                acidPools.push(new AcidPool(vcx, vcy, 48, 150, attacker));
+            if (typeof BodyZone !== 'undefined' && typeof bodyEffects !== 'undefined') {
+                bodyEffects.push(new BodyZone(vcx, vcy, 44, 'acid', attacker, 150, 1));
             }
             addFloatingText(vcx, victim.y - 20, 'DỊCH HẠCH BÙNG PHÁT! -0.9 ☣️', '#4ade80', 13);
         }
@@ -3191,7 +3248,7 @@ function onGearBulletHitPlayer(attacker, victim, b, dealtDmg) {
     if (attacker.hasGear('gear_atk_soul_burn_g') && (attacker.gearSoulBurnCd || 0) <= 0) {
         attacker.gearSoulBurnCd = 72;
         const soulDmg = Math.max(0.15, (victim.maxHp || 6) * 0.03);
-        victim.hp = Math.max(0.1, victim.hp - soulDmg);
+        victim.takeDamage(soulDmg, attacker, { bypassShield: true, isEnvironmental: true });
         if (typeof victim.energy === 'number' && victim.energy > 0) victim.energy = Math.max(0, victim.energy - 10);
         if (typeof victim.chuLuc === 'number' && victim.chuLuc > 0) victim.chuLuc = Math.max(0, victim.chuLuc - 10);
         if (typeof victim.cursedEnergy === 'number' && victim.cursedEnergy > 0) victim.cursedEnergy = Math.max(0, victim.cursedEnergy - 10);
@@ -3519,7 +3576,7 @@ function onGearTruckDestroyed(t, attacker) {
             shieldPierceDmg = amount * 0.35;
         }
 
-        // Giảm sát thương nhận vào từ G.E.A.R của nạn nhân (#24, #44, #54, #63, #69, #78, #98)
+        // Giảm sát thương nhận vào từ G.E.A.R của nạn nhân (#24, #44, #54, #63, #73, #78, #98)
         let dmgReducMult = 1;
         if (this.hasGear) {
             if (this.hasGear('gear_scaling_time_g')) {
@@ -3527,12 +3584,12 @@ function onGearTruckDestroyed(t, attacker) {
                 dmgReducMult *= (1 - 0.05 * stacks);
             }
             if (isDirectCombat && this.hasGear('gear_thorn_armor_g')) dmgReducMult *= 0.90;
-            if (this.hasGear('gear_duel_standoff_g') && (this.gearStandStillTicks || 0) >= 36) dmgReducMult *= 0.85;
-            if (this.hasGear('gear_surv_colossus_s') && (this.hp / Math.max(1, this.maxHp)) < 0.5) dmgReducMult *= 0.85;
-            if (this.hasGear('gear_charge_shield_g')) {
+            if (this.hasGear('gear_duel_honor_g') && (this.gearStandStillTicks || 0) >= 36) dmgReducMult *= 0.85;
+            if (this.hasGear('gear_surv_fortress_g') && (this.hp / Math.max(1, this.maxHp)) < 0.5) dmgReducMult *= 0.85;
+            if (this.hasGear('gear_fast_charge_s')) {
                 const inp = this.id === 1 ? inputs.p1 : inputs.p2;
                 if (inp && inp.s && ((this.bowChargeTimer || 0) >= 30 || (this.lazerCharge || 0) >= 30 || (this.gojoChargeTimer || 0) >= 30 || (this.sukunaChargeTimer || 0) >= 30 || (this.stormChargeTimer || 0) >= 30)) {
-                    dmgReducMult *= 0.75;
+                    dmgReducMult *= 0.80;
                 }
             }
             if (this.hasGear('gear_hero_twins_g') && (this.gearTwinSynergyTimer || 0) > 0) dmgReducMult *= 0.75;
@@ -3605,11 +3662,11 @@ function onGearTruckDestroyed(t, attacker) {
         if (this.hp < prevHp) {
             const actualHpLost = prevHp - this.hp;
 
-            // #66 Phản Chấn Hạng Nặng: mỗi khi mất đủ 2.0 HP tích lũy -> phóng Sóng Chấn Động xóa đạn + gây 1.0 dame & Làm Chậm
-            if (this.hasGear && this.hasGear('gear_surv_quake_g') && this.hp > 0) {
+            // #66 Khiên Chắn Phản Xung: mỗi khi mất đủ 2.5 HP tích lũy -> phóng Sóng Chấn Động xóa đạn + gây 0.8 dame & Làm Chậm
+            if (this.hasGear && this.hasGear('gear_surv_aegis_g') && this.hp > 0) {
                 this.gearQuakeLostHpAcc = (this.gearQuakeLostHpAcc || 0) + actualHpLost;
-                if (this.gearQuakeLostHpAcc >= 2.0) {
-                    this.gearQuakeLostHpAcc -= 2.0;
+                if (this.gearQuakeLostHpAcc >= 2.5) {
+                    this.gearQuakeLostHpAcc -= 2.5;
                     const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
                     const enemy = this.id === 1 ? p2 : p1;
                     explosions.push(new Explosion(cx, cy, 110, 'rgba(250, 204, 21,', 0, this));
@@ -3617,7 +3674,7 @@ function onGearTruckDestroyed(t, attacker) {
                         enemy.bullets = enemy.bullets.filter(eb => Math.hypot(eb.x - cx, eb.y - cy) > 130);
                     }
                     if (enemy && enemy.hp > 0) {
-                        enemy.takeDamage(1.0, this, { isEnvironmental: true });
+                        enemy.takeDamage(0.8, this, { isEnvironmental: true });
                         enemy.slowTimer = Math.max(enemy.slowTimer || 0, 90);
                     }
                     addFloatingText(cx, this.y - 18, 'PHẢN CHẤN HẠNG NẶNG! 💥', '#facc15', 13);
@@ -3672,8 +3729,8 @@ function onGearTruckDestroyed(t, attacker) {
                 }
             }
 
-            // #72 Đòn Kết Liễu Lạnh Lùng: máu địch xuống dưới 8% Max HP -> Kết liễu ngay lập tức!
-            if (attacker.hasGear && attacker.hasGear('gear_execute_coup_g') && this.hp > 0 && (this.hp / Math.max(1, this.maxHp)) <= 0.08) {
+            // #53 Xung Kích Khát Máu: máu địch xuống dưới 8% Max HP -> Kết liễu ngay lập tức!
+            if (attacker.hasGear && attacker.hasGear('gear_duel_frenzy_p') && this.hp > 0 && (this.hp / Math.max(1, this.maxHp)) <= 0.08) {
                 this.hp = 0;
                 this.ghostHp = 0;
                 addFloatingText(this.x + this.w / 2, this.y - 22, 'KẾT LIỄU! ☠️', '#ef4444', 16);
@@ -3799,6 +3856,7 @@ const PracticeGearModal = {
                 if (p) {
                     p.equippedGears = [];
                     p.gearFreeFeetUpgrades = [];
+                    p._appliedImmediateGearIds = [];
                     p.gearBonusMaxHp = 0;
                     p.gearInfiniteStacks = 0;
                     p.gearJackpot = 0;

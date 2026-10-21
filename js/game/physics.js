@@ -39,8 +39,9 @@ function tickPhysics() {
 
     // 3. Spawns & Obstacle (Host / Local only)
     const isOnlineGuest = (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'guest');
+    const isSandboxSpawnLocked = (typeof botAI !== 'undefined' && botAI.enabled && botAI.freezeNaturalSpawns);
 
-    if (!isOnlineGuest) {
+    if (!isOnlineGuest && !isSandboxSpawnLocked) {
         let crateInterval = (gameState.currentMap === 'supply_drop') ? 1500 : 3000;
         let maxCrates = (gameState.currentMap === 'supply_drop') ? 12 : 5;
         if (now - lastCrateSpawn > crateInterval && crates.length < maxCrates) {

@@ -55,7 +55,14 @@ Object.assign(Player.prototype, {
     takeDamage(amount, attacker = null, options = {}) {
         if (this.hp <= 0 || gameState.phase !== 'playing') return 0;
 
-        // Practice Bot God Mode (Bất tử cho Bot trong phòng luyện tập)
+        // Practice Player 1 & Bot God Mode (Bất tử trong phòng luyện tập)
+        if (this.id === 1 && typeof botAI !== 'undefined' && botAI.enabled && botAI.isPlayerGodMode) {
+            this.hp = this.maxHp;
+            addFloatingText(this.x + this.w / 2, this.y - 10, "P1 GODMODE 🛡️", "#4ade80", 14);
+            spawnSparkParticles(this.x + this.w / 2, this.y + this.h / 2, "#4ade80", 8);
+            if (soundSystem && !soundSystem.muted) soundSystem.playHit();
+            return 0;
+        }
         if (this.id === 2 && typeof botAI !== 'undefined' && botAI.enabled && botAI.isGodMode) {
             this.hp = this.maxHp;
             addFloatingText(this.x + this.w / 2, this.y - 10, "GODMODE 🛡️", "#ffd700", 14);

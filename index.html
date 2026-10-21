@@ -97,7 +97,7 @@
         <!-- IN-GAME PRACTICE / TRAINING TOOLBAR (VERTICAL COMPACT ON TOP LEFT) -->
         <div id="trainingToolbar" style="display: none;">
             <div class="tb-header">
-                <span class="tb-title">🛠️ PHÒNG TẬP</span>
+                <span class="tb-title">🛠️ SANDBOX</span>
                 <button id="btnToggleTrainingToolbar" class="tb-toggle-btn" title="Thu gọn / Mở rộng">▾</button>
             </div>
             <div id="trainingToolbarContent" class="tb-content">
@@ -109,27 +109,44 @@
                         <button id="btnBotShooter" class="tb-btn" title="Bot chỉ bắn đạn liên tục">🎯 CHỈ BẮN</button>
                         <button id="btnBotCombat" class="tb-btn" title="Bot chiến đấu AI thông minh">⚔️ CHIẾN ĐẤU</button>
                         <button id="btnBotLevel" class="tb-btn" title="Đổi cấp độ bot chiến đấu">🧠 CẤP: Tinh Anh</button>
-                        <button id="btnBotGodMode" class="tb-btn" title="Bật/Tắt Bot Bất Tử">🛡️ BẤT TỬ: TẮT</button>
+                        <button id="btnBotGodMode" class="tb-btn" title="Bật/Tắt Bot Bất Tử">🛡️ BOT BẤT TỬ: TẮT</button>
                     </div>
                 </div>
                 
-                <!-- Group 2: Đổi Body & G.E.A.R Cho Bạn & Cho Bot -->
+                <!-- Group 2: Đổi Body, Tiến Hóa & G.E.A.R Cho Bạn & Cho Bot -->
                 <div class="tb-section">
-                    <span class="tb-sec-label">ĐỔI BODY & G.E.A.R</span>
+                    <span class="tb-sec-label">BODY • EVO • G.E.A.R</span>
                     <div class="tb-btn-grid">
                         <button id="btnOpenPlayerWeaponModal" class="tb-btn btn-player" title="Đổi Body xe của bạn (Player 1)">👤 BODY BẠN</button>
                         <button id="btnOpenBotWeaponModal" class="tb-btn btn-accent" title="Đổi Body cho Bot (Player 2)">🤖 BODY BOT</button>
+                        <button id="btnCycleP1Evo" class="tb-btn btn-player" title="Chuyển nhanh cấp Tiến Hóa của Bạn (Cơ Bản -> Evo 1 -> Evo 2 -> Full Evo)">🧬 EVO BẠN: CƠ BẢN</button>
+                        <button id="btnCycleP2Evo" class="tb-btn btn-accent" title="Chuyển nhanh cấp Tiến Hóa của Bot (Cơ Bản -> Evo 1 -> Evo 2 -> Full Evo)">🧬 EVO BOT: CƠ BẢN</button>
                         <button id="btnOpenPlayerGearModal" class="tb-btn btn-player" title="Lắp / Thử 150 Lõi G.E.A.R cho bạn (Player 1)">⚙️ G.E.A.R BẠN</button>
                         <button id="btnOpenBotGearModal" class="tb-btn btn-accent" title="Lắp / Thử 150 Lõi G.E.A.R cho Bot (Player 2)">⚙️ G.E.A.R BOT</button>
                     </div>
                 </div>
 
-                <!-- Group 3: Tiện ích -->
+                <!-- Group 3: Hệ thống Test Box & Bản đồ -->
                 <div class="tb-section">
-                    <span class="tb-sec-label">TIỆN ÍCH</span>
+                    <span class="tb-sec-label">TEST BOX &amp; BẢN ĐỒ</span>
                     <div class="tb-btn-grid">
-                        <button id="btnHealAll" class="tb-btn" title="Hồi đầy máu cả hai bên">💚 HỒI MÁU</button>
-                        <button id="btnAddCoins" class="tb-btn" title="Cộng thêm 100 coin">💰 +100$</button>
+                        <button id="btnOpenTestBoxModal" class="tb-btn btn-box-test" title="Mở bảng gọi & thử nghiệm 16 loại Thùng Gacha, Xe Tiền, Xe Đặc Biệt và Vật Thể">📦 TEST BOX / XE</button>
+                        <button id="btnToggleAutoCrate" class="tb-btn active" title="Bật/Tắt tự động sinh Thùng & Xe trên sân">🎲 THÙNG TỰ NHIÊN: BẬT</button>
+                        <button id="btnCycleSandboxMap" class="tb-btn" title="Đổi Map trực tiếp trong Phòng Tập">🗺️ MAP: CỔ ĐIỂN</button>
+                    </div>
+                </div>
+
+                <!-- Group 4: Cơ chế Test & Tiện ích -->
+                <div class="tb-section">
+                    <span class="tb-sec-label">CƠ CHẾ &amp; TIỆN ÍCH</span>
+                    <div class="tb-btn-grid">
+                        <button id="btnPlayerGodMode" class="tb-btn" title="Bật/Tắt Bất Tử cho xe của Bạn (Player 1)">🛡️ BẠN BẤT TỬ: TẮT</button>
+                        <button id="btnInfiniteAmmo" class="tb-btn" title="Bật/Tắt Vô Hạn Đạn, Không Quá Nhiệt & Đầy Năng Lượng/Chú Lực cho Bạn">♾️ VÔ HẠN ĐẠN: TẮT</button>
+                        <button id="btnTestFinisher" class="tb-btn" title="Kéo máu Bot về 0.05 HP để phát bắn kế tiếp kích hoạt Hoạt Ảnh Kết Liễu">💀 TEST KẾT LIỄU</button>
+                        <button id="btnOpenSandboxShop" class="tb-btn" title="Mở ngay Cửa Hàng giữa hiệp để test mua đồ (Chợ Linh Kiện, Chợ Đen, Chân Xe...)">🛒 MỞ CỬA HÀNG</button>
+                        <button id="btnHealAll" class="tb-btn" title="Hồi đầy máu & khiên cả hai bên">💚 HỒI ĐẦY MÁU</button>
+                        <button id="btnAddCoins" class="tb-btn" title="Cộng thêm 200$ + Tài nguyên chế tạo (LK / Bánh Răng / CP)">💰 +200$ &amp; TÀI NGUYÊN</button>
+                        <button id="btnClearArena" class="tb-btn" title="Xóa toàn bộ thùng, xe, đạn và bẫy trên sân">🧹 DỌN SẠCH SÂN</button>
                         <button id="btnExitPractice" class="tb-btn btn-exit" title="Thoát phòng luyện tập">🚪 THOÁT</button>
                     </div>
                 </div>
@@ -360,17 +377,70 @@
         <div id="botWeaponModal" class="modal-overlay" style="display: none;">
             <div class="modal-card bot-weapon-card">
                 <div class="modal-header">
-                    <h2 id="weaponModalTitle">🤖 CHỌN BODY (34 BODY)</h2>
+                    <h2 id="weaponModalTitle">🤖 CHỌN BODY (67 BODY)</h2>
                     <button id="closeBotWeaponBtn" class="close-btn">&times;</button>
                 </div>
                 <div class="modal-body bot-weapon-content">
                     <p class="bot-weapon-hint" id="weaponModalHint">Chọn 1 Body dưới đây để trang bị thử nghiệm ngay lập tức:</p>
+                    <div class="sandbox-body-controls">
+                        <div class="sandbox-body-top-row">
+                            <input type="text" id="weaponSearchInput" class="online-input" placeholder="🔍 Tìm tên Body, cơ chế (vd: Kusarigama, Jack, Thợ May, Siêu Năng...)" style="flex:1;padding:6px 10px;font-size:12px;">
+                            <div class="sandbox-evo-preset-group" id="weaponEvoPresetGroup" title="Mức Tiến Hóa đi kèm khi chọn Body mới">
+                                <button type="button" class="gear-filter-btn active" data-evo="0">Cơ Bản</button>
+                                <button type="button" class="gear-filter-btn" data-evo="1">Evo 1</button>
+                                <button type="button" class="gear-filter-btn" data-evo="2">Evo 2</button>
+                                <button type="button" class="gear-filter-btn" data-evo="full">Full Evo ⭐</button>
+                            </div>
+                        </div>
+                        <div class="gear-sandbox-tabs" id="weaponRoleTabs">
+                            <button type="button" class="gear-filter-btn active" data-role="ALL">TẤT CẢ</button>
+                            <button type="button" class="gear-filter-btn" data-role="Đối Đầu">⚔️ ĐỐI ĐẦU</button>
+                            <button type="button" class="gear-filter-btn" data-role="Kiểm Soát">🕸️ KIỂM SOÁT</button>
+                            <button type="button" class="gear-filter-btn" data-role="Cơ Động">⚡ CƠ ĐỘNG</button>
+                            <button type="button" class="gear-filter-btn" data-role="Sinh Tồn">🛡️ SINH TỒN</button>
+                            <button type="button" class="gear-filter-btn" data-role="Cờ Bạc">🎰 CỜ BẠC</button>
+                            <button type="button" class="gear-filter-btn" data-role="COLLAB">★ COLLAB</button>
+                        </div>
+                    </div>
                     <div id="botWeaponGrid" class="bot-weapon-grid">
                         <!-- Populated dynamically via JS -->
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button id="closeBotWeaponFooterBtn" class="glow-btn btn-secondary">ĐÓNG</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SANDBOX TEST BOX & MAP ENTITY MODAL -->
+        <div id="sandboxBoxModal" class="modal-overlay" style="display: none;">
+            <div class="modal-card bot-weapon-card sandbox-box-card">
+                <div class="modal-header">
+                    <h2>📦 HỆ THỐNG TEST BOX • XE BẢN ĐỒ &amp; VẬT THỂ</h2>
+                    <button id="closeSandboxBoxBtn" class="close-btn">&times;</button>
+                </div>
+                <div class="modal-body bot-weapon-content">
+                    <div class="sandbox-box-mode-bar">
+                        <span class="sb-mode-label">CHẾ ĐỘ THẢ / KÍCH HOẠT:</span>
+                        <div class="gear-sandbox-tabs" id="sandboxBoxModeTabs">
+                            <button type="button" class="gear-filter-btn active" data-bmode="front_p1" title="Đặt thùng ngay trước mũi xe của Bạn để bắn thử">📍 TRƯỚC MẶT BẠN</button>
+                            <button type="button" class="gear-filter-btn" data-bmode="front_p2" title="Đặt thùng ngay trước mũi xe của Bot">🤖 TRƯỚC MẶT BOT</button>
+                            <button type="button" class="gear-filter-btn" data-bmode="center" title="Đặt thùng ngẫu nhiên ở giữa sân">🎯 GIỮA SÂN</button>
+                            <button type="button" class="gear-filter-btn" data-bmode="break_p1" title="Phá/Ăn thùng ngay lập tức cho Bạn (không cần bắn)">⚡ NỔ LUÔN CHO BẠN</button>
+                            <button type="button" class="gear-filter-btn" data-bmode="break_p2" title="Phá/Ăn thùng ngay lập tức cho Bot">💥 NỔ LUÔN CHO BOT</button>
+                        </div>
+                    </div>
+                    <div class="sandbox-box-quick-actions">
+                        <button type="button" id="btnBoxSpawnRain" class="glow-btn btn-primary" style="padding:5px 10px;font-size:11px;">🌧️ MƯA 8 THÙNG GACHA</button>
+                        <button type="button" id="btnBoxSpawnAllTypes" class="glow-btn btn-secondary" style="padding:5px 10px;font-size:11px;">🧪 THẢ ĐỦ MỌI LOẠI THÙNG</button>
+                        <button type="button" id="btnBoxClearAll" class="glow-btn btn-danger" style="padding:5px 10px;font-size:11px;">🧹 XÓA SẠCH THÙNG &amp; XE</button>
+                    </div>
+                    <div id="sandboxBoxGrid" class="bot-weapon-grid sandbox-box-grid">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="closeSandboxBoxFooterBtn" class="glow-btn btn-secondary">ĐÓNG</button>
                 </div>
             </div>
         </div>

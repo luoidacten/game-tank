@@ -145,3 +145,44 @@ Tài liệu này ghi nhận đầy đủ tất cả các file tạo mới, các 
     - Thêm nút **`🔄 ĐỔI LẠI` (Reroll từng ô 1 lần)** trên từng thẻ nâng cấp G.E.A.R (`renderGearSelection` và `rollSingleGearReplacement` trong `gear-system.js`) cũng như trên từng thẻ Vũ Khí ở Hiệp 1 (`renderStandardCards` trong `shop-ui.js`).
 12. **[index.html](file:///d:/Game/game-tank-claude-peaceful-goodall-w1qjps/game-tank-claude-peaceful-goodall-w1qjps/index.html)**
 13. **[style.css](file:///d:/Game/game-tank-claude-peaceful-goodall-w1qjps/game-tank-claude-peaceful-goodall-w1qjps/style.css)**
+
+---
+
+## 5. Nâng Cấp Sandbox (Phòng Tập 2.0) & Hệ Thống Test Box / Xe Bản Đồ
+
+### 5.1. Thanh Công Cụ Phòng Tập (`#trainingToolbar`) & Các Cơ Chế Mới
+- **4 Nhóm chức năng rõ ràng, có thanh cuộn gọn**:
+  1. **AI BOT**: `🎯 DUMMY`, `🔫 CHỈ BẮN`, `⚔️ CHIẾN ĐẤU`, `🎚️ CẤP: TB/DỄ/KHÓ`, `🛡️ BOT BẤT TỬ`.
+  2. **BODY • EVO • G.E.A.R**:
+     - `🎖️ BODY BẠN` & `🔧 BODY BOT`: Mở bảng chọn đủ **67 Body** (cập nhật tự động theo `MODULES.BODY.length`) kèm ô **Tìm kiếm trực tiếp**, **Tab lọc Hệ / Vai Trò** (`TẤT CẢ`, `Đối Đầu`, `Kiểm Soát`, `Cơ Động`, `Sinh Tồn`, `Cờ Bạc`, `COLLAB`) và **Preset Tiến Hóa** (`Cơ Bản`, `Evo 1`, `Evo 2`, `Full Evo ⭐`).
+     - `🧬 EVO BẠN` & `🧬 EVO BOT`: Đổi nhanh bậc Tiến Hóa ngay trên sân (`CƠ BẢN` → `EVO 1` → `EVO 2` → `FULL EVO`) cho bất kỳ Body nào (kể cả `basic` / `MAIN` và `evolution`).
+     - `⚙️ G.E.A.R BẠN` & `⚙️ G.E.A.R BOT`: Lắp/gỡ thử nghiệm 150 lõi G.E.A.R.
+  3. **TEST BOX & BẢN ĐỒ**:
+     - `📦 TEST BOX / XE`: Mở **Hệ Thống Test Box • Xe Bản Đồ & Vật Thể** (`#sandboxBoxModal`).
+     - `🎲 THÙNG TỰ NHIÊN: BẬT / KHÓA`: Cho phép khóa toàn bộ thùng/xe tự nhiên rơi ngẫu nhiên trên sân (`botAI.freezeNaturalSpawns` trong `js/game/physics.js`) để test riêng từng loại thùng mà không bị nhiễu.
+     - `🗺️ MAP: ...`: Đổi trực tiếp giữa 4 bản đồ (`CỔ ĐIỂN`, `Đoàn Tàu`, `Băng Giá`, `Bão Từ`) ngay trong Phòng Tập.
+  4. **CƠ CHẾ & TIỆN ÍCH**:
+     - `🛡️ BẠN BẤT TỬ`: Bật/tắt chế độ bất tử cho Người chơi 1 (`botAI.isPlayerGodMode` trong `js/player/combat.js`).
+     - `♾️ VÔ HẠN ĐẠN`: Giữ đầy đạn, năng lượng, chú lực, linh hồn, bánh răng, linh kiện và xóa nhiệt độ súng mỗi nhịp (`botAI.isInfiniteAmmo`).
+     - `💀 TEST KẾT LIỄU`: Kích hoạt ngay hoạt cảnh **Fatal Finisher Cinematic** của Body hiện tại lên Bot.
+     - `🛒 MỞ CỬA HÀNG`: Mở trực tiếp giao diện Cửa Hàng Nâng Cấp giữa trận.
+     - `💚 HỒI ĐẦY MÁU`, `💰 +200$ & TÀI NGUYÊN`, `🧹 DỌN SẠCH SÂN` (xóa toàn bộ đạn, thùng, xe, vùng hiệu ứng, vật triệu hồi), `🚪 THOÁT`.
+
+### 5.2. Hệ Thống Test Box & Xe Bản Đồ (`#sandboxBoxModal` trong `js/ai/bot.js`)
+- Hỗ trợ đầy đủ **16 loại Thùng Tiếp Tế & Thùng Gacha Mới** + **9 loại Xe Bản Đồ & Pháo Đài**:
+  - **10 Thùng Tốt (Buff / Tiếp Tế)**: `coin` (Thùng Xu), `hp` (Thùng Máu), `ammo` (Thùng Đạn), `shield` (Thùng Khiên), `dmg` (Thùng Sát Thương), `gear` (Thùng Bánh Răng / Linh Kiện), `frost` (Thùng Băng Hàn), `haste` (Thùng Tăng Tốc), `immune` (Thùng Miễn Nhiễm), `phantom` (Thùng Ảo Ảnh — Gacha mới), `guard` (Thùng Hộ Vệ — Gacha mới).
+  - **5 Thùng Bẫy / Nguy Hiểm**: `boom` (Thùng Nổ), `bullets` (Thùng Văng Đạn), `trap` (Thùng Bẫy Kẹp — Gacha mới), `laser` (Thùng Laser Quét — Gacha mới), `mimic` (Thùng Mimic Giả Dạng).
+  - **9 Xe Bản Đồ & Công Trình**: `money_truck` (Xe Tiền), `mv_buff` (Xe Cường Hóa), `mv_heal` (Xe Cứu Thương), `mv_atk_cannon` (Xe Pháo Kích), `mv_atk_smg` (Xe Liên Thanh), `mv_atk_laser` (Xe Tia Chớp Laser), `obstacle` (Chướng Ngại Vật), `bastion` (Pháo Đài Kiên Cố), `artillery` (Pháo Cối Tự Hành).
+- **5 Chế độ Thả / Kích hoạt**:
+  - `📍 TRƯỚC MẶT BẠN`: Thả ngay trên làn trước mặt P1 để tự bắn hoặc nhặt.
+  - `🤖 TRƯỚC MẶT BOT`: Thả ngay trước mặt Bot P2.
+  - `🎯 GIỮA SÂN`: Thả ở tâm đấu trường.
+  - `⚡ NỔ LUÔN CHO BẠN`: Tự động đập vỡ thùng / nổ xe ngay tại vị trí của P1 (test tức thì hiệu ứng `gachaCrateActivate` / buff / bẫy).
+  - `💥 NỔ LUÔN CHO BOT`: Tự động đập vỡ thùng / nổ xe ngay tại vị trí của Bot P2.
+- **3 Nút Thao Tác Nhanh**: `🌧️ MƯA 8 THÙNG GACHA`, `🧪 THẢ ĐỦ MỌI LOẠI THÙNG` (xếp hàng ngang 16 loại thùng), `🧹 XÓA SẠCH THÙNG & XE`.
+
+### 5.3. Hoàn Thiện Kiểm Tra G.E.A.R (trong `js/game/gear-system.js`)
+- Bổ sung đầy đủ xử lý cho `#55 gear_ctrl_zone_s` (+25% bán kính & +1.0s thời gian vùng nguyên tố, +30% thời gian làm chậm của `#32`), `#94 gear_hero_time_g` (-20% hồi chiêu & nhận +1.0 Giáp Trắng + bắn 2 mảnh thời gian khi dịch chuyển/tua ngược), `#96 gear_hero_dj_g` (mỗi nhịp thứ 4 phát sóng Bass Drop hồi +0.35 HP, làm chậm & gây 0.35 sát thương).
+- Sửa `#112 gear_atk_plague_g` tạo đúng `new BodyZone(vcx, vcy, 44, 'acid', attacker, 150, 1)` trong `bodyEffects`.
+- Sửa `#119 gear_atk_soul_burn_g` gọi qua `victim.takeDamage(soulDmg, attacker, { bypassShield: true, isEnvironmental: true })`.
+- Chống cộng dồn tiền/lợi tức nhiều lần khi bật/tắt lại cùng 1 lõi trong Phòng Tập (`player._appliedImmediateGearIds`) và dọn sạch 14 lệnh `hasGear` trỏ tới ID cũ.

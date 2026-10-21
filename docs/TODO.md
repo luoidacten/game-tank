@@ -6,12 +6,8 @@
 
 ## 0. Chỉnh sửa gấp (làm TRƯỚC mục 1)
 - [x] Hệ thống 150 Lõi Công Nghệ G.E.A.R (`#1 – #150`), lọc theo giai đoạn (`EARLY`, `EARLY_MID`, `MID_LATE`, `ALL`), khóa dòng (`familyId`), khóa chéo (`incompatibleWith`), nút Đổi lại (`🔄 ĐỔI LẠI`) từng ô nâng cấp và chặn bấm Bắn bỏ qua chọn G.E.A.R (chi tiết: `NOTE_Antigravity.md`).
-- G.E.A.R — kết quả kiểm tra (đã sửa: crash đạn xuyên thiếu hitIds; Sandbox chồng triệu hồi khi bật/tắt lõi; #106 online không cộng $200). Còn lại:
-  - Lõi chưa có code: #55 `gear_ctrl_zone_s`, #94 `gear_hero_time_g`, #96 `gear_hero_dj_g`; #56 thiếu phần +30% kích thước vùng.
-  - #112 Dịch Hạch tạo `AcidPool` không tồn tại → vũng không bao giờ xuất hiện.
-  - #119 Đốt Hồn trừ thẳng `hp` (bỏ qua takeDamage: không số sát thương, bỏ qua khiên/bất tử, không kết liễu được).
-  - Sandbox: bật/tắt lõi tiền/lãi thì nhận thưởng lại nhiều lần.
-  - ~14 chỗ `hasGear('...')` trỏ tới id không tồn tại (đổi tên?).
+- [x] Nâng cấp Phòng Tập (Sandbox 2.0): Hệ thống Test Box & Xe Bản Đồ (`#sandboxBoxModal` với đủ 16 loại thùng Gacha + 9 loại xe/vật thể, 5 chế độ thả/kích nổ tức thì), bộ lọc Hệ/Vai trò + Tìm kiếm + Preset Evo cho 67 Body, nút Đổi Evo nhanh trên sân, Đổi Map trực tiếp, Khóa thùng tự nhiên, Bạn Bất Tử, Vô Hạn Đạn, Test Kết Liễu, Mở Shop, Dọn Sân (chi tiết: `NOTE_Antigravity.md`).
+- G.E.A.R — kết quả kiểm tra (đã sửa: crash đạn xuyên thiếu hitIds; Sandbox chồng triệu hồi khi bật/tắt lõi; #106 online không cộng $200; thêm code #55/#94/#96; sửa #112 tạo `BodyZone` axit; sửa #119 đi qua `takeDamage`; khóa nhận thưởng lặp khi bật/tắt lõi trong Sandbox; dọn sạch 14 chỗ `hasGear` ID cũ). Còn lại:
   - Thiếu hình ảnh: Giáp Trắng (`gearWhiteShield`) không vẽ; #127 đường ray, #138 vùng Bullet Time, #45 màng hấp thụ, #141 buff Hộp Bí Ẩn, #119 không có phản hồi; #116/#81/#137/#108/#115 hình sơ sài; các buff theo thời gian/cộng dồn không có chỉ báo (#23 #24 #136 #142 #51 #52 #53 #59 #98 #148).
 - 5 body mới (đặc tả `docs/BODY_MOI_3.md`), làm từ dễ đến khó, xong cái nào push cái đó: ~~Nhện Độc~~ ✅ → ~~Boomerang~~ ✅ → ~~Thợ May~~ ✅ → ~~Siêu Năng~~ ✅ → ~~Kusarigama~~ ✅.
 - Nhóm Cờ Bạc + 2 body mới (đặc tả `docs/BODY_MOI_4.md`): ~~nội tại Cờ Bạc~~ ✅; ~~Jack - 6 Lỗ~~ ✅; COC (`coc`).
