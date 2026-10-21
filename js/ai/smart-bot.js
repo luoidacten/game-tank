@@ -447,3 +447,18 @@ function botShopBuy(playerId) {
         return f.call(this, bot, enemy, aligned, inp);
     };
 })();
+
+// Siêu Năng: nhiều đạn địch lao tới -> giữ 1s mở Vùng Niệm Lực; đủ đạn / sắp hết giờ -> nhấp phản hồi hoặc giữ Khoá Tâm
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon === 'psychokinesis' && typeof psyBotAction === 'function') {
+            if (this.psyB > 0) { this.psyB--; inp.s = this.psyB > 2; if (this.psyB === 0) this.tapCool = 6; return; }
+            if (bot.psyLockT > 0) { inp.s = false; return; }
+            const a = psyBotAction(bot);
+            if (a) { this.psyB = a === 'field' ? 66 : (a === 'lock' ? psyLockN(bot) + 6 : 5); inp.s = true; return; }
+            if (bot.psyField > 0) { inp.s = false; return; } // đang giữ vùng: đừng nhấp bừa
+        }
+        return f.call(this, bot, enemy, aligned, inp);
+    };
+})();

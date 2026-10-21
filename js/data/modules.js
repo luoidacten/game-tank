@@ -385,6 +385,14 @@ const MODULES = {
             size: { w: 30, h: 30 },
             stats: { hp: 5.5, dmg: 1.1, ammo: 3, speedMult: 1.0857 }
         },
+        {
+            id: 'psychokinesis',
+            name: 'Siêu Năng',
+            desc: '"Tất cả... dừng lại cho ta!" HP:4 | Dame:0.85 | Đạn:6 (nạp 1.2s/viên) | Tốc: 3.65. Nhấp: ĐẠN NIỆM LỰC trôi lệch sang bên, lơ lửng giảm tốc 0.45s rồi vút đi (tốc 12); xả liên tiếp được nhiều viên. Giữ 1s (hồi 11s): VÙNG NIỆM LỰC r=135 theo xe tối đa 5s (xe -20% tốc): đạn bay thường của địch lọt vào bị thắng phanh, dừng lơ lửng lệch nhịp, hoá xanh lơ & thuộc về bạn (giữ nguyên st, cỡ, hiệu ứng; tối đa 15 viên). Không bắt được: hitscan / tia lazer, chiêu lao húc, siêu đạn không thể cản phá. Trong vùng: nhấp (hoặc hết giờ) -> PHẢN HỒI NGƯỢC QUỸ ĐẠO +30% tốc; giữ 1s -> KHOÁ TÂM TẤT SÁT: hiện đường ngắm rồi hội tụ về địch (homing nhẹ), hồi chiêu +2s. Hạ gục địch -> kết liễu TÂM NIỆM NGHIỀN NÁT.',
+            type: 'body', role: ['Kiểm Soát'],
+            size: { w: 28, h: 28 },
+            stats: { hp: 4.0, dmg: 0.85, ammo: 6, speedMult: 1.0429 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 30 },
