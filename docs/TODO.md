@@ -13,7 +13,7 @@
   - Sandbox: bật/tắt lõi tiền/lãi thì nhận thưởng lại nhiều lần.
   - ~14 chỗ `hasGear('...')` trỏ tới id không tồn tại (đổi tên?).
   - Thiếu hình ảnh: Giáp Trắng (`gearWhiteShield`) không vẽ; #127 đường ray, #138 vùng Bullet Time, #45 màng hấp thụ, #141 buff Hộp Bí Ẩn, #119 không có phản hồi; #116/#81/#137/#108/#115 hình sơ sài; các buff theo thời gian/cộng dồn không có chỉ báo (#23 #24 #136 #142 #51 #52 #53 #59 #98 #148).
-- 5 body mới (đặc tả `docs/BODY_MOI_3.md`), làm từ dễ đến khó, xong cái nào push cái đó: ~~Nhện Độc~~ ✅ → ~~Boomerang~~ ✅ → Thợ May (`tailor`) → Siêu Năng (`psychokinesis`) → Kusarigama (`kusarigama`).
+- 5 body mới (đặc tả `docs/BODY_MOI_3.md`), làm từ dễ đến khó, xong cái nào push cái đó: ~~Nhện Độc~~ ✅ → ~~Boomerang~~ ✅ → Thợ May (`tailor`) → ~~Siêu Năng~~ ✅ → Kusarigama (`kusarigama`).
 - Nhóm Cờ Bạc + 2 body mới (đặc tả `docs/BODY_MOI_4.md`): nội tại Cờ Bạc (Joker/Jack/COC: Reroll shop miễn phí lần đầu mỗi hiệp, +1 ô lựa chọn); Jack - 6 Lỗ (`jack_6_lo`); COC (`coc`).
 - Sau đó: thêm hiệu ứng kết liễu cho mọi body còn thiếu (trừ Cơ Bản); chữ thắng hiệp ("PLAYER X THẮNG") chỉ hiện sau khi kết liễu kết thúc 3s.
 - Còn lại: các mục bên dưới.
@@ -25,6 +25,7 @@
 - Gemini: AI mệt dần khi né nhiều, né kém đòn tia; đòn đặc biệt trúng xe AI. Mô phỏng: cơ bản 59%, Full Evo 75% (vẫn hơi cao) — cần chơi thử.
 - Cuồng Phong: Lôi Bão gây 9.6–14.5 sát thương lên địch đứng yên (đúng theo số đặc tả nhưng có thể quá mạnh) — cần chơi thử.
 - Boomerang Full Evo ~1.8 sát thương/s lên mục tiêu đứng yên — có thể hơi mạnh, cần chơi thử.
+- Siêu Năng Full Evo: Khóa Tâm có thể gây ~25 sát thương nếu địch xả liên tục vào vùng — cần chơi thử.
 - Phi Công thắng ~68-72% trong mô phỏng bot (hơi mạnh) — cần chơi thử, có thể giảm sát thương tự ngắm của Phi Ảnh / tần suất ném bom.
 - Online: đã sửa xe P2 bên khách bị giật/nhảy (dự đoán đầu vào), mốc thời gian, thanh máu đỏ, vòng HUD lệch khi rung màn hình — cần chơi thử thật 2 máy. Xe P1 bên khách còn hơi bước nhảy (~30 lần/s).
 ## 4. Y Cầu Cân bằng/chỉnh sửa
