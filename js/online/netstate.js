@@ -44,6 +44,7 @@ const NET_CLASSES = {
     BmStraight, BmCurve, BmBlast, BmFinisher,
     PsyWave, PsyFinisher,
     TlPin, TlDoll, TlFinisher,
+    KgSickle, KgPool, KgVortex, KgFinisher,
 };
 
 // Biến toàn cục cần đồng bộ: [tên, getter, setter]
