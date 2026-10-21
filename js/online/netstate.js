@@ -45,6 +45,7 @@ const NET_CLASSES = {
     PsyWave, PsyFinisher,
     TlPin, TlDoll, TlFinisher,
     JlFinisher,
+    KgSickle, KgPool, KgVortex, KgFinisher,
 };
 
 // Biến toàn cục cần đồng bộ: [tên, getter, setter]

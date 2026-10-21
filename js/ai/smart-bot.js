@@ -487,3 +487,17 @@ function botShopBuy(playerId) {
         return f.call(this, bot, enemy, aligned, inp);
     };
 })();
+
+// Kusarigama: tích đủ tầng mới ra đòn, giữ 0.5s đổi Phong Cách theo khoảng cách, nhấp thu xích Khóa (kgBotAction)
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon === 'kusarigama' && typeof kgBotAction === 'function') {
+            if (this.kgB > 0) { this.kgB--; inp.s = this.kgB > 2; return; }
+            const a = kgBotAction(bot, enemy);
+            if (a === 'hold') { this.kgB = kgHoldN(bot) + 6; inp.s = true; return; }
+            if (a === 'tap') { this.kgB = 4; inp.s = true; return; }
+        }
+        return f.call(this, bot, enemy, aligned, inp);
+    };
+})();
