@@ -393,6 +393,14 @@ const MODULES = {
             size: { w: 28, h: 28 },
             stats: { hp: 4.0, dmg: 0.85, ammo: 6, speedMult: 1.0429 }
         },
+        {
+            id: 'tailor',
+            name: 'Thợ May',
+            desc: '"Kim chỉ là vũ khí sao?" HP:4 | Dame:0.8 | Đạn:4 Kim Khâu | Tốc: 3.7. Nhấp: KIM KHÂU bay nhanh -> chạm biên / vật cản / trúng đích cắm thành CỌC CHỈ 8s (tối đa 3, bắn cây thứ 4 cọc cũ nhất mất). ĐƯỜNG CHỈ CĂNG nối Thợ May với các cọc & các cọc với nhau: địch chạm chỉ bị Làm Chậm 35% & 0.25 st/s. Trúng trực tiếp -> MŨI KHÂU 5s nối địch vào cọc gần nhất (chạy xa quá 180px bị giật ngược lại). Giữ 0.6s (hồi 7s): RÚT CHỈ XIẾT CHẶT - mọi cọc phóng về Thợ May cắt xuyên mọi thứ (0.6 st mỗi cây); địch đang Mũi Khâu / chạm chỉ -> KHÂU CHÉO: kéo về tâm các cọc, 1.2 st & Trói Chân 1.25s (Juggernaut miễn kéo/trói/chậm). Hạ gục địch -> kết liễu ĐƯỜNG KIM MŨI CHỈ.',
+            type: 'body', role: ['Kiểm Soát'],
+            size: { w: 26, h: 26 },
+            stats: { hp: 4.0, dmg: 0.8, ammo: 4, speedMult: 1.0571 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 30 },

@@ -462,3 +462,15 @@ function botShopBuy(playerId) {
         return f.call(this, bot, enemy, aligned, inp);
     };
 })();
+
+// Thợ May: giữ 0.6s Rút Chỉ Xiết Chặt khi địch đang Mũi Khâu / chạm chỉ (tlBotHold)
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon === 'tailor' && typeof tlBotHold === 'function') {
+            if (this.tlHold > 0) { this.tlHold++; inp.s = this.tlHold <= 40; if (this.tlHold > 44) { this.tlHold = 0; this.tapCool = 6; } return; }
+            if (tlBotHold(bot, enemy)) { this.tlHold = 1; inp.s = true; return; }
+        }
+        return f.call(this, bot, enemy, aligned, inp);
+    };
+})();

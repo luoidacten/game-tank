@@ -43,6 +43,7 @@ const NET_CLASSES = {
     GearSupportDrone, GearMine, GearBarrierWall, GearCenterPrism, GearMirage, GearPrankBox, GearStormBolt, GearFieldDevice,
     BmStraight, BmCurve, BmBlast, BmFinisher,
     PsyWave, PsyFinisher,
+    TlPin, TlDoll, TlFinisher,
 };
 
 // Biến toàn cục cần đồng bộ: [tên, getter, setter]
