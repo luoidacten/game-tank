@@ -383,17 +383,57 @@ function botShopBuy(playerId) {
     const sig = () => JSON.stringify([coins(), player.upgrades.length, player.upgradeLevel, player.components, player.gears,
         player.invUpgrades, player.geniusUpgrades, player.geniusPurchaseCount, player.kkData && player.kkData.active.length, player.cuData]);
 
+    const getRemainingEvos = () => {
+        const list = (typeof EVOLUTIONS !== 'undefined' && EVOLUTIONS[player.weapon]) ? EVOLUTIONS[player.weapon] : [];
+        return list.filter(e => !(player.upgrades || []).includes(e.id));
+    };
+    const getMinEvoPrice = () => {
+        const rem = getRemainingEvos();
+        if (!rem.length) return Infinity;
+        return Math.min(...rem.map(e => typeof shopItemPrice === 'function' ? shopItemPrice(player, e) : (e.cost || 150)));
+    };
+    const isDesperate = () => {
+        const target = (typeof gameState !== 'undefined' && gameState.winScore) ? gameState.winScore : 3;
+        const oppScore = playerId === 'p1' ? gameState.p2Score : gameState.p1Score;
+        return oppScore >= target - 1;
+    };
+
     const buyMain = () => {
         for (let guard = 0; guard < 12; guard++) {
+            const minEvo = getMinEvoPrice();
+            const hasRemainingEvo = isFinite(minEvo);
+            const intOwned = typeof feetTotalCount === 'function' ? feetTotalCount(player, 'interest') : 0;
+            const curCoins = coins();
+            // Chế độ tiết kiệm: Nếu còn Evo chưa mua, chưa bị dồn vào thế chân tường (Match Point),
+            // và đã tích được >= 42% giá Evo (hoặc đã có Lợi Tức để hưởng lãi giữ ví) -> ưu tiên gom tiền mua Evo!
+            const savingForEvo = hasRemainingEvo && !isDesperate() && (curCoins >= minEvo * 0.42 || intOwned >= 1);
+
             const cands = live().filter(c => !isBack(c) && !isReady(c) && !isReroll(c) && !isPayWin(c)).map(c => {
                 const price = priceOf(c);
                 const t = txt(c);
-                let pri = c.classList.contains('evo-card') ? 3 : 1;
-                if (/CẤP ĐỘ/.test(t)) pri = player.weapon === 'money_tank' ? 2.8 : 0.5;
+                const isEvo = c.classList.contains('evo-card');
+                const isInterest = /Lợi Tức/.test(t);
+                const isMtLevel = /CẤP ĐỘ/.test(t);
+                let pri = isEvo ? 5.0 : 1.0;
+                if (isMtLevel) pri = player.weapon === 'money_tank' ? 3.8 : 0.5;
+                if (isInterest) {
+                    if (gameState.round <= 3 && intOwned < 2) pri = 3.6;
+                    else if (gameState.round <= 5 && intOwned < 3) pri = 2.2;
+                    else pri = 0.6;
+                }
                 if (/Bánh Xích|Giáp Thép/.test(t)) pri += 0.6;
-                if (/Lợi Tức/.test(t) && gameState.round <= 4) pri += 0.9;
+
+                // Nếu đang tiết kiệm lên Evo: không tiêu tiền lẻ vào Module Chân trừ khi miễn phí (0$),
+                // mua Lợi Tức sớm (<= 2 tầng), hoặc mua xong vẫn dư đủ tiền mua Evo
+                if (savingForEvo && !isEvo && !isMtLevel && price > 0) {
+                    const allowEarlyInterest = isInterest && intOwned < 2 && gameState.round <= 3;
+                    const canStillAffordEvo = (curCoins - price) >= minEvo;
+                    if (!allowEarlyInterest && !canStillAffordEvo) {
+                        return { c, price, pri: -1 };
+                    }
+                }
                 return { c, price, pri };
-            }).filter(x => x.price !== null && x.price <= coins()).sort((a, b) => b.pri - a.pri);
+            }).filter(x => x.pri > 0 && x.price !== null && x.price <= coins()).sort((a, b) => b.pri - a.pri);
             if (!cands.length) return;
             const before = sig();
             cands[0].c.click();
@@ -425,11 +465,19 @@ function botShopBuy(playerId) {
 
     buyMain();
     visitSpecialShops();
-    // Đổi hàng khi còn dư tiền (giữ lại ~10$)
-    for (let r = 0; r < 8; r++) {
+    // Đổi hàng thông minh: chỉ reroll khi miễn phí (0$), hoặc khi đã đủ tiền mua Evo mà chưa thấy Evo trên bàn,
+    // hoặc khi đã Full Evo và còn dư nhiều tiền
+    for (let r = 0; r < 6; r++) {
         const rr = live().find(isReroll);
         const cost = rr ? priceOf(rr) : null;
-        if (!rr || cost === null || coins() < cost + 10) break;
+        if (!rr || cost === null) break;
+        const minEvo = getMinEvoPrice();
+        const hasEvoOnBoard = live().some(c => c.classList.contains('evo-card'));
+        if (cost > 0) {
+            if (hasEvoOnBoard) break; // Đã có Evo trên bàn (nhưng chưa đủ tiền mua) -> giữ tiền, không reroll mất Evo
+            if (isFinite(minEvo) && coins() - cost < minEvo) break; // Đang tích tiền mua Evo -> không đốt tiền reroll
+            if (coins() < cost + 35) break;
+        }
         rr.click();
         buyMain();
     }

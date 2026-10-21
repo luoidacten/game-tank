@@ -23,11 +23,17 @@ function feetDamageMult(n, player) {
     const flatCap = (player && typeof player.hasGear === 'function' && player.hasGear('gear_heavy_tread_s')) ? 6 : 3;
     return n <= flatCap ? 1.25 : 1 + 0.25 * Math.pow(0.6, n - flatCap);
 }
-// Lợi Tức: tiền nhận mỗi hiệp không chỉ cộng dồn mà còn nhân thêm 20% mỗi tầng
-// (1 tầng 30$, 2 tầng 72$, 3 tầng 126$, 4 tầng 192$...; Xe Tiền gấp đôi)
-function interestIncome(n, isMoneyTank) {
+// Lợi Tức: tiền nhận mỗi hiệp gồm Lãi Cố Định tăng tiến (45$/108$/189$/288$...; Xe Tiền gấp đôi)
+// + Lãi Tiết Kiệm: +15% số tiền đang giữ trong ví mỗi tầng (tối đa +35$/tầng, Xe Tiền +70$/tầng)
+function interestSavingBonus(n, isMoneyTank, savedCoins = 0) {
+    if (n <= 0 || !savedCoins || savedCoins <= 0) return 0;
+    const capPerStack = isMoneyTank ? 70 : 35;
+    return Math.min(n * capPerStack, Math.round(savedCoins * 0.15 * n));
+}
+function interestIncome(n, isMoneyTank, savedCoins = 0) {
     if (n <= 0) return 0;
-    return Math.round(n * (isMoneyTank ? 60 : 30) * (1 + 0.2 * (n - 1)));
+    const base = Math.round(n * (isMoneyTank ? 90 : 45) * (1 + 0.2 * (n - 1)));
+    return base + interestSavingBonus(n, isMoneyTank, savedCoins);
 }
 function shopItemPrice(player, item) {
     if (item.type === 'feet' && player && player._gearFreeFootAvailable) return 0;
@@ -60,7 +66,7 @@ function triggerGearVipShop(player, playerId, item) {
 // Huy hiệu vai trò của body (vai trò chính đứng đầu, nổi bật hơn)
 const ROLE_ICON = { 'Đối Đầu': '⚔️', 'Kiểm Soát': '🕸️', 'Cơ Động': '⚡', 'Sinh Tồn': '🛡️' };
 // Tướng Collab (rất mạnh): huy hiệu riêng ở phần chọn tướng; chọn tướng Collab -> đối thủ được bù tiền đầu game
-const COLLAB_BONUS = { kazuki: 150, joker: 150, raven_oca: 120, chrononeo: 150, tsukiyo: 150 };
+const COLLAB_BONUS = { kazuki: 180, joker: 180, raven_oca: 150, chrononeo: 180, tsukiyo: 180 };
 function collabBonusOf(id) { return COLLAB_BONUS[id] || 0; }
 function collabBadge(mod) {
     const b = mod && collabBonusOf(mod.id);
@@ -378,17 +384,16 @@ function renderShop(playerId, keepItems = false) {
             winBtn.style.background = '#f39c12';
             winBtn.style.border = '3px solid white';
             winBtn.dataset.icon = '👑';
-            winBtn.innerHTML = `<h4>PAY TO WIN</h4><p>THẮNG LUÔN.</p><p style="color:white; font-size:1.2em">$500</p>`;
+            winBtn.innerHTML = `<h4>PAY TO WIN</h4><p>THẮNG LUÔN.</p><p style="color:white; font-size:1.2em">$800</p>`;
             winBtn.onclick = () => {
                 let curMoney = (playerId === 'p1') ? gameState.p1Coins : gameState.p2Coins;
-                if (curMoney >= 500) {
+                if (curMoney >= 800) {
                     // Online guest: gửi yêu cầu cho host xử lý (host trừ tiền & kết thúc hiệp)
                     if (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'guest') {
                         onlineManager.sendNetworkMessage({ type: 'PAY_TO_WIN' });
                         return;
                     }
-                    // [FIX] Trước đây không trừ 500$
-                    if (playerId === 'p1') gameState.p1Coins -= 500; else gameState.p2Coins -= 500;
+                    if (playerId === 'p1') gameState.p1Coins -= 800; else gameState.p2Coins -= 800;
                     endRound(playerId === 'p1' ? 1 : 2);
                     document.getElementById('upgradeScreen').style.display = 'none';
                 }
@@ -442,7 +447,23 @@ function renderShop(playerId, keepItems = false) {
             const lvlTxt = owned > 0 || cap ? ` <span style="color:#94a3b8">(${cap ? `${owned}/${cap}` : `đã có ${owned}`})</span>` : '';
             let extra = '';
             if (item.id === 'damage') extra = `<br><span style="color:#facc15">Lần này: x${feetDamageMult(owned + 1, player).toFixed(2)} sát thương</span>`;
-            if (item.id === 'interest') extra = `<br><span style="color:#facc15">Mỗi hiệp: ${interestIncome(owned, player.weapon === 'money_tank')}$ → ${interestIncome(owned + 1, player.weapon === 'money_tank')}$</span>`;
+            if (item.id === 'interest') {
+                const isMT = player.weapon === 'money_tank';
+                const curInc = interestIncome(owned, isMT, coins);
+                const nextInc = interestIncome(owned + 1, isMT, Math.max(0, coins - price));
+                extra = `<br><span style="color:#facc15">Mỗi hiệp (gồm lãi giữ ví): ${curInc}$ → ${nextInc}$</span>`;
+            }
+            if (item.type === 'evo') {
+                const rawCost = item.cost || 100;
+                const tierBadge = rawCost <= 145
+                    ? `<span style="color:#38bdf8;font-weight:bold;">[⚡ ĐẦU TRẬN]</span>`
+                    : (rawCost <= 270
+                        ? `<span style="color:#a855f7;font-weight:bold;">[⚔️ CHIẾN THUẬT]</span>`
+                        : (rawCost <= 360
+                            ? `<span style="color:#fb923c;font-weight:bold;">[🔥 CUỐI TRẬN]</span>`
+                            : `<span style="color:#f43f5e;font-weight:bold;">[👑 PHÁ GAME]</span>`));
+                extra = `<br>${tierBadge}`;
+            }
             const priceLabel = price === 0 ? 'MIỄN PHÍ' : ('$' + price);
             card.innerHTML = `<h4>${item.name}${lvlTxt}</h4><p>${item.desc}${extra}</p><p style="color:#f1c40f; font-weight:bold">${priceLabel}</p>`;
             card.dataset.icon = SHOP_ICON[item.id] || (item.type === 'evo' ? '🧬' : '');

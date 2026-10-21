@@ -186,3 +186,55 @@ Tài liệu này ghi nhận đầy đủ tất cả các file tạo mới, các 
 - Sửa `#112 gear_atk_plague_g` tạo đúng `new BodyZone(vcx, vcy, 44, 'acid', attacker, 150, 1)` trong `bodyEffects`.
 - Sửa `#119 gear_atk_soul_burn_g` gọi qua `victim.takeDamage(soulDmg, attacker, { bypassShield: true, isEnvironmental: true })`.
 - Chống cộng dồn tiền/lợi tức nhiều lần khi bật/tắt lại cùng 1 lõi trong Phòng Tập (`player._appliedImmediateGearIds`) và dọn sạch 14 lệnh `hasGear` trỏ tới ID cũ.
+
+---
+
+## 6. Cân Bằng Kinh Tế & Phân Tầng Giá Tiến Hóa (Economy & Evolution Pricing Overhaul)
+
+### 6.1. Triết Lý Thiết Kế & Nhịp Độ Trận Đấu
+- **Trận đấu hoàn toàn có thể KẾT THÚC (END) khi cả hai chỉ có 0–1 Evo**: Giá các Tiến Hóa (`EVOLUTIONS` trong `js/data/evolutions.js`) được nâng lên và phân tầng rõ rệt theo lối chơi (Ép đánh sớm, Đánh rút/Thủ bo/Kiểm soát, Thuần Farm/Triệu hồi cuối trận, và Siêu cấp Phá Game `$380–$480`).
+- **Tạo bài toán chiến thuật ở Hiệp 2 – Hiệp 4**:
+  1. **Mua ngay Evo 1 tầm sớm/trung (`$115 – $220`) hoặc đắp Module Chân (`$20 – $35`)**: Lấy ngưỡng sức mạnh tức thì để ép sân,抢 thùng và kết thúc ván đấu trước khi đối thủ kịp gom tiền.
+  2. **Nhịn mua Evo 1 + Đầu tư Lợi Tức (`interest`) + Tích tiền trong ví**: Hưởng **Lãi Cố Định tăng tiến + Lãi Tiết Kiệm (+15% số tiền giữ trong ví mỗi tầng)** để bứt phá lên **Evo 2 / Full Evo đắt đỏ (`$280 – $480`)** ở giữa/cuối trận.
+
+### 6.2. Phân Tầng Giá 106 Tiến Hóa (53 Body) trong `js/data/evolutions.js`
+1. **Nhóm 1 — Thiên Đầu Game / Đánh Nhanh Ép Sân / Kỹ Năng Tay (`[⚡ ĐẦU TRẬN]` -> `[⚔️ CHIẾN THUẬT]`)**:
+   - *Đặc trưng*: Bản chất cơ động hoặc sát thương đầu trận tốt; nhánh Evo 1 vừa túi tiền (`$60 – $140`) để mua sớm gây áp lực kết thúc trận, nhưng nhánh Evo 2 nâng lên `$220 – $270`.
+   - `basic` (`60$ / 140$`), `lazer_beam` (`115$ / 240$`), `shotgun` (`120$ / 220$`), `lazer_auto` (`120$ / 230$`), `ice` (`130$ / 230$`), `smg` (`130$ / 240$`), `portal` (`130$ / 240$`), `ghost` (`130$ / 250$`), `boomerang` (`135$ / 250$`), `tailor` (`135$ / 250$`), `cung` (`135$ / 260$`), `revolver` (`140$ / 260$`), `arachnid` (`140$ / 260$`), `shadow_hunter` (`140$ / 260$`), `shortgunATK` (`140$ / 270$`).
+2. **Nhóm 2 — Chiến Thuật / Kiểm Soát / Đánh Rút / Thủ Bo / Rỉa Máu (`[⚔️ CHIẾN THUẬT]` -> `[🔥 CUỐI TRẬN]`)**:
+   - *Đặc trưng*: Khiến người chơi phân vân mạnh giữa việc mua Evo 1 (`$150 – $180`) để kiểm soát sân hay tiết kiệm + đập Lợi Tức lên thẳng Evo 2 (`$280 – $340`).
+   - `big_bullet` (`150$ / 290$`), `acid` (`150$ / 280$`), `cluster_gun` (`150$ / 340$`), `overload` (`160$ / 300$`), `am_duong_su` (`160$ / 280$`), `six_barrel` (`160$ / 290$`), `mirror` (`160$ / 280$`), `magnet` (`160$ / 290$`), `sprayer` (`160$ / 300$`), `dj` (`160$ / 310$`), `jack_6_lo` (`160$ / 350$`), `water_gun` (`165$ / 290$`), `sniper` (`165$ / 300$`), `death_lock` (`165$ / 290$`), `kiem_su` (`165$ / 300$`), `healer` (`165$ / 310$`), `tank` (`170$ / 280$`), `wind_slash` (`170$ / 290$`), `furnace` (`170$ / 310$`), `psychokinesis` (`170$ / 320$`), `kusarigama` (`170$ / 320$`), `flower_shadow` (`175$ / 320$`), `kiem_vu` (`175$ / 320$`), `t_zero` (`175$ / 320$`), `juggernaut` (`175$ / 320$`), `steel_hook` (`180$ / 330$`).
+3. **Nhóm 3 — Thiên Cuối Game / Thuần Farm / Triệu Hồi / Tích Lũy (`[⚔️ CHIẾN THUẬT]` -> `[🔥 CUỐI TRẬN]`)**:
+   - *Đặc trưng*: Cần farm thùng/xe tiền/linh kiện/bánh răng/bài tập; khi đạt Evo 2 hoặc Full Evo sẽ tạo áp lực cực lớn (`Evo 1: $170 – $195`, `Evo 2: $320 – $380`).
+   - `inventor` (`170$ / 320$`), `aaa` (`175$ / 330$`), `customize` (`175$ / 340$`), `storm` (`180$ / 340$`), `engineer` (`180$ / 350$`), `necromancer` (`180$ / 340$`), `genius` (`180$ / 340$`), `kiem_khach` (`180$ / 360$`), `berserker` (`180$ / 340$`), `paradox` (`185$ / 340$`), `magician` (`185$ / 350$`), `thunder` (`185$ / 350$`), `creator` (`185$ / 350$`), `clone` (`185$ / 350$`), `evolution` (`190$ / 380$`), `gemini` (`190$ / 360$`), `blood_lord` (`190$ / 360$`), `jet_pilot` (`195$ / 360$`).
+4. **Nhóm 4 — Siêu Phá Game / One-Shot / Collab / Đế Chế Tiền Tệ (`[👑 PHÁ GAME]` `$380 – $480`)**:
+   - *Đặc trưng*: Các tiến hóa có khả năng kết liễu tức thì, càn quét toàn bản đồ hoặc đảo ngược hoàn toàn cục diện trận đấu khi đạt ngưỡng:
+   - `rocket`: Đầu Đạn Lớn (`150$`) / **Đầu Đạn Hạt Nhân (`380$`)**
+   - `lazer_charge`: Năng Lượng Xanh (`180$`) / **Pháo Diệt Tinh — One-Shot Full Evo (`460$`)**
+   - `raven_oca`: Chiến Thuật Đặc Nhiệm (`200$`) / **Hỏa Lực Không Kích (`380$`)**
+   - `tat_sat`: Thuấn Kiếm Sát Ý (`210$`) / **Phá Vọng Đoạt Hồn (`390$`)**
+   - `chrononeo`: Bước Thời Gian (`210$`) / **Dòng Chảy Hội Tụ (`400$`)**
+   - `van_kiem`: Mưa Kiếm (`230$`) / **Kiếm Thế Hoàn Chỉnh (`400$`)**
+   - `sukuna`: Phách Diện Rộng (`230$`) / **Hỏa Mũi Tên Fuga (`450$`)**
+   - `blade_god`: Kiếm Thế Vô Chủ (`240$`) / **Kiếm Thể Phòng Hộ — Tuyệt Diệt (`450$`)**
+   - `kazuki`: Vô Niệm Lưu Thủy (`220$`) / **Bách Biến Kiếm Thế — Trảm Vực (`450$`)**
+   - `one_punch`: Đấm Bồi Hai Tay (`220$`) / **Nhảy Liên Hoàn Nghiêm Túc — DEATH PUNCH (`460$`)**
+   - `joker`: Gian Lận Tinh Vi (`210$`) / **Sao Chép Tuyệt Kỹ — Phán Quyết Joker (`460$`)**
+   - `the_strongest`: Lục Nhãn (`240$`) / **Hư Thức: Tử (`480$`)** (đồng thời sửa lỗi hiển thị font tiếng Việt của `the_strongest`)
+   - `tsukiyo`: Thích Ứng Sắc Bén (`220$`) / **Nhẫn Đạo Hoàn Chỉnh — Đỉnh Cao Nhẫn Giả (`480$`)**
+   - `money_tank`: Tiền Tấn Công (`260$`) / **Sức Mạnh Đồng Tiền — Giảm 50% Shop & Mốc Thưởng (`480$`)**; nâng mốc `PAY TO WIN` từ `$500` lên `$800` (cả Offline & Online trong `js/game/shop-ui.js` và `js/online/multiplayer.js`).
+
+### 6.3. Nâng Giá Trị Module Lợi Tức (`interest`) & Hệ Thống Farm (`js/data/modules.js`, `js/game/shop-ui.js`, `js/game/round.js`, `js/game/combat.js`)
+- **Cơ chế Lợi Tức Kép (`interestIncome` & `interestSavingBonus` trong `js/game/shop-ui.js`)**:
+  - Giá gốc Module Chân (`js/data/modules.js`): `Giáp Thép: $20`, `Bánh Xích: $25`, `Động Cơ: $35`, `Lợi Tức: $25`.
+  - **Lãi Cố Định tăng tiến theo tầng**: `1 tầng = $45`, `2 tầng = $108`, `3 tầng = $189`, `4 tầng = $288`... (`Xe Tiền` nhân đôi).
+  - **Lãi Tiết Kiệm (Saving Dividend — MỚI)**: Mỗi tầng `Lợi Tức` cộng thêm **+15% số tiền đang giữ trong ví** lúc kết thúc hiệp (tối đa `+$35/tầng`, `Xe Tiền` tối đa `+$70/tầng`). Nhờ đó, người chơi nhịn mua Evo 1 để giữ tiền trong ví + kết hợp bắn thùng/xe tiền trong hiệp sẽ nhận lãi kép cực lớn để chạm mốc Evo `$300–$480`.
+- **Tăng Giá Trị Farm Trên Sân (`js/game/combat.js`, `js/entities/world.js`, `js/characters/money_tank/logic.js`)**:
+  - **Thùng Xu (`coin`)**: Tăng từ `$30` lên **`$35`** (`Xe Tiền: $70`).
+  - **Xe Tiền (`MoneyTruck`)**: Tăng máu từ `6` lên `7 HP` và tăng thưởng từ `$30` lên **`$50`** (`Xe Tiền: $100`) — biến Xe Tiền thành mục tiêu tranh chấp chiến lược trên bản đồ.
+- **Thưởng Hiệp Đấu, Chuỗi & Bù Collab (`js/game/round.js`, `js/game/shop-ui.js`)**:
+  - Kết thúc hiệp: Thắng `+$65` (cũ `$50`), Thua `+$30` (cũ `$15`), Hòa `+$25` (cũ `$10`).
+  - Chuỗi thua `>= 2`: `+$80` (cũ `$60`); Cơ Hội Cuối (Match Point): `+$160` (cũ `$120`); Chuỗi thắng `>= 2`: `+$40` (cũ `$30`).
+  - Tiền bù đối thủ khi chọn tướng Collab đầu trận (`COLLAB_BONUS`): `kazuki: $180, joker: $180, raven_oca: $150, chrononeo: $180, tsukiyo: $180`.
+- **Trí Tuệ Kinh Tế Cho Bot (`botShopBuy` trong `js/ai/smart-bot.js` & `PVE_STAGES` trong `js/ai/pve.js`)**:
+  - Dạy Bot biết ưu tiên mua `Lợi Tức` ở các hiệp đầu (`round <= 3`) và kích hoạt **Chế Độ Tiết Kiệm (`savingForEvo`)**: khi đã tích được `>= 42%` giá Evo tiếp theo hoặc đang có `Lợi Tức`, Bot sẽ giữ tiền để gom lên Evo (không tiêu sạch tiền vào Module Chân hay đốt tiền Reroll làm mất thẻ Evo trên bàn), trừ khi đang bị dồn vào hiệp quyết định (`Match Point`).

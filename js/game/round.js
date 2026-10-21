@@ -120,26 +120,30 @@ function updateMapHUD() {
 }
 function endRound(winnerId) {
     if (gameState.phase === 'end_round') return;
-    // --- LOGIC LỢI TỨC (MỚI) ---
-    // Duyệt qua cả 2 người chơi để tính tiền lãi
+    // --- LOGIC LỢI TỨC (MỚI - CỘNG LÃI TIẾT KIỆM THEO TIỀN GIỮ LẠI) ---
+    // Duyệt qua cả 2 người chơi để tính tiền lãi trước khi cộng tiền thưởng hiệp
     [p1, p2].forEach(p => {
         // Đếm số lượng 'Lợi Tức' mà người chơi đã mua
-        // p.upgrades lưu danh sách ID, nên mua bao nhiêu cái thì đếm bấy nhiêu
         let interestCount = p.upgrades.filter(u => u === 'interest').length;
 
         if (interestCount > 0) {
-            // Cộng dồn + nhân giá trị theo số tầng (Xe Tiền nhân đôi) - xem interestIncome()
-            let totalProfit = interestIncome(interestCount, p.weapon === 'money_tank');
+            const currentSavedCoins = (p.id === 1) ? gameState.p1Coins : gameState.p2Coins;
+            // Cộng dồn lãi cố định + lãi tiết kiệm 15%/tầng trên số tiền giữ lại - xem interestIncome()
+            let totalProfit = interestIncome(interestCount, p.weapon === 'money_tank', currentSavedCoins);
+            let savingDiv = typeof interestSavingBonus === 'function' ? interestSavingBonus(interestCount, p.weapon === 'money_tank', currentSavedCoins) : 0;
 
             // Cộng tiền vào game state
             if (p.id === 1) gameState.p1Coins += totalProfit;
             else gameState.p2Coins += totalProfit;
 
-            // (Tùy chọn) Hiệu ứng visual báo nhận tiền lãi
-            // Hiển thị text bay lên từ vị trí người chơi
+            // Hiệu ứng visual báo nhận tiền lãi
             ctx.fillStyle = "gold";
             ctx.font = "bold 20px Arial";
             ctx.fillText(`+$${totalProfit}`, p.x, p.y - 20);
+            if (typeof addFloatingText === 'function') {
+                const subNote = savingDiv > 0 ? ` (+$${savingDiv} lãi giữ ví)` : '';
+                addFloatingText(p.x + p.w / 2, p.y - 45, `+$${totalProfit} LỢI TỨC${subNote}`, '#facc15', 14);
+            }
         }
     });
     // ----------------------------
@@ -147,9 +151,9 @@ function endRound(winnerId) {
     cancelAnimationFrame(animationId);
 
     soundSystem.playWin();
-    if (winnerId === 1) { gameState.p1Score++; gameState.p1Coins += 50; gameState.p2Coins += 15; }
-    else if (winnerId === 2) { gameState.p2Score++; gameState.p2Coins += 50; gameState.p1Coins += 15; }
-    else { gameState.p1Coins += 10; gameState.p2Coins += 10; }
+    if (winnerId === 1) { gameState.p1Score++; gameState.p1Coins += 65; gameState.p2Coins += 30; }
+    else if (winnerId === 2) { gameState.p2Score++; gameState.p2Coins += 65; gameState.p1Coins += 30; }
+    else { gameState.p1Coins += 25; gameState.p2Coins += 25; }
 
     // Thưởng Linh Kiện (LK) an toàn cho Inventor (Thắng: 4 -> 6 LK, Thua: 2 -> 3 LK)
     let winnerPlayer = (winnerId === 1) ? p1 : ((winnerId === 2) ? p2 : null);
@@ -184,8 +188,8 @@ function endRound(winnerId) {
         if (typeof addFloatingText === 'function') addFloatingText(winnerPlayer.x + winnerPlayer.w / 2, winnerPlayer.y - 15, `+2 MAX HP & +1 DMG!`, "#ff6600", 16);
     }
 
-    // [MỚI] Thưởng chuỗi: thua liên tiếp +60$, sắp bị loại (hiệp sau là cơ hội cuối) +120$,
-    // thắng liên tiếp +30$ mỗi trận thắng
+    // [MỚI] Thưởng chuỗi: thua liên tiếp +80$, sắp bị loại (hiệp sau là cơ hội cuối) +160$,
+    // thắng liên tiếp +40$ mỗi trận thắng
     const targetScore = gameState.winScore || 3;
     [p1, p2].forEach(p => {
         const res = winnerId === 0 ? 'draw' : (winnerId === p.id ? 'win' : 'lose');
@@ -196,9 +200,9 @@ function endRound(winnerId) {
         const oppScore = p.id === 1 ? gameState.p2Score : gameState.p1Score;
         let bonus = 0;
         const notes = [];
-        if (p.loseStreak >= 2) { bonus += 60; notes.push('CHUỖI THUA'); }
-        if (oppScore === targetScore - 1 && myScore < targetScore) { bonus += 120; notes.push('CƠ HỘI CUỐI'); }
-        if (p.winStreak >= 2) { bonus += 30; notes.push(`CHUỖI THẮNG x${p.winStreak}`); }
+        if (p.loseStreak >= 2) { bonus += 80; notes.push('CHUỖI THUA'); }
+        if (oppScore === targetScore - 1 && myScore < targetScore) { bonus += 160; notes.push('CƠ HỘI CUỐI'); }
+        if (p.winStreak >= 2) { bonus += 40; notes.push(`CHUỖI THẮNG x${p.winStreak}`); }
         if (bonus > 0) {
             if (p.id === 1) gameState.p1Coins += bonus; else gameState.p2Coins += bonus;
             p.lastStreakBonus = { bonus, notes };

@@ -419,9 +419,9 @@ const MODULES = {
         },
     ],
     FEET: [
-        { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 30 },
-        { id: 'armor', name: 'Giáp Thép', desc: '+1 Máu tối đa.', type: 'feet', cost: 15 },
-        { id: 'damage', name: 'Bánh Xích', desc: 'x1.25 Sát thương (3 lần đầu), sau đó giảm dần.', type: 'feet', cost: 20 },
-        { id: 'interest', name: 'Lợi Tức', desc: 'Sau mỗi round nhận tiền; càng nhiều tầng mỗi tầng càng sinh lời (30$/72$/126$/192$..., Xe Tiền x2).', type: 'feet', cost: 10 }
+        { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 35 },
+        { id: 'armor', name: 'Giáp Thép', desc: '+1 Máu tối đa.', type: 'feet', cost: 20 },
+        { id: 'damage', name: 'Bánh Xích', desc: 'x1.25 Sát thương (3 lần đầu), sau đó giảm dần.', type: 'feet', cost: 25 },
+        { id: 'interest', name: 'Lợi Tức', desc: 'Sau mỗi hiệp nhận Lãi Cố Định tăng tiến (45$/108$/189$/288$...; Xe Tiền x2) + Lãi Tiết Kiệm: +15% số tiền đang giữ trong ví mỗi tầng (tối đa +35$/tầng).', type: 'feet', cost: 25 }
     ]
 };

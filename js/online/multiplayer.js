@@ -520,8 +520,8 @@ class OnlineMultiplayerManager {
                 break;
 
             case 'PAY_TO_WIN':
-                if (gameState.phase === 'upgrade' && gameState.p2Coins >= 500) {
-                    gameState.p2Coins -= 500;
+                if (gameState.phase === 'upgrade' && gameState.p2Coins >= 800) {
+                    gameState.p2Coins -= 800;
                     endRound(2);
                     const upg = document.getElementById('upgradeScreen');
                     if (upg) upg.style.display = 'none';

@@ -112,8 +112,8 @@ class AttackTruck {
             t.hp -= 4;
             if (t.hp <= 0) {
                 t.active = false;
-                if (this.owner.id === 1) gameState.p1Coins += 60; else gameState.p2Coins += 60;
-                addFloatingText(t.x + t.w / 2, t.y - 8, '+60$', '#ffd700', 13);
+                if (this.owner.id === 1) gameState.p1Coins += 100; else gameState.p2Coins += 100;
+                addFloatingText(t.x + t.w / 2, t.y - 8, '+100$', '#ffd700', 13);
                 explosions.push(new Explosion(t.x + t.w / 2, t.y + t.h / 2, 60, 'rgba(255,215,0,', 0, this.owner));
                 if (typeof onGearTruckDestroyed === 'function') onGearTruckDestroyed(t, this.owner);
             }
@@ -221,7 +221,7 @@ function grantCrateLoot(c, p) {
     if (c.type === 'ammo') p.onCollectAmmoCrate(c);
     if (c.type === 'shield') p.shield++;
     if (c.type === 'dmg') p.dmgBuff++;
-    if (c.type === 'coin') { const m = p.weapon === 'money_tank' ? 60 : 30; if (p.id === 1) gameState.p1Coins += m; else gameState.p2Coins += m; }
+    if (c.type === 'coin') { const m = p.weapon === 'money_tank' ? 70 : 35; if (p.id === 1) gameState.p1Coins += m; else gameState.p2Coins += m; }
     if (c.type === 'gear') { p.ammo = Math.min(p.maxAmmo, p.ammo + 1); if (p.weapon === 'genius') p.gears = (p.gears || 0) + 1; if (p.weapon === 'inventor') p.components = (p.components || 0) + 5; }
     if (p.weapon === 'evolution') p.onEvolutionCrateEat(c.type);
     explosions.push(new Explosion(c.x + c.w / 2, c.y + c.h / 2, 30, 'rgba(255,255,255,', 0, p));

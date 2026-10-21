@@ -230,7 +230,7 @@ class MoneyTruck {
     constructor() {
         this.id = 'mt_' + Math.random().toString(36).substr(2, 9);
         this.w = 45; this.h = 28;
-        this.hp = 6;
+        this.hp = 7;
         this.y = 100 + Math.random() * (canvas.height - 200);
         this.dir = Math.random() > 0.5 ? 1 : -1;
         this.x = this.dir === 1 ? -60 : canvas.width + 10;

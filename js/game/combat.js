@@ -314,8 +314,9 @@ function checkHits(attacker, victim) {
 
                     if (n.hp <= 0) {
                         n.active = false;
-                        let money = 30; if (attacker.weapon === 'money_tank') money *= 2;
+                        let money = 50; if (attacker.weapon === 'money_tank') money *= 2;
                         if (attacker.id === 1) gameState.p1Coins += money; else gameState.p2Coins += money;
+                        if (typeof addFloatingText === 'function') addFloatingText(n.x + n.w / 2, n.y, `+$${money} 💰`, '#facc15', 14);
                         if (attacker.weapon === 'inventor') {
                             let lkTruck = attacker.hasUpgrade('evo_inv_1') ? 3 : 2;
                             attacker.components = (attacker.components || 0) + lkTruck;
@@ -355,8 +356,9 @@ function checkHits(attacker, victim) {
                     if (n.type === 'dmg') { attacker.dmgBuff++; }
                     if (attacker.weapon === 'evolution') { attacker.onEvolutionCrateEat(n.type); }
                     if (n.type === 'coin') {
-                        let money = 30; if (attacker.weapon === 'money_tank') money *= 2;
+                        let money = 35; if (attacker.weapon === 'money_tank') money *= 2;
                         if (attacker.id === 1) gameState.p1Coins += money; else gameState.p2Coins += money;
+                        if (typeof addFloatingText === 'function') addFloatingText(n.x + n.w / 2, n.y, `+$${money}`, '#facc15', 13);
                     }
                     if (n.type === 'gear') {
                         attacker.ammo = Math.min(attacker.maxAmmo, attacker.ammo + 1);

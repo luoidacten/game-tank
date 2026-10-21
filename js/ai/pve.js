@@ -8,10 +8,10 @@
 
 const PVE_STAGES = [
     { name: 'Vòng Loại', level: 1, wins: 2, map: 'classic', bonus: 0 },
-    { name: 'Vòng Bảng', level: 2, wins: 2, map: 'bastion', bonus: 10 },
-    { name: 'Tứ Kết', level: 3, wins: 2, map: 'rush_hour', bonus: 20 },
-    { name: 'Bán Kết', level: 4, wins: 3, map: 'artillery', bonus: 35 },
-    { name: 'Chung Kết', level: 5, wins: 3, map: 'random', bonus: 50 },
+    { name: 'Vòng Bảng', level: 2, wins: 2, map: 'bastion', bonus: 20 },
+    { name: 'Tứ Kết', level: 3, wins: 2, map: 'rush_hour', bonus: 45 },
+    { name: 'Bán Kết', level: 4, wins: 3, map: 'artillery', bonus: 75 },
+    { name: 'Chung Kết', level: 5, wins: 3, map: 'random', bonus: 110 },
 ];
 
 const PVE = {
