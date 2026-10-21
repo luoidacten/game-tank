@@ -284,4 +284,8 @@ const EVOLUTIONS = {
         { id: 'evo_spider_1', name: 'Tơ Trói Thần Kinh', desc: 'Chỉ cần 3 tầng Tơ Quấn là Hóa Kén. Tầng Tơ duy trì 8s. Địch đứng trên Vùng Tơ Nhện quá 2s liên tục -> +1 tầng. Phá Kén bằng Cú Vồ: địch bị Câm Lặng thêm 1.5s và nhiễm Kịch Độc (0.3 HP/s trong 3s).', cost: 90, type: 'evo' },
         { id: 'evo_spider_2', name: 'Ổ Nhện Phục Kích', desc: 'Băng đạn 4 viên. Mỗi Vùng Tơ Nhện xuất hiện hoặc khi địch bị Hóa Kén -> nở 2 Nhện Con (HP 0.8, bò tới cắn 0.3 st & làm mới thời gian tầng Tơ; tối đa 4 con). FULL EVO (Nữ Hoàng Nhện Độc): đầu hiệp rải sẵn 2 Vùng Tơ lớn bên sân địch; đứng trên tơ giảm 25% st nhận; Hóa Kén kéo dài 2.25s & xoá sạch Khiên; ngưỡng Xử Tử của Cú Vồ tăng lên 25% Max HP; địch chưa trong kén nhưng có >= 2 tầng Tơ -> Cú Vồ bẻ lái tìm mục tiêu và đóng kén ngay khi chạm.', cost: 120, type: 'evo' },
     ],
+    tailor: [
+        { id: 'evo_tailor_1', name: 'Chỉ Tơ Hoàng Kim', desc: 'Tối đa 4 Cọc Chỉ, tồn tại 12s. Đường Chỉ Căng làm chậm 50% và làm chậm 30% tốc độ bay của đạn thường địch xuyên qua màn chỉ. Rút Chỉ Xiết Chặt: mỗi Cọc Chỉ thu về +0.25 Giáp Ảo (tối đa 2.0).', cost: 90, type: 'evo' },
+        { id: 'evo_tailor_2', name: 'Búp Bê Thế Mạng', desc: 'Đầu hiệp & mỗi 14s khâu ra 1 Búp Bê Vải (HP 3) trên nửa sân mình, chặn đạn địch; địch đang Mũi Khâu -> 60% st bắn vào Búp Bê truyền thẳng sang xe địch. Rút Chỉ: Búp Bê phóng kim về phía địch. FULL EVO (Tuyệt Tác Định Mệnh): tối đa 5 Cọc Chỉ, băng đạn 5 Kim; >= 3 Cọc bên sân địch tạo LĨNH VỰC CẮT MAY (cấm lướt/dịch chuyển, rút 0.4 HP/s); Rút Chỉ hồi 4.5s, cọc không mất mà chụm quanh địch rồi bung ngược ra.', cost: 120, type: 'evo' },
+    ],
 };
