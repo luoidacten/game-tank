@@ -634,67 +634,162 @@ function drawGojoPurple(b) {
     const cx = b.x + b.w / 2, cy = b.y + b.h / 2;
     const ang = Math.atan2(b.vy || 0, b.vx || 0);
     const sp = Math.hypot(b.vx || 0, b.vy || 0);
-    const charge = Math.max(0, b.chargeTimer || 0) / 30;      // 1 -> 0 khi tụ lực xong
+    const charge = Math.max(0, b.chargeTimer || 0) / (b.maxCharge || 30);      // 1 -> 0 khi tụ lực xong
+    const low = F.low();
     ctx.save();
+    // Cột cảnh báo đường bay lúc đang tụ lực
+    if (charge > 0) {
+        const up = (b.vy || 0) < 0;
+        const y0 = up ? 0 : cy, y1 = up ? cy : canvas.height;
+        const blink = (Math.floor(Date.now() / 90) % 2) ? 0.5 : 1;
+        ctx.globalAlpha = (0.10 + 0.2 * (1 - charge)) * blink;
+        const cg = ctx.createLinearGradient(cx - R * 1.3, 0, cx + R * 1.3, 0);
+        cg.addColorStop(0, 'rgba(168,85,247,0)'); cg.addColorStop(0.5, '#c084fc'); cg.addColorStop(1, 'rgba(168,85,247,0)');
+        ctx.fillStyle = cg; ctx.fillRect(cx - R * 1.3, y0, R * 2.6, y1 - y0);
+        ctx.globalAlpha = 0.7 * blink;
+        ctx.strokeStyle = '#e9d5ff'; ctx.lineWidth = 1; ctx.setLineDash([8, 6]); ctx.lineDashOffset = -t * 60;
+        ctx.beginPath(); ctx.moveTo(cx - R * 1.1, y0); ctx.lineTo(cx - R * 1.1, y1); ctx.moveTo(cx + R * 1.1, y0); ctx.lineTo(cx + R * 1.1, y1); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.globalAlpha = 1;
+    }
     ctx.translate(cx, cy);
-    // Vệt huỷ diệt phía sau khi bay nhanh
+    // Vệt huỷ diệt phía sau khi bay nhanh (2 lớp + tàn lửa)
     if (sp > 3) {
         ctx.save(); ctx.rotate(ang);
-        const L = Math.min(160, sp * 6);
-        const tg = ctx.createLinearGradient(-L, 0, 0, 0);
-        tg.addColorStop(0, 'rgba(126,34,206,0)'); tg.addColorStop(1, 'rgba(192,132,252,0.55)');
-        ctx.fillStyle = tg; ctx.fillRect(-L, -R * 0.95, L, R * 1.9);
+        const L = Math.min(220, sp * 7);
+        let tg = ctx.createLinearGradient(-L, 0, 0, 0);
+        tg.addColorStop(0, 'rgba(76,29,149,0)'); tg.addColorStop(1, 'rgba(168,85,247,0.6)');
+        ctx.fillStyle = tg; ctx.fillRect(-L, -R * 1.1, L, R * 2.2);
+        tg = ctx.createLinearGradient(-L * 0.6, 0, 0, 0);
+        tg.addColorStop(0, 'rgba(255,255,255,0)'); tg.addColorStop(1, 'rgba(243,232,255,0.8)');
+        ctx.fillStyle = tg; ctx.fillRect(-L * 0.6, -R * 0.35, L * 0.6, R * 0.7);
+        ctx.fillStyle = '#e9d5ff';
+        for (let i = 0; i < (low ? 6 : 14); i++) {
+            const ph = F.frac(t * 2.2 + F.hash(i + 40));
+            ctx.globalAlpha = 1 - ph;
+            ctx.fillRect(-ph * L, (F.hash(i * 9) - 0.5) * R * 2.2, 2.5, 2.5);
+        }
         ctx.restore();
     }
-    // Quầng tím lớn
-    const halo = ctx.createRadialGradient(0, 0, R * 0.5, 0, 0, R * 2.3);
-    halo.addColorStop(0, 'rgba(168,85,247,0.55)'); halo.addColorStop(1, 'rgba(76,29,149,0)');
-    ctx.fillStyle = halo; ctx.beginPath(); ctx.arc(0, 0, R * 2.3, 0, Math.PI * 2); ctx.fill();
-    if (charge > 0) {
-        // Xanh & Đỏ tiến lại hợp nhất (vuông góc hướng bay)
-        const d = R * 1.5 * charge;
-        const nx = -Math.sin(ang), ny = Math.cos(ang);
-        [[1, '#3b82f6', '#dbeafe'], [-1, '#ef4444', '#fee2e2']].forEach(([sd, c, c2]) => {
-            const ox = nx * d * sd, oy = ny * d * sd;
-            const g = ctx.createRadialGradient(ox, oy, 0, ox, oy, R * 0.55);
-            g.addColorStop(0, c2); g.addColorStop(0.5, c); g.addColorStop(1, 'rgba(0,0,0,0)');
-            ctx.fillStyle = g; ctx.beginPath(); ctx.arc(ox, oy, R * 0.55, 0, Math.PI * 2); ctx.fill();
-        });
-        ctx.strokeStyle = `rgba(233,213,255,${1 - charge})`; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.arc(0, 0, R * (1.8 - charge), 0, Math.PI * 2); ctx.stroke();
+    // Quầng tím lớn + vòng méo không gian (thấu kính)
+    const pulse = 1 + Math.sin(t * 7) * 0.05;
+    const halo = ctx.createRadialGradient(0, 0, R * 0.4, 0, 0, R * 2.8 * pulse);
+    halo.addColorStop(0, 'rgba(192,132,252,0.6)'); halo.addColorStop(0.5, 'rgba(126,34,206,0.28)'); halo.addColorStop(1, 'rgba(46,16,101,0)');
+    ctx.fillStyle = halo; ctx.beginPath(); ctx.arc(0, 0, R * 2.8 * pulse, 0, Math.PI * 2); ctx.fill();
+    for (let i = 0; i < 3; i++) {
+        const ph = F.frac(t * 0.9 + i / 3);
+        ctx.globalAlpha = (1 - ph) * 0.7;
+        ctx.strokeStyle = i % 2 ? '#f0abfc' : '#c4b5fd'; ctx.lineWidth = 2 * (1 - ph) + 0.5;
+        ctx.beginPath(); ctx.ellipse(0, 0, R * (1.2 + ph * 1.8), R * (1.1 + ph * 1.6), t * 0.7 + i, 0, Math.PI * 2); ctx.stroke();
     }
-    const core = 1 - charge * 0.6;
-    // Cầu chính
-    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, R * core);
-    g.addColorStop(0, '#ffffff'); g.addColorStop(0.25, '#f3e8ff'); g.addColorStop(0.6, '#a855f7'); g.addColorStop(1, '#3b0764');
-    ctx.shadowBlur = 20; ctx.shadowColor = '#a855f7';
+    ctx.globalAlpha = 1;
+    if (charge > 0) {
+        // Xanh (Thương) & Đỏ (Hách) xoáy quanh nhau rồi hợp nhất
+        const d = R * 2.2 * charge;
+        const spin = t * 6 + (1 - charge) * 5;
+        [[0, '#3b82f6', '#dbeafe', 'rgba(59,130,246,'], [Math.PI, '#ef4444', '#fee2e2', 'rgba(239,68,68,']].forEach(([off, c, c2, ca]) => {
+            const a0 = spin + off;
+            const ox = Math.cos(a0) * d, oy = Math.sin(a0) * d * 0.6;
+            // dải năng lượng nối vào tâm
+            ctx.strokeStyle = ca + (0.7 * (1 - charge * 0.5)) + ')'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(ox, oy); ctx.quadraticCurveTo(Math.cos(a0 + 1) * d * 0.5, Math.sin(a0 + 1) * d * 0.3, 0, 0); ctx.stroke();
+            const rr = R * (0.45 + 0.25 * charge);
+            const g = ctx.createRadialGradient(ox, oy, 0, ox, oy, rr * 1.8);
+            g.addColorStop(0, c2); g.addColorStop(0.35, c); g.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = g; ctx.beginPath(); ctx.arc(ox, oy, rr * 1.8, 0, Math.PI * 2); ctx.fill();
+            // hạt rơi theo quỹ đạo
+            ctx.fillStyle = c2;
+            for (let i = 0; i < (low ? 4 : 8); i++) {
+                const aa = a0 - i * 0.22;
+                ctx.globalAlpha = 1 - i / 8;
+                ctx.fillRect(Math.cos(aa) * d - 1, Math.sin(aa) * d * 0.6 - 1, 2, 2);
+            }
+            ctx.globalAlpha = 1;
+        });
+        ctx.strokeStyle = `rgba(233,213,255,${1 - charge})`; ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.arc(0, 0, R * (2.2 - charge * 1.2), 0, Math.PI * 2); ctx.stroke();
+    }
+    const core = 1 - charge * 0.55;
+    // Cầu chính tím - tâm trắng chói
+    const g = ctx.createRadialGradient(-R * 0.15 * core, -R * 0.15 * core, 0, 0, 0, R * core);
+    g.addColorStop(0, '#ffffff'); g.addColorStop(0.22, '#f5e9ff'); g.addColorStop(0.55, '#a855f7'); g.addColorStop(0.85, '#581c87'); g.addColorStop(1, '#1e0638');
+    ctx.shadowBlur = 26; ctx.shadowColor = '#c084fc';
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, R * core, 0, Math.PI * 2); ctx.fill();
     ctx.shadowBlur = 0;
     // Xoáy đỏ/xanh bên trong
     ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
     ctx.rotate(t * 4);
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 6; i++) {
         ctx.strokeStyle = i % 2 ? 'rgba(248,113,113,0.85)' : 'rgba(96,165,250,0.85)';
-        ctx.lineWidth = 2.2;
-        ctx.beginPath(); ctx.arc(0, 0, R * core * (0.55 + 0.1 * i), i * Math.PI / 2, i * Math.PI / 2 + 1.6); ctx.stroke();
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(0, 0, R * core * (0.42 + 0.09 * i), i * Math.PI / 3, i * Math.PI / 3 + 1.4); ctx.stroke();
     }
     ctx.restore();
-    // Vòng méo (thấu kính tối) + vòng sáng dao động
-    const wob = Math.sin(t * 9) * 0.06;
-    ctx.strokeStyle = 'rgba(10,0,25,0.45)'; ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.ellipse(0, 0, R * (1.22 + wob), R * (1.22 - wob), t, 0, Math.PI * 2); ctx.stroke();
-    ctx.strokeStyle = 'rgba(233,213,255,0.65)'; ctx.lineWidth = 1.2;
+    // Vòng méo (thấu kính tối) + vòng sáng dao động + tia điện tím
+    const wob = Math.sin(t * 9) * 0.07;
+    ctx.strokeStyle = 'rgba(10,0,25,0.55)'; ctx.lineWidth = 3.5;
+    ctx.beginPath(); ctx.ellipse(0, 0, R * core * (1.2 + wob), R * core * (1.2 - wob), t, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = 'rgba(233,213,255,0.75)'; ctx.lineWidth = 1.3;
     ctx.beginPath(); ctx.ellipse(0, 0, R * (1.55 - wob), R * (1.55 + wob), -t * 0.8, 0, Math.PI * 2); ctx.stroke();
-    // Mảnh vụn bị hút
+    if (!low) {
+        ctx.strokeStyle = '#f5d0fe'; ctx.lineWidth = 1; ctx.shadowBlur = 8; ctx.shadowColor = '#e879f9';
+        const fr = Math.floor(t * 14);
+        for (let k = 0; k < 3; k++) {
+            const a0 = F.hash(fr * 3 + k) * Math.PI * 2;
+            ctx.beginPath();
+            for (let s = 0; s <= 4; s++) {
+                const rr = R * core * (1 + s * 0.22);
+                const aa = a0 + (F.hash(fr * 11 + k * 5 + s) - 0.5) * 0.5;
+                if (s === 0) ctx.moveTo(Math.cos(aa) * rr, Math.sin(aa) * rr); else ctx.lineTo(Math.cos(aa) * rr, Math.sin(aa) * rr);
+            }
+            ctx.stroke();
+        }
+        ctx.shadowBlur = 0;
+    }
+    // Mảnh vụn bị hút vào
     ctx.fillStyle = '#e9d5ff';
-    const N = F.low() ? 6 : 10;
+    const N = low ? 8 : 16;
     for (let i = 0; i < N; i++) {
         const ph = F.frac(t * 1.3 + i / N);
-        const rr = R * (2.2 - ph * 1.0);
+        const rr = R * (2.6 - ph * 1.4);
         const a = F.hash(i + 9) * Math.PI * 2 - t;
         ctx.globalAlpha = ph;
         ctx.fillRect(Math.cos(a) * rr - 1, Math.sin(a) * rr - 1, 2, 2);
     }
+    ctx.restore();
+}
+
+// Thông báo HUD "HƯ THỨC: TỬ" khi Gojo tung Tím (cả 2 người chơi đều thấy)
+function drawGojoPurpleBanner(p) {
+    const T = p.gojoPurpleBanner || 0;
+    if (T <= 0) return;
+    const e = 120 - T;
+    const a = Math.min(1, e / 8) * Math.min(1, T / 20);
+    const W = canvas.width, y = canvas.height / 2;
+    const t = Date.now() / 1000;
+    ctx.save();
+    ctx.globalAlpha = a;
+    // dải nền tím
+    const bg = ctx.createLinearGradient(0, 0, W, 0);
+    bg.addColorStop(0, 'rgba(30,6,56,0)'); bg.addColorStop(0.5, 'rgba(46,16,101,0.85)'); bg.addColorStop(1, 'rgba(30,6,56,0)');
+    ctx.fillStyle = bg; ctx.fillRect(0, y - 34, W, 68);
+    // viền cảnh báo nhấp nháy
+    const blink = (Math.floor(Date.now() / 120) % 2) ? 1 : 0.45;
+    ctx.fillStyle = `rgba(239,68,68,${0.8 * blink})`; ctx.fillRect(0, y - 34, W, 2);
+    ctx.fillStyle = `rgba(59,130,246,${0.8 * blink})`; ctx.fillRect(0, y + 32, W, 2);
+    // vạch chéo cảnh báo
+    ctx.fillStyle = 'rgba(250,204,21,0.25)';
+    const off = (t * 40) % 16;
+    for (let x = -16 + off; x < W; x += 16) { ctx.beginPath(); ctx.moveTo(x, y - 32); ctx.lineTo(x + 6, y - 32); ctx.lineTo(x + 2, y - 26); ctx.lineTo(x - 4, y - 26); ctx.fill(); }
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const sx = 0.8 + 0.2 * Math.min(1, e / 10);
+    ctx.font = "bold 10px 'Orbitron', Arial"; ctx.fillStyle = `rgba(250,204,21,${blink})`;
+    drawWorldText(ctx, '⚠ CẢNH BÁO — NÉ KHỎI CỘT TÍM ⚠', W / 2, y - 17);
+    ctx.font = `bold ${Math.round(22 * sx)}px 'Orbitron', Arial`;
+    ctx.shadowBlur = 18; ctx.shadowColor = '#c084fc'; ctx.fillStyle = '#f5e9ff';
+    drawWorldText(ctx, 'HƯ THỨC: TỬ', W / 2, y + 6);
+    ctx.shadowBlur = 0; ctx.font = "bold 9px 'Orbitron', Arial"; ctx.fillStyle = '#d8b4fe';
+    drawWorldText(ctx, 'HOLLOW PURPLE', W / 2, y + 23);
     ctx.restore();
 }
 
@@ -784,6 +879,21 @@ function drawGojoRedBeam(bm) {
 // Vòng gồng Gojo (mốc 1s = Đỏ, 5s = Lãnh địa)
 CharHooks.register('the_strongest', Object.assign(CharHooks.registry['the_strongest'] || {}, {
     draw() {
+        const dt = this.gojoDomainTimer || 0;
+        if (dt > GOJO_DOMAIN_FREE) {
+            // Đang niệm Lãnh Địa: vòng đếm ngược 4s (đứng yên), xong mới được di chuyển
+            const k = (dt - GOJO_DOMAIN_FREE) / (GOJO_DOMAIN_TICKS - GOJO_DOMAIN_FREE);
+            const cx = this.x + this.w / 2, cy = this.y + this.h / 2, R = this.w * 1.05;
+            ctx.save();
+            ctx.lineCap = 'round'; ctx.lineWidth = 3;
+            ctx.strokeStyle = 'rgba(2,6,23,0.6)';
+            ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+            ctx.strokeStyle = '#e0f2fe'; ctx.shadowBlur = 10; ctx.shadowColor = '#60a5fa';
+            ctx.beginPath(); ctx.arc(cx, cy, R, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * k); ctx.stroke();
+            ctx.font = "bold 9px 'Orbitron', Arial"; ctx.textAlign = 'center'; ctx.fillStyle = '#e0f2fe';
+            drawWorldText(ctx, 'NIỆM ' + Math.ceil((dt - GOJO_DOMAIN_FREE) / 60) + 's', cx, this.id === 1 ? this.y + this.h + 14 : this.y - 8);
+            ctx.restore();
+        }
         const ch = this.gojoChargeTimer || 0;
         if (ch <= 0) return;
         const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
@@ -824,7 +934,7 @@ const VOID_STARS = (() => {
     }
     return s;
 })();
-const GOJO_DOMAIN_TICKS = 100;
+// GOJO_DOMAIN_TICKS (300) khai báo ở js/characters/the_strongest/logic.js
 function drawInfiniteVoid(p) {
     const F = CURSE_FX;
     const timer = p.gojoDomainTimer || 0;
@@ -1736,6 +1846,7 @@ function curseFxOver() {
         try {
             if (p.hp > 0 && p.weapon === 'sukuna' && p.domainActive) drawMalevolentShrineIntro(p);
             if (p.hp > 0 && p.weapon === 'the_strongest' && (p.gojoDomainTimer || 0) > 0) drawInfiniteVoidOverlay(p);
+            if (p.weapon === 'the_strongest' && (p.gojoPurpleBanner || 0) > 0) drawGojoPurpleBanner(p);
             drawBindingMarks(p);
         } catch (e) { /* bỏ qua */ }
     });

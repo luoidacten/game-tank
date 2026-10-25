@@ -103,7 +103,7 @@ const EVOLUTIONS = {
         { id: 'evo_six_2', name: 'Quá Nhiệt', desc: 'Nhiệt >50% đã gây Đốt. Hạ nhiệt cực nhanh khi <50%. Lâu quá tải hơn. Nhược điểm: Quá tải trừ 5 Max HP.', cost: 290, type: 'evo' }
     ],
     the_strongest: [
-        { id: 'evo_strongest_1', name: 'Hư Thức: Tử (Tím)', type: 'evo', desc: 'Kích hoạt cả 2 nội tại khi Chú lực >50% tạo cầu hủy diệt nổ diện rộng.', cost: 480 },
+        { id: 'evo_strongest_1', name: 'Hư Thức: Tử (Tím)', type: 'evo', desc: 'Đã dùng cả Xanh & Đỏ: lần ra chiêu kế tiếp còn >= 60% Chú Lực tung HƯ THỨC: TỬ (tụ 0.75s có cột cảnh báo + thông báo, xuyên thấu 2.9 dame, nổ tường 3.9). Giữ 5s: Bành Trướng Lãnh Địa Vô Lượng Không Xứ (75% CL) — 5s địch câm lặng & chậm 50% (choáng 1s đầu); bạn đứng yên niệm 4s, 1s cuối mới di chuyển / ra chiêu.', cost: 480 },
         { id: 'evo_strongest_2', name: 'Lục Nhãn (Mắt Xanh)', type: 'evo', desc: 'Tăng max & hồi Chú lực. Nhấp: Đạn Xanh hút địch. Giữ: Tia Đỏ choáng.', cost: 240 }
     ],
     // THÊM TIẾN HÓA SNIPER VÀO ĐÂY:
@@ -120,8 +120,8 @@ const EVOLUTIONS = {
         { id: 'evo_mirror_2', name: 'Hình Chiếu', desc: 'Tạo Ảnh chiếu cho địch. Đánh vào Ảnh chiếu địch chịu 50% dame.', cost: 280, type: 'evo' }
     ],
     sukuna: [
-        { id: 'evo_sukuna_1', name: 'Hỏa Mũi Tên (Fuga)', desc: 'Khi đầy 100 Chú Lực, giữ bắn 2s phóng đại hồng tâm lửa gây 3.5 dame.', cost: 450, type: 'evo' },
-        { id: 'evo_sukuna_2', name: 'Phách Diện Rộng', desc: 'Nhát chém to gấp đôi, có thể triệt tiêu đạn thường của kẻ địch.', cost: 230, type: 'evo' }
+        { id: 'evo_sukuna_1', name: 'Hỏa Mũi Tên (Fuga)', desc: 'Bấm khi Chú Lực >= 95 (máu >= 50%) để nạp Fuga (vòng lửa cam), giữ 2s rồi nhả: phóng mũi tên lửa 2.1 dame, tốn hết Chú Lực. Full Evo: giữ 5s mở Lãnh Địa (50 CL); đã mở Lãnh Địa + phóng >= 2 Fuga trong hiệp -> giữ 8s khoá mục tiêu, 9s Nhát Chém Thế Giới kết liễu (1 lần/hiệp, trúng đòn là ngắt).', cost: 450, type: 'evo' },
+        { id: 'evo_sukuna_2', name: 'Phách Diện Rộng', desc: 'Nhát chém to gấp đôi (7 CL/nhát), có thể triệt tiêu đạn thường của kẻ địch.', cost: 230, type: 'evo' }
     ],
     paradox: [
         { id: 'evo_paradox_1', name: 'Dấu Ấn Thời Gian', type: 'evo', desc: 'Bắn trúng địch tích ấn (Max 3). Đủ ấn tạo Bóng Đứng Yên + Choáng. Kích hoạt tua ngược kéo địch về Bóng Đứng.', cost: 185 },

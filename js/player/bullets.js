@@ -89,7 +89,7 @@ Object.assign(Player.prototype, {
 
                     // Bùmmmm! (Nerfed: Bán kính nổ giảm 50% tránh bao phủ toàn map)
                     let radius = b.isEvo2 ? 70 : 55;
-                    explosions.push(new Explosion(b.x + b.w / 2, b.y + b.h / 2, radius, 'purple', 3.0, this));
+                    explosions.push(new Explosion(b.x + b.w / 2, b.y + b.h / 2, radius, 'purple', 3.9, this)); // [BUFF] 3.0 -> 3.9 (+30%)
 
                     this.bullets.splice(i, 1);
                     continue;

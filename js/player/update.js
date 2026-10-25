@@ -346,6 +346,7 @@ Object.assign(Player.prototype, {
         // Trạng thái chung (vùng làm chậm...) & hook tốc độ của body mới
         currentSpeed *= (this.statusSpeedMult === undefined ? 1 : this.statusSpeedMult);
         if (CharHooks.has(this, 'speed')) currentSpeed = CharHooks.call(this, 'speed', currentSpeed);
+        if (typeof hitscanOwnerLocked === 'function' && hitscanOwnerLocked(this)) currentSpeed = 0; // đang cảnh báo tia: người bắn đứng yên
 
         const prevXForStone = this.x;
         this.netMoveSpd = currentSpeed;

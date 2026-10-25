@@ -228,3 +228,15 @@ function resolveStoneBlocking(p, prevX) {
         }
     }
 }
+
+// Người bắn tia có cảnh báo (scheduleHitscan / HitscanTelegraph) phải đứng yên tới khi hết cảnh báo.
+// Trạng thái suy ra từ thực thể trong bodyEffects (bị xoá khi sang hiệp / bắn xong) -> không bao giờ kẹt.
+// Ngoại lệ: Kiếm Tôn (blade_god) — Quang Kiếm tự bắn, xe vẫn di chuyển.
+function hitscanOwnerLocked(p) {
+    if (!p || p.weapon === 'blade_god' || !(p.hp > 0) || gameState.phase !== 'playing') return false;
+    for (let i = 0; i < bodyEffects.length; i++) {
+        const e = bodyEffects[i];
+        if (e && e.active && e.owner === p && e.delay > 0 && (e instanceof HitscanTelegraph || (typeof HitscanWarning !== 'undefined' && e instanceof HitscanWarning))) return true;
+    }
+    return false;
+}

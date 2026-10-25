@@ -31,7 +31,7 @@ const MODULES = {
         { id: 'furnace', name: 'Lò Nung', desc: 'HP:6 (+3 máu xe lớn) | Chậm | Dame:0.25 Đạn: Nội năng. Gây Đốt. 5 stack Đốt -> Nổ 5 dame.', type: 'body', role: ['Đối Đầu', 'Kiểm Soát'], size: { w: 36, h: 36 }, stats: { hp: 6, dmg: 0.25, ammo: 0 } },
         { id: 'am_duong_su', name: 'Âm Dương Sư', desc: 'HP:5 | Dame:0.5 | Đạn:4. Luân phiên Âm/Dương chú. Bùa kích nổ nhanh.', type: 'body', role: ['Kiểm Soát', 'Đối Đầu'], size: { w: 30, h: 30 }, stats: { hp: 5, dmg: 0.5, ammo: 4 } },
         { id: 'six_barrel', name: '6 Nòng', desc: 'HP:6 (+3 máu xe lớn) | Dame:0.4 | Đạn: Vô hạn. Giữ 0.5s khởi động nòng rồi mới bắn (đã quay thì nhấp vẫn bắn). Bắn liên tục tăng Nhiệt, đi chậm. Quá nhiệt gây câm lặng.', type: 'body', role: ['Đối Đầu', 'Sinh Tồn'], size: { w: 36, h: 36 }, stats: { hp: 6, dmg: 0.4, ammo: 999 } },
-        { id: 'the_strongest', name: 'Kẻ Mạnh Nhất', type: 'body', role: ['Sinh Tồn', 'Đối Đầu'], size: { w: 30, h: 30 }, desc: 'HP 1. Dùng Chú Lực vô hiệu sát thương. Nhấp: Lướt (Thương). Giữ: Hit-scan (Hách). Bị trúng đòn ngắt niệm.', stats: { hp: 1, dmg: 0.5, ammo: 999 } },
+        { id: 'the_strongest', name: 'Kẻ Mạnh Nhất', type: 'body', role: ['Sinh Tồn', 'Đối Đầu'], size: { w: 30, h: 30 }, desc: 'HP 1. Dùng Chú Lực vô hiệu sát thương. Nhấp: Xanh (Thương, 15 CL). Giữ 1s: tia Đỏ (Hách, 50 CL, cảnh báo 0.5s - đứng yên). Bấm lúc hồi chiêu được xếp hàng. Nhấp đúp nhanh: Hắc Thiểm (1.3 dame + choáng 0.3s, 20 CL, hồi 6s). Bị trúng đòn / câm lặng ngắt niệm (phải nhả nút).', stats: { hp: 1, dmg: 0.5, ammo: 999 } },
         { id: 'sniper', name: 'Sniper', desc: 'HP:3 | Dame:2 | Đạn:5. Tốc chậm. Giữ bắn tạo tường chặn MỌI đòn địch (cả tia hitscan & đạn xuyên); đạn mình bay qua. Tường tự mục sau 5s. Xuyên giảm dame. Đạn bay cực nhanh, tia ngắm chỉ đúng hướng bắn. Hết đạn nạp cả băng (vòng nạp).', type: 'body', role: ['Đối Đầu', 'Kiểm Soát'], size: { w: 24, h: 24 }, stats: { hp: 3, dmg: 2, ammo: 5 } },
         {
             id: 'cung',
@@ -52,10 +52,10 @@ const MODULES = {
         {
             id: 'sukuna',
             name: 'Vua Đầu Bếp',
-            desc: 'HP:4.5 (+3 máu xe lớn) | Chú Lực tấn công. Giữ bắn Phản Chuyển (+1.25 HP). Bị trúng đòn ngắt niệm Lãnh Địa.',
+            desc: 'HP:3.5 (+3 máu xe lớn) | Chú Lực tấn công. Nhấp: nhát Giải 0.3 dame (9 CL, hồi 0.7s). Giữ 1.2s: Phản Chuyển (+0.6 HP, 22 CL). Nhấp đúp nhanh: Hắc Thiểm (1.1 dame + choáng 0.3s, 15 CL, hồi 6s). Bị trúng đòn ngắt niệm.',
             type: 'body', role: ['Đối Đầu', 'Sinh Tồn'],
             size: { w: 36, h: 36 },
-            stats: { hp: 4.5, dmg: 2.0, ammo: 999 }
+            stats: { hp: 3.5, dmg: 2.0, ammo: 999 }
         },
         {
             id: 'paradox',

@@ -44,7 +44,17 @@ Object.assign(Player.prototype, {
                     ctx.arc(centerX, centerY, 60 + Math.sin(Date.now() / 50) * 10, 0, Math.PI * 2);
                     ctx.stroke();
                 }
-                else if (chargeSec >= 1.5) {
+                else if (this.skFugaArmed) {
+                    // Đang nạp Fuga: vòng lửa cam đầy dần tới 2s (đủ -> nhả để phóng)
+                    const k = Math.min(1, chargeSec / 2);
+                    const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
+                    ctx.lineCap = 'round'; ctx.lineWidth = 3;
+                    ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+                    ctx.beginPath(); ctx.arc(cx, cy, this.w * 0.95, 0, Math.PI * 2); ctx.stroke();
+                    ctx.strokeStyle = k >= 1 ? '#ffd166' : '#ff6a00'; ctx.shadowBlur = 10; ctx.shadowColor = '#ff6a00';
+                    ctx.beginPath(); ctx.arc(cx, cy, this.w * 0.95, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * k); ctx.stroke();
+                }
+                else if (chargeSec >= 1.2) {
                     // Hiệu ứng Phản chuyển Hồi máu
                     ctx.strokeStyle = '#00ff66';
                     ctx.lineWidth = 3;
