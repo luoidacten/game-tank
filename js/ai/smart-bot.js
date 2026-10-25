@@ -607,3 +607,18 @@ function botShopBuy(playerId) {
         return f.call(this, bot, enemy, aligned, inp);
     };
 })();
+
+// Tỉnh: nhấp bắn khi thẳng hàng; khi đủ Khó Chịu đôi khi giữ 0.4s nạp sẵn Đạn Cấm Chế rồi nhả (tnBotAction)
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon === 'tinh' && typeof tnBotAction === 'function') {
+            if (this.tnB > 0) { this.tnB--; inp.s = this.tnB > 0; return; }
+            const a = tnBotAction(bot, enemy, aligned);
+            if (a === 'hold') { this.tnB = 24 + 4; inp.s = true; return; }
+            if (a === 'tap') { this.tnB = 4; inp.s = true; return; }
+            inp.s = false; return;
+        }
+        return f.call(this, bot, enemy, aligned, inp);
+    };
+})();

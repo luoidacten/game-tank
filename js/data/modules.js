@@ -449,6 +449,14 @@ const MODULES = {
             size: { w: 30, h: 30 },
             stats: { hp: 5.5, dmg: 1.0, ammo: 4, speedMult: 1.0286 }
         },
+        {
+            id: 'tinh',
+            name: 'Tỉnh',
+            desc: '"Ngươi đang cố chạy sao?" HP:5.5 | Dame:1.1 | Đạn:4 | Tốc:3.4. KHÓ CHỊU (0-10): địch Lướt/Lao/Dịch Chuyển -> +2; địch đi > 160px trong 1.2s -> +1. Mỗi hành động gây khó chịu đóng +1 tầng NGƯNG lên địch (5s, -20% tốc mỗi tầng); đủ 3 tầng: CHOÁNG CỨNG 3s + 0.8 sát thương chuẩn (miễn tích lại 1.5s sau khi tỉnh). ĐẠN CẤM CHẾ: khi Khó Chịu >= 5, phát bắn kế tiếp tự tiêu 5 điểm (hoặc giữ 0.4s để nạp sẵn, nhả để bắn): to x1.5, nhanh x2, x1.6 dame, xuyên vật cản; trúng/chạm biên sân địch mở VÙNG CẤM CHẾ r125 trong 4s — địch bên trong bị nhốt, không thể bước hay lướt ra (trừ Juggernaut). Hạ gục -> NGƯNG ĐỌNG VĨNH HẰNG.',
+            type: 'body', role: ['Kiểm Soát', 'Đối Đầu'],
+            size: { w: 30, h: 30 },
+            stats: { hp: 5.5, dmg: 1.1, ammo: 4, speedMult: 0.9714 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 35 },

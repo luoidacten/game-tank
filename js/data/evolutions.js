@@ -315,4 +315,8 @@ const EVOLUTIONS = {
         { id: 'evo_adapter_1', name: 'Học Sâu Thời Gian Thực', desc: 'Vòng Xoay Thích Ứng tối đa 6 -> 8 nấc (48% Giảm Sát Thương, +0.96 dame). Tự xoay mỗi 2.5s thay vì 3.5s. Mỗi khi địch dùng Kỹ năng Giữ Bắn: +1 nấc ngay & +1 tầng Lộ Điểm Yếu lên địch.', cost: 90, type: 'evo' },
         { id: 'evo_adapter_2', name: 'Phá Giải Hoàn Toàn', desc: 'Lộ Điểm Yếu tối đa 5 -> 7 tầng (+49% sát thương nhận, -28% tốc đạn/nạp đạn của địch). Từ 4 tầng trở lên: mỗi phát bắn thường trúng hút +0.15 HP & cướp 10% tốc chạy ngang của địch trong 1.5s. FULL EVO (Thần Cơ Bất Bại): đầu hiệp có sẵn 2 nấc & địch bị gắn sẵn 1 tầng; TRẠNG THÁI HOÀN MỸ (8/8 nấc): đạn thường to gấp rưỡi, xuyên vật cản, mỗi 6s tự tạo 1 lớp Khiên Thích Ứng, đòn trúng địch đủ 7 tầng nổ thêm 0.4 sát thương chuẩn.', cost: 120, type: 'evo' },
     ],
+    tinh: [
+        { id: 'evo_tinh_1', name: 'Ánh Nhìn Áp Chế', desc: 'Khó Chịu tối đa 10 -> 15. Đi bộ chỉ cần 120px trong 1.2s là bị tính Khó Chịu. Tầng Ngưng tồn tại 7s; mỗi tầng Ngưng làm địch nhận thêm +10% sát thương từ Tỉnh. Địch đứng im quá 2.5s -> +1 Khó Chịu mỗi giây.', cost: 90, type: 'evo' },
+        { id: 'evo_tinh_2', name: 'Lĩnh Vực Tĩnh Lặng', desc: 'Đạn Cấm Chế chỉ tốn 4 Khó Chịu. Vùng Cấm Chế r155, 5s, rút 0.3 HP/s & đạn địch bắn từ trong vùng chậm 35%. Địch bị Choáng do 3 tầng Ngưng -> Tỉnh hồi đầy đạn, +1 Khiên, phát bắn kế tiếp Chí Mạng x2. FULL EVO (Tuyệt Đối Tĩnh Lặng): Đạn Cấm Chế trúng trực tiếp +1 tầng Ngưng; địch trong vùng hoặc >= 2 tầng Ngưng -> vật triệu hồi của địch chậm 50%.', cost: 120, type: 'evo' },
+    ],
 };

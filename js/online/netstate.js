@@ -51,6 +51,7 @@ const NET_CLASSES = {
     CocLaser, CocFireZone, CocBolt, CocSlash, CocFinisher,
     PrBeam, PrFinisher,
     AdFinisher,
+    TnZone, TnFinisher,
 };
 
 // Biến toàn cục cần đồng bộ: [tên, getter, setter]
