@@ -45,8 +45,8 @@ Object.assign(Player.prototype, {
                     ctx.stroke();
                 }
                 else if (this.skFugaArmed) {
-                    // Đang nạp Fuga: vòng lửa cam đầy dần tới 2s (đủ -> nhả để phóng)
-                    const k = Math.min(1, chargeSec / 2);
+                    // Đang nạp Fuga: vòng lửa cam đầy dần tới 1.5s (đủ -> nhả để phóng)
+                    const k = Math.min(1, chargeSec / 1.5);
                     const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
                     ctx.lineCap = 'round'; ctx.lineWidth = 3;
                     ctx.strokeStyle = 'rgba(0,0,0,0.5)';

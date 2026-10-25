@@ -278,7 +278,7 @@ function renderFrame() {
 
 // Băng rôn thắng hiệp: hiện trong VICTORY_BANNER_SPAN tick rồi hết hiệp
 const VICTORY_BANNER_SPAN = 87;
-const VICTORY_FX_DELAY = 180;      // chờ thêm 3s sau khi kết liễu diễn xong
+const VICTORY_FX_DELAY = 0;        // kết liễu diễn xong là hiện màn thắng ngay
 const VICTORY_TOTAL_CAP = 600;     // tối đa 10s cho cả màn kết hiệp (không bao giờ treo)
 const FINISHER_FX_CLASSES = ['FsFinisher', 'TsFinisher', 'JkFinisher', 'JgFinisher', 'CgFinisher', 'ClFinisher', 'JpFinisher', 'WsFinisher', 'StFinisher', 'TatFinisher', 'OpFinisher', 'BmFinisher', 'ArFinisher', 'PsyFinisher', 'TlFinisher', 'JlFinisher', 'KgFinisher', 'BodyFinisher', 'TcFinisher', 'CocFinisher'];
 function finisherFxActive() {

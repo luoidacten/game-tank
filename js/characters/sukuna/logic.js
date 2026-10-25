@@ -68,9 +68,9 @@ Object.assign(Player.prototype, {
                     if (this.jjkTryBlackFlash()) this.skBF = true;
                     else {
                         // Fuga: đủ Chú Lực ngay lúc bấm -> "nạp" Fuga cho lần giữ này (không bị Phản Chuyển / nhát chém ăn mất Chú Lực)
-                        this.skFugaArmed = hasEvo1 && this.cursedEnergy >= 95 && this.hp >= this.maxHp * 0.5; // máu < 50%: ưu tiên Phản Chuyển
-                        // Nhát chém Giải (Dismantle) ngay khi chạm nút (chỉ 1 phát)
-                        if (!this.domainActive && this.cursedEnergy >= 10 && now - this.lastShot > 700) { // [NERF] 450 -> 700ms
+                        this.skFugaArmed = hasEvo1 && this.cursedEnergy >= 60; // [SỬA] nới điều kiện: chỉ cần >= 60 Chú Lực
+                        // Nhát chém Giải (Dismantle) ngay khi chạm nút (chỉ 1 phát; không chém khi đang nạp Fuga)
+                        if (!this.skFugaArmed && !this.domainActive && this.cursedEnergy >= 10 && now - this.lastShot > 700) { // [NERF] 450 -> 700ms
                             this.cursedEnergy -= hasEvo2 ? 7 : 9; // [NERF] 5 -> 9 Chú Lực mỗi nhát (Evo 2: 7)
                             this.lastShot = now;
                             this.bullets.push({
@@ -84,7 +84,7 @@ Object.assign(Player.prototype, {
                             });
                         }
                     }
-                } else if ((this.skHeld || 0) > 0 && this.sukunaChargeTimer === 0 && !this.skBroken && !this.skBF) {
+                } else if ((this.skHeld || 0) > 0 && this.sukunaChargeTimer === 0 && !this.skBroken && !this.skBF && !this.skFugaArmed) {
                     // Bị trúng đòn ngắt niệm (combat.js đặt sukunaChargeTimer = 0): huỷ cả lần giữ này
                     this.skBroken = true; this.skFugaArmed = false;
                     addFloatingText(this.x + this.w / 2, this.y - 12, 'NGẮT NIỆM', '#f87171', 11);
@@ -94,7 +94,7 @@ Object.assign(Player.prototype, {
 
                 this.sukunaChargeTimer++;
                 let chargeSec = this.sukunaChargeTimer / 60;
-                if (this.skFugaArmed && this.sukunaChargeTimer === 120) {
+                if (this.skFugaArmed && this.sukunaChargeTimer === 90) {
                     addFloatingText(this.x + this.w / 2, this.y - 14, 'FUGA ✓', '#ff8a00', 13);
                     explosions.push(new Explosion(this.x + this.w / 2, this.y + this.h / 2, 38, 'rgba(255, 120, 0,', 0, this));
                 }
@@ -195,7 +195,7 @@ Object.assign(Player.prototype, {
                 this.sukunaDomainTick = 0;
 
                 // PHÓNG FUGA (HỎA MŨI TÊN): đã "nạp" lúc bấm, giữ >= 2s rồi nhả
-                if (released && this.skFugaArmed && !this.skBroken && chargeSec >= 2.0 && this.cursedEnergy >= 80) {
+                if (released && this.skFugaArmed && !this.skBroken && chargeSec >= 1.5 && this.cursedEnergy >= 50) {
                     this.sukunaFugaCount++;
                     let fugaSize = 45;
                     this.bullets.push({
@@ -207,7 +207,7 @@ Object.assign(Player.prototype, {
                         vy: (this.id === 1) ? -7 : 7,
                         dmg: 2.1, owner: this, hitIds: [], isFuga: true // [NERF] 3.5 -> 2.1
                     });
-                    this.cursedEnergy = 0;
+                    this.cursedEnergy = Math.max(0, this.cursedEnergy - 60);
                     addFloatingText(this.x + this.w / 2, this.y - 16, 'FUGA', '#ff8a00', 16);
                 }
                 this.skFugaArmed = false;

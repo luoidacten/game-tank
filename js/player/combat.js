@@ -121,7 +121,7 @@ Object.assign(Player.prototype, {
         }
 
         // Sukuna: Đang gồng Lãnh Địa / Phản Chuyển mà ăn sát thương -> Bị phá niệm!
-        if (this.weapon === 'sukuna' && (this.sukunaChargeTimer || 0) > 0) {
+        if (this.weapon === 'sukuna' && (this.sukunaChargeTimer || 0) > 0 && !this.skFugaArmed) { // Fuga đã nạp: không bị ngắt
             this.sukunaChargeTimer = 0;
             this.domainActive = false;
             addFloatingText(this.x + this.w / 2, this.y - 15, "LÃNH ĐỊA BỊ PHÁ! 💥", "#e74c3c", 14);

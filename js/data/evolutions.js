@@ -120,7 +120,7 @@ const EVOLUTIONS = {
         { id: 'evo_mirror_2', name: 'Hình Chiếu', desc: 'Tạo Ảnh chiếu cho địch. Đánh vào Ảnh chiếu địch chịu 50% dame.', cost: 280, type: 'evo' }
     ],
     sukuna: [
-        { id: 'evo_sukuna_1', name: 'Hỏa Mũi Tên (Fuga)', desc: 'Bấm khi Chú Lực >= 95 (máu >= 50%) để nạp Fuga (vòng lửa cam), giữ 2s rồi nhả: phóng mũi tên lửa 2.1 dame, tốn hết Chú Lực. Full Evo: giữ 5s mở Lãnh Địa (50 CL); đã mở Lãnh Địa + phóng >= 2 Fuga trong hiệp -> giữ 8s khoá mục tiêu, 9s Nhát Chém Thế Giới kết liễu (1 lần/hiệp, trúng đòn là ngắt).', cost: 450, type: 'evo' },
+        { id: 'evo_sukuna_1', name: 'Hỏa Mũi Tên (Fuga)', desc: 'Bấm khi Chú Lực >= 60 để nạp Fuga (vòng lửa cam, trúng đòn không bị ngắt), giữ 1.5s rồi nhả: phóng mũi tên lửa 2.1 dame, tốn 60 Chú Lực. Full Evo: giữ 5s mở Lãnh Địa (50 CL); đã mở Lãnh Địa + phóng >= 2 Fuga trong hiệp -> giữ 8s khoá mục tiêu, 9s Nhát Chém Thế Giới kết liễu (1 lần/hiệp, trúng đòn là ngắt).', cost: 450, type: 'evo' },
         { id: 'evo_sukuna_2', name: 'Phách Diện Rộng', desc: 'Nhát chém to gấp đôi (7 CL/nhát), có thể triệt tiêu đạn thường của kẻ địch.', cost: 230, type: 'evo' }
     ],
     paradox: [

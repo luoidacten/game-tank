@@ -62,7 +62,7 @@ function checkHits(attacker, victim) {
             }
 
             // Ngắt Lãnh địa / Phản chuyển khi bị đánh trúng
-            victim.sukunaChargeTimer = 0;
+            if (!victim.skFugaArmed) victim.sukunaChargeTimer = 0; // Fuga đã nạp: không bị ngắt
             if (victim.domainActive) victim.domainActive = false;
         }
         if (victim.weapon === 'the_strongest') {
