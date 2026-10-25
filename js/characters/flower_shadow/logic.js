@@ -671,6 +671,7 @@ function fsCast(p, d) {
 }
 
 function fsThienStart(p, emp) {
+    if (groundedBlock(p)) return;
     p.fsMode = 'thien';
     p.fsHidden = true;
     p.fsHomeX = p.x;

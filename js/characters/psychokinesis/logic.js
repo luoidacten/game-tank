@@ -38,10 +38,11 @@ function psyCy(p) { return p.y + p.h / 2; }
 const PSY_NO_TYPES = ['purple', 'gojo_blue'];
 function psyCanCatch(b) {
     if (!b || typeof b.vx !== 'number' || typeof b.vy !== 'number' || b.psyCap) return false;
-    if (b.unstoppable || b.isUnstoppable || b.isLazer || b.isRaycast || b.isBeam || b.isHitscan || b.isUltimate) return false;
-    if (b.isSukunaSlash || b.isFuga || b.isStormPhantom || b.isWindBlade) return false;
+    // Bắt MỌI đạn đạo vật lý (đạn thường/lớn, tên lửa, phi kiếm, cầu lửa/băng, kim, mìn bay, Fuga, Phong Trảm...).
+    // Loại trừ: hitscan / lazer / raycast (Evo 2 chặn riêng ở rìa vùng), chiêu tối thượng / chém không gian, quyền phong.
+    if (b.isLazer || b.isRaycast || b.isBeam || b.isHitscan || b.isUltimate) return false;
+    if (b.isSukunaSlash || b.isStormPhantom) return false;
     if (b.type && PSY_NO_TYPES.includes(b.type)) return false;
-    if (b.hook === 'chrononeo' && b.cnKind === 'home') return false;   // Liên Xạ (Chrono)
     if (b.hook === 'one_punch') return false;                          // quyền phong Nhất Quyền
     if (Math.hypot(b.vx, b.vy) < 1) return false;
     return true;
@@ -237,6 +238,123 @@ function psyCatchEnv(p, cx, cy, R) {
     }
 }
 
+// Bắt ĐẠN DẠNG THỰC THỂ của địch (bodyEffects): Trọng/Nguyệt Luân, Huyết Cầu, Phi Tiêu Nguyệt, Liềm Xích, Cánh Hoa...
+// -> thực thể biến mất, sinh 1 viên đạn bắt giữ (psy_cap) cùng sát thương nằm lơ lửng trong vùng.
+function psyEntInfo(o, team) {
+    const own = o.owner && typeof o.owner.id === 'number' ? o.owner.id : o.team;
+    if (own === team || (own !== 1 && own !== 2)) return null;
+    const ow = own === 1 ? p1 : p2;
+    if (typeof BmStraight !== 'undefined' && o instanceof BmStraight) {
+        if (o.st === 'spin') return null;
+        return { r: 10, vx: 0, vy: (o.st === 'out' ? o.dir * 9 : -o.dir * 8), dmg: (ow.damage || 1) * 0.75, lost: () => o.end(ow, 'miss') };
+    }
+    if (typeof BmCurve !== 'undefined' && o instanceof BmCurve) return { r: 9, vx: 0, vy: (team === 1 ? 6 : -6), dmg: (ow.damage || 1) * 0.75, lost: () => o.finish(ow, 'miss') };
+    if (typeof BdOrb !== 'undefined' && o instanceof BdOrb) return { r: Math.min(10, o.r || 8), vx: 0, vy: o.vy || 0, dmg: (o.dmg || 1) + (o.exDmg || 0) * 0.5 };
+    if (typeof TsBigStar !== 'undefined' && o instanceof TsBigStar) return { r: Math.min(10, o.r || 8), vx: o.vx || 0, vy: o.vy || 0, dmg: o.dmg || 1 };
+    if (typeof KgSickle !== 'undefined' && o instanceof KgSickle) {
+        if (o.mode !== 'out') return null;
+        return { r: 8, vx: o.vx || 0, vy: o.vy || 0, dmg: o.dmg || 1,
+            lost: () => { if (typeof kgMine === 'function' && typeof KG_CDS !== 'undefined' && ow.kgCds && kgMine(ow, KgSickle).length === 0) ow.kgCds[0] = KG_CDS[0]; } };
+    }
+    if (typeof FsPetal !== 'undefined' && o instanceof FsPetal) { if (o.state !== 'fly') return null; return { r: 6, vx: o.vx || 0, vy: o.vy || 0, dmg: o.dmg || 0.5 }; }
+    return null;
+}
+function psyCatchEnts(p, cx, cy, R) {
+    if (typeof bodyEffects === 'undefined') return;
+    const e = psyEnemy(p);
+    for (const o of bodyEffects) {
+        if (!o || !o.active || typeof o.x !== 'number' || (p.psyCapN || 0) >= psyCapMax(p)) continue;
+        if (Math.hypot(o.x - cx, o.y - cy) > R) continue;
+        const I = psyEntInfo(o, p.id);
+        if (!I) continue;
+        o.active = false;
+        try { if (I.lost) I.lost(); } catch (err) { }
+        const sp = Math.hypot(I.vx, I.vy) || 6, depth = 15 + Math.random() * 40, sz = I.r * 2;
+        spawnBullet(p, { x: o.x - sz / 2, y: o.y - sz / 2, w: sz, h: sz, vx: I.vx, vy: I.vy || 0.01, dmg: I.dmg, hook: 'psy_cap', psyOH: '', psyOId: e ? e.id : 0,
+            psyCap: 1, psyOVx: I.vx, psyOVy: I.vy || -psyDir(p) * 6, psyFr: Math.max(0.6, Math.min(0.95, depth / (sp + depth))), psyPh: Math.random() * 6.28, psyEnv: 'ent', isPiercing: false });
+        p.psyCapN = (p.psyCapN || 0) + 1;
+        spawnSparkParticles(o.x, o.y, PSY_CYAN, 5);
+    }
+}
+
+// ---------- Evo 2: chặn HITSCAN / LAZER tại rìa vùng ----------
+// Mất 1.0s thời gian vùng / 1.0 dame chặn; về 0 -> vùng đỡ trọn đòn đó rồi VỠ. Tia bị chặn ngưng tụ thành 1 Đạn Năng Lượng.
+let psyHsDepth = 0, psyBeamHot = 0;
+function psyHsWrap(K) {
+    if (!K || !K.prototype || !K.prototype.update || K.prototype.update.__psy) return;
+    const o = K.prototype.update;
+    K.prototype.update = function () { psyHsDepth++; try { return o.apply(this, arguments); } finally { psyHsDepth--; } };
+    K.prototype.update.__psy = true;
+}
+function psyInstallHs() {
+    psyHsWrap(typeof HitscanWarning !== 'undefined' ? HitscanWarning : null);
+    psyHsWrap(typeof HitscanTelegraph !== 'undefined' ? HitscanTelegraph : null);
+    psyHsWrap(typeof DjBeam !== 'undefined' ? DjBeam : null);
+    psyHsWrap(typeof BdLaser !== 'undefined' ? BdLaser : null);
+    if (typeof Beam === 'function' && !Beam.prototype.update.__psy) {
+        const o = Beam.prototype.update;
+        Beam.prototype.update = function () { const r = o.apply(this, arguments); if (this.active && this.isEvo && this.lifeTime % 12 === 0) psyBeamHot = this.ownerId; return r; };
+        Beam.prototype.update.__psy = true;
+    }
+    if (Player.prototype.fireAnhMinhHitscan && !Player.prototype.fireAnhMinhHitscan.__psy) {
+        const o = Player.prototype.fireAnhMinhHitscan;
+        Player.prototype.fireAnhMinhHitscan = function () { psyHsDepth++; try { return o.apply(this, arguments); } finally { psyHsDepth--; } };
+        Player.prototype.fireAnhMinhHitscan.__psy = true;
+    }
+}
+function psyHsBlock(p, amount, fromX, fromY) {
+    const cx = psyCx(p), cy = psyCy(p), R = psyR(p), e = psyEnemy(p);
+    const fx = fromX === undefined ? (e ? psyCx(e) : cx) : fromX, fy = fromY === undefined ? (e ? psyCy(e) : cy + psyDir(p) * 100) : fromY;
+    const a = Math.atan2(fy - cy, fx - cx);
+    const ex = cx + Math.cos(a) * R * 0.8, ey = cy + Math.sin(a) * R * 0.8;
+    p.psyField -= amount * 60;
+    p.psyHsFx = 14; p.psyHsX = ex; p.psyHsY = ey;
+    let orb = null;
+    for (const b of p.bullets) if (b.psyHs && b.psyCap > 0 && b.dmg < 3) { orb = b; break; }
+    if (orb) orb.dmg = Math.min(3, orb.dmg + amount);
+    else spawnBullet(p, { x: ex - 6, y: ey - 6, w: 12, h: 12, vx: 0, vy: 0, dmg: Math.min(3, amount), hook: 'psy_cap', psyOH: '', psyOId: 0, psyCap: 2, psyHs: 1,
+        psyAx: ex - 6, psyAy: ey - 6, psyOVx: 0, psyOVy: -psyDir(p) * 7, psyPh: Math.random() * 6.28, isPiercing: false });
+    spawnSparkParticles(ex, ey, PSY_VIO, 6);
+    if (!(p.psyHsTxtT > 0)) { addFloatingText(ex, ey - 10, 'CHẶN TIA! -' + amount.toFixed(1) + 's', PSY_VIO, 11); p.psyHsTxtT = 30; }
+    if (p.psyField <= 0) {
+        p.psyField = 0;
+        addFloatingText(cx, cy - 40, 'VÙNG VỠ!', '#f472b6', 14);
+        explosions.push(new Explosion(cx, cy, R * 0.6, 'rgba(167, 139, 250,', 0, p));
+        triggerScreenShake(6, 10);
+        psyReflect(p);
+    }
+}
+
+// ---------- Phản chấn cận chiến (lao mặt đất chạm vùng) ----------
+function psyHomeY(e) { return e.id === 1 ? canvas.height - e.h - 22 : 20; }
+function psyIsSky(e) { return !!(e.thunderSky || e.tzFly || e.fsMode === 'thien' || e.fsHidden); }
+function psyDashFlag(e) {
+    return e.dashState === 1 || e.isDashing || e.isShortgunDashing || e.stormDashState === 1 || e.isPolarDashing
+        || e.kazMode === 'dash' || e.tatMode === 'dash' || e.tsPhase > 0 || e.isCharging;
+}
+function psyMeleeCounter(p, e, cx, cy, R) {
+    if (!e || !(e.hp > 0) || psyIsSky(e) || e.psyPinT > 0) { if (e) e.psyPY = e.y; return; }
+    const d = psyDir(e), home = psyHomeY(e), off = (e.y - home) * d, mv = (e.y - (typeof e.psyPY === 'number' ? e.psyPY : e.y)) * d;
+    e.psyPY = e.y;
+    if (off < 20 || !(mv > 1.5 || psyDashFlag(e))) return;
+    const nx = Math.max(e.x, Math.min(e.x + e.w, cx)), ny = Math.max(e.y, Math.min(e.y + e.h, cy));
+    if (Math.hypot(nx - cx, ny - cy) > R) return;
+    // chặn tại rìa vùng -> hất về làn cũ
+    const hx = e.x + e.w / 2, hy = ny;
+    explosions.push(new Explosion(hx, hy, 46, 'rgba(0, 242, 255,', 0, p));
+    spawnSparkParticles(hx, hy, PSY_CYAN, 16);
+    if (e.dashState === 1 || e.dashState === 2) { e.dashState = 0; e.tankDashCooldown = Math.max(e.tankDashCooldown || 0, 120); if (typeof e.dashStartY === 'number') e.dashStartY = home; }
+    if (e.isShortgunDashing) { e.isShortgunDashing = false; e.shortgunDashState = 0; }
+    if (e.stormDashState) e.stormDashState = 0;
+    if (e.isPolarDashing) e.isPolarDashing = false;
+    e.y = home; e.psyPY = home; e.psyPinT = 75;
+    e.takeDamage(1.0, p);
+    if (e.weapon !== 'juggernaut' && e.hp > 0) e.freezeTimer = Math.max(e.freezeTimer || 0, 75);
+    addFloatingText(hx, hy + d * 20, 'PHẢN CHẤN!', PSY_CYAN, 14);
+    triggerScreenShake(6, 10);
+    psySfx('playShieldBreak');
+}
+
 function psyFieldTick(p) {
     const e = psyEnemy(p), cx = psyCx(p), cy = psyCy(p), R = psyR(p), full = psyFull(p);
     const dx = p.x - (typeof p.psyLastX === 'number' ? p.psyLastX : p.x);
@@ -264,17 +382,17 @@ function psyFieldTick(p) {
         if (!b) continue;
         const bx = b.x + (b.w || 6) / 2, by = b.y + (b.h || 6) / 2;
         if (Math.hypot(bx - cx, by - cy) > R) continue;
-        if (full && psyLaserLike(b) && !b.psyBent) {
-            const a = Math.atan2(b.vy, b.vx) + (bx < cx ? -0.5 : 0.5), sp = Math.hypot(b.vx, b.vy);
-            b.vx = Math.cos(a) * sp; b.vy = Math.sin(a) * sp; b.dmg = (b.dmg || 1) * 0.5; b.psyBent = 1;
-            spawnSparkParticles(bx, by, PSY_VIO, 3);
+        if (psyLaserLike(b)) {
+            if (psyE2(p)) { e.bullets.splice(i, 1); psyHsBlock(p, b.dmg || 1, bx, by); if (!(p.psyField > 0)) return; }
             continue;
         }
         if ((p.psyCapN || 0) >= psyCapMax(p) || !psyCanCatch(b)) continue;
         psyCatch(p, e, i);
     }
     psyCatchEnv(p, cx, cy, R);
-    if (full) psyCatchBombs(p, cx, cy, R);
+    psyCatchEnts(p, cx, cy, R);
+    psyCatchBombs(p, cx, cy, R);
+    psyMeleeCounter(p, e, cx, cy, R);
     if (psyE2(p) && e && e.hp > 0 && Math.hypot(psyCx(e) - cx, psyCy(e) - cy) < R + e.w / 2) addStatusSlow(e, 0.6);
     if (--p.psyField <= 0) psyReflect(p);
 }
@@ -283,6 +401,9 @@ function psyFieldTick(p) {
 function psyTick(p) {
     if (gameState.phase !== 'playing') return;
     p.psyTk = (p.psyTk || 0) + 1;
+    psyInstallHs(); psyBeamHot = 0;
+    if (p.psyHsFx > 0) p.psyHsFx--;
+    if (p.psyHsTxtT > 0) p.psyHsTxtT--;
     if (p.psyCd > 0) p.psyCd--;
     if (p.psyPushFx > 0) p.psyPushFx--;
     if (p.ammo < p.maxAmmo) { if (++p.psyRl >= PSY_RELOAD) { p.ammo++; p.psyRl = 0; } } else p.psyRl = 0;
@@ -403,7 +524,10 @@ CharHooks.register('psychokinesis', {
     const origU = Player.prototype.update;
     Player.prototype.update = function () {
         if (psyIs(this)) { try { psyTick(this); } catch (err) { console.error(err); } }
-        return origU.apply(this, arguments);
+        const r = origU.apply(this, arguments);
+        // bị Phản Chấn: ghim về làn cũ
+        if (this.psyPinT > 0) { this.psyPinT--; this.y = psyHomeY(this); }
+        return r;
     };
 })();
 
@@ -412,8 +536,14 @@ const PSY_BEAM_BODIES = ['lazer_beam', 'lazer_charge', 'lazer_auto', 'water_gun'
 (function () {
     const origTD = Player.prototype.takeDamage;
     Player.prototype.takeDamage = function (amount, attacker, options) {
-        if (psyIs(this) && psyFull(this) && (this.psyField > 0 || this.psyLockT > 0) && attacker && PSY_BEAM_BODIES.includes(attacker.weapon)
-            && typeof amount === 'number' && amount > 0) amount *= 0.5;
+        // Evo 2: đòn hitscan / tia lazer của địch -> chặn tại rìa vùng (đổi thời gian vùng)
+        if (psyIs(this) && psyE2(this) && this.psyField > 0 && !(this.psyLockT > 0) && this.hp > 0 && attacker && attacker !== this && attacker.id !== this.id
+            && typeof amount === 'number' && amount > 0 && gameState.phase === 'playing'
+            && (psyHsDepth > 0 || psyBeamHot === attacker.id || PSY_BEAM_BODIES.includes(attacker.weapon))) {
+            if (psyBeamHot === attacker.id) psyBeamHot = 0;
+            psyHsBlock(this, amount);
+            return 0;
+        }
         const before = this.hp;
         const r = origTD.call(this, amount, attacker, options, ...Array.prototype.slice.call(arguments, 3));
         if (before > 0 && this.hp <= 0 && attacker && attacker !== this && psyIs(attacker)

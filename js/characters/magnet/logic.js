@@ -260,7 +260,7 @@ Object.assign(Player.prototype, {
                         return true;
                     } else {
                         // Nhấp 1 lần: có mục tiêu KHÁC CỰC phía trước & hết hồi -> Lướt Cực Tính thay cho bắn
-                        let found = (this.polarDashCd <= 0) ? this.findPolarDashTarget() : null;
+                        let found = (this.polarDashCd <= 0 && !isGrounded(this)) ? this.findPolarDashTarget() : null;
                         if (found) {
                             this.startPolarDash(found);
                             return true;

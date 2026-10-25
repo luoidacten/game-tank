@@ -5,7 +5,7 @@
 //   tích theo sát thương GỐC nhận (trước giảm): x22 / Evo1 x30 / Full x40 mỗi 1.0 dame.
 //   Buff: +exc*0.35% tốc chạy, -exc*0.30% st nhận. 5s không bị đánh -> hồi máu (base tiêu 10%/HP,
 //   Evo1 7%/HP, xả 20%/s; Full: không tiêu Thú Vị, +0.5 HP/s khi Thú Vị > 0).
-// Nhấp: ĐẤM THƯỜNG — cột áp lực hitscan: tâm |dx|<30 = 1.0x + đẩy nhẹ + phá 1 lớp Khiên; rìa 30–85 = 0.32x.
+// Nhấp: ĐẤM THƯỜNG — gồng 0.35s (vạch cảnh báo đỏ khoá trục X lúc nhấp) rồi phóng cột áp lực: tâm |dx|<30 = 0.72x + đẩy nhẹ + phá 1 lớp Khiên; rìa 30–85 = 0.24x.
 //   Xoá đạn thường trên đường quyền, x3 st lên Tường chắn/Vật triệu hồi (tường đầu tiên chặn cú đấm).
 //   Evo 1: trong 0.4s sau Đấm Thường, nhấp tiếp -> 4 luồng quyền phong nhỏ (tổng +1.2).
 // Giữ 1s (Full 0.5s) khi THÚ VỊ >= 55% & hồi 12s (Full 8s) xong: ĐẤM NGHIÊM TÚC. Khi tụ: -50% st nhận, miễn
@@ -130,11 +130,19 @@ class OpFinisher {
 }
 
 // ---------- Đấm Thường ----------
+// Nhấp: gồng quyền 0.35s (OP_WIND) — vạch cảnh báo đỏ khoá trục X lúc nhấp — rồi mới phóng cột áp lực.
+const OP_WIND = 21, OP_DMG_C = 0.72, OP_DMG_E = 0.24;
 function opNormalPunch(p, now) {
     if (!(p.ammo > 0)) { opTxt(p, 'ĐANG NẠP...', '#94a3b8', 10); return; }
-    p.ammo--; p.lastShot = now; p.opRecoil = 12;
+    if (p.opWindT > 0) return;
+    p.ammo--; p.lastShot = now;
+    p.opWindT = OP_WIND; p.opWindX = p.x + p.w / 2;
+    opSfx('playCharge');
+}
+function opFirePunch(p, cx) {
+    p.opRecoil = 12;
     if (opE1(p)) { p.opFollowT = OP_FOLLOW; p.opFollowUsed = false; }
-    const dir = opDir(p), cx = p.x + p.w / 2, y0 = dir < 0 ? p.y : p.y + p.h, e = opEnemy(p);
+    const dir = opDir(p), y0 = dir < 0 ? p.y : p.y + p.h, e = opEnemy(p);
     // tường đầu tiên trên đường quyền chặn cú đấm (nhận x3)
     let wall = null, wy = null;
     for (const o of opWalls(p)) {
@@ -157,12 +165,12 @@ function opNormalPunch(p, now) {
         const dx = Math.abs(e.x + e.w / 2 - cx);
         if (dx < OP_CENTER) {
             if (e.shield > 0) { e.shield--; addFloatingText(e.x + e.w / 2, e.y + (e.id === 1 ? -28 : e.h + 30), 'PHÁ KHIÊN!', '#00f0ff', 12); }
-            e.takeDamage(p.damage, p, { bypassShield: true });
+            e.takeDamage(p.damage * OP_DMG_C, p, { bypassShield: true });
             if (opAlive(e)) e.kbX = (e.x + e.w / 2 < cx ? -1 : 1) * 4;
             explosions.push(new Explosion(e.x + e.w / 2, e.y + e.h / 2, 34, 'rgba(250, 204, 21,', 0, p));
             triggerScreenShake(5, 8);
         } else if (dx < OP_EDGE) {
-            e.takeDamage(p.damage * 0.32, p);
+            e.takeDamage(p.damage * OP_DMG_E, p);
         }
     }
     opSfx('playExplosion');
@@ -240,13 +248,14 @@ CharHooks.register('one_punch', {
         this.opSerCd = 0; this.opFollowT = 0; this.opFollowUsed = true; this.opGustQ = 0; this.opGustT = 0;
         this.opVS = 0; this.opVSMax = 0; this.opVSDecay = 0; this.opVSFx = 0;
         this.opLineX = 0; this.opLockX = this.x; this.opLockY = this.y; this.opDashT = 0; this.opDashV = 0; this.opDashCd = 0;
-        this.opPrevL = false; this.opPrevR = false; this.opRecoil = 0; this.opDeathMark = false;
+        this.opPrevL = false; this.opPrevR = false; this.opRecoil = 0; this.opDeathMark = false; this.opWindT = 0; this.opWindX = 0;
     },
     update(inp, eff) {
         opConvertAmmo(this);
         if (this.opSerCd > 0) this.opSerCd--;
         if (this.opFollowT > 0) this.opFollowT--;
         if (this.opRecoil > 0) this.opRecoil--;
+        if (this.opWindT > 0 && --this.opWindT <= 0) { this.opWindT = 0; if (this.hp > 0) opFirePunch(this, this.opWindX); }
         if (this.opVSFx > 0) this.opVSFx--;
         if (this.opRegenFx > 0) this.opRegenFx--;
         // Giáp Ảo giảm dần (Full Evo: vĩnh viễn)

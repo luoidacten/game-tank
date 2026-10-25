@@ -181,12 +181,40 @@ function bmDrawBlast(f) {
     ctx.save();
     ctx.globalAlpha = 1 - k;
     ctx.strokeStyle = BM_GOLD; ctx.lineWidth = 3; ctx.shadowBlur = 16; ctx.shadowColor = BM_GREEN;
-    ctx.beginPath(); ctx.arc(f.x, f.y, 110 * Math.min(1, k * 2.5), 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(f.x, f.y, BM_CROSS_R * Math.min(1, k * 2.5), 0, Math.PI * 2); ctx.stroke();
     ctx.strokeStyle = '#ecfdf5'; ctx.lineWidth = 1.5;
     for (let i = 0; i < 8; i++) {
         const a = i * Math.PI / 4 + k * 3, r0 = 20 + k * 40, r1 = r0 + 40;
         ctx.beginPath(); ctx.moveTo(f.x + Math.cos(a) * r0, f.y + Math.sin(a) * r0); ctx.quadraticCurveTo(f.x + Math.cos(a + 0.4) * (r0 + 20), f.y + Math.sin(a + 0.4) * (r0 + 20), f.x + Math.cos(a + 0.6) * r1, f.y + Math.sin(a + 0.6) * r1); ctx.stroke();
     }
+    ctx.restore();
+}
+function bmDrawCatch(f) {
+    const k = f.t / f.dur, col = f.kind ? BM_CYAN : BM_GREEN;
+    ctx.save();
+    // chớp sáng + 2 vòng lan
+    if (k < 0.25) { ctx.globalAlpha = (0.25 - k) * 3; ctx.fillStyle = '#f0fdf4'; ctx.beginPath(); ctx.arc(f.x, f.y, 26, 0, Math.PI * 2); ctx.fill(); }
+    ctx.globalAlpha = 1 - k;
+    ctx.shadowBlur = 14; ctx.shadowColor = col;
+    ctx.strokeStyle = col; ctx.lineWidth = 3 * (1 - k) + 1;
+    ctx.beginPath(); ctx.arc(f.x, f.y, 10 + 34 * Math.sqrt(k), 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = BM_GOLD; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(f.x, f.y, 6 + 52 * k, 0, Math.PI * 2); ctx.stroke();
+    // lấp lánh hình sao 4 cánh bay ra
+    ctx.fillStyle = '#fefce8';
+    for (let i = 0; i < 8; i++) {
+        const a = i * Math.PI / 4 + f.seed, r = 12 + 30 * k + (i % 2) * 8, s = (i % 2 ? 2.4 : 3.6) * (1 - k * 0.7);
+        const x = f.x + Math.cos(a) * r, y = f.y + Math.sin(a) * r;
+        ctx.beginPath(); ctx.moveTo(x, y - s * 1.6); ctx.lineTo(x + s * 0.4, y - s * 0.4); ctx.lineTo(x + s * 1.6, y); ctx.lineTo(x + s * 0.4, y + s * 0.4);
+        ctx.lineTo(x, y + s * 1.6); ctx.lineTo(x - s * 0.4, y + s * 0.4); ctx.lineTo(x - s * 1.6, y); ctx.lineTo(x - s * 0.4, y - s * 0.4); ctx.closePath(); ctx.fill();
+    }
+    // chữ "BẮT!" bật nảy
+    const pop = k < 0.2 ? 0.6 + k * 4 : 1.4 - Math.min(0.4, (k - 0.2) * 1.2);
+    const ty = f.y + (f.team === 1 ? -54 : 58) - k * 12 * (f.team === 1 ? 1 : -1);
+    ctx.font = `900 ${Math.round(15 * pop)}px 'Orbitron', Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = f.kind ? '#cffafe' : '#fef9c3';
+    ctx.shadowBlur = 12; ctx.shadowColor = col;
+    drawWorldText(ctx, 'BẮT!', f.x, ty);
     ctx.restore();
 }
 function bmDrawBlade(b) {

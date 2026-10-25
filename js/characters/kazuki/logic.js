@@ -287,6 +287,7 @@ function kzThrust(p) {
 }
 
 function kzStartDash(p, kind) {
+    if (groundedBlock(p)) return;
     p.kazMode = 'dash'; p.kazDashKind = kind; p.kazPhase = 1; p.kazHits = [];
     p.kazLaneY = p.y; p.kazTrail = [];
     p.invincibleTimer = Math.max(p.invincibleTimer || 0, 100);

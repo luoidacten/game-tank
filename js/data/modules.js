@@ -124,7 +124,7 @@ const MODULES = {
         {
             id: 'death_lock',
             name: 'Trối Chết (DeathLock)',
-            desc: 'HP:6 (+2 máu xe lớn) | Dame:0.8 | Đạn:3 | Tốc: 0.8x. Nội tại Ràng Buộc: 4 tầng ấn. Đạn Cấm Chế: Lồng Xích hút & giam giữ.',
+            desc: 'HP:6 (+2 máu xe lớn) | Dame:0.8 | Đạn:3 | Tốc: 0.8x. Nội tại Ràng Buộc: 4 tầng ấn (tầng 3: Choáng 1.5s + KHÓA CƠ ĐỘNG - cấm lướt/nhảy/lao/bay/dịch chuyển tới khi hết ấn hoặc nổ tầng 4). Đạn Cấm Chế: Lồng Xích hút & giam giữ; địch trong Lồng luôn bị Khóa Cơ Động (trừ Juggernaut).',
             type: 'body', role: ['Kiểm Soát', 'Đối Đầu'],
             size: { w: 34, h: 34 },
             stats: { hp: 6, dmg: 0.8, ammo: 3, speedMult: 0.8 }
@@ -364,7 +364,7 @@ const MODULES = {
         {
             id: 'one_punch',
             name: 'Nhất Quyền / Một Đấm',
-            desc: '"Chỉ cần một đấm." HP:8 | Dame:2.5 | Đạn:1 (nạp 2.2s; mỗi viên đạn cộng thêm -> +20% tốc nạp & +15% st) | Tốc: 3.6. THÚ VỊ: nhận sát thương (tính st gốc) -> +22% Thú Vị mỗi 1 dame; Thú Vị tăng tốc chạy (tối đa +35%) & giảm st nhận (tối đa 30%). 5s không bị đánh -> tiêu Thú Vị hồi máu (10% = +1 HP). Nhấp: ĐẤM THƯỜNG - cột áp lực dọc sân: tâm 2.5 st, đẩy lùi & phá 1 lớp Khiên; rìa 0.8 st; xoá đạn thường trên đường quyền, x3 st lên Tường/Vật triệu hồi. Giữ 1s khi Thú Vị >= 55% (hồi 12s): ĐẤM NGHIÊM TÚC - khi tụ giảm 50% st nhận, miễn đẩy/kéo, hiện đường cảnh báo đỏ; nhả -> tiêu hết Thú Vị nhận GIÁP ẢO (tối đa 4, giảm dần 12s), hitscan 4.0 st xuyên MỌI tường, xoá đạn/triệu hồi/vũng trên đường. Hạ gục địch -> kết liễu CÚ ĐẤM RẼ ĐÔI BẦU TRỜI.',
+            desc: '"Chỉ cần một đấm." HP:8 | Dame:2.5 | Đạn:1 (nạp 2.2s; mỗi viên đạn cộng thêm -> +20% tốc nạp & +15% st) | Tốc: 3.6. THÚ VỊ: nhận sát thương (tính st gốc) -> +22% Thú Vị mỗi 1 dame; Thú Vị tăng tốc chạy (tối đa +35%) & giảm st nhận (tối đa 30%). 5s không bị đánh -> tiêu Thú Vị hồi máu (10% = +1 HP). Nhấp: ĐẤM THƯỜNG - gồng quyền 0.35s, vạch cảnh báo đỏ khoá trục X lúc nhấp (né được!) rồi phóng cột áp lực dọc sân: tâm 1.8 st, đẩy lùi & phá 1 lớp Khiên; rìa 0.6 st; xoá đạn thường trên đường quyền, x3 st lên Tường/Vật triệu hồi. Giữ 1s khi Thú Vị >= 55% (hồi 12s): ĐẤM NGHIÊM TÚC - khi tụ giảm 50% st nhận, miễn đẩy/kéo, hiện đường cảnh báo đỏ; nhả -> tiêu hết Thú Vị nhận GIÁP ẢO (tối đa 4, giảm dần 12s), hitscan 4.0 st xuyên MỌI tường, xoá đạn/triệu hồi/vũng trên đường. Hạ gục địch -> kết liễu CÚ ĐẤM RẼ ĐÔI BẦU TRỜI.',
             type: 'body', role: ['Đối Đầu', 'Sinh Tồn'],
             size: { w: 30, h: 30 },
             stats: { hp: 8, dmg: 2.5, ammo: 1, speedMult: 1.0286 }
@@ -372,7 +372,7 @@ const MODULES = {
         {
             id: 'boomerang',
             name: 'Boomerang',
-            desc: '"Ném đi... và luôn quay về!" HP:4.5 | Dame:1.0 | Đạn: 2 Boomerang độc lập | Tốc: 3.9. Nhấp: ném chiếc đang chọn; giữ 0.4s: đổi chiếc. TRỌNG LUÂN (Thẳng): bay dọc theo trục x cố định gây 1x mọi thứ xuyên qua, tới làn địch dừng lại phóng to (r=55) xoay 2s (0.25x mỗi 0.2s, làm chậm nhẹ), rồi bay ngược về cùng trục x gây 1x (vạch chỉ đường xanh lá). BẮT được khi nó về -> hồi 0.5s + HỨNG KHỞI 3s (+25% tốc chạy & dame cả 2 chiếc); để lọt qua lưng -> rơi mất, hồi 8s. NGUYỆT LUÂN (Vòng Cung): bay theo quỹ đạo ELIP cố định (hiện vạch nét đứt) — 2 đỉnh là chỗ bạn ném và mép xa làn địch, phình ra 1 cánh (ưu tiên phía địch / hướng đang chạy); nửa đi 1.2x, nửa về 0.8x, ~1.5s một vòng. Đứng ở đỉnh ném khi nó về -> BẮT, về tay ngay; bỏ đi chỗ khác -> TRƯỢT, hồi 2s. Hạ gục địch -> kết liễu KHÔNG LỐI THOÁT.',
+            desc: '"Ném đi... và luôn quay về!" HP:4.5 | Dame:1.0 | Đạn: 2 Boomerang độc lập | Tốc: 3.9. Nhấp: ném chiếc đang chọn; giữ 0.4s: đổi chiếc. TRỌNG LUÂN (Thẳng): bay dọc theo trục x cố định gây 0.75x mọi thứ xuyên qua, tới làn địch dừng lại phóng to (r=46) xoay 2s (0.18x mỗi 0.2s, làm chậm nhẹ), rồi bay ngược về cùng trục x gây 0.75x (vạch chỉ đường xanh lá). BẮT được khi nó về -> hồi 0.5s + HỨNG KHỞI 3s (+20% tốc chạy & dame cả 2 chiếc); để lọt qua lưng -> rơi mất, hồi 8s. NGUYỆT LUÂN (Vòng Cung): bay theo quỹ đạo ELIP cố định (hiện vạch nét đứt) — 2 đỉnh là chỗ bạn ném và mép xa làn địch, phình ra 1 cánh (ưu tiên phía địch / hướng đang chạy); nửa đi 0.9x, nửa về 0.6x, ~1.5s một vòng. Đứng ở đỉnh ném khi nó về -> BẮT, về tay ngay; bỏ đi chỗ khác -> TRƯỢT, hồi 2s. Hạ gục địch -> kết liễu KHÔNG LỐI THOÁT.',
             type: 'body', role: ['Kiểm Soát', 'Cơ Động'],
             size: { w: 28, h: 28 },
             stats: { hp: 4.5, dmg: 1.0, ammo: 2, speedMult: 1.1143 }
@@ -388,7 +388,7 @@ const MODULES = {
         {
             id: 'psychokinesis',
             name: 'Siêu Năng',
-            desc: '"Tất cả... dừng lại cho ta!" HP:4 | Dame:0.85 | Đạn:6 (nạp 1.2s/viên) | Tốc: 3.65. Nhấp: ĐẠN NIỆM LỰC trôi lệch sang bên, lơ lửng giảm tốc 0.45s rồi vút đi (tốc 12); xả liên tiếp được nhiều viên. Giữ 1s (hồi 11s): VÙNG NIỆM LỰC r=135 theo xe tối đa 5s (xe -20% tốc): đạn bay thường của địch (cả đạn Xe Tấn Công & chùm đạn Thùng Đạn) lọt vào bị thắng phanh, dừng lơ lửng lệch nhịp, hoá xanh lơ & thuộc về bạn (giữ nguyên st, cỡ, hiệu ứng; tối đa 15 viên). Không bắt được: hitscan / tia lazer, chiêu lao húc, siêu đạn không thể cản phá. Trong vùng: nhấp (hoặc hết giờ) -> PHẢN HỒI NGƯỢC QUỸ ĐẠO +30% tốc; giữ 1s -> KHOÁ TÂM TẤT SÁT: hiện đường ngắm rồi hội tụ về địch (homing nhẹ), hồi chiêu +2s. Hạ gục địch -> kết liễu TÂM NIỆM NGHIỀN NÁT.',
+            desc: '"Tất cả... dừng lại cho ta!" HP:4 | Dame:0.85 | Đạn:6 (nạp 1.2s/viên) | Tốc: 3.65. Nhấp: ĐẠN NIỆM LỰC trôi lệch sang bên, lơ lửng giảm tốc 0.45s rồi vút đi (tốc 12); xả liên tiếp được nhiều viên. Giữ 1s (hồi 11s): VÙNG NIỆM LỰC r=135 theo xe tối đa 5s (xe -20% tốc): MỌI đạn đạo của địch (đạn thường/lớn, tên lửa, pháo cối, bom, phi kiếm, cầu lửa/băng, mìn bay, kim, boomerang, liềm xích... cả đạn Xe Tấn Công & chùm đạn Thùng Đạn) lọt vào bị thắng phanh, dừng lơ lửng lệch nhịp, hoá xanh lơ & thuộc về bạn (giữ nguyên st; tối đa 15 viên). Không chặn: hitscan / tia lazer (mở ở Evo 2). PHẢN CHẤN: địch lao cận chiến mặt đất (Xe TANK, lướt chém, lao húc...) chạm vùng -> bị chặn tại rìa, hất về làn cũ, nhận 1.0 st & Choáng 1.25s (Juggernaut không bị choáng; đòn bổ từ trên trời như Thiên của Hoa Ảnh bỏ qua). Trong vùng: nhấp (hoặc hết giờ) -> PHẢN HỒI NGƯỢC QUỸ ĐẠO +30% tốc; giữ 1s -> KHOÁ TÂM TẤT SÁT: hiện đường ngắm rồi hội tụ về địch (homing nhẹ), hồi chiêu +2s. Hạ gục địch -> kết liễu TÂM NIỆM NGHIỀN NÁT.',
             type: 'body', role: ['Kiểm Soát'],
             size: { w: 28, h: 28 },
             stats: { hp: 4.0, dmg: 0.85, ammo: 6, speedMult: 1.0429 }

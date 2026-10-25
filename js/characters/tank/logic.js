@@ -272,7 +272,7 @@ Object.assign(Player.prototype, {
     // [handleShooting] Xe TANK — trả về true nếu cần dừng handleShooting()
     shootTank(inp) {
         if (this.weapon === 'tank') {
-            if (inp.s && this.dashState === 0 && (this.tankDashCooldown || 0) <= 0) {
+            if (inp.s && this.dashState === 0 && (this.tankDashCooldown || 0) <= 0 && !groundedBlock(this)) {
                 this.tankDashHitEnemy = false;
                 this.dashState = 1;
                 this.dashStartY = this.y;

@@ -16,7 +16,9 @@
 // ==========================================
 
 const BM_GREEN = '#4ade80', BM_TEAL = '#2dd4bf', BM_CYAN = '#67e8f9', BM_GOLD = '#fde047';
-const BM_R0 = 12, BM_RBIG = 55;
+const BM_R0 = 12, BM_RBIG = 46;
+// [NERF] hệ số sát thương & bán kính trúng đòn (bán kính bắt giữ giữ nguyên)
+const BM_M_STR = 0.75, BM_M_SPIN = 0.18, BM_M_OUT = 0.9, BM_M_RET = 0.6, BM_M_CROSS = 1.35, BM_CROSS_R = 85, BM_M_BLADE = 0.26, BM_HIT_K = 0.8;
 
 function bmE1(p) { return p.hasUpgrade('evo_boom_1'); }
 function bmE2(p) { return p.hasUpgrade('evo_boom_2'); }
@@ -28,7 +30,7 @@ function bmDir(p) { return p.id === 1 ? -1 : 1; }
 function bmSfx(n) { if (typeof soundSystem !== 'undefined' && soundSystem && !soundSystem.muted && soundSystem[n]) soundSystem[n](); }
 function bmTxt(p, s, c, z) { addFloatingText(p.x + p.w / 2, p.id === 1 ? p.y - 16 : p.y + p.h + 20, s, c, z || 11); }
 function bmSwitchN(p) { return bmE1(p) ? 15 : 24; }
-function bmBuffPer(p) { return bmFull(p) ? 0.30 : (bmE1(p) ? 0.35 : 0.25); }
+function bmBuffPer(p) { return bmFull(p) ? 0.25 : (bmE1(p) ? 0.30 : 0.20); }
 function bmBuffMult(p) { return 1 + ((p.bmBuffT || 0) > 0 ? (p.bmBuffN || 1) * bmBuffPer(p) : 0); }
 function bmDmg(p, m) { return p.damage * m * bmBuffMult(p); }
 function bmHitR(x, y, r, o) {
@@ -100,8 +102,8 @@ class BmStraight {
         this.ang += this.st === 'spin' ? 0.55 : 0.32;
         if (this.st === 'out') {
             this.y += this.dir * 9;
-            if (!this.hitOut && e && e.hp > 0 && bmHitR(this.x, this.y, this.r, e)) { this.hitOut = true; bmHitEnemy(o, e, bmDmg(o, 1.0)); }
-            bmHitWorld(o, this.x, this.y, this.r, bmDmg(o, 1.0));
+            if (!this.hitOut && e && e.hp > 0 && bmHitR(this.x, this.y, this.r * BM_HIT_K, e)) { this.hitOut = true; bmHitEnemy(o, e, bmDmg(o, BM_M_STR)); }
+            bmHitWorld(o, this.x, this.y, this.r * BM_HIT_K, bmDmg(o, BM_M_STR));
             const edge = this.dir < 0 ? this.y <= 26 : this.y >= canvas.height - 26;
             if ((this.y - this.tgtY) * this.dir >= 0 || edge || this.t > 150) {
                 this.st = 'spin'; this.spinT = 0;
@@ -110,16 +112,16 @@ class BmStraight {
         } else if (this.st === 'spin') {
             this.spinT++;
             this.r = Math.min(BM_RBIG, this.r + 5);
-            if (e && e.hp > 0 && bmHitR(this.x, this.y, this.r, e)) {
+            if (e && e.hp > 0 && bmHitR(this.x, this.y, this.r * BM_HIT_K, e)) {
                 addStatusSlow(e, 0.8);
                 if (bmE2(o)) {
                     addStatusVuln(e, 0.15);
                     const dx = this.x - (e.x + e.w / 2);
                     e.x = Math.max(0, Math.min(canvas.width - e.w, e.x + Math.sign(dx) * Math.min(Math.abs(dx), 1.1)));
                 }
-                if (this.spinT % 12 === 0) bmHitEnemy(o, e, bmDmg(o, 0.25), BM_TEAL);
+                if (this.spinT % 12 === 0) bmHitEnemy(o, e, bmDmg(o, BM_M_SPIN), BM_TEAL);
             }
-            if (this.spinT % 12 === 0) bmHitWorld(o, this.x, this.y, this.r, bmDmg(o, 0.25));
+            if (this.spinT % 12 === 0) bmHitWorld(o, this.x, this.y, this.r * BM_HIT_K, bmDmg(o, BM_M_SPIN));
             if (bmFull(o) && e && e.bullets) {
                 for (let i = e.bullets.length - 1; i >= 0; i--) {
                     const b = e.bullets[i];
@@ -132,8 +134,8 @@ class BmStraight {
             this.r = Math.max(BM_R0, this.r - 4);
             this.y -= this.dir * 8;
             if (bmFull(o) && o.hp > 0) { const dx = o.x + o.w / 2 - this.x; this.x += Math.sign(dx) * Math.min(Math.abs(dx), 1.3); }
-            if (!this.hitRet && e && e.hp > 0 && bmHitR(this.x, this.y, this.r, e)) { this.hitRet = true; bmHitEnemy(o, e, bmDmg(o, 1.0)); }
-            bmHitWorld(o, this.x, this.y, this.r, bmDmg(o, 1.0));
+            if (!this.hitRet && e && e.hp > 0 && bmHitR(this.x, this.y, this.r * BM_HIT_K, e)) { this.hitRet = true; bmHitEnemy(o, e, bmDmg(o, BM_M_STR)); }
+            bmHitWorld(o, this.x, this.y, this.r * BM_HIT_K, bmDmg(o, BM_M_STR));
             if (o.hp > 0) {
                 const ocx = o.x + o.w / 2, ocy = o.y + o.h / 2;
                 const mag = bmE1(o) ? 25 : 0;
@@ -150,6 +152,7 @@ class BmStraight {
         if (how === 'catch') {
             this.caught = true;
             o.bmSSt = 'cd'; o.bmSCd = 30;
+            bmCatchFx(o, this.x, this.y, 0);
             bmOnCatch(o);
         } else if (how === 'miss') {
             o.bmSSt = 'cd'; o.bmSCd = bmE1(o) ? 270 : 480;
@@ -214,13 +217,13 @@ class BmCurve {
             this.bend += Math.sign(want - this.bend) * Math.min(Math.abs(want - this.bend), 5);
         }
         this.x = Math.max(4, Math.min(canvas.width - 4, p.x + this.bend)); this.y = p.y;
-        const out = this.th < Math.PI, m = out ? 1.2 : 0.8;
-        if (e && e.hp > 0 && !(out ? this.hitOut : this.hitRet) && bmHitR(this.x, this.y, this.r + 2, e)) {
+        const out = this.th < Math.PI, m = out ? BM_M_OUT : BM_M_RET;
+        if (e && e.hp > 0 && !(out ? this.hitOut : this.hitRet) && bmHitR(this.x, this.y, this.r - 2, e)) {
             if (out) this.hitOut = true; else this.hitRet = true;
             bmHitEnemy(o, e, bmDmg(o, m), BM_CYAN);
             if (out && bmE1(o)) { e.bmSlowT = 90; addFloatingText(e.x + e.w / 2, e.y + (e.id === 1 ? -14 : e.h + 18), 'CHẬM 35%', BM_CYAN, 10); }
         }
-        bmHitWorld(o, this.x, this.y, this.r + 2, bmDmg(o, m));
+        bmHitWorld(o, this.x, this.y, this.r - 2, bmDmg(o, m));
         if (bmE2(o) && !this.combo) bmTryCross(o, this);
         if (!this.active) return;
         // đón: đoạn về gần đỉnh A
@@ -231,7 +234,7 @@ class BmCurve {
         if (!this.active) return;
         this.active = false;
         if (!o || !bmIs(o)) return;
-        if (how === 'catch') spawnSparkParticles(this.x, this.y, BM_CYAN, 6);
+        if (how === 'catch') { spawnSparkParticles(this.x, this.y, BM_CYAN, 10); bmCatchFx(o, this.x, this.y, 1); }
         if (how === 'miss') { o.bmCMiss = true; spawnSparkParticles(this.x, this.y, '#94a3b8', 6); }
         // Evo 2: 2 chiếc đối xứng -> chỉ về tay khi cả 2 đã về
         if (bodyEffects.some(b => b !== this && b.active && b instanceof BmCurve && b.team === this.team)) return;
@@ -252,12 +255,12 @@ function bmTryCross(o, c) {
         s.combo = true; c.combo = true;
         s.spinMax += 60;
         const bx = (s.x + c.x) / 2, by = (s.y + c.y) / 2, e = bmEnemyOf(o.id);
-        if (e && e.hp > 0 && Math.hypot(e.x + e.w / 2 - bx, e.y + e.h / 2 - by) <= 110 + e.w / 2) {
+        if (e && e.hp > 0 && Math.hypot(e.x + e.w / 2 - bx, e.y + e.h / 2 - by) <= BM_CROSS_R + e.w / 2) {
             const hp0 = e.hp;
-            e.takeDamage(bmDmg(o, 1.8), o);
+            e.takeDamage(bmDmg(o, BM_M_CROSS), o);
             if (e.hp > 0 && (e.invincibleTimer || 0) <= 0 && e.hp <= hp0) e.freezeTimer = Math.max(e.freezeTimer || 0, 45);
         }
-        bmHitWorld(o, bx, by, 110, bmDmg(o, 1.8));
+        bmHitWorld(o, bx, by, BM_CROSS_R, bmDmg(o, BM_M_CROSS));
         bodyEffects.push(new BmBlast(o.id, bx, by));
         explosions.push(new Explosion(bx, by, 70, 'rgba(74, 222, 128,', 0, o));
         addFloatingText(bx, by - 30, 'ĐIỂM GIAO CẮT!', BM_GOLD, 14);
@@ -265,10 +268,22 @@ function bmTryCross(o, c) {
         bmSfx('playExplosion');
         if (bmFull(o)) for (let i = 0; i < 6; i++) {
             const a = i * Math.PI / 3 + 0.3;
-            spawnBullet(o, { x: bx - 4, y: by - 4, w: 8, h: 8, vx: Math.cos(a) * 7, vy: Math.sin(a) * 7, dmg: bmDmg(o, 0.35), isPiercing: true, hook: 'boomerang', bmAng: a });
+            spawnBullet(o, { x: bx - 4, y: by - 4, w: 8, h: 8, vx: Math.cos(a) * 7, vy: Math.sin(a) * 7, dmg: bmDmg(o, BM_M_BLADE), isPiercing: true, hook: 'boomerang', bmAng: a });
         }
         return;
     }
+}
+
+// ---------- Hiệu ứng BẮT THÀNH CÔNG (hình ảnh): vòng sáng + lấp lánh + chữ "BẮT!" ----------
+class BmCatch {
+    constructor(team, x, y, kind) { this.team = team; this.x = x; this.y = y; this.kind = kind; this.t = 0; this.dur = 34; this.active = true; this.seed = Math.round(Math.random() * 600) / 100; }
+    update() { const o = bmTeam(this.team); if (o) { this.x += (o.x + o.w / 2 - this.x) * 0.3; this.y += (o.y + o.h / 2 - this.y) * 0.3; } if (++this.t >= this.dur) this.active = false; }
+    draw() { if (typeof bmDrawCatch === 'function') bmDrawCatch(this); }
+}
+function bmCatchFx(o, x, y, kind) {
+    if (typeof bodyEffects !== 'undefined') bodyEffects.push(new BmCatch(o.id, x, y, kind));
+    spawnSparkParticles(x, y, kind ? BM_CYAN : BM_GOLD, 10);
+    triggerScreenShake(2, 5);
 }
 
 // ---------- Bão Kiếm Khí (hình ảnh) ----------

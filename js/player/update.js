@@ -143,6 +143,10 @@ Object.assign(Player.prototype, {
                 this.bindingCurseStacks = 0;
             }
         }
+        // Khóa Cơ Động (Sa Lầy): Ràng Buộc tầng 3 giữ tới khi hết ấn / nổ tầng 4
+        if (this.bindingCurseStacks >= 3 && this.bindingCurseTimer > 0 && this.weapon !== 'juggernaut') this.groundedTimer = Math.max(this.groundedTimer || 0, 2);
+        if (this.groundedTimer > 0) this.groundedTimer--;
+        if (this.groundedTxtT > 0) this.groundedTxtT--;
 
         // ==========================================
         // --- LOGIC KẺ SÁNG TẠO (CREATOR) ---

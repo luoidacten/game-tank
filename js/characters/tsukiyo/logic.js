@@ -505,6 +505,7 @@ function tsReleaseCharge(p) {
 // Lướt chém (Tất Sát) / Hắc Nguyệt (moon)
 function tsDashSpeed(p) { return 15 * (tsBr(p, 'd') === 3 ? 1.3 : 1) * (tsFull(p) ? 1.5 : 1); }
 function tsStartDash(p, kind) {
+    if (groundedBlock(p)) return;
     p.tsMode = kind; p.tsPhase = 1; p.tsDashHit = false; p.tsTrail = [];
     p.invincibleTimer = Math.max(p.invincibleTimer || 0, 4);
     tsSfx('playDash');

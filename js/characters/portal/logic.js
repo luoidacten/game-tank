@@ -76,7 +76,9 @@ Object.assign(Player.prototype, {
 
     // [update] Cổng Không Gian
     updatePortal() {
-        if (this.weapon === 'portal') {
+        if (this.weapon === 'portal' && isGrounded(this)) {
+            this.x = Math.max(0, Math.min(canvas.width - this.w, this.x)); // Sa Lầy: không xuyên mép
+        } else if (this.weapon === 'portal') {
             if (this.x < -this.w) { this.x = canvas.width; this.portalWrapCount = (this.portalWrapCount || 0) + 1; this.triggerPortalEffect(); }
             else if (this.x > canvas.width) { this.x = -this.w; this.portalWrapCount = (this.portalWrapCount || 0) + 1; this.triggerPortalEffect(); }
         } else {

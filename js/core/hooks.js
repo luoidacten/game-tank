@@ -46,6 +46,14 @@ const BulletHooks = {
 
 // Trạng thái chung (dùng cho mọi body): hiệu ứng ghi vào _next*, cuối tick mới áp dụng
 // -> không phụ thuộc thứ tự cập nhật p1/p2.
+// KHÓA CƠ ĐỘNG / SA LẦY (Trối Chết): p.groundedTimer > 0 -> cấm lướt / nhảy / lao / bay / dịch chuyển.
+function isGrounded(p) { return !!p && p.groundedTimer > 0; }
+// Trả true (và hiện chữ, có giãn cách) nếu p đang bị Sa Lầy -> nơi gọi bỏ qua chiêu cơ động.
+function groundedBlock(p) {
+    if (!isGrounded(p)) return false;
+    if (!(p.groundedTxtT > 0) && typeof addFloatingText === 'function') { addFloatingText(p.x + p.w / 2, p.id === 1 ? p.y - 18 : p.y + p.h + 22, '⛓ SA LẦY!', '#a78bfa', 11); p.groundedTxtT = 40; }
+    return true;
+}
 function addStatusSlow(p, mult) { if (p) p._nextSpeedMult = Math.min(p._nextSpeedMult === undefined ? 1 : p._nextSpeedMult, mult); }
 function addStatusVuln(p, v) { if (p) p._nextVuln = Math.max(p._nextVuln || 0, v); }
 // Vận tốc để bắn trúng mục tiêu, có đón đầu theo hướng di chuyển (target._vx đo mỗi tick)

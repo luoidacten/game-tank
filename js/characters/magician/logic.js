@@ -95,7 +95,7 @@ function magEscapeTargetX(p) {
 }
 
 function magTryEscape(p) {
-    if (p.weapon !== 'magician' || !((p.magEscapeLeft || 0) > 0)) return false;
+    if (p.weapon !== 'magician' || !((p.magEscapeLeft || 0) > 0) || groundedBlock(p)) return false;
     p.magEscapeLeft--;
     const oldX = p.x, oldY = p.y;
     // Phân ảnh mồi đứng ở chỗ cũ (rõ nét, ăn đạn ngay -> kích hoạt Bẫy Nổ)
@@ -380,7 +380,7 @@ Object.assign(Player.prototype, {
                 } else {
                     if (this.magicianCharge > 0) {
                         // MỐC 3 (EVO 1): HOÁN ĐỔI CHỦ ĐỘNG (Giữ > 60 frames ~ 1s)
-                        if (this.magicianCharge >= 60 && hasEvo1 && this.illusions.length > 0 && this.magCloneCd <= 0) {
+                        if (this.magicianCharge >= 60 && hasEvo1 && this.illusions.length > 0 && this.magCloneCd <= 0 && !groundedBlock(this)) {
                             this.magCloneCd = MAG_CLONE_CD; // dùng chung hồi chiêu 10s với Phân Ảnh
                             let targetIllusion = this.illusions[0]; // First in, first out
 

@@ -225,7 +225,7 @@ Object.assign(Player.prototype, {
         this.stormHeld = !!inp.s;
         if (released) {
             let ratio = this.stormChargeRatio || 0;
-            if (ratio >= 0.05) {
+            if (ratio >= 0.05 && !groundedBlock(this)) {
                 this.savedChargeRatio = ratio;
                 this.stOrigin = { x: this.x, y: this.y };
                 this.stTier = ratio >= 0.999 ? 2 : (ratio >= 0.5 ? 1 : 0);

@@ -113,6 +113,17 @@ function psyDrawCap(b) {
             ctx.save(); ctx.fillStyle = '#334155'; ctx.strokeStyle = PSY_CYAN; ctx.lineWidth = 1.5;
             ctx.beginPath(); ctx.arc(cx, cy, 6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
             ctx.fillStyle = '#fb923c'; ctx.beginPath(); ctx.arc(cx + 3, cy - 4, 1.6, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+        } else if (b.psyHs || b.psyEnv === 'ent') {
+            // Đạn Năng Lượng (tia bị chặn) / đạn thực thể bị bắt: lõi sáng + vòng xoáy
+            const hs = !!b.psyHs, r = hs ? 4 + Math.min(3, b.dmg || 1) * 1.6 : Math.max(4, (b.w || 8) / 2), t = Date.now() / 1000;
+            const col = hs ? PSY_VIO : PSY_CYAN;
+            ctx.save(); ctx.shadowBlur = 14; ctx.shadowColor = col;
+            const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+            g.addColorStop(0, '#ffffff'); g.addColorStop(0.45, hs ? '#ddd6fe' : '#a5f3fc'); g.addColorStop(1, hs ? 'rgba(167,139,250,0.15)' : 'rgba(0,242,255,0.15)');
+            ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = col; ctx.lineWidth = 1.3;
+            for (let k = 0; k < 2; k++) { const a0 = t * 6 + k * Math.PI; ctx.beginPath(); ctx.arc(cx, cy, r + 3, a0, a0 + 1.6); ctx.stroke(); }
+            ctx.restore();
         } else if (b.psyEnv) {
             // đạn môi trường (Xe Tấn Công / Thùng Đạn) bị bắt
             const r = b.psyEnv === 'shell' ? 6 : (b.psyEnv === 'smg' ? 3 : 3.2);
@@ -205,6 +216,15 @@ Object.assign(CharHooks.registry.psychokinesis, {
             ctx.beginPath(); ctx.arc(ex, ey, rr, 0, Math.PI * 2); ctx.stroke();
             ctx.beginPath(); ctx.moveTo(ex - rr - 6, ey); ctx.lineTo(ex - rr + 6, ey); ctx.moveTo(ex + rr - 6, ey); ctx.lineTo(ex + rr + 6, ey);
             ctx.moveTo(ex, ey - rr - 6); ctx.lineTo(ex, ey - rr + 6); ctx.moveTo(ex, ey + rr - 6); ctx.lineTo(ex, ey + rr + 6); ctx.stroke();
+            ctx.shadowBlur = 0;
+        }
+        // Evo 2: chặn tia ở rìa vùng
+        if (this.psyHsFx > 0) {
+            const q = this.psyHsFx / 14, ex = this.psyHsX, ey = this.psyHsY;
+            ctx.strokeStyle = `rgba(196, 181, 253, ${q})`; ctx.lineWidth = 3; ctx.shadowBlur = 16; ctx.shadowColor = PSY_VIO;
+            const a = Math.atan2(ey - cy, ex - cx), R = psyR(this);
+            ctx.beginPath(); ctx.arc(cx, cy, R * 0.8, a - 0.35, a + 0.35); ctx.stroke();
+            ctx.fillStyle = `rgba(255, 255, 255, ${q})`; ctx.beginPath(); ctx.arc(ex, ey, 3 + 6 * (1 - q), 0, Math.PI * 2); ctx.fill();
             ctx.shadowBlur = 0;
         }
         // tụ lực khi giữ nút

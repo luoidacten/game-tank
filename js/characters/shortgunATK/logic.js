@@ -47,6 +47,7 @@ Object.assign(Player.prototype, {
     },
 
     triggerShortgunAttack() {
+        if (groundedBlock(this)) return;
         this.isShortgunDashing = true;
         this.shortgunDashState = 1; // 1: Lao thẳng lên như tank, 2: Rút lui về vị trí ban đầu
         this.shortgunStartY = this.y;

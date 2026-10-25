@@ -641,10 +641,12 @@ function checkHits(attacker, victim) {
                 } else if (victim.bindingCurseStacks === 3) {
                     victim.freezeTimer = Math.max(victim.freezeTimer || 0, 90); // 1.5s choáng
                     addFloatingText(victim.x + victim.w / 2, victim.y - 15, `RÀNG BUỘC [3] CHOÁNG 1.5s! ⛓️`, "#8e24aa", 14);
+                    if (victim.weapon !== 'juggernaut') { victim.groundedTimer = Math.max(victim.groundedTimer || 0, 2); addFloatingText(victim.x + victim.w / 2, victim.y - 30, '⛓ KHÓA CƠ ĐỘNG!', '#a78bfa', 12); }
                 } else if (victim.bindingCurseStacks >= 4) {
                     // Tầng 4 (Kích nổ ấn)
                     victim.bindingCurseStacks = 0;
                     victim.bindingCurseTimer = 0;
+                    victim.groundedTimer = 0;
                     victim.permanentSlow = (victim.permanentSlow || 0) + 0.2; // -20% vĩnh viễn
                     let vulnBonus = isFullEvo ? 0.5 : 0.25; // +50% vs +25%
                     victim.permanentVulnerability = (victim.permanentVulnerability || 0) + vulnBonus;

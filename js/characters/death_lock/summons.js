@@ -62,6 +62,8 @@ class ConfinementCage {
         }
 
         if (enemy && enemy.hp > 0) {
+            // Trong Lồng Cấm Chế: luôn bị Khóa Cơ Động (trừ Juggernaut)
+            if (enemy.weapon !== 'juggernaut') enemy.groundedTimer = Math.max(enemy.groundedTimer || 0, 3);
             let enemyMidX = enemy.x + enemy.w / 2;
             let dx = this.x - enemyMidX;
             let left = Math.max(0, this.x - this.w / 2);

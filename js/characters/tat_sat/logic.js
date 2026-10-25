@@ -323,6 +323,7 @@ function tatRelease(p, pct) {
     p.tatPct = pct;
     if (!br) return;
     p.tatLastBr = br; p.tatBrFx = 30;
+    if (br === 1 && groundedBlock(p)) return;
     if (br === 1) {
         p.tatMode = 'dash'; p.tatModeT = 0; p.tatOrigin = { x: p.x, y: p.y };
         tatSfx('playDash');

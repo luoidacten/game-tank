@@ -209,6 +209,7 @@ const HUD_STATUS = [
     },
     p => p.blindTimer > 0 ? { g: 'blind', c: '#94a3b8', l: 'MÙ', t: sec(p.blindTimer) } : null,
     p => p.confusionStacks > 0 ? { g: 'confuse', c: '#e879f9', l: 'LOẠN×' + p.confusionStacks, t: '' } : null,
+    p => p.groundedTimer > 0 ? { g: 'chain', c: '#c4b5fd', l: '⛓ SA LẦY', t: '' } : null,
     p => p.bindingCurseStacks > 0 ? { g: 'chain', c: '#a78bfa', l: 'TRÓI×' + p.bindingCurseStacks, t: p.bindingCurseTimer > 0 ? sec(p.bindingCurseTimer) : '' } : null,
     p => {
         const v = (p.statusVuln || 0) + (p.permanentVulnerability || 0) + (p.vulnerableStacks || 0) * 0.1;

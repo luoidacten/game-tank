@@ -25,7 +25,7 @@ function opFist(x, y, s, glow) {
 
 // ---------- Xe ----------
 registerTankArt('one_punch', (p, k) => {
-    const t = k.t, rec = (p.opRecoil || 0) / 16, exc = (p.opExc || 0) / 100;
+    const t = k.t, rec = (p.opRecoil || 0) / 16 - (p.opWindT > 0 ? (1 - p.opWindT / 21) * 0.9 : 0), exc = (p.opExc || 0) / 100;
     // áo choàng đỏ bay phía sau
     const wave = Math.sin(t * 7) * 1.6;
     ctx.fillStyle = TA.vgrad(6, 17, '#dc2626', '#7f1d1d');
@@ -131,6 +131,27 @@ Object.assign(CharHooks.registry.one_punch, {
         const cx = this.x + this.w / 2, cy = this.y + this.h / 2, t = opNow();
         const dir = this.id === 1 ? -1 : 1;
         ctx.save();
+        // Gồng Đấm Thường: vạch cảnh báo đỏ khoá trục X + nắm đấm tụ lực
+        if (this.opWindT > 0) {
+            const lx = this.opWindX || cx, y0 = dir < 0 ? this.y : this.y + this.h, y1 = dir < 0 ? 0 : canvas.height;
+            const top = Math.min(y0, y1), H = Math.abs(y1 - y0), k = 1 - this.opWindT / OP_WIND;
+            const fl = 0.55 + 0.45 * Math.abs(Math.sin(t * 28));
+            ctx.fillStyle = `rgba(239, 68, 68, ${0.06 + 0.12 * k})`;
+            ctx.fillRect(lx - OP_CENTER, top, OP_CENTER * 2, H);
+            ctx.strokeStyle = `rgba(248, 113, 113, ${0.5 + 0.4 * fl})`; ctx.lineWidth = 1.2; ctx.setLineDash([6, 5]);
+            ctx.lineDashOffset = -t * 80 * dir;
+            ctx.beginPath(); ctx.moveTo(lx - OP_CENTER, top); ctx.lineTo(lx - OP_CENTER, top + H); ctx.moveTo(lx + OP_CENTER, top); ctx.lineTo(lx + OP_CENTER, top + H); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.strokeStyle = `rgba(254, 202, 202, ${0.6 + 0.4 * fl})`; ctx.lineWidth = 2 + 2 * k; ctx.shadowBlur = 10; ctx.shadowColor = OP_RED;
+            ctx.beginPath(); ctx.moveTo(lx, y0); ctx.lineTo(lx, y0 + dir * H * Math.min(1, k * 1.6)); ctx.stroke();
+            // vòng tụ quyền co lại quanh nắm đấm
+            const fy = dir < 0 ? this.y - 6 : this.y + this.h + 6;
+            ctx.strokeStyle = OP_YEL; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(lx, fy, 6 + 16 * (1 - k), 0, Math.PI * 2); ctx.stroke();
+            ctx.fillStyle = `rgba(250, 204, 21, ${0.3 + 0.5 * k})`;
+            ctx.beginPath(); ctx.arc(lx, fy, 3 + 4 * k, 0, Math.PI * 2); ctx.fill();
+            ctx.shadowBlur = 0;
+        }
         // Đường cảnh báo Đấm Nghiêm Túc (đỏ, rộng, dọc màn hình)
         if (this.opCharging) {
             const lx = this.opLineX || cx, y0 = dir < 0 ? this.y : this.y + this.h, y1 = dir < 0 ? 0 : canvas.height;

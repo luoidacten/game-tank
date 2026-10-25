@@ -418,7 +418,7 @@ function jkEscapeX(p) {
     return Math.max(0, Math.min(canvas.width - p.w, best));
 }
 function jkTryEscape(p) {
-    if (!((p.jkEsc || 0) > 0)) return false;
+    if (!((p.jkEsc || 0) > 0) || groundedBlock(p)) return false;
     p.jkEsc--;
     if (jkE2(p) && p.jkEsc < p.jkEscMax && !(p.jkEscT > 0)) p.jkEscT = jkFull(p) ? 2700 : 3600;
     const ox = p.x, oy = p.y;
@@ -694,7 +694,7 @@ CharHooks.register('joker', {
         }
         if (this.jkDashT > 0) {
             this.jkDashT--;
-            this.x = Math.max(0, Math.min(canvas.width - this.w, this.x + this.jkDashDir * this.jkDashV));
+            if (!groundedBlock(this)) this.x = Math.max(0, Math.min(canvas.width - this.w, this.x + this.jkDashDir * this.jkDashV));
         }
         jkUpdateBullets(this);
     },
