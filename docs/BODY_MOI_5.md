@@ -1,6 +1,6 @@
 # Đặc tả body mới đợt 5 (người dùng gửi)
 
-> Ghi chú: phần Idol chỉ có bảng Evo/kết liễu (thiếu phần cơ chế chính) — chờ người dùng gửi đủ. Đoạn Diệp Thanh Phong chỉ là nhận xét, chưa có đặc tả.
+> Ghi chú: phần Idol chỉ có bảng Evo/kết liễu (thiếu phần cơ chế chính) — chờ người dùng gửi đủ. Đặc tả đầy đủ Diệp Thanh Phong + Skinwalker ở docs/BODY_MOI_6.md.
 
 ### 97. The Clock — Kẻ Ngưng Đọng Thời Gian (`the_clock`) 🆕 *(Bản Cập Nhật Chuẩn Hóa)*
 
