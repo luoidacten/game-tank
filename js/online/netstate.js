@@ -48,6 +48,7 @@ const NET_CLASSES = {
     KgSickle, KgPool, KgVortex, KgFinisher,
     BodyFinisher,
     TcFinisher,
+    CocLaser, CocFireZone, CocBolt, CocSlash, CocFinisher,
 };
 
 // Biến toàn cục cần đồng bộ: [tên, getter, setter]

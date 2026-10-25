@@ -565,3 +565,17 @@ function botShopBuy(playerId) {
         return f.call(this, bot, enemy, aligned, inp);
     };
 })();
+
+// COC: Tiểu Liên giữ liên thanh khi thẳng hàng; Evo 1 giữ 0.6s ReRoll khi vũ khí bất lợi (cocBotWantReroll)
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon === 'coc' && typeof cocBotWantReroll === 'function') {
+            if (this.cocB > 0) { this.cocB--; inp.s = this.cocB > 2; return; }
+            if (cocBotWantReroll(bot, enemy)) { this.cocB = 44; inp.s = true; return; }
+            if (bot.cocW === 2) { inp.s = aligned && !(bot.cocReload > 0); return; }
+            if (bot.cocW === 5) { if ((this.t || 0) % 12 === 0) { this.cocB = 4; inp.s = true; } else inp.s = false; return; }
+        }
+        return f.call(this, bot, enemy, aligned, inp);
+    };
+})();

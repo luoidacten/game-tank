@@ -425,6 +425,14 @@ const MODULES = {
             size: { w: 28, h: 28 },
             stats: { hp: 4.5, dmg: 0.25, ammo: 4, speedMult: 1.0857 }
         },
+        {
+            id: 'coc',
+            name: 'The Change or Chance — COC',
+            desc: '"Vận mệnh trong tay ta nắm!" HP:4.5 | Dame: theo vũ khí | Đạn: theo vũ khí | Tốc: 3.5 (± vũ khí). NỘI TẠI CỜ BẠC: Reroll shop đầu tiên mỗi hiệp miễn phí, +1 ô lựa chọn shop & G.E.A.R. XÚC XẮC VẬN MỆNH: đầu hiệp & mỗi 12s lăn ra 1 trong 6 vũ khí (không trùng mặt vừa dùng): ⚀ SÚNG LỤC 2.0 | 10 viên | tốc 4.5 - bắn chuẩn, sau mỗi phát lướt nhẹ, nạp 1.2s. ⚁ TIỂU LIÊN 0.5 | 20 viên | tốc 4.0 - giữ liên thanh; hết băng: trúng > 10 viên -> hồi đầy ngay, không thì phạt nạp 6s. ⚂ ĐẠI PHÁO 2.0 | 2 viên | tốc 3.0 - đạn nổ lan, x3 st lên vật không phải Body, nạp 1.8s. ⚃ ĐOẢN ĐAO 1.0 | vô hạn (0.6s) | tốc 5.5 - nhấp lao lên chém vòng (chém vỡ đạn thường) + kiếm khí ngắn, 35% Chí Mạng x3. ⚄ BÚP BÊ SONG SINH | tốc 3.75 - nhấp ra lệnh: L (hồi 5s) cảnh báo 0.5s rồi bắn tia lazer xuyên 2.0; R (hồi 1s) loạt 3 viên 0.5. ⚅ SÚNG VÀNG 5.0 | 1 viên | tốc 3.5 - đạn vàng homing nhẹ, nạp 2.5s. Hạ gục địch -> kết liễu ĐỊNH MỆNH AN BÀI.',
+            type: 'body', role: ['Đối Đầu', 'Cơ Động'],
+            size: { w: 28, h: 28 },
+            stats: { hp: 4.5, dmg: 1.0, ammo: 10, speedMult: 1.0 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 35 },
