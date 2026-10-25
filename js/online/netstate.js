@@ -50,6 +50,7 @@ const NET_CLASSES = {
     TcFinisher,
     CocLaser, CocFireZone, CocBolt, CocSlash, CocFinisher,
     PrBeam, PrFinisher,
+    WdFinisher,
     AdFinisher,
     TnZone, TnFinisher,
 };

@@ -457,6 +457,14 @@ const MODULES = {
             size: { w: 30, h: 30 },
             stats: { hp: 5.5, dmg: 1.1, ammo: 4, speedMult: 0.9714 }
         },
+        {
+            id: 'wind',
+            name: 'Wind',
+            desc: '"Cơn gió mỏng manh... chạm vào là tan biến, ngưng đọng là cuồng phong!" HP:3 | Dame:0.8 | Đạn:6 | Tốc: 4.4. GIÓ NHẸ: ngừng bắn 0.5s thì NGƯNG PHONG tích +35% dame/giây (tối đa x2.5, đạn gió to, bay nhanh, đẩy lùi); bắn liên tục (cách nhau <1.2s) tích LIÊN PHONG tối đa 6 tầng (+15% tốc bắn & +12% tốc nạp mỗi tầng). Giữ 0.4s (hồi 8s): HÓA GIÓ tối đa 3.5s — bất tử, đạn bay xuyên qua, +35%→55% tốc chạy, nạp đạn & tích Ngưng Phong x2; PHẢI di chuyển liên tục (đứng yên 0.15s, bắn hoặc hết giờ là hiện hình). Hiện hình: CUỒNG PHONG TỐC XẠ +50% tốc bắn 2.5s, phát đầu giữ nguyên Ngưng Phong.',
+            type: 'body', role: ['Đối Đầu', 'Cơ Động'],
+            size: { w: 24, h: 24 },
+            stats: { hp: 3, dmg: 0.8, ammo: 6, speedMult: 1.2571 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 35 },

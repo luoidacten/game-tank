@@ -622,3 +622,25 @@ function botShopBuy(playerId) {
         return f.call(this, bot, enemy, aligned, inp);
     };
 })();
+
+// Wind: giữ 0.4s Hóa Gió khi đạn địch sắp trúng; trong Hóa Gió luôn lướt qua lại (đứng yên là hiện hình), nhấp xuất kích khi Ngưng Phong đầy; ngoài ra nhấp xả Liên Phong hoặc đứng tích Ngưng Phong (wdBotAction)
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon === 'wind' && typeof wdBotAction === 'function') {
+            if (this.wdB > 0) { this.wdB--; inp.s = this.wdB > 2; return; }
+            const a = wdBotAction(bot, enemy, aligned);
+            if (a === 'glide' || (bot.wdForm > 0 && a === 'tap')) {
+                const cx = bot.x + bot.w / 2;
+                if (!this.wdDx || cx < 30) this.wdDx = 1; else if (cx > canvas.width - 30) this.wdDx = -1;
+                inp.l = this.wdDx < 0; inp.r = this.wdDx > 0;
+                if (a === 'tap') { this.wdB = 4; inp.s = true; return; }
+                inp.s = false; return;
+            }
+            if (a === 'form') { this.wdB = WD_HOLD + 5; inp.s = true; return; }
+            if (a === 'tap') { this.wdB = 4; inp.s = true; return; }
+            if (a === 'wait') { inp.s = false; return; }
+        }
+        return f.call(this, bot, enemy, aligned, inp);
+    };
+})();
