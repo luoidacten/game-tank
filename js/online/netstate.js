@@ -47,6 +47,7 @@ const NET_CLASSES = {
     JlFinisher,
     KgSickle, KgPool, KgVortex, KgFinisher,
     BodyFinisher,
+    TcFinisher,
 };
 
 // Biến toàn cục cần đồng bộ: [tên, getter, setter]

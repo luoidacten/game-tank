@@ -248,6 +248,8 @@ function renderFrame() {
     if (typeof kgFxOver === 'function') kgFxOver();
     // Lớp phủ kết liễu chung cho các thân còn lại - js/entities/body-finisher.js
     if (typeof bodyFinisherFxOver === 'function') bodyFinisherFxOver();
+    // Lớp phủ Time Zone & kết liễu The Clock (ĐỒNG HỒ ĐIỂM 12 GIỜ) - js/characters/the_clock/render.js
+    if (typeof tcFxOver === 'function') tcFxOver();
 
     // Particles & Floating Numbers
     updateAndDrawParticles();
@@ -276,7 +278,7 @@ function renderFrame() {
 const VICTORY_BANNER_SPAN = 87;
 const VICTORY_FX_DELAY = 180;      // chờ thêm 3s sau khi kết liễu diễn xong
 const VICTORY_TOTAL_CAP = 600;     // tối đa 10s cho cả màn kết hiệp (không bao giờ treo)
-const FINISHER_FX_CLASSES = ['FsFinisher', 'TsFinisher', 'JkFinisher', 'JgFinisher', 'CgFinisher', 'ClFinisher', 'JpFinisher', 'WsFinisher', 'StFinisher', 'TatFinisher', 'OpFinisher', 'BmFinisher', 'ArFinisher', 'PsyFinisher', 'TlFinisher', 'JlFinisher', 'KgFinisher', 'BodyFinisher'];
+const FINISHER_FX_CLASSES = ['FsFinisher', 'TsFinisher', 'JkFinisher', 'JgFinisher', 'CgFinisher', 'ClFinisher', 'JpFinisher', 'WsFinisher', 'StFinisher', 'TatFinisher', 'OpFinisher', 'BmFinisher', 'ArFinisher', 'PsyFinisher', 'TlFinisher', 'JlFinisher', 'KgFinisher', 'BodyFinisher', 'TcFinisher'];
 function finisherFxActive() {
     if (typeof bodyEffects === 'undefined') return false;
     for (const e of bodyEffects) {

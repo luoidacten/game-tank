@@ -299,4 +299,8 @@ const EVOLUTIONS = {
         { id: 'evo_kusa_1', name: 'Huyết Xích Khát Máu', desc: 'Hút Máu 25% -> 50% (cộng dồn với Evo 2). Tích Lũy nạp nhanh hơn 40% (1.5s đầy 5 tầng), hệ số tầng 5 lên x3.5. Đổi Phong Cách chỉ cần giữ 0.3s và không mất tầng Tích Lũy. Chảy Máu cộng dồn tối đa 3 tầng (0.6 HP/s) & làm chậm địch 20%.', cost: 170, type: 'evo' },
         { id: 'evo_kusa_2', name: 'Bất Tử Huyết Ma', desc: 'Hút Máu +25% (chỉ Evo 2: 50%; Evo 1 + Evo 2: 100%). Cuồng Huyết: ngoài 3s Bất Tử nhận ngay 2.0 Giáp Trắng, Giáp Trắng chỉ tụt 0.1/s, đổi Hút Máu -> Giáp Trắng x1.5. LINH: khi đang hiện Vòng Cảnh Báo nhận 50% Giảm Sát Thương & Miễn Khống Chế. FULL EVO (Tu La Huyết Liêm): Hút Máu 100%; đầy máu thì 50% lượng hút dư thành Giáp Trắng; trong Cuồng Huyết Tích Lũy luôn còn tối thiểu 2 tầng sau khi ra đòn, tầng 5 đạt x4.0; TAM THỨC HỢP NHẤT: Trảm phóng 2 lưỡi liềm chéo, Khóa thu về kéo giật địch trong lốc theo, Linh khi xoay bắn tỏa 8 tia huyết kiếm.', cost: 320, type: 'evo' },
     ],
+    the_clock: [
+        { id: 'evo_clock_1', name: 'Dây Cót Dư Trữ', desc: 'Băng đạn +1 (5 viên), nạp đạn thường nhanh hơn 25%. Kích hoạt Time Zone: hồi ngay +2 viên & +35% tốc chạy ngang trong lúc ngưng đọng.', cost: 95, type: 'evo' },
+        { id: 'evo_clock_2', name: 'Kim Giờ Gia Tốc', desc: 'Hồi Time Zone 12s -> 8.5s. Kim Giờ Cường Hóa bay nhanh hơn 45%, Làm Chậm 45%. NHẢY KIM: mỗi lần Choáng 3 nhịp mà địch đang bị chậm bởi Kim Giờ -> hồi +1 viên. FULL EVO (Chúa Tể Thời Không — Án Tử 12 Giờ): Dư Chấn mở từ 10 nhịp (khựng 0.4s), KẾT LIỄU chỉ cần 20 nhịp; chủ động tắt sớm Time Zone: mỗi 1s còn dư giảm 1.2s hồi chiêu.', cost: 125, type: 'evo' },
+    ],
 };

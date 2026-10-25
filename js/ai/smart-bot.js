@@ -549,3 +549,19 @@ function botShopBuy(playerId) {
         return f.call(this, bot, enemy, aligned, inp);
     };
 })();
+
+// The Clock: giữ 0.5s mở Time Zone khi hồi xong; trong Time Zone nhấp gài Kim Giờ quanh địch, hết đạn thì giữ 0.4s tắt sớm (tcBotAction)
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon === 'the_clock' && typeof tcBotAction === 'function') {
+            if (this.tcB > 0) { this.tcB--; inp.s = this.tcB > 3; return; }
+            const a = tcBotAction(bot, enemy);
+            if (a === 'tz') { this.tcB = 30 + 6; inp.s = true; return; }
+            if (a === 'end') { this.tcB = 24 + 6; inp.s = true; return; }
+            if (a === 'tap') { this.tcB = 5; inp.s = true; return; }
+            if (bot.tcTZ > 0) { inp.s = false; return; }
+        }
+        return f.call(this, bot, enemy, aligned, inp);
+    };
+})();

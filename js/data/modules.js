@@ -417,6 +417,14 @@ const MODULES = {
             size: { w: 26, h: 26 },
             stats: { hp: 5.0, dmg: 0.25, ammo: 0, speedMult: 1.2857 }
         },
+        {
+            id: 'the_clock',
+            name: 'The Clock',
+            desc: '"Tích tắc... Đủ 24 nhịp kim gõ, thời gian sống của ngươi chính thức khép lại!" HP:4.5 | Dame:0.25 (Time Zone: 0.5) | Đạn:4 | Tốc: 3.8. Nhấp: bắn Kim Giây. ĐẾM NGƯỢC: mỗi phát trúng +1 nhịp trên địch (1 -> 24, giữ cả hiệp): cứ mỗi 3 nhịp CHOÁNG 1s; 12 nhịp mở DƯ CHẤN (mỗi lần Time Zone kết thúc địch khựng 0.25s); 24 nhịp -> KẾT LIỄU TỨC THÌ (xuyên máu, giáp, khiên). Giữ 0.5s (hồi 12s): TIME ZONE 5s toàn sân — địch, vật triệu hồi & đạn địch ngưng đọng; bạn di chuyển & bắn tự do nhưng không nạp đạn, đạn bắn ra hóa KIM GIỜ CƯỜNG HÓA (0.5 dame, xuyên vật cản, chậm 35% 1.5s) treo lơ lửng, hết giờ (hoặc giữ 0.4s tắt sớm) đồng loạt phóng đi. Ngoại lệ: Chrono vẫn bắn nhưng không di chuyển, Neo di chuyển nhưng không bắn; Paradox vừa Tua Ngược hoạt động bình thường. Hạ gục -> ĐỒNG HỒ ĐIỂM 12 GIỜ.',
+            type: 'body', role: ['Kiểm Soát', 'Cơ Động'],
+            size: { w: 28, h: 28 },
+            stats: { hp: 4.5, dmg: 0.25, ammo: 4, speedMult: 1.0857 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 35 },
