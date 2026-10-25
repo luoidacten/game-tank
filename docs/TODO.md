@@ -10,6 +10,17 @@
 - [x] Cân bằng Kinh Tế & Phân Tầng Giá Tiến Hóa (`js/data/evolutions.js`, `js/game/shop-ui.js`, `js/game/round.js`, `js/game/combat.js`, `js/ai/smart-bot.js`): Phân 4 bậc giá Evo (`$60–$140` Đầu trận / `$150–$270` Chiến thuật / `$280–$360` Cuối trận / `$380–$480` Phá game), nâng cấp Lợi Tức kèm Lãi Tiết Kiệm (+15% tiền giữ trong ví/tầng), tăng thưởng Thùng Xu (`$35`) & Xe Tiền (`$50`), và dạy AI Bot tiết kiệm tiền mua Evo (chi tiết: `NOTE_Antigravity.md`).
 - G.E.A.R — kết quả kiểm tra (đã sửa: crash đạn xuyên thiếu hitIds; Sandbox chồng triệu hồi khi bật/tắt lõi; #106 online không cộng $200; thêm code #55/#94/#96; sửa #112 tạo `BodyZone` axit; sửa #119 đi qua `takeDamage`; khóa nhận thưởng lặp khi bật/tắt lõi trong Sandbox; dọn sạch 14 chỗ `hasGear` ID cũ). Còn lại:
   - Thiếu hình ảnh: Giáp Trắng (`gearWhiteShield`) không vẽ; #127 đường ray, #138 vùng Bullet Time, #45 màng hấp thụ, #141 buff Hộp Bí Ẩn, #119 không có phản hồi; #116/#81/#137/#108/#115 hình sơ sài; các buff theo thời gian/cộng dồn không có chỉ báo (#23 #24 #136 #142 #51 #52 #53 #59 #98 #148).
+- **Đợt chỉnh mới (làm TRƯỚC):**
+  - Nhất Quyền: Đấm Thường gồng 0.35s, vạch cảnh báo đỏ khóa trục X lúc nhấp rồi mới phóng; giảm sát thương (dễ né, cần kỹ năng).
+  - Siêu Năng (& Railgun sau này): vùng chặn hầu hết đạn đạo (đạn thường, đạn lớn, tên lửa, pháo, phi kiếm, cầu lửa/băng, mìn bay, kim khâu…); KHÔNG chặn hitscan/lazer (Evo 2 Siêu Năng mới chặn được hitscan, đổi 1s thời gian vùng / 1.0 dame) & cận chiến. Siêu Năng: địch lao cận chiến mặt đất chạm vùng → chặn tại rìa, 1.0 dame phản chấn, hất về làn, Choáng 1.25s (đòn từ trên trời như Thiên của Hoa Ảnh bỏ qua). Bảng chi tiết trong `docs/BODY_MOI_5.md`.
+  - Thợ May: Song Búp Bê — Trắng (Hộ Mệnh, sân mình, HP 50%/Full 75% Max HP, gánh sát thương x2.0/Full x1.5, hồi máu ưu tiên búp bê, kim nối gây sát thương hồi +0.35/Full +0.55 HP cho búp bê) & Đen (Nguyền Rủa, làn địch; kim trúng → địch Choáng 0.75s (hồi 3.5s); dây chỉ qua búp bê đen → +40%/Full +65% sát thương dây & giật chỉ).
+  - Các đòn lazer có cảnh báo: người bắn đứng yên tới khi hết cảnh báo (trừ Kiếm Tôn).
+  - Kẻ Mạnh Nhất (`the_strongest`): lỗi input tấn công; Bành Trướng Lãnh Địa lâu hơn (4s đầu đứng yên, 1s cuối mới di chuyển); Tím (Hollow Purple) đẹp hơn, HUD thông báo, mạnh hơn.
+  - Đầu Bếp = Sukuna (`sukuna`): nerf nặng (đang quá OP); không dùng được Fuga (mũi tên lửa) & Nhát Chém Thế Giới — sửa lỗi.
+  - Kẻ Mạnh Nhất & Sukuna: không dùng được Hắc Thiểm — sửa lỗi.
+  - Boomerang: nerf toàn diện; phạm vi sát thương & hiệu ứng khi bắt thành công.
+  - Trối Chết (`death_lock`) buff: Tầng 3 Ràng Buộc → Khóa Cơ Động (cấm lướt/nhảy/lao/bay/dịch chuyển) tới khi hết ấn hoặc nổ tầng 4; trong Lồng Cấm Chế luôn bị Khóa Cơ Động (trừ Juggernaut).
+- 6 body mới (đặc tả `docs/BODY_MOI_5.md`): The Clock (`the_clock`), The Adapter (`the_adapter`), Phản Chiếu (`prism`), Tỉnh (`tinh`), Wind (`wind`), Railgun (`railgun`). Idol: thiếu phần cơ chế chính — chờ người dùng gửi đủ.
 - 5 body mới (đặc tả `docs/BODY_MOI_3.md`), làm từ dễ đến khó, xong cái nào push cái đó: ~~Nhện Độc~~ ✅ → ~~Boomerang~~ ✅ → ~~Thợ May~~ ✅ → ~~Siêu Năng~~ ✅ → ~~Kusarigama~~ ✅.
 - Nhóm Cờ Bạc + 2 body mới (đặc tả `docs/BODY_MOI_4.md`): ~~nội tại Cờ Bạc~~ ✅; ~~Jack - 6 Lỗ~~ ✅; COC (`coc`).
 - Sau đó: thêm hiệu ứng kết liễu cho mọi body còn thiếu (trừ Cơ Bản); chữ thắng hiệp ("PLAYER X THẮNG") chỉ hiện sau khi kết liễu kết thúc 3s.
