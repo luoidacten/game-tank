@@ -416,15 +416,16 @@ function getZoneState(tp) {
 }
 
 // Đếm nhịp màn kết hiệp: không có kết liễu -> băng rôn hiện sau 3 tick như cũ (tổng 90 tick);
-// có kết liễu -> chờ tới khi diễn xong + 3s rồi mới hiện băng rôn (VICTORY_BANNER_SPAN tick), tổng tối đa 10s.
+// có kết liễu -> chờ tới khi diễn xong (+VICTORY_FX_DELAY) rồi mới hiện băng rôn (VICTORY_BANNER_SPAN tick), tổng tối đa 10s.
 function fatalCinematicStep(fc) {
     fc.el = (fc.el || 0) + 1;
     if (!(fc.bannerAt >= 0)) {
         const span = typeof VICTORY_BANNER_SPAN !== 'undefined' ? VICTORY_BANNER_SPAN : 87;
         const delay = typeof VICTORY_FX_DELAY !== 'undefined' ? VICTORY_FX_DELAY : 180;
         const cap = (typeof VICTORY_TOTAL_CAP !== 'undefined' ? VICTORY_TOTAL_CAP : 600) - span;
-        if (typeof finisherFxActive === 'function' && finisherFxActive()) { fc.fxSeen = true; fc.fxEnd = fc.el; }
-        const ready = fc.el >= cap || (fc.fxSeen ? fc.el >= fc.fxEnd + delay : fc.el >= 3);
+        const fxOn = typeof finisherFxActive === 'function' && finisherFxActive();
+        if (fxOn) { fc.fxSeen = true; fc.fxEnd = fc.el; }
+        const ready = fc.el >= cap || (!fxOn && (fc.fxSeen ? fc.el > fc.fxEnd + delay : fc.el >= 3));
         if (ready) { fc.bannerAt = fc.el; fc.timer = Math.min(fc.timer, span); }
         else fc.timer = Math.max(fc.timer - 1, span);
         return;
