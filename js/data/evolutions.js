@@ -311,4 +311,8 @@ const EVOLUTIONS = {
         { id: 'evo_prism_1', name: 'Lăng Kính Khuếch Đại', desc: 'Phản thường 40% -> 70% dame, phạt khi phản 0.5 -> 0.25 HP. Cửa Sổ Vàng phản 125%. Mở Kính kéo dài 2.5s, hồi chiêu 7s. Đạn phản tự bẻ góc nhẹ về phía địch.', cost: 90, type: 'evo' },
         { id: 'evo_prism_2', name: 'Gương Vỡ Tái Sinh', desc: 'Đầu hiệp nhận sẵn 1 Khiên Kính Lấp Lánh. Cửa sổ phản ngược Lazer Xuyên Phá 0.125s -> 0.2s. Kính vỡ bắn 5 mảnh kính (0.35 dame mỗi mảnh). FULL EVO (Thần Quang Vạn Tượng — Bất Hoại Lăng Kính): miễn hoàn toàn phạt máu khi phản; phản thường 100% dame; Cửa Sổ Vàng phản 150% + đạn phản tăng tốc cực đại.', cost: 120, type: 'evo' },
     ],
+    the_adapter: [
+        { id: 'evo_adapter_1', name: 'Học Sâu Thời Gian Thực', desc: 'Vòng Xoay Thích Ứng tối đa 6 -> 8 nấc (48% Giảm Sát Thương, +0.96 dame). Tự xoay mỗi 2.5s thay vì 3.5s. Mỗi khi địch dùng Kỹ năng Giữ Bắn: +1 nấc ngay & +1 tầng Lộ Điểm Yếu lên địch.', cost: 90, type: 'evo' },
+        { id: 'evo_adapter_2', name: 'Phá Giải Hoàn Toàn', desc: 'Lộ Điểm Yếu tối đa 5 -> 7 tầng (+49% sát thương nhận, -28% tốc đạn/nạp đạn của địch). Từ 4 tầng trở lên: mỗi phát bắn thường trúng hút +0.15 HP & cướp 10% tốc chạy ngang của địch trong 1.5s. FULL EVO (Thần Cơ Bất Bại): đầu hiệp có sẵn 2 nấc & địch bị gắn sẵn 1 tầng; TRẠNG THÁI HOÀN MỸ (8/8 nấc): đạn thường to gấp rưỡi, xuyên vật cản, mỗi 6s tự tạo 1 lớp Khiên Thích Ứng, đòn trúng địch đủ 7 tầng nổ thêm 0.4 sát thương chuẩn.', cost: 120, type: 'evo' },
+    ],
 };

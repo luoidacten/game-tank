@@ -566,6 +566,21 @@ function botShopBuy(playerId) {
     };
 })();
 
+// The Adapter: nhấp bắn khi thẳng hàng; giữ 0.4s Ép Xung Bắt Bài khi hồi xong và có đạn địch sắp trúng (adBotAction)
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon === 'the_adapter' && typeof adBotAction === 'function') {
+            if (this.adB > 0) { this.adB--; inp.s = this.adB > 3; return; }
+            const a = adBotAction(bot, enemy, aligned);
+            if (a === 'skill') { this.adB = 24 + 6; inp.s = true; return; }
+            if (a === 'tap') { this.adB = 5; inp.s = true; return; }
+            inp.s = false; return;
+        }
+        return f.call(this, bot, enemy, aligned, inp);
+    };
+})();
+
 // COC: Tiểu Liên giữ liên thanh khi thẳng hàng; Evo 1 giữ 0.6s ReRoll khi vũ khí bất lợi (cocBotWantReroll)
 (function () {
     const f = SmartBot.prototype.fire;

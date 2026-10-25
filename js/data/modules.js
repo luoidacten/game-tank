@@ -441,6 +441,14 @@ const MODULES = {
             size: { w: 28, h: 28 },
             stats: { hp: 4.5, dmg: 1.0, ammo: 5, speedMult: 1.0286 }
         },
+        {
+            id: 'the_adapter',
+            name: 'The Adapter',
+            desc: '"Ngươi càng ra đòn, ta càng bất bại. Đánh càng lâu... tử huyệt của ngươi càng phơi bày!" HP:5.5 | Dame:1.0 (tăng dần) | Đạn:4 | Tốc:3.6. THÍCH ỨNG VAI TRÒ (đầu hiệp, theo vai trò chính của địch): Đối Đầu +0.5 Max HP & đạn đẩy lùi ngang; Kiểm Soát đạn x2.5 lên vật triệu hồi/tường & -35% Làm Chậm nhận vào; Cơ Động +0.3 tốc & đạn nhanh hơn 30%; Sinh Tồn địch -35% hồi máu & +0.3 dame vào Giáp Trắng. VÒNG XOAY THÍCH ỨNG (tối đa 6 nấc): +1 nấc mỗi 3.5s hoặc mỗi 1.0 sát thương nhận vào; mỗi nấc -6% sát thương nhận, +0.12 dame, +5% tốc chạy & tốc nạp. Lên nấc khi đang bị Đốt/Chảy Máu -> xoá hiệu ứng; khi đang ăn đạn liên thanh -> +0.3 Giáp Trắng. PHÂN TÍCH TỬ HUYỆT: địch bắn đủ 4 lần hoặc bạn bắn trúng 2 lần -> +1 tầng Lộ Điểm Yếu (tối đa 5): địch nhận +7% sát thương từ bạn, đạn địch chậm 4% & nạp đạn chậm 4% mỗi tầng. Giữ 0.4s (hồi 7.5s) ÉP XUNG BẮT BÀI: +1 nấc, hồi 0.3 HP, lướt ngang né đạn & bắn Đạn Khai Thác Tử Huyệt (1.1 + 0.2/tầng dame, Làm Chậm 30% 1.5s). Hạ gục -> PHÂN TÍCH HOÀN TẤT: 100% LỖI.',
+            type: 'body', role: ['Sinh Tồn', 'Đối Đầu'],
+            size: { w: 30, h: 30 },
+            stats: { hp: 5.5, dmg: 1.0, ammo: 4, speedMult: 1.0286 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 35 },
