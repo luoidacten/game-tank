@@ -7,8 +7,14 @@
 // Giữ 0.6s (hồi 7s): RÚT CHỈ XIẾT CHẶT — mọi cọc phóng về Thợ May, cắt xuyên mọi thứ (0.6 mỗi cây).
 //   KHÂU CHÉO: địch đang Mũi Khâu / chạm chỉ -> kéo về tâm các cọc, 1.2 st + Trói Chân 1.25s.
 // Evo 1: 4 cọc 12s, chỉ chậm 50% + làm chậm 30% đạn thường địch xuyên qua; mỗi cọc thu về +0.25 Giáp Ảo (tối đa 2).
-// Evo 2: Búp Bê Vải (HP 3) đầu hiệp & mỗi 14s trên nửa sân mình; st vào búp bê truyền 60% sang địch đang Mũi Khâu;
-//   Rút Chỉ -> búp bê phóng kim về phía địch.
+// BÚP BÊ KÉP (kit gốc, hồi sinh 14s sau khi bị phá):
+//   BÚP BÊ TRẮNG "Hộ Mệnh" (nửa sân mình): HP = 50% Max HP Thợ May; st từ địch vào Thợ May chuyển sang Búp Bê x2.0;
+//     mọi hồi máu của bộ kỹ năng vào Búp Bê trước (tràn -> 50% cho Thợ May). Bắn Kim vào Búp Bê -> TRẠM CHỈ:
+//     nối chỉ vào mạng, mỗi lần mạng chỉ gây st lên địch -> Búp Bê +0.35 HP (tối đa 1 lần / 0.75s).
+//   BÚP BÊ ĐEN "Nguyền Rủa" (trước làn địch, trôi chậm, HP 3, đạn địch phá được): Kim trúng -> choáng địch 0.75s
+//     (hồi 3.5s mỗi mục tiêu, Juggernaut miễn) & cắm Cọc tại đó; sợi chỉ xuyên qua Búp Bê Đen -> st chỉ & Rút Chỉ +40%.
+// Evo 2: Búp Bê hồi sinh 8s; Rút Chỉ -> Búp Bê Trắng phóng kim về phía địch.
+//   Full: Búp Bê Trắng 75% Max HP, nhận x1.5, hồi +0.55; Búp Bê Đen HP 4, +65%.
 // Full: 5 cọc, 5 kim; >= 3 cọc bên sân địch tạo LĨNH VỰC CẮT MAY (bao lồi): cấm lướt/dịch chuyển, 0.4 HP/s;
 //   Rút Chỉ hồi 4.5s, cọc không mất mà chụm quanh địch rồi bung ngược về chỗ cũ.
 // Juggernaut (miễn khống chế): không bị chậm / giật / trói (vẫn nhận sát thương).
@@ -33,6 +39,11 @@ function tlImmune(e) { return e && e.weapon === 'juggernaut'; }
 function tlMaxPins(p) { return tlFull(p) ? 5 : (tlE1(p) ? 4 : 3); }
 function tlPinLife(p) { return tlE1(p) ? 720 : 480; }
 function tlCdMax(p) { return tlFull(p) ? 270 : 420; }
+function tlDollRespawn(p) { return tlE2(p) ? 480 : 840; }
+function tlWhite(p) { return bodyEffects.find(d => d instanceof TlWhite && d.active && d.team === p.id) || null; }
+function tlBlack(p) { return bodyEffects.find(d => d instanceof TlBlack && d.active && d.team === p.id) || null; }
+// hệ số st chỉ / Rút Chỉ khi sợi chỉ xuyên Búp Bê Đen
+function tlAmp(p) { return p.tlCurse ? (tlFull(p) ? 1.65 : 1.4) : 1; }
 function tlPins(p, all) {
     return bodyEffects.filter(o => o instanceof TlPin && o.active && o.team === p.id && (all || o.mode === 'pin')).sort((a, b) => a.uid - b.uid);
 }
@@ -59,6 +70,13 @@ function tlThreads(p) {
     const cx = p.x + p.w / 2, cy = p.y + p.h / 2;
     for (const q of pins) S.push([cx, cy, q.x, q.y]);
     for (let i = 1; i < pins.length; i++) S.push([pins[i - 1].x, pins[i - 1].y, pins[i].x, pins[i].y]);
+    // Trạm Chỉ: Búp Bê Trắng nối với Thợ May & mọi cọc
+    const w = typeof TlWhite !== 'undefined' ? tlWhite(p) : null;
+    if (w && w.relay) {
+        const wx = w.x + w.w / 2, wy = w.y + w.h / 2;
+        S.push([cx, cy, wx, wy]);
+        for (const q of pins) S.push([wx, wy, q.x, q.y]);
+    }
     if (tlFull(p) && pins.length >= 3) S.push([pins[pins.length - 1].x, pins[pins.length - 1].y, pins[0].x, pins[0].y]);
     return S;
 }
@@ -125,42 +143,123 @@ function tlCutPath(own, k, px, py) {
     const e = tlEnemy(own);
     if (!k.hitDone && tlAlive(e) && (tlSegRect(px, py, k.x, k.y, e, 5)) && gameState.phase === 'playing') {
         k.hitDone = true;
-        e.takeDamage(0.6 * tlScale(own), own, { unavoidable: true });
+        e.takeDamage(0.6 * tlScale(own) * tlAmp(own), own, { unavoidable: true });
         spawnSparkParticles(e.x + e.w / 2, e.y + e.h / 2, TL_SILVER, 6);
     }
     if (typeof crates !== 'undefined') for (const c of crates) if (c.active && tlHitR(k.x, k.y, 6, c)) { c.active = false; crateOnBreak(c, own); grantCrateLoot(c, own); }
 }
 
-// ---------- Entity: Búp Bê Vải (Evo 2) ----------
-class TlDoll {
-    constructor(team, x, y) {
-        this.team = team; this.w = 18; this.h = 22; this.x = x - 9; this.y = y - 11;
-        this.hp = 3; this.maxHp = 3; this.did = 1 + Math.floor(Math.random() * 1e6); this.t = 0; this.linkFx = 0; this.hitFx = 0; this.active = true;
+// ---------- Entity: Búp Bê Trắng "Hộ Mệnh" (nửa sân Thợ May) ----------
+class TlWhite {
+    constructor(team, x, y, maxHp) {
+        this.team = team; this.w = 22; this.h = 28; this.x = x - 11; this.y = y - 14;
+        this.hp = maxHp; this.maxHp = maxHp; this.relay = false; this.t = 0; this.hitFx = 0; this.healFx = 0; this.linkFx = 0; this.active = true;
+    }
+    update() {
+        const own = tlTeam(this.team);
+        if (!own || !tlIs(own)) { this.active = false; return; }
+        this.t++;
+        if (this.hitFx > 0) this.hitFx--;
+        if (this.healFx > 0) this.healFx--;
+        if (this.linkFx > 0) this.linkFx--;
+    }
+    draw() { if (typeof tlDrawWhite === 'function') tlDrawWhite(this); }
+}
+// ---------- Entity: Búp Bê Đen "Nguyền Rủa" (trước làn địch, trôi chậm) ----------
+class TlBlack {
+    constructor(team, x, y, maxHp) {
+        this.team = team; this.w = 22; this.h = 28; this.x = x - 11; this.y = y - 14; this.vx = Math.random() < 0.5 ? -0.3 : 0.3;
+        this.hp = maxHp; this.maxHp = maxHp; this.t = 0; this.hitFx = 0; this.stunFx = 0; this.did = 1 + Math.floor(Math.random() * 1e6); this.active = true;
     }
     update() {
         const own = tlTeam(this.team), e = own ? tlEnemy(own) : null;
-        if (!own || !tlIs(own) || gameState.phase !== 'playing') { if (!own || !tlIs(own)) this.active = false; return; }
-        this.t++;
-        if (this.linkFx > 0) this.linkFx--;
+        if (!own || !tlIs(own)) { this.active = false; return; }
         if (this.hitFx > 0) this.hitFx--;
+        if (this.stunFx > 0) this.stunFx--;
+        if (gameState.phase !== 'playing') return;
+        this.t++;
+        this.x += this.vx;
+        if (this.x < 24 || this.x + this.w > canvas.width - 24) { this.vx = -this.vx; this.x = Math.max(24, Math.min(canvas.width - 24 - this.w, this.x)); }
+        // cọc ghim trên búp bê trôi theo
+        for (const q of bodyEffects) if (q instanceof TlPin && q.active && q.stuck === this.did && q.mode === 'pin') { q.x = this.x + this.w / 2 + q.sdx; q.ox = q.x; }
         if (!e || !e.bullets) return;
         for (let j = e.bullets.length - 1; j >= 0; j--) {
             const b = e.bullets[j];
             if (b.tlDoll === this.did) continue;
             if (!(b.x < this.x + this.w && b.x + (b.w || 6) > this.x && b.y < this.y + this.h && b.y + (b.h || 6) > this.y)) continue;
-            const d = Math.max(0, b.dmg || 1);
-            this.hp -= d; this.hitFx = 8;
+            this.hp -= Math.max(0.2, b.dmg || 1); this.hitFx = 8;
             if (b.isPiercing) b.tlDoll = this.did; else e.bullets.splice(j, 1);
-            if (tlAlive(e) && e.tlStitch > 0) {
-                e.takeDamage(0.6 * d, own, { unavoidable: true });
-                this.linkFx = 18;
-                spawnSparkParticles(e.x + e.w / 2, e.y + e.h / 2, TL_PINK, 6);
-            }
-            spawnSparkParticles(this.x + this.w / 2, this.y + this.h / 2, TL_PINK, 4);
-            if (this.hp <= 0) { this.active = false; explosions.push(new Explosion(this.x + this.w / 2, this.y + this.h / 2, 24, 'rgba(244, 114, 182,', 0, own)); return; }
+            spawnSparkParticles(this.x + this.w / 2, this.y + this.h / 2, '#a855f7', 4);
+            if (this.hp <= 0) { tlDollDie(own, this); return; }
         }
     }
-    draw() { if (typeof tlDrawDoll === 'function') tlDrawDoll(this); }
+    draw() { if (typeof tlDrawBlack === 'function') tlDrawBlack(this); }
+}
+function tlDollDie(own, d) {
+    d.active = false;
+    const white = d instanceof TlWhite;
+    if (white) own.tlWT = tlDollRespawn(own); else { own.tlBT = tlDollRespawn(own); own.tlCurse = false; }
+    explosions.push(new Explosion(d.x + d.w / 2, d.y + d.h / 2, 26, white ? 'rgba(255, 255, 255,' : 'rgba(168, 85, 247,', 0, own));
+    addFloatingText(d.x + d.w / 2, d.y - 10, white ? 'BÚP BÊ TRẮNG VỠ!' : 'BÚP BÊ ĐEN VỠ!', white ? '#ffffff' : '#c084fc', 11);
+}
+function tlSpawnDolls(p) {
+    if (typeof bodyEffects === 'undefined') return;
+    if (!tlWhite(p) && !(--p.tlWT > 0)) {
+        const x = 50 + Math.random() * (canvas.width - 100), y = canvas.height * (p.id === 1 ? 0.66 : 0.34);
+        bodyEffects.push(new TlWhite(p.id, x, y, Math.round(p.maxHp * (tlFull(p) ? 0.75 : 0.5) * 100) / 100));
+        addFloatingText(x, y - 20, 'BÚP BÊ HỘ MỆNH', '#ffffff', 11);
+        spawnSparkParticles(x, y, '#ffffff', 8);
+    }
+    if (!tlBlack(p) && !(--p.tlBT > 0)) {
+        const x = 50 + Math.random() * (canvas.width - 100), y = canvas.height * (p.id === 1 ? 0.2 : 0.8);
+        bodyEffects.push(new TlBlack(p.id, x, y, tlFull(p) ? 4 : 3));
+        addFloatingText(x, y - 20, 'BÚP BÊ NGUYỀN RỦA', '#c084fc', 11);
+        spawnSparkParticles(x, y, '#a855f7', 8);
+    }
+}
+// Hồi máu của bộ kỹ năng: vào Búp Bê Trắng trước, tràn -> 50% cho Thợ May
+function tlHeal(p, amt) {
+    const w = tlWhite(p);
+    if (w) {
+        const add = Math.min(amt, w.maxHp - w.hp);
+        w.hp += add; w.healFx = 16;
+        addFloatingText(w.x + w.w / 2, w.y - 6, '+' + (Math.round(amt * 100) / 100), '#ffffff', 10);
+        amt = (amt - add) * 0.5;
+    }
+    if (amt > 0 && p.hp > 0) p.hp = Math.min(p.maxHp, p.hp + amt);
+}
+// Kim của Thợ May va chạm Búp Bê: Trắng -> Trạm Chỉ; Đen -> choáng địch + cắm cọc
+function tlNeedleDolls(p) {
+    const w = tlWhite(p), k = tlBlack(p), e = tlEnemy(p);
+    if (!p.bullets || (!w && !k)) return;
+    const ov = (b, d) => b.x < d.x + d.w && b.x + (b.w || 4) > d.x && b.y < d.y + d.h && b.y + (b.h || 14) > d.y;
+    for (let j = p.bullets.length - 1; j >= 0; j--) {
+        const b = p.bullets[j];
+        if (b.hook !== 'tailor' || b.tlDone) continue;
+        if (w && !w.relay && ov(b, w)) {
+            b.tlDone = true; p.bullets.splice(j, 1);
+            w.relay = true; w.linkFx = 20;
+            addFloatingText(w.x + w.w / 2, w.y - 8, 'TRẠM CHỈ!', TL_CYAN, 11);
+            spawnSparkParticles(w.x + w.w / 2, w.y + w.h / 2, TL_SILVER, 8);
+            continue;
+        }
+        if (k && ov(b, k)) {
+            b.tlDone = true; p.bullets.splice(j, 1);
+            // ghim vào mép búp bê phía Thợ May (chỉ luôn xuyên qua búp bê, cọc trôi theo)
+            const q = tlPlant(p, b.x + (b.w || 4) / 2, p.id === 1 ? k.y + k.h - 4 : k.y + 4);
+            q.stuck = k.did; q.sdx = Math.max(-k.w / 2 + 3, Math.min(k.w / 2 - 3, q.x - (k.x + k.w / 2)));
+            k.stunFx = 24; k.hitFx = 6;
+            spawnSparkParticles(k.x + k.w / 2, k.y + k.h / 2, '#a855f7', 8);
+            if (tlAlive(e) && gameState.phase === 'playing') {
+                if (tlImmune(e)) tlTxt(e, 'MIỄN CHOÁNG', '#94a3b8', 10);
+                else if (!(e.tlStunCd > 0)) {
+                    e.freezeTimer = Math.max(e.freezeTimer || 0, 45); e.tlStunCd = 210; e.tlCurseFx = 30;
+                    tlTxt(e, 'NGUYỀN RỦA!', '#c084fc', 13);
+                    spawnSparkParticles(e.x + e.w / 2, e.y + e.h / 2, '#a855f7', 10);
+                }
+            }
+        }
+    }
 }
 
 // ---------- Entity: Kết liễu "ĐƯỜNG KIM MŨI CHỈ" ----------
@@ -238,7 +337,7 @@ function tlYank(p) {
             e.kbX = 0; e.tlRoot = 75; e.tlRootX = e.x;
         }
         e.tlStitch = 0;
-        e.takeDamage(1.2 * s, p, { unavoidable: true });
+        e.takeDamage(1.2 * s * tlAmp(p), p, { unavoidable: true });
         e.tlCrossFx = 30;
         addFloatingText(e.x + e.w / 2, e.y + (e.id === 1 ? -30 : e.h + 34), tlImmune(e) ? 'KHÂU CHÉO! (MIỄN TRÓI)' : 'KHÂU CHÉO!', TL_PINK, 14);
         spawnSparkParticles(e.x + e.w / 2, e.y + e.h / 2, TL_SILVER, 14);
@@ -251,9 +350,9 @@ function tlYank(p) {
             q.mode = 'conv'; q.tx = e.x + e.w / 2 + Math.cos(an) * 12; q.ty = e.y + e.h / 2 + Math.sin(an) * 10;
         } else q.mode = 'ret';
     });
-    // Búp bê phóng kim về phía địch
-    if (tlE2(p) && tlAlive(e)) for (const d of bodyEffects) {
-        if (!(d instanceof TlDoll) || !d.active || d.team !== p.id) continue;
+    // Evo 2: Búp Bê Trắng phóng kim về phía địch
+    const d = tlWhite(p);
+    if (tlE2(p) && tlAlive(e) && d) {
         const sx = d.x + d.w / 2, sy = d.y + d.h / 2, v = aimVelocity(sx, sy, e, C.bulletSpeed * 1.4);
         spawnBullet(p, { x: sx - 2, y: sy - 2, w: 4, h: 10, vx: v.vx, vy: v.vy, dmg: 0.6 * s, hook: 'tailor_doll' });
         d.linkFx = 12;
@@ -268,24 +367,24 @@ function tlTick(p) {
     if (p.tlVSFx > 0) p.tlVSFx--;
     p.tlT = (p.tlT || 0) + 1;
     const playing = gameState.phase === 'playing';
-    // Búp Bê Vải (Evo 2)
-    if (tlE2(p) && playing && p.hp > 0 && --p.tlDollT <= 0) {
-        p.tlDollT = 840;
-        bodyEffects.forEach(d => { if (d instanceof TlDoll && d.team === p.id) d.active = false; });
-        const x = 40 + Math.random() * (canvas.width - 80), y = canvas.height * (p.id === 1 ? 0.64 : 0.36);
-        bodyEffects.push(new TlDoll(p.id, x, y));
-        addFloatingText(x, y - 18, 'BÚP BÊ VẢI', TL_PINK, 11);
-    }
+    if (p.tlRelayCd > 0) p.tlRelayCd--;
+    // Búp Bê Kép
+    if (playing && p.hp > 0) { tlSpawnDolls(p); tlNeedleDolls(p); }
     const e = tlEnemy(p);
     p.tlDom = [];
-    if (!tlAlive(e) || !playing) return;
+    if (!tlAlive(e) || !playing) { p.tlCurse = false; return; }
     const imm = tlImmune(e), threads = tlThreads(p);
     if (e.tlCrossFx > 0) e.tlCrossFx--;
+    if (e.tlStunCd > 0) e.tlStunCd--;
+    if (e.tlCurseFx > 0) e.tlCurseFx--;
+    // Búp Bê Đen: sợi chỉ xuyên qua -> khuếch đại st chỉ / Rút Chỉ
+    const bk = tlBlack(p);
+    p.tlCurse = !!bk && threads.some(s => tlSegRect(s[0], s[1], s[2], s[3], bk, 0));
     // Đường Chỉ Căng
     e.tlOnThread = threads.some(s => tlSegRect(s[0], s[1], s[2], s[3], e, 1));
     if (e.tlOnThread) {
         if (!imm) addStatusSlow(e, tlE1(p) ? 0.5 : 0.65);
-        if (p.tlT % 15 === 0) e.takeDamage(0.0625 * tlScale(p), p, { unavoidable: true, isDot: true });
+        if (p.tlT % 15 === 0) e.takeDamage(0.0625 * tlScale(p) * tlAmp(p), p, { unavoidable: true, isDot: true });
     }
     // Evo 1: chậm 30% đạn thường địch xuyên màn chỉ
     if (tlE1(p) && e.bullets && threads.length) for (const b of e.bullets) {
@@ -324,7 +423,7 @@ function tlTick(p) {
         if (hull.length && tlInPoly(e.x + e.w / 2, e.y + e.h / 2, hull)) {
             e.tlInDom = true;
             if (typeof e.tlLastX === 'number' && Math.abs(e.x - e.tlLastX) > 12) e.x = e.tlLastX + Math.sign(e.x - e.tlLastX) * 4;
-            if (p.tlT % 15 === 0) e.takeDamage(0.1, p, { unavoidable: true, isDot: true });
+            if (p.tlT % 15 === 0) e.takeDamage(0.1 * tlAmp(p), p, { unavoidable: true, isDot: true });
         }
     }
     e.tlLastX = e.x;
@@ -349,7 +448,9 @@ function tlBotHold(p, e) {
 CharHooks.register('tailor', {
     setup() {
         this.tlCd = 0; this.tlPrevS = false; this.tlHold = 0; this.tlUsed = false; this.tlRecoil = 0;
-        this.tlVS = 0; this.tlVSFx = 0; this.tlYankFx = 0; this.tlT = 0; this.tlDollT = 1; this.tlDom = [];
+        this.tlVS = 0; this.tlVSFx = 0; this.tlYankFx = 0; this.tlT = 0; this.tlDom = [];
+        this.tlWT = 1; this.tlBT = 1; this.tlCurse = false; this.tlRelayCd = 0;
+        if (typeof bodyEffects !== 'undefined') bodyEffects.forEach(d => { if ((d instanceof TlWhite || d instanceof TlBlack) && d.team === this.id) d.active = false; });
         tlClearVictim(this); tlClearVictim(tlEnemy(this));
         if (tlFull(this)) { this.maxAmmo += 1; this.ammo = this.maxAmmo; }
     },
@@ -361,7 +462,7 @@ CharHooks.register('tailor', {
             this.tlHold++;
             if (this.tlHold >= TL_HOLD && (this.tlCd || 0) <= 0) {
                 this.tlUsed = true; this.tlHold = 0;
-                if (tlPins(this).length || (tlE2(this) && bodyEffects.some(d => d instanceof TlDoll && d.active && d.team === this.id))) tlYank(this);
+                if (tlPins(this).length || (tlE2(this) && tlWhite(this))) tlYank(this);
                 else tlTxt(this, 'CHƯA CÓ CỌC', '#94a3b8', 10);
             }
         } else {
@@ -370,7 +471,7 @@ CharHooks.register('tailor', {
         }
         return true;
     },
-    roundEnd() { tlClearVictim(tlEnemy(this)); this.tlVS = 0; },
+    roundEnd() { tlClearVictim(tlEnemy(this)); this.tlVS = 0; this.tlCurse = false; },
 });
 
 // ---------- Bọc update: tick luôn chạy ----------
@@ -396,9 +497,31 @@ CharHooks.register('tailor', {
                 if (amount <= 1e-4) { addFloatingText(this.x + this.w / 2, this.y - 10, 'GIÁP ẢO', TL_SILVER, 12); return 0; }
             }
         }
+        // Búp Bê Trắng gánh st từ địch (khuếch đại)
+        if (tlIs(this) && typeof amount === 'number' && amount > 0 && this.hp > 0 && attacker && attacker === tlEnemy(this)) {
+            const opt = options || {}, w = tlWhite(this);
+            const blocked = (this.invincibleTimer > 0 && !opt.ignoreInvincible && !opt.unavoidable) || (this.shield > 0 && !opt.bypassShield);
+            if (w && !blocked) {
+                const amp = tlFull(this) ? 1.5 : 2, take = amount * amp;
+                w.hitFx = 10;
+                if (take < w.hp) {
+                    w.hp -= take;
+                    if (!opt.isDot) addFloatingText(w.x + w.w / 2, w.y - 6, '-' + (Math.round(take * 100) / 100), '#fda4af', 10);
+                    return 0;
+                }
+                amount = (take - w.hp) / amp; w.hp = 0;
+                tlDollDie(this, w);
+                if (amount <= 1e-4) return 0;
+            }
+        }
         const before = this.hp;
         const r = origTD.call(this, amount, attacker, options, ...Array.prototype.slice.call(arguments, 3));
         if (before > 0 && this.hp <= 0 && attacker && attacker !== this && tlIs(attacker)) tlSpawnFinisher(attacker, this);
+        // Trạm Chỉ: mạng chỉ gây st lên địch -> hồi Búp Bê Trắng
+        if (attacker && attacker !== this && tlIs(attacker) && this.hp < before && !(attacker.tlRelayCd > 0)) {
+            const w = tlWhite(attacker);
+            if (w && w.relay) { attacker.tlRelayCd = 45; w.linkFx = 14; tlHeal(attacker, tlFull(attacker) ? 0.55 : 0.35); }
+        }
         return r;
     };
 })();

@@ -289,7 +289,7 @@ const EVOLUTIONS = {
     ],
     tailor: [
         { id: 'evo_tailor_1', name: 'Chỉ Tơ Hoàng Kim', desc: 'Tối đa 4 Cọc Chỉ, tồn tại 12s. Đường Chỉ Căng làm chậm 50% và làm chậm 30% tốc độ bay của đạn thường địch xuyên qua màn chỉ. Rút Chỉ Xiết Chặt: mỗi Cọc Chỉ thu về +0.25 Giáp Ảo (tối đa 2.0).', cost: 135, type: 'evo' },
-        { id: 'evo_tailor_2', name: 'Búp Bê Thế Mạng', desc: 'Đầu hiệp & mỗi 14s khâu ra 1 Búp Bê Vải (HP 3) trên nửa sân mình, chặn đạn địch; địch đang Mũi Khâu -> 60% st bắn vào Búp Bê truyền thẳng sang xe địch. Rút Chỉ: Búp Bê phóng kim về phía địch. FULL EVO (Tuyệt Tác Định Mệnh): tối đa 5 Cọc Chỉ, băng đạn 5 Kim; >= 3 Cọc bên sân địch tạo LĨNH VỰC CẮT MAY (cấm lướt/dịch chuyển, rút 0.4 HP/s); Rút Chỉ hồi 4.5s, cọc không mất mà chụm quanh địch rồi bung ngược ra.', cost: 250, type: 'evo' },
+        { id: 'evo_tailor_2', name: 'Búp Bê Thế Mạng', desc: 'Búp Bê Kép hồi sinh nhanh hơn: 8s (thay 14s). Rút Chỉ: Búp Bê Trắng phóng kim về phía địch. FULL EVO (Tuyệt Tác Định Mệnh): Búp Bê Trắng HP = 75% Max HP, chỉ nhận x1.5 st, Trạm Chỉ hồi +0.55; Búp Bê Đen HP 4, sợi chỉ xuyên qua -> st chỉ & Rút Chỉ +65%; tối đa 5 Cọc Chỉ, băng đạn 5 Kim; >= 3 Cọc bên sân địch tạo LĨNH VỰC CẮT MAY (cấm lướt/dịch chuyển, rút 0.4 HP/s); Rút Chỉ hồi 4.5s, cọc không mất mà chụm quanh địch rồi bung ngược ra.', cost: 250, type: 'evo' },
     ],
     jack_6_lo: [
         { id: 'evo_jack_1', name: 'Thú Vị Hơn', desc: 'Luck 16s (+30% tốc, né 30%, giảm 25% st nhận); mỗi tầng Nợ phạt nặng hơn (-5% tốc, +8% st nhận). The BOY: Phát 1 x8 (nổ to); Phát 2–3 x3; Phát 4–5 x2; nổ ngược Phát 6 tự nhận 3.5 st & Choáng 1.75s.', cost: 160, type: 'evo' },

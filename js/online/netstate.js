@@ -43,7 +43,7 @@ const NET_CLASSES = {
     GearSupportDrone, GearMine, GearBarrierWall, GearCenterPrism, GearMirage, GearPrankBox, GearStormBolt, GearFieldDevice,
     BmStraight, BmCurve, BmBlast, BmFinisher,
     PsyWave, PsyFinisher,
-    TlPin, TlDoll, TlFinisher,
+    TlPin, TlWhite, TlBlack, TlFinisher,
     JlFinisher,
     KgSickle, KgPool, KgVortex, KgFinisher,
 };
