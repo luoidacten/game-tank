@@ -433,6 +433,14 @@ const MODULES = {
             size: { w: 28, h: 28 },
             stats: { hp: 4.5, dmg: 1.0, ammo: 10, speedMult: 1.0 }
         },
+        {
+            id: 'prism',
+            name: 'Phản Chiếu',
+            desc: '"Lazer sao? Hay là đạn xuyên thủng? Nếu không chuẩn xác... ngươi sẽ phải trả giá bằng máu của chính mình!" HP:4.5 | Dame:1.0 | Đạn:5 | Tốc: 3.6. Nhấp: Tia Khúc Xạ bay cực nhanh, nảy tường 1 lần. KÍNH LẤP LÁNH: mọi Khiên hóa Khiên Kính — bị đánh trúng thì bật Kính 1.2s phản mọi đòn (40% dame, bị phạt 0.5 HP mỗi đợt) rồi vỡ. Giữ 0.4s (hồi 9s): MỞ KÍNH 1.5s (dùng trước mọi khiên khác); 0.25s đầu = CỬA SỔ VÀNG: miễn sát thương, phản 100% + đạn phản tăng tốc. Lazer Xuyên Phá: chỉ phản ngược được trong 0.125s đầu, ngoài ra bị khúc xạ lệch & mất 2.0 HP. Hạ gục -> VẠN KÍNH QUY QUANG.',
+            type: 'body', role: ['Sinh Tồn', 'Kiểm Soát'],
+            size: { w: 28, h: 28 },
+            stats: { hp: 4.5, dmg: 1.0, ammo: 5, speedMult: 1.0286 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 35 },

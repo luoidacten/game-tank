@@ -579,3 +579,16 @@ function botShopBuy(playerId) {
         return f.call(this, bot, enemy, aligned, inp);
     };
 })();
+
+// Phản Chiếu: giữ 0.4s Mở Kính đúng nhịp đạn/lazer địch sắp chạm (prBotWantsOpen); còn lại nhấp bắn như 'tap'
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon === 'prism' && typeof prBotWantsOpen === 'function') {
+            if (this.prB > 0) { this.prB--; inp.s = this.prB > 0; return; }
+            const n = prBotWantsOpen(bot, enemy);
+            if (n > 0) { this.prB = n; inp.s = true; return; }
+        }
+        return f.call(this, bot, enemy, aligned, inp);
+    };
+})();

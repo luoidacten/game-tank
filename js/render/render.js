@@ -252,6 +252,8 @@ function renderFrame() {
     if (typeof tcFxOver === 'function') tcFxOver();
     // Lớp phủ kết liễu COC (ĐỊNH MỆNH AN BÀI) - js/characters/coc/render.js
     if (typeof cocFxOver === 'function') cocFxOver();
+    // Kết liễu Phản Chiếu (VẠN KÍNH QUY QUANG) - js/characters/prism/render.js
+    if (typeof prFxOver === 'function') prFxOver();
 
     // Particles & Floating Numbers
     updateAndDrawParticles();
@@ -280,7 +282,7 @@ function renderFrame() {
 const VICTORY_BANNER_SPAN = 87;
 const VICTORY_FX_DELAY = 0;        // kết liễu diễn xong là hiện màn thắng ngay
 const VICTORY_TOTAL_CAP = 600;     // tối đa 10s cho cả màn kết hiệp (không bao giờ treo)
-const FINISHER_FX_CLASSES = ['FsFinisher', 'TsFinisher', 'JkFinisher', 'JgFinisher', 'CgFinisher', 'ClFinisher', 'JpFinisher', 'WsFinisher', 'StFinisher', 'TatFinisher', 'OpFinisher', 'BmFinisher', 'ArFinisher', 'PsyFinisher', 'TlFinisher', 'JlFinisher', 'KgFinisher', 'BodyFinisher', 'TcFinisher', 'CocFinisher'];
+const FINISHER_FX_CLASSES = ['FsFinisher', 'TsFinisher', 'JkFinisher', 'JgFinisher', 'CgFinisher', 'ClFinisher', 'JpFinisher', 'WsFinisher', 'StFinisher', 'TatFinisher', 'OpFinisher', 'BmFinisher', 'ArFinisher', 'PsyFinisher', 'TlFinisher', 'JlFinisher', 'KgFinisher', 'BodyFinisher', 'TcFinisher', 'CocFinisher', 'PrFinisher'];
 function finisherFxActive() {
     if (typeof bodyEffects === 'undefined') return false;
     for (const e of bodyEffects) {

@@ -307,4 +307,8 @@ const EVOLUTIONS = {
         { id: 'evo_clock_1', name: 'Dây Cót Dư Trữ', desc: 'Băng đạn +1 (5 viên), nạp đạn thường nhanh hơn 25%. Kích hoạt Time Zone: hồi ngay +2 viên & +35% tốc chạy ngang trong lúc ngưng đọng.', cost: 95, type: 'evo' },
         { id: 'evo_clock_2', name: 'Kim Giờ Gia Tốc', desc: 'Hồi Time Zone 12s -> 8.5s. Kim Giờ Cường Hóa bay nhanh hơn 45%, Làm Chậm 45%. NHẢY KIM: mỗi lần Choáng 3 nhịp mà địch đang bị chậm bởi Kim Giờ -> hồi +1 viên. FULL EVO (Chúa Tể Thời Không — Án Tử 12 Giờ): Dư Chấn mở từ 10 nhịp (khựng 0.4s), KẾT LIỄU chỉ cần 20 nhịp; chủ động tắt sớm Time Zone: mỗi 1s còn dư giảm 1.2s hồi chiêu.', cost: 125, type: 'evo' },
     ],
+    prism: [
+        { id: 'evo_prism_1', name: 'Lăng Kính Khuếch Đại', desc: 'Phản thường 40% -> 70% dame, phạt khi phản 0.5 -> 0.25 HP. Cửa Sổ Vàng phản 125%. Mở Kính kéo dài 2.5s, hồi chiêu 7s. Đạn phản tự bẻ góc nhẹ về phía địch.', cost: 90, type: 'evo' },
+        { id: 'evo_prism_2', name: 'Gương Vỡ Tái Sinh', desc: 'Đầu hiệp nhận sẵn 1 Khiên Kính Lấp Lánh. Cửa sổ phản ngược Lazer Xuyên Phá 0.125s -> 0.2s. Kính vỡ bắn 5 mảnh kính (0.35 dame mỗi mảnh). FULL EVO (Thần Quang Vạn Tượng — Bất Hoại Lăng Kính): miễn hoàn toàn phạt máu khi phản; phản thường 100% dame; Cửa Sổ Vàng phản 150% + đạn phản tăng tốc cực đại.', cost: 120, type: 'evo' },
+    ],
 };
