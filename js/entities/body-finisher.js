@@ -4,61 +4,62 @@
 //   slash (nhát chém) · blast (vụ nổ) · beam (tia) · implode (hút sập) · freeze (đóng băng vỡ vụn)
 //   bolt (sét) · rain (mưa đạn/kiếm/bài...) · burn (thiêu/ăn mòn) · seal (ấn phong) · glitch (nhiễu thời gian)
 //   scope (ống ngắm khóa mục tiêu)
+// Mỗi thân có hàm vẽ CHỮ KÝ riêng trong BF_MOTIFS (js/entities/body-finisher-motifs.js); BF_STYLES chỉ là dự phòng.
 // Kích hoạt chung: bọc Player.takeDamage (máu > 0 trước, <= 0 sau, người đánh là thân có cấu hình).
 // Online: thực thể chỉ chứa dữ liệu thuần (BodyFinisher nằm trong NET_CLASSES), cấu hình tra theo id thân.
 // ============================================================
 // t1/t2: 2 dòng chữ; c/c2: màu chính/phụ; g: ký hiệu lớn; s: kiểu; n: số nhát/vệt; p: ký hiệu đạn (rain); sky: tia từ trời; pal: dải màu
 const BODY_FINISHERS = {
     money_tank:   { t1: 'ĐẾ CHẾ', t2: 'TIỀN TỆ', c: '#facc15', c2: '#fef08a', g: '$', s: 'rain', p: '$', n: 26 },
-    tank:         { t1: 'NGHIỀN', t2: 'NÁT THÉP', c: '#f97316', c2: '#fde68a', g: '✸', s: 'blast' },
-    ice:          { t1: 'BĂNG', t2: 'PHONG ẤN', c: '#67e8f9', c2: '#e0f2fe', g: '❄', s: 'freeze' },
-    big_bullet:   { t1: 'ĐẠN', t2: 'HỦY DIỆT', c: '#fb923c', c2: '#fef3c7', g: '●', s: 'blast', n: 3 },
-    shotgun:      { t1: 'NỔ TUNG', t2: 'TẦM GẦN', c: '#f59e0b', c2: '#fde68a', g: '✸', s: 'blast' },
-    overload:     { t1: 'QUÁ TẢI', t2: 'ĐIỆN ÁP', c: '#a78bfa', c2: '#38bdf8', g: 'ϟ', s: 'bolt' },
+    tank:         { t1: 'NGHIỀN', t2: 'NÁT THÉP', c: '#f97316', c2: '#fde68a', g: '▣', s: 'blast' },
+    ice:          { t1: 'ĐÓNG BĂNG', t2: 'VỠ VỤN', c: '#67e8f9', c2: '#e0f2fe', g: '❄', s: 'freeze' },
+    big_bullet:   { t1: 'ĐẠN', t2: 'KHỔNG LỒ', c: '#fb923c', c2: '#fef3c7', g: '●', s: 'blast', n: 3 },
+    shotgun:      { t1: 'NỔ TUNG', t2: 'TẦM GẦN', c: '#f59e0b', c2: '#fde68a', g: '⁂', s: 'blast' },
+    overload:     { t1: 'QUÁ TẢI', t2: 'ĐIỆN ÁP', c: '#a78bfa', c2: '#38bdf8', g: 'Ω', s: 'bolt' },
     smg:          { t1: 'XẢ SẠCH', t2: 'BĂNG ĐẠN', c: '#fbbf24', c2: '#fff7ed', g: '⁍', s: 'rain', n: 30 },
     lazer_charge: { t1: 'XUYÊN PHÁ', t2: 'TUYỆT ĐỐI', c: '#f43f5e', c2: '#fecdd3', g: '✦', s: 'beam' },
-    lazer_auto:   { t1: 'NÓNG', t2: 'CHẢY', c: '#ef4444', c2: '#fb923c', g: '✦', s: 'beam' },
+    lazer_auto:   { t1: 'NÓNG', t2: 'CHẢY', c: '#ef4444', c2: '#fb923c', g: '≡', s: 'beam' },
     rocket:       { t1: 'OANH', t2: 'TẠC', c: '#f97316', c2: '#fde047', g: '✹', s: 'blast', n: 3 },
     portal:       { t1: 'HƯ', t2: 'KHÔNG', c: '#a855f7', c2: '#22d3ee', g: '◎', s: 'implode' },
     acid:         { t1: 'ĂN MÒN', t2: 'TAN RÃ', c: '#84cc16', c2: '#a855f7', g: '☣', s: 'burn' },
-    engineer:     { t1: 'ĐỒNG LOẠT', t2: 'KHAI HỎA', c: '#f59e0b', c2: '#cbd5e1', g: '⚙', s: 'rain', n: 20 },
+    engineer:     { t1: 'ĐỒNG LOẠT', t2: 'KHAI HỎA', c: '#f59e0b', c2: '#cbd5e1', g: '⚒', s: 'rain', n: 20 },
     ghost:        { t1: 'VÔ ẢNH', t2: 'ĐOẠT HỒN', c: '#c7d2fe', c2: '#818cf8', g: '☾', s: 'slash', n: 3 },
-    aaa:          { t1: 'PHÁO KÍCH', t2: 'TỔNG LỰC', c: '#f97316', c2: '#fde047', g: '✹', s: 'rain', p: '●', n: 14 },
+    aaa:          { t1: 'PHÁO KÍCH', t2: 'TỔNG LỰC', c: '#f97316', c2: '#fde047', g: '❋', s: 'rain', p: '●', n: 14 },
     blade_god:    { t1: 'PHÁ THIÊN', t2: 'KIẾM', c: '#fde68a', c2: '#a78bfa', g: '†', s: 'slash', n: 1 },
-    van_kiem:     { t1: 'VẠN KIẾM', t2: 'QUY TÔNG', c: '#38bdf8', c2: '#e0f2fe', g: '†', s: 'rain', p: '†', n: 24 },
+    van_kiem:     { t1: 'VẠN KIẾM', t2: 'QUY TÔNG', c: '#38bdf8', c2: '#e0f2fe', g: '萬', s: 'rain', p: '†', n: 24 },
     water_gun:    { t1: 'THỦY LONG', t2: 'TRẢM', c: '#38bdf8', c2: '#e0f2fe', g: '≋', s: 'beam' },
     furnace:      { t1: 'HỎA', t2: 'TÁNG', c: '#f97316', c2: '#ef4444', g: '♨', s: 'burn' },
     am_duong_su:  { t1: 'ÂM DƯƠNG', t2: 'PHONG ẤN', c: '#f8fafc', c2: '#ef4444', g: '☯', s: 'seal' },
-    six_barrel:   { t1: 'MƯA', t2: 'THÉP', c: '#fbbf24', c2: '#f97316', g: '⁍', s: 'rain', n: 34 },
+    six_barrel:   { t1: 'MƯA', t2: 'THÉP', c: '#fbbf24', c2: '#f97316', g: '⊛', s: 'rain', n: 34 },
     the_strongest:{ t1: 'HƯ THỨC', t2: 'TỬ', c: '#a855f7', c2: '#3b82f6', g: '◉', s: 'implode', pal: ['#ef4444', '#3b82f6', '#a855f7'] },
     sniper:       { t1: 'MỘT PHÁT', t2: 'MỘT MẠNG', c: '#22d3ee', c2: '#f43f5e', g: '⌖', s: 'scope' },
     cung:         { t1: 'TIỄN', t2: 'VŨ', c: '#a3e635', c2: '#fef9c3', g: '➶', s: 'rain', p: '➶', n: 22 },
     mirror:       { t1: 'GƯƠNG', t2: 'VỠ', c: '#e0f2fe', c2: '#a5b4fc', g: '◇', s: 'freeze' },
     sukuna:       { t1: 'PHỤC MA', t2: 'NGỰ TRÙ TỬ', c: '#ef4444', c2: '#fecaca', g: '⛩', s: 'slash', n: 7 },
-    paradox:      { t1: 'NGHỊCH LÝ', t2: 'THỜI GIAN', c: '#22d3ee', c2: '#f472b6', g: '⧗', s: 'glitch' },
+    paradox:      { t1: 'NGHỊCH LÝ', t2: 'THỜI GIAN', c: '#22d3ee', c2: '#f472b6', g: '∞', s: 'glitch' },
     magician:     { t1: 'MÀN CUỐI', t2: 'ẢO THUẬT', c: '#f472b6', c2: '#facc15', g: '♠', s: 'rain', p: '♠', n: 20, pal: ['#f472b6', '#facc15', '#f8fafc', '#a855f7'] },
     inventor:     { t1: 'KHÔNG KÍCH', t2: 'DRONE', c: '#22d3ee', c2: '#facc15', g: '✈', s: 'rain', p: '▼', n: 14 },
-    shadow_hunter:{ t1: 'ÁM SÁT', t2: 'BÓNG ĐÊM', c: '#8b5cf6', c2: '#ef4444', g: '☾', s: 'slash', n: 4 },
-    shortgunATK:  { t1: 'NỔ', t2: 'TUNG XÁC', c: '#f59e0b', c2: '#ef4444', g: '✸', s: 'blast' },
+    shadow_hunter:{ t1: 'ÁM SÁT', t2: 'BÓNG ĐÊM', c: '#8b5cf6', c2: '#ef4444', g: '☽', s: 'slash', n: 4 },
+    shortgunATK:  { t1: 'BỘC PHÁ', t2: 'ÁP SÁT', c: '#f59e0b', c2: '#ef4444', g: '➤', s: 'blast' },
     thunder:      { t1: 'LÔI THẦN', t2: 'GIÁNG THẾ', c: '#facc15', c2: '#60a5fa', g: 'ϟ', s: 'bolt', n: 5 },
     magnet:       { t1: 'TỪ TRƯỜNG', t2: 'NGHIỀN ÉP', c: '#ef4444', c2: '#3b82f6', g: '⊕', s: 'implode', pal: ['#ef4444', '#3b82f6'] },
-    evolution:    { t1: 'TIẾN HÓA', t2: 'TỐI THƯỢNG', c: '#4ade80', c2: '#facc15', g: '✧', s: 'blast', n: 2 },
+    evolution:    { t1: 'ĐỘT BIẾN', t2: 'GEN TRỘI', c: '#4ade80', c2: '#facc15', g: '✧', s: 'blast', n: 2 },
     death_lock:   { t1: 'XIỀNG', t2: 'TỬ THẦN', c: '#a855f7', c2: '#94a3b8', g: '⛓', s: 'seal' },
     creator:      { t1: 'KIẾN TẠO', t2: 'HỦY DIỆT', c: '#22d3ee', c2: '#facc15', g: '⬢', s: 'rain', p: '◆', n: 18 },
     necromancer:  { t1: 'VONG HỒN', t2: 'NUỐT CHỬNG', c: '#4ade80', c2: '#a855f7', g: '☠', s: 'implode' },
-    genius:       { t1: 'MECHA', t2: 'TỐI THƯỢNG', c: '#22d3ee', c2: '#f97316', g: '⚙', s: 'beam' },
-    kiem_khach:   { t1: 'NHẤT KIẾM', t2: 'ĐOẠN HỒN', c: '#e2e8f0', c2: '#38bdf8', g: '⚔', s: 'slash', n: 2 },
+    genius:       { t1: 'CỖ MÁY', t2: 'THIÊN TÀI', c: '#22d3ee', c2: '#f97316', g: '⚙', s: 'beam' },
+    kiem_khach:   { t1: 'NHẤT KIẾM', t2: 'ĐOẠN HỒN', c: '#e2e8f0', c2: '#38bdf8', g: '劍', s: 'slash', n: 2 },
     sprayer:      { t1: 'PHUN', t2: 'TÀN', c: '#f97316', c2: '#67e8f9', g: '☁', s: 'burn', pal: ['#f97316', '#84cc16', '#67e8f9'] },
-    customize:    { t1: 'LẮP GHÉP', t2: 'TỐI THƯỢNG', c: '#22d3ee', c2: '#f472b6', g: '⚙', s: 'glitch' },
+    customize:    { t1: 'LẮP GHÉP', t2: 'HOÀN HẢO', c: '#22d3ee', c2: '#f472b6', g: '⊞', s: 'glitch' },
     kiem_su:      { t1: 'NGŨ HÀNH', t2: 'KIẾM TRẬN', c: '#facc15', c2: '#4ade80', g: '五', s: 'rain', p: '†', n: 20, pal: ['#facc15', '#4ade80', '#ef4444', '#b45309', '#38bdf8'] },
     revolver:     { t1: 'TỬ CHIẾN', t2: 'GIỮA TRƯA', c: '#fbbf24', c2: '#ef4444', g: '✪', s: 'scope' },
     dj:           { t1: 'BÙNG NỔ', t2: 'NHỊP ĐIỆU', c: '#f472b6', c2: '#22d3ee', g: '♪', s: 'blast', n: 4, pal: ['#f472b6', '#22d3ee', '#facc15', '#a855f7'] },
     steel_hook:   { t1: 'XÍCH THÉP', t2: 'ĐOẠT MẠNG', c: '#94a3b8', c2: '#f97316', g: '⚓', s: 'beam', chain: true },
-    kiem_vu:      { t1: 'BẢN MỆNH', t2: 'KIẾM VŨ', c: '#a78bfa', c2: '#f0abfc', g: '†', s: 'slash', n: 1 },
+    kiem_vu:      { t1: 'BẢN MỆNH', t2: 'KIẾM VŨ', c: '#a78bfa', c2: '#f0abfc', g: '舞', s: 'slash', n: 1 },
     t_zero:       { t1: 'THIÊN', t2: 'LUẬT', c: '#22d3ee', c2: '#f8fafc', g: '⌬', s: 'beam', sky: true },
-    raven_oca:    { t1: 'CUỘC SĂN', t2: 'KẾT THÚC', c: '#f43f5e', c2: '#e2e8f0', g: '✪', s: 'scope' },
-    lazer_beam:   { t1: 'TIA', t2: 'HỦY DIỆT', c: '#ef4444', c2: '#fde68a', g: '✦', s: 'beam' },
-    healer:       { t1: 'SINH MỆNH', t2: 'CẠN KIỆT', c: '#4ade80', c2: '#f0fdf4', g: '✚', s: 'implode' },
+    raven_oca:    { t1: 'CUỘC SĂN', t2: 'KẾT THÚC', c: '#f43f5e', c2: '#e2e8f0', g: 'Ѵ', s: 'scope' },
+    lazer_beam:   { t1: 'TIA', t2: 'THIÊU ĐỐT', c: '#ef4444', c2: '#fde68a', g: '☀', s: 'beam' },
+    healer:       { t1: 'NHỊP TIM', t2: 'NGỪNG ĐẬP', c: '#4ade80', c2: '#f0fdf4', g: '✚', s: 'implode' },
     chrononeo:    { t1: 'HAI THỜI ĐẠI', t2: 'MỘT KẾT CỤC', c: '#f59e0b', c2: '#22d3ee', g: '⧗', s: 'glitch' },
     gemini:       { t1: 'SONG TỬ', t2: 'HỢP KÍCH', c: '#60a5fa', c2: '#f472b6', g: '♊', s: 'slash', n: 2 },
     blood_lord:   { t1: 'HUYẾT', t2: 'TẾ', c: '#dc2626', c2: '#fecaca', g: '♦', s: 'implode', pal: ['#dc2626', '#7f1d1d', '#fecaca'] },
@@ -149,8 +150,8 @@ function bfDraw(f, cfg) {
     ctx.restore();
     ctx.globalAlpha = fade;
     ctx.lineCap = 'round';
-    const fn = BF_STYLES[cfg.s] || BF_STYLES.blast;
-    fn(f, cfg, t, W, H);
+    const fn = (typeof BF_MOTIFS !== 'undefined' && BF_MOTIFS[f.body]) || BF_STYLES[cfg.s] || BF_STYLES.blast;
+    ctx.save(); fn(f, cfg, t, W, H); ctx.restore();
     // chớp sáng lúc ra đòn
     if (t >= BF_HIT && t < BF_HIT + 10) {
         const k = (t - BF_HIT) / 10;
