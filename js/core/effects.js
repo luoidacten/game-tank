@@ -39,6 +39,9 @@ function triggerFatalCinematic(winnerId, victim) {
     fatalCinematic.winnerId = winnerId;
     fatalCinematic.victimX = vx;
     fatalCinematic.victimY = vy;
+    fatalCinematic.el = 0; fatalCinematic.bannerAt = -1; fatalCinematic.fxSeen = false; fatalCinematic.fxEnd = 0;
+    // Thân có kết liễu chung (BodyFinisher) mà đòn chót không qua takeDamage (vd. độc, vật triệu hồi...) -> vẫn diễn
+    if ((winnerId === 1 || winnerId === 2) && victim && typeof bfSpawn === 'function') bfSpawn(winnerId === 1 ? p1 : p2, victim);
 
     // Dramatic Screen Shake
     triggerScreenShake(14, 30);

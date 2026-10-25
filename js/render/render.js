@@ -246,6 +246,8 @@ function renderFrame() {
     if (typeof jlFxOver === 'function') jlFxOver();
     // Lớp phủ kết liễu Kusarigama (HUYẾT LIÊM ĐOẠT MỆNH) - js/characters/kusarigama/render.js
     if (typeof kgFxOver === 'function') kgFxOver();
+    // Lớp phủ kết liễu chung cho các thân còn lại - js/entities/body-finisher.js
+    if (typeof bodyFinisherFxOver === 'function') bodyFinisherFxOver();
 
     // Particles & Floating Numbers
     updateAndDrawParticles();
@@ -263,23 +265,18 @@ function renderFrame() {
     if (p2CoinEl && p2CoinEl.textContent !== String(gameState.p2Coins)) p2CoinEl.textContent = gameState.p2Coins;
 
     // Fatal Cinematic Victory Sequence
-    // Đang có hiệu ứng kết liễu (Hoa Ảnh, Tsukiyo, Joker...) -> băng rôn THẮNG chờ tới khi nó diễn xong
-    // (tối đa ~1.1s) để không che phần giữa; chỉ trễ phần hiển thị, không đổi thời gian hiệp.
-    if (fatalCinematic.active) {
-        const elapsed = fatalCinematic.maxTimer - fatalCinematic.timer;
-        if (elapsed < 3 || elapsed < victoryBannerStart) victoryBannerStart = -1; // hiệp mới (renderFrame không chạy giữa các hiệp)
-        if (victoryBannerStart < 0 && (elapsed >= VICTORY_BANNER_MAX_WAIT || (elapsed >= 3 && !finisherFxActive()))) victoryBannerStart = elapsed;
-        if (victoryBannerStart >= 0) {
-            const span = Math.max(20, fatalCinematic.maxTimer - victoryBannerStart);
-            drawVictoryBanner(fatalCinematic.winnerId, Math.max(0, span - (elapsed - victoryBannerStart)), span);
-        }
-    } else victoryBannerStart = -1;
+    // Có hiệu ứng kết liễu -> băng rôn THẮNG hiện 3s SAU khi hiệu ứng diễn xong (mốc do host tính trong
+    // fatalCinematic.bannerAt, xem fatalCinematicStep ở js/game/physics.js); không có kết liễu: như cũ.
+    if (fatalCinematic.active && fatalCinematic.bannerAt >= 0) {
+        drawVictoryBanner(fatalCinematic.winnerId, Math.max(0, fatalCinematic.timer), VICTORY_BANNER_SPAN);
+    }
 }
 
-// Băng rôn thắng hiệp: mốc bắt đầu hiện (tick trong fatalCinematic), -1 = chưa hiện
-let victoryBannerStart = -1;
-const VICTORY_BANNER_MAX_WAIT = 66;
-const FINISHER_FX_CLASSES = ['FsFinisher', 'TsFinisher', 'JkFinisher', 'JgFinisher', 'CgFinisher', 'ClFinisher', 'JpFinisher', 'WsFinisher', 'StFinisher', 'TatFinisher', 'OpFinisher', 'BmFinisher', 'ArFinisher', 'PsyFinisher', 'TlFinisher', 'JlFinisher', 'KgFinisher'];
+// Băng rôn thắng hiệp: hiện trong VICTORY_BANNER_SPAN tick rồi hết hiệp
+const VICTORY_BANNER_SPAN = 87;
+const VICTORY_FX_DELAY = 180;      // chờ thêm 3s sau khi kết liễu diễn xong
+const VICTORY_TOTAL_CAP = 600;     // tối đa 10s cho cả màn kết hiệp (không bao giờ treo)
+const FINISHER_FX_CLASSES = ['FsFinisher', 'TsFinisher', 'JkFinisher', 'JgFinisher', 'CgFinisher', 'ClFinisher', 'JpFinisher', 'WsFinisher', 'StFinisher', 'TatFinisher', 'OpFinisher', 'BmFinisher', 'ArFinisher', 'PsyFinisher', 'TlFinisher', 'JlFinisher', 'KgFinisher', 'BodyFinisher'];
 function finisherFxActive() {
     if (typeof bodyEffects === 'undefined') return false;
     for (const e of bodyEffects) {
