@@ -94,7 +94,7 @@ const GEARS = [
             if (!p) return false;
             const evos = (typeof EVOLUTIONS !== 'undefined' && EVOLUTIONS[p.weapon]) || [];
             if (!evos.length) return !p.isFullEvoInventor;
-            return evos.some(e => !p.hasUpgrade(e.id));
+            return evos.some(e => !e.fullEvoGate && !p.hasUpgrade(e.id));
         },
         desc: 'Mở khóa miễn phí ngay lập tức 1 Tiến Hóa (Evo 1 hoặc Evo 2 giá thấp hơn) của Body bạn đang chơi! Nếu đã có đủ 2 Evo, nhận +$220 và +25% mọi chỉ số.'
     },

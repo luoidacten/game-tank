@@ -20,7 +20,7 @@ const KG_CDS = [36, 72, 150];
 
 function kgE1(p) { return p.hasUpgrade('evo_kusa_1'); }
 function kgE2(p) { return p.hasUpgrade('evo_kusa_2'); }
-function kgFull(p) { return kgE1(p) && kgE2(p); }
+function kgFull(p) { return hasFullEvo(p, 'kusarigama'); } // cần thêm thẻ FULL EVO (FULL_EVO_GATE)
 function kgIs(p) { return !!p && p.weapon === 'kusarigama'; }
 function kgEnemy(p) { return p === p1 ? p2 : p1; }
 function kgTeam(id) { return id === 1 ? p1 : p2; }

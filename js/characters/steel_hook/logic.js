@@ -22,7 +22,7 @@ const SH_BREAK_TICKS = 45;                 // móc đã neo: giữ Bắn 0.75s -
 const SH_SIDE_HP = 0.25;                   // Full Evo: 2 móc phụ chỉ có 25% máu tối đa (dễ bắn đứt)
 const SH_AIM_DELAY = 20;                   // tụ lực (≥1 mốc): khoá hướng + cảnh báo đỏ 0.33s rồi mới phóng
 
-function shIsFull(p) { return p.hasUpgrade('evo_hook_1') && p.hasUpgrade('evo_hook_2'); }
+function shIsFull(p) { return hasFullEvo(p, 'steel_hook'); } // cần thêm thẻ FULL EVO (FULL_EVO_GATE)
 function shMaxBounces(p) { return shIsFull(p) ? 17 : (p.hasUpgrade('evo_hook_1') ? 15 : 9); }
 function shBouncesForTier(p, tier) { return Math.floor(1 + tier * (shMaxBounces(p) - 1) / 4); }
 // Thời gian bay hết đường xích theo lực tụ (giữ càng lâu càng nhanh)

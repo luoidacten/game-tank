@@ -38,7 +38,7 @@ Object.assign(Player.prototype, {
         if (!fromSelfDestruct) {
             this.hp = Math.max(0.5, this.hp * 0.5);
             this.mechaSummonMultiplier = (this.mechaSummonMultiplier || 1) * 2;
-            let refund = (this.hasUpgrade('evo_gen_1') && this.hasUpgrade('evo_gen_2')) ? 6 : (this.hasUpgrade('evo_gen_1') ? 4 : 0);
+            let refund = hasFullEvo(this, 'genius') ? 6 : (this.hasUpgrade('evo_gen_1') ? 4 : 0);
             if (refund > 0) {
                 this.gears = (this.gears || 0) + refund;
                 if (typeof addFloatingText === 'function') addFloatingText(this.x + this.w / 2, this.y - 15, `HOÀN +${refund} BÁNH RĂNG ⚙️`, "#ffb74d", 13);
@@ -51,7 +51,7 @@ Object.assign(Player.prototype, {
 
     selfDestructMecha() {
         if (!this.isPilotingMecha) return;
-        let isFullEvo = this.hasUpgrade('evo_gen_1') && this.hasUpgrade('evo_gen_2');
+        let isFullEvo = hasFullEvo(this, 'genius');
         if (!isFullEvo) return;
 
         // [ĐỔI CƠ CHẾ] Ném Robot: lao thẳng về phía trước, chạm tường mới phát nổ
@@ -180,7 +180,7 @@ Object.assign(Player.prototype, {
             const enemy = (this.id === 1) ? p2 : p1;
             let hasEvo1 = this.hasUpgrade('evo_gen_1');
             let hasEvo2 = this.hasUpgrade('evo_gen_2');
-            let isFullEvo = hasEvo1 && hasEvo2;
+            let isFullEvo = hasFullEvo(this, 'genius'); // cần thêm thẻ FULL EVO
 
             if (!this.isPilotingMecha) {
                 // 1. Tự động nhận 1 Bánh Răng mỗi 10s (600 ticks) khi không lái Mecha

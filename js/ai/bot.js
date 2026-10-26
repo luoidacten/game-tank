@@ -164,7 +164,7 @@ class BotAIController {
         if (evos.length === 0) return '0';
         const has1 = evos[0] && p.hasUpgrade(evos[0].id);
         const has2 = evos[1] && p.hasUpgrade(evos[1].id);
-        if (has1 && has2) return 'full';
+        if (has1 && has2) return (typeof hasFullEvo !== 'function' || hasFullEvo(p)) ? 'full' : '2';
         if (has2) return '2';
         if (has1) return '1';
         return '0';

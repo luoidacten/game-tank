@@ -33,7 +33,7 @@ const GM_RES_BONUS = 0.5;        // -> phát thứ 2 nổ cộng hưởng thêm 
 
 function gmE1(p) { return !!(p && p.hasUpgrade && p.hasUpgrade('evo_gem_1')); }
 function gmE2(p) { return !!(p && p.hasUpgrade && p.hasUpgrade('evo_gem_2')); }
-function gmFull(p) { return gmE1(p) && gmE2(p); }
+function gmFull(p) { return !!(p && p.hasUpgrade) && hasFullEvo(p, 'gemini'); } // cần thêm thẻ FULL EVO (FULL_EVO_GATE)
 function gmEnemy(p) { return p === p1 ? p2 : p1; }
 function gmOwnerOf(t) { return t.ownerId === 1 ? p1 : p2; }
 function gmTwinOf(p) {

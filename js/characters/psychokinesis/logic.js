@@ -19,7 +19,7 @@ const PSY_HOLD = 60, PSY_RELOAD = 72;
 
 function psyE1(p) { return p.hasUpgrade('evo_psy_1'); }
 function psyE2(p) { return p.hasUpgrade('evo_psy_2'); }
-function psyFull(p) { return psyE1(p) && psyE2(p); }
+function psyFull(p) { return hasFullEvo(p, 'psychokinesis'); } // cần thêm thẻ FULL EVO (FULL_EVO_GATE)
 function psyIs(p) { return !!p && p.weapon === 'psychokinesis'; }
 function psyEnemy(p) { return p.id === 1 ? p2 : p1; }
 function psyDir(p) { return p.id === 1 ? -1 : 1; }

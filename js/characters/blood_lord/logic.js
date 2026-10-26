@@ -17,7 +17,7 @@ const BD_HP_FLOOR = 0.5;    // kỹ năng tự trừ máu không làm HP tụt d
 
 function bdEvo1(p) { return p.hasUpgrade('evo_bd_1'); }
 function bdEvo2(p) { return p.hasUpgrade('evo_bd_2'); }
-function bdFull(p) { return bdEvo1(p) && bdEvo2(p); }
+function bdFull(p) { return hasFullEvo(p, 'blood_lord'); } // cần thêm thẻ FULL EVO (FULL_EVO_GATE)
 function bdPow(p) { return bdFull(p) ? 1.5 : (bdEvo2(p) ? 1.25 : 1); }
 const BD_NERF = 0.72; // giảm ~28% sát thương kỹ năng
 function bdDmgMult(p) { return bdPow(p) * BD_NERF; }

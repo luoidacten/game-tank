@@ -21,7 +21,7 @@ const OP_TAP = 14, OP_CHARGE_START = 8, OP_NOHIT = 300, OP_FOLLOW = 24;
 
 function opE1(p) { return p.hasUpgrade('evo_punch_1'); }
 function opE2(p) { return p.hasUpgrade('evo_punch_2'); }
-function opFull(p) { return opE1(p) && opE2(p); }
+function opFull(p) { return hasFullEvo(p, 'one_punch'); } // cần thêm thẻ FULL EVO (FULL_EVO_GATE)
 function opIs(p) { return p && p.weapon === 'one_punch'; }
 function opEnemy(p) { return p === p1 ? p2 : p1; }
 function opDir(p) { return p.id === 1 ? -1 : 1; }

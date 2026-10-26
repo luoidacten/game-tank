@@ -57,7 +57,7 @@ function tankArtEvoState(p) {
     const list = (typeof EVOLUTIONS !== 'undefined' && EVOLUTIONS[p.weapon]) || [];
     const evo1 = !!(list[0] && p.hasUpgrade(list[0].id));
     const evo2 = !!(list[1] && p.hasUpgrade(list[1].id));
-    return { evo1, evo2, full: evo1 && evo2 };
+    return { evo1, evo2, full: evo1 && evo2 && (typeof hasFullEvo !== 'function' || hasFullEvo(p)) };
 }
 
 // Trả về true nếu đã vẽ xe bằng art mới

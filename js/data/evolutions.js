@@ -340,3 +340,43 @@ const EVOLUTIONS = {
         { id: 'evo_idol_2', name: 'Hiện Tượng Mạng', desc: 'CẦN ≥ 12 FAN (tụt dưới 12 -> tạm khóa). Cứ mỗi 2 Fan +2% Sát thương & +1.5% tốc chạy ngang (tối đa ở 20 Fan: +20% / +15%). Ba Phong Cách tách thành 3 CD riêng (combo Tim -> Lazer -> Vũ Đạo). FULL EVO (Huyền Thoại Sân Khấu, duy trì ≥ 18 Fan): Buổi Trình Diễn = 100% Sân Khấu đã chọn + 50% của 2 Sân Khấu còn lại; mỗi 5s khi Sân Khấu mở ném về làn Idol 1 Hộp Quà Fan (+0.4 HP & +20 Náo Nhiệt) và 1 Lightstick Phát Nổ xuống vị trí địch (cảnh báo 0.8s, 1.0 st + chậm 30%).', cost: 260, type: 'evo' },
     ],
 };
+
+// ==========================================
+// KHOÁ FULL EVO: các body có Full Evo quá mạnh phải mua thêm 1 thẻ "FULL EVO"
+// (chỉ xuất hiện trong Shop khi đã có đủ Evo 1 + Evo 2). Body không có trong bảng:
+// Full Evo vẫn tự kích hoạt khi có đủ 2 Evo như cũ.
+// ==========================================
+const FULL_EVO_GATE = {
+    steel_hook: 220,   // Móc Thép
+    tank: 250,         // Full Evo ~99% thắng trong mô phỏng
+    one_punch: 250,
+    gemini: 220,
+    kusarigama: 220,
+    blood_lord: 200,   // Full Evo nhảy vọt mạnh nhất (+42% tỉ lệ thắng)
+    genius: 200,
+    psychokinesis: 180,
+};
+for (const body in FULL_EVO_GATE) {
+    if (!EVOLUTIONS[body]) continue;
+    // Mô tả Evo có nhắc Full Evo -> ghi chú cần thẻ FULL EVO
+    EVOLUTIONS[body].forEach(e => { if (/full\s*evo/i.test(e.desc)) e.desc += ' (🔒 Full Evo cần mua thêm thẻ ★ FULL EVO ★ — chỉ bày bán khi đã có Evo 1 + Evo 2)'; });
+    EVOLUTIONS[body].push({
+        id: 'evo_' + body + '_full', name: '★ FULL EVO ★', cost: FULL_EVO_GATE[body], type: 'evo', fullEvoGate: true,
+        desc: 'Mở khoá sức mạnh FULL EVO của body này (có Evo 1 + Evo 2 vẫn CHƯA đủ — phải mua thêm thẻ này mới kích hoạt Full Evo).'
+    });
+}
+// id thẻ FULL EVO của body (null nếu body không bị khoá)
+function fullEvoGateId(body) { return FULL_EVO_GATE[body] ? 'evo_' + body + '_full' : null; }
+// Đã có Full Evo chưa: đủ Evo 1 + Evo 2 (+ thẻ FULL EVO nếu body bị khoá). body mặc định = p.weapon
+function hasFullEvo(p, body) {
+    body = body || (p && p.weapon);
+    const list = EVOLUTIONS[body];
+    if (!p || !list || list.length < 2 || typeof p.hasUpgrade !== 'function') return false;
+    return list.every(e => p.hasUpgrade(e.id));
+}
+// Thẻ Evo có được bày trong Shop chưa (thẻ FULL EVO chỉ hiện khi đã có 2 Evo thường)
+function evoShopAvailable(p, e) {
+    if (!e || !e.fullEvoGate) return true;
+    const list = EVOLUTIONS[p.weapon] || [];
+    return list.filter(x => !x.fullEvoGate).every(x => p.hasUpgrade(x.id));
+}

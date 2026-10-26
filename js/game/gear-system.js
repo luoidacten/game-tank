@@ -246,7 +246,7 @@ function applyGearImmediateEffect(player, gearId) {
             break;
         case 'gear_early_evo_p': { // #12 Tiến Hóa Sớm
             const evos = EVOLUTIONS[player.weapon] || [];
-            const unowned = evos.filter(e => !player.upgrades.includes(e.id)).sort((a, b) => (a.cost || 0) - (b.cost || 0));
+            const unowned = evos.filter(e => !e.fullEvoGate && !player.upgrades.includes(e.id)).sort((a, b) => (a.cost || 0) - (b.cost || 0));
             if (unowned.length > 0) {
                 player.addUpgrade(unowned[0].id);
             } else {

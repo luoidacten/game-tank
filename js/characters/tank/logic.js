@@ -201,7 +201,7 @@ Object.assign(Player.prototype, {
 
     // Thời gian hồi 1 khiên nội tại (tick)
     tankShieldLimit() {
-        return (this.hasUpgrade('evo_tank_1') && this.hasUpgrade('evo_tank_2')) ? 120 : (this.hasUpgrade('evo_tank_2') ? 240 : 360);
+        return hasFullEvo(this, 'tank') ? 120 : (this.hasUpgrade('evo_tank_2') ? 240 : 360);
     },
 
     // [setupForNewRound] Xe TANK
@@ -216,7 +216,7 @@ Object.assign(Player.prototype, {
             this.dashSpeed = 16 + (this.speed - (C.baseSpeed * 0.95)) * 2;
 
             // Full Evo Tank Bonus
-            if (this.hasUpgrade('evo_tank_1') && this.hasUpgrade('evo_tank_2')) {
+            if (hasFullEvo(this, 'tank')) {
                 this.maxHp += 15;
                 this.dashSpeed += 8;
             }

@@ -386,7 +386,7 @@ function botShopBuy(playerId) {
 
     const getRemainingEvos = () => {
         const list = (typeof EVOLUTIONS !== 'undefined' && EVOLUTIONS[player.weapon]) ? EVOLUTIONS[player.weapon] : [];
-        return list.filter(e => !(player.upgrades || []).includes(e.id));
+        return list.filter(e => !(player.upgrades || []).includes(e.id) && (typeof evoShopAvailable !== 'function' || evoShopAvailable(player, e)));
     };
     const getMinEvoPrice = () => {
         const rem = getRemainingEvos();
