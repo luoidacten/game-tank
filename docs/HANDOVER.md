@@ -26,6 +26,9 @@ Chromium: `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`, Playwright: `req
 - Hook: `CharHooks.register(id, {setup, update, shoot, draw, ...})`, `BulletHooks`.
 - Thực thể dùng chung: mảng `bodyEffects` (mỗi class mới phải thêm vào `NET_CLASSES` trong `js/online/netstate.js` để online đồng bộ).
 - Online: host quyết định, guest chỉ vẽ → state phải là dữ liệu thuần (không hàm/Map).
+  Gói SYNC 30/giây = keyframe (~5s/lần hoặc khi guest xin `SYNC_KEY`) + delta: chỉ gửi trường Player / mảng gốc / key gameState có chuỗi mã hoá đổi
+  (`NetState.captureSync/applySync`); mốc Date.now() mã hoá theo mốc cố định của host nên không tự đổi mỗi gói. Guest nội suy x/y của xe đối thủ,
+  đạn và thực thể có `_nid` theo thời gian host với độ trễ đệm (`NetSmooth`). Trường Player chỉ của máy cục bộ: `NET_LOCAL_PLAYER_KEYS` / `NET_SKIP_PLAYER_KEYS`.
 - Vẽ xe: `js/render/tank-art.js` (`registerTankArt`), nhóm art ở `js/render/tank-art/*.js`. Đạn: `js/render/bullet-art.js` (`registerBulletArt`).
 - HUD: `js/render/tank-hud.js` (thanh máu/đạn/trạng thái, `hudRowY`), `js/render/empower-hud.js` + `empower-providers.js` (vòng & biểu tượng trên nút bắn, `registerEmpowerHUD`).
 - Đạn tự tìm dùng chung `homingTurnScale()` trong `js/core/hooks.js`.

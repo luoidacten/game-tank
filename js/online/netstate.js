@@ -115,12 +115,21 @@ const NET_LOADOUT_KEYS = ['upgrades', 'rerollCount', 'upgradeLevel', 'invUpgrade
     'gearBonusMaxHp', 'gearComebackDmgBuff', 'gearEarlyEvoFallback', 'gearInfiniteStacks', 'gearJackpot',
     'mainEgg', 'mainAwakened', 'isMainChar'];
 
+// Trường của Player luôn gửi kể cả khi không đổi (guest dự đoán / nội suy ghi đè x,y tại chỗ nên cần giá trị gốc của host)
+const NET_ALWAYS_PLAYER_KEYS = new Set(['x', 'y', 'netInSeq', 'netInTicks']);
+// Trường Player không đồng bộ: trạng thái màn chọn tướng ở shop (mỗi máy tự giữ, khá nặng ~1.7KB)
+const NET_SKIP_PLAYER_KEYS = new Set(['_bodySelectionState']);
+// Gói đầy đủ (keyframe) mỗi NET_KEY_EVERY ảnh chụp (~5 giây, kênh tin cậy nên chỉ để phòng hờ; thiếu gói thì guest xin SYNC_KEY); giữa đó chỉ gửi phần thay đổi (delta)
+const NET_KEY_EVERY = 150;
+
 const NetState = {
     // ---------- Tuần tự hoá ----------
-    encode(roots, hostNow) {
+    // Mỗi "phạm vi" (1 trường của Player / 1 mảng gốc) có bảng id riêng -> bỏ được phạm vi không đổi.
+    // p1 = {$r:1}, p2 = {$r:2} ở mọi phạm vi (guest dùng lại object người chơi sẵn có).
+    makeEnc(hostNow) {
         const ids = new Map();
-        let nextId = 1;
-        const enc = (v) => {
+        let nextId = 3;
+        const enc = (v, top) => {
             if (v === null) return null;
             const t = typeof v;
             if (t === 'number') {
@@ -129,15 +138,18 @@ const NetState = {
                 // vì đồng hồ 2 máy lệch nhau -> guest cộng lại theo đồng hồ của mình
                 if (v > 1e12 && v < 1e13) return { $t: Math.round(v - hostNow) };
                 if (Number.isInteger(v)) return v;
-                return Math.round(v * 1000) / 1000;
+                const a = Math.abs(v); // số lẻ: làm tròn theo độ lớn (vị trí 0.1px, vận tốc 0.01) cho gói nhỏ hơn
+                return a >= 100 ? Math.round(v * 10) / 10 : a >= 1 ? Math.round(v * 100) / 100 : Math.round(v * 1000) / 1000;
             }
             if (t === 'string' || t === 'boolean') return v;
             if (t !== 'object') return undefined; // function / undefined / symbol
             if (typeof Node !== 'undefined' && v instanceof Node) return undefined;
             if (typeof CanvasRenderingContext2D !== 'undefined' && v instanceof CanvasRenderingContext2D) return undefined;
             if (Array.isArray(v)) { const a = new Array(v.length); for (let i = 0; i < v.length; i++) { const e = enc(v[i]); a[i] = e === undefined ? null : e; } return a; }
-            if (v instanceof Set) return { $set: [...v].map(enc) };
+            if (v instanceof Set) return { $set: [...v].map(x => enc(x)) };
             if (v instanceof Map) return { $map: [...v].map(([k, x]) => [enc(k), enc(x)]) };
+            if (!top && typeof p1 !== 'undefined' && v === p1) return { $r: 1 };
+            if (!top && typeof p2 !== 'undefined' && v === p2) return { $r: 2 };
             if (ids.has(v)) return { $r: ids.get(v) };
             const id = nextId++;
             ids.set(v, id);
@@ -147,24 +159,31 @@ const NetState = {
                 if (!NET_CLASSES[cn]) return undefined; // class lạ (âm thanh, DOM...) – bỏ qua
                 o.$c = cn;
             }
-            const skipLocal = cn === 'Player'; // bỏ trường chỉ để vẽ (NET_LOCAL_PLAYER_KEYS)
+            const skipLocal = cn === 'Player'; // bỏ trường chỉ để vẽ / chỉ của máy đó
             for (const k in v) {
                 if (!Object.prototype.hasOwnProperty.call(v, k)) continue;
-                if (skipLocal && NET_LOCAL_PLAYER_KEYS.includes(k)) continue;
+                if (skipLocal && (NET_LOCAL_PLAYER_KEYS.includes(k) || NET_SKIP_PLAYER_KEYS.has(k))) continue;
                 const e = enc(v[k]);
                 if (e !== undefined) o[k] = e;
             }
             return o;
         };
+        return enc;
+    },
+
+    // Mã hoá toàn bộ trong 1 phạm vi (ROUND_END)
+    encode(roots, hostNow) {
+        const enc = this.makeEnc(hostNow);
         const out = {};
-        for (const [k, v] of Object.entries(roots)) out[k] = enc(v);
+        for (const [k, v] of Object.entries(roots)) out[k] = enc(v, k === 'p1' || k === 'p2');
         return out;
     },
 
-    // existing: { $i-gốc: object hiện có } để cập nhật tại chỗ (p1, p2)
-    decode(data, guestNow, reuse) {
+    makeDec(guestNow) {
         const objs = new Map();
-        const dec = (v, reuseTarget) => {
+        if (typeof p1 !== 'undefined') objs.set(1, p1);
+        if (typeof p2 !== 'undefined') objs.set(2, p2);
+        const dec = (v) => {
             if (v === null || typeof v !== 'object') return v;
             if (Array.isArray(v)) return v.map(x => dec(x));
             if ('$t' in v) return v.$t + guestNow;
@@ -172,14 +191,8 @@ const NetState = {
             if ('$r' in v) return objs.get(v.$r);
             if ('$set' in v) return new Set(v.$set.map(x => dec(x)));
             if ('$map' in v) return new Map(v.$map.map(([k, x]) => [dec(k), dec(x)]));
-            let o;
-            if (reuseTarget) {
-                o = reuseTarget;
-                for (const k of Object.keys(o)) if (!(k in v) && !NET_LOCAL_PLAYER_KEYS.includes(k)) delete o[k];
-            } else {
-                const C = v.$c ? NET_CLASSES[v.$c] : null;
-                o = C ? Object.create(C.prototype) : {};
-            }
+            const C = v.$c ? NET_CLASSES[v.$c] : null;
+            const o = C ? Object.create(C.prototype) : {};
             if (v.$i) objs.set(v.$i, o);
             for (const k in v) {
                 if (k === '$i' || k === '$c') continue;
@@ -187,12 +200,89 @@ const NetState = {
             }
             return o;
         };
+        return dec;
+    },
+
+    // Cập nhật tại chỗ object người chơi. full = keyframe (xoá trường host không còn); $x = trường đã bị xoá (delta)
+    // shared = bộ giải mã dùng chung (ROUND_END: 1 phạm vi) | null = mỗi trường 1 phạm vi (SYNC)
+    decodePlayer(o, v, guestNow, full, shared) {
+        if (!o || !v || typeof v !== 'object') return;
+        if (full) for (const k of Object.keys(o)) if (!(k in v) && !NET_LOCAL_PLAYER_KEYS.includes(k) && !NET_SKIP_PLAYER_KEYS.has(k)) delete o[k];
+        if (Array.isArray(v.$x)) v.$x.forEach(k => { delete o[k]; });
+        for (const k in v) {
+            if (k === '$i' || k === '$c' || k === '$x') continue;
+            o[k] = (shared || this.makeDec(guestNow))(v[k]);
+        }
+    },
+
+    decode(data, guestNow, reuse) {
+        const dec = this.makeDec(guestNow);
         const out = {};
-        for (const [k, v] of Object.entries(data)) out[k] = dec(v, reuse && reuse[k]);
+        for (const [k, v] of Object.entries(data)) {
+            if (reuse && reuse[k] && v && typeof v === 'object' && !('$r' in v)) { this.decodePlayer(reuse[k], v, guestNow, true, dec); out[k] = reuse[k]; }
+            else out[k] = dec(v);
+        }
         return out;
     },
 
-    // ---------- Ảnh chụp thế giới ----------
+    // ---------- Ảnh chụp thế giới (SYNC: keyframe + delta) ----------
+    // Mốc Date.now() trong SYNC gửi tương đối với 1 mốc cố định của host (_epoch) chứ không phải "bây giờ"
+    // -> trường thời gian không đổi thì chuỗi mã hoá cũng không đổi (không phải gửi lại mỗi gói).
+    // Gói kèm e = now - _epoch; guest ước lượng mốc tương ứng theo đồng hồ mình (làm mượt chống dao động độ trễ).
+    _sent: null,      // chuỗi JSON đã gửi của từng phạm vi: { 'p1.x': '...', 'r.crates': '...' }
+    _sentKeys: null,  // { p1: Set(trường), p2: Set(trường) }
+    _seq: 0, _sinceKey: 0, _forceKey: true, _epoch: 0,
+    resetDelta() { this._forceKey = true; this._gotSeq = -1; },
+
+    // Chuỗi JSON { s: seq, b: seq gói gốc (delta) | 0 (keyframe), e, w: { p1:{trường đổi}, p2:{...}, gs:{...}, <gốc đổi>: ... } }
+    captureSync() {
+        const now = Date.now();
+        if (!this._epoch) this._epoch = now;
+        const ep = this._epoch;
+        this.tagNetIds();
+        const key = this._forceKey || !this._sent || ++this._sinceKey >= NET_KEY_EVERY;
+        if (key) { this._sinceKey = 0; this._forceKey = false; }
+        const prev = key ? {} : this._sent;
+        const sent = {}, sentKeys = {}, parts = [];
+        const gs = { roundStartTime: gameState.roundStartTime };
+        NET_GAMESTATE_KEYS.forEach(k => gs[k] = gameState[k]);
+        // Object gửi theo từng trường (chỉ trường đổi); trường bị xoá liệt kê trong $x
+        for (const [pk, p] of [['p1', p1], ['p2', p2], ['gs', gs]]) {
+            if (!p) continue;
+            const isP = pk !== 'gs';
+            const fp = [], keys = new Set();
+            for (const k in p) {
+                if (!Object.prototype.hasOwnProperty.call(p, k)) continue;
+                if (isP && (NET_LOCAL_PLAYER_KEYS.includes(k) || NET_SKIP_PLAYER_KEYS.has(k))) continue;
+                const e = this.makeEnc(ep)(p[k]);
+                if (e === undefined) continue;
+                keys.add(k);
+                const js = JSON.stringify(e), id = pk + '.' + k;
+                sent[id] = js;
+                if (prev[id] !== js || (isP && NET_ALWAYS_PLAYER_KEYS.has(k))) fp.push(JSON.stringify(k) + ':' + js);
+            }
+            if (isP && !key && this._sentKeys && this._sentKeys[pk]) {
+                const gone = [...this._sentKeys[pk]].filter(k => !keys.has(k));
+                if (gone.length) fp.push('"$x":' + JSON.stringify(gone));
+            }
+            sentKeys[pk] = keys;
+            if (fp.length || isP) parts.push(JSON.stringify(pk) + ':{' + fp.join(',') + '}');
+        }
+        for (const [name, get] of NET_ROOTS) {
+            const e = this.makeEnc(ep)(get());
+            if (e === undefined) continue;
+            const js = JSON.stringify(e), id = 'r.' + name;
+            sent[id] = js;
+            if (prev[id] !== js) parts.push(JSON.stringify(name) + ':' + js);
+        }
+        const base = key ? 0 : this._seq;
+        this._seq++;
+        this._sent = sent;
+        this._sentKeys = sentKeys;
+        return '{"s":' + this._seq + ',"b":' + base + ',"e":' + (now - ep) + ',"w":{' + parts.join(',') + '}}';
+    },
+
+    // Ảnh chụp đầy đủ kiểu cũ (gửi kèm ROUND_END): mốc thời gian tương đối với "bây giờ"
     captureWorld() {
         const now = Date.now();
         const roots = { p1, p2 };
@@ -204,10 +294,33 @@ const NetState = {
         return JSON.stringify(this.encode(roots, now));
     },
 
-    applyWorld(json) {
-        const data = JSON.parse(json);
+    // Guest: seq gói SYNC đã áp gần nhất; delta chỉ áp khi gói gốc của nó (b) đúng bằng seq này.
+    // Trả về false khi thiếu gói gốc (chờ / xin keyframe)
+    _gotSeq: -1, _gEpoch: 0,
+    applySync(json) {
+        const pk = typeof json === 'string' ? JSON.parse(json) : json;
+        if (pk.b && pk.b !== this._gotSeq) return false;
         const now = Date.now();
-        const w = this.decode(data, now, { p1, p2 });
+        // mốc host theo đồng hồ guest: lấy giá trị nhỏ dần (gói đến nhanh nhất) + trôi chậm theo đồng hồ lệch
+        const est = now - (pk.e || 0);
+        if (!this._gEpoch || Math.abs(est - this._gEpoch) > 400) this._gEpoch = est;
+        else this._gEpoch = est < this._gEpoch ? est * 0.5 + this._gEpoch * 0.5 : this._gEpoch * 0.98 + est * 0.02;
+        const base = this._gEpoch;
+        this.lastHostT = pk.e || 0;
+        this.lastLate = est - this._gEpoch;
+        const w = pk.w || {};
+        const full = !pk.b;
+        if (w.p1 && typeof p1 !== 'undefined') this.decodePlayer(p1, w.p1, base, full, null);
+        if (w.p2 && typeof p2 !== 'undefined') this.decodePlayer(p2, w.p2, base, full, null);
+        const out = {};
+        for (const k in w) if (k !== 'p1' && k !== 'p2') out[k] = this.makeDec(base)(w[k]);
+        this._gotSeq = pk.s;
+        if (out.gs && typeof out.gs.roundStartTime === 'number') { gameState.roundStartTime = out.gs.roundStartTime; delete out.gs.roundStartTime; }
+        this._applyRoots(out, now);
+        return true;
+    },
+
+    _applyRoots(w, now) {
         // Mảng được vẽ bằng item.draw(): bỏ phần tử mất hàm draw khi truyền mạng
         // (vd. hiệu ứng tia kiếm tạo bằng object chứa function) để guest không lỗi khung hình
         for (const [name, , set] of NET_ROOTS) {
@@ -220,8 +333,15 @@ const NetState = {
             gameState._noSpendTrack = true;
             NET_GAMESTATE_KEYS.forEach(k => { if (w.gs[k] !== undefined) gameState[k] = w.gs[k]; });
             gameState._noSpendTrack = false;
-            gameState.roundStartTime = now - (w.gs.roundElapsed || 0);
+            if (typeof w.gs.roundElapsed === 'number') gameState.roundStartTime = now - w.gs.roundElapsed;
         }
+    },
+
+    applyWorld(json) {
+        const data = JSON.parse(json);
+        const now = Date.now();
+        const w = this.decode(data, now, { p1, p2 });
+        this._applyRoots(w, now);
     },
 
     // ---------- Trang bị ----------
@@ -280,6 +400,105 @@ const NetState = {
                 else if (e[0] === 'p') this.replaySpark(...e[1]);
                 else if (e[0] === 's' && this.soundOrig[e[1]] && !soundSystem.muted) this.soundOrig[e[1]](...e[2]);
             } catch (err) { /* bỏ qua sự kiện lỗi */ }
+        }
+    },
+
+    // Host: gắn id mạng (_nid) cho đạn & thực thể để guest nối đúng object giữa 2 ảnh chụp (nội suy)
+    _nidNext: 1,
+    tagNetIds() {
+        const seen = new Set();
+        const tag = (o) => {
+            if (!o || typeof o !== 'object') return;
+            if (!o._nid || seen.has(o._nid)) o._nid = this._nidNext++; // đạn sao chép (phản đạn) mang _nid cũ -> cấp mới
+            seen.add(o._nid);
+        };
+        for (const p of [p1, p2]) if (p && Array.isArray(p.bullets)) p.bullets.forEach(tag);
+        for (const [name, get] of NET_ROOTS) {
+            if (NET_PLAIN_LISTS.has(name)) continue;
+            const a = get();
+            if (Array.isArray(a)) a.forEach(tag);
+        }
+    },
+};
+
+// ==========================================
+// Guest: nội suy vị trí giữa các ảnh chụp (~30 gói/giây, vẽ 60 khung/giây)
+// ------------------------------------------
+// Mỗi object có _nid (đạn, thực thể) + xe đối thủ giữ lịch sử vị trí theo thời gian HOST (pk.e).
+// Mỗi tick guest vẽ ở thời điểm host "hiện tại - độ trễ đệm" (đủ phủ dao động độ trễ mạng) -> nội suy giữa
+// 2 ảnh chụp kẹp thời điểm đó; quá ảnh mới nhất thì ngoại suy ngắn (≤ 50ms) rồi đứng chờ.
+// Chỉ ghi đè x/y HIỂN THỊ; host vẫn là nguồn chuẩn (gói sau ghi đè lại). Nhảy xa (dịch chuyển) không nội suy.
+// ==========================================
+const NetSmooth = {
+    tr: new Map(),      // khoá -> { o, h: [{ t, x, y }] } (x/y gốc của host)
+    late: 15,           // trung bình độ trễ thêm (ms) so với gói đến nhanh nhất -> độ trễ đệm
+    SNAP: 140,
+    reset() { this.tr.clear(); },
+
+    each(fn) {
+        if (typeof p1 !== 'undefined' && p1) fn('P1', p1); // xe đối thủ (xe mình = p2 đã có dự đoán riêng)
+        for (const p of [p1, p2]) if (p && Array.isArray(p.bullets)) p.bullets.forEach(b => { if (b && b._nid) fn(b._nid, b); });
+        for (const [name, get] of NET_ROOTS) {
+            if (NET_PLAIN_LISTS.has(name)) continue;
+            const a = get();
+            if (Array.isArray(a)) a.forEach(o => { if (o && o._nid) fn(o._nid, o); });
+        }
+    },
+
+    delay() { return Math.max(45, Math.min(200, 40 + this.late * 2)); },
+    hostNow() { return Date.now() - NetState._gEpoch - this.delay(); },
+
+    // Gọi ngay sau khi áp 1 ảnh chụp có thời điểm host t (ms tính từ mốc host)
+    onSnapshot(t, lateMs) {
+        if (typeof t !== 'number') return;
+        if (typeof lateMs === 'number') this.late = this.late * 0.9 + Math.max(0, Math.min(300, lateMs)) * 0.1;
+        const next = new Map();
+        this.each((k, o) => {
+            if (typeof o.x !== 'number' || typeof o.y !== 'number') return;
+            const old = this.tr.get(k);
+            let h;
+            if (old && old.o === o && k !== 'P1') { // gốc không gửi lại (không đổi) -> vị trí host như lần trước
+                const l = old.h[old.h.length - 1];
+                h = old.h; h.push({ t, x: l.x, y: l.y });
+            } else {
+                h = old ? old.h : [];
+                h.push({ t, x: o.x, y: o.y });
+            }
+            while (h.length > 8) h.shift();
+            next.set(k, { o, h });
+        });
+        this.tr = next;
+        this.apply();
+    },
+
+    // Gọi mỗi tick guest
+    step() { this.apply(); },
+
+    apply() {
+        if (!this.tr.size) return;
+        const rt = this.hostNow();
+        for (const e of this.tr.values()) {
+            const h = e.h, n = h.length;
+            let x = h[n - 1].x, y = h[n - 1].y;
+            if (rt <= h[0].t) { x = h[0].x; y = h[0].y; }
+            else if (rt >= h[n - 1].t) {
+                if (n >= 2) { // ngoại suy ngắn theo 2 ảnh cuối
+                    const a = h[n - 2], b = h[n - 1], dt = b.t - a.t;
+                    if (dt > 0 && Math.abs(b.x - a.x) < this.SNAP && Math.abs(b.y - a.y) < this.SNAP) {
+                        const k = Math.min(rt - b.t, 50) / dt;
+                        x = b.x + (b.x - a.x) * k; y = b.y + (b.y - a.y) * k;
+                    }
+                }
+            } else {
+                for (let i = n - 2; i >= 0; i--) {
+                    const a = h[i], b = h[i + 1];
+                    if (rt < a.t) continue;
+                    if (Math.abs(b.x - a.x) >= this.SNAP || Math.abs(b.y - a.y) >= this.SNAP || b.t <= a.t) { x = a.x; y = a.y; }
+                    else { const k = (rt - a.t) / (b.t - a.t); x = a.x + (b.x - a.x) * k; y = a.y + (b.y - a.y) * k; }
+                    break;
+                }
+            }
+            e.o.x = x; e.o.y = y;
         }
     },
 };

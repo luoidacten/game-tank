@@ -62,6 +62,10 @@ class OnlineMultiplayerManager {
         this.predOff = 0;      // độ lệch hiển thị giảm dần sau mỗi lần sửa (tránh giật)
         this.inHist = [];
         this.ackSeq = -1; this.ackDone = 0;
+        this.lastKeyAsk = 0;
+        this.syncPending = new Map();
+        if (typeof NetState !== 'undefined') NetState.resetDelta();
+        if (typeof NetSmooth !== 'undefined') NetSmooth.reset();
     }
 
     // Nhận mọi tin nhắn (từ BroadcastChannel hoặc WebRTC) qua 1 cửa: lọc trùng rồi định tuyến
@@ -499,6 +503,10 @@ class OnlineMultiplayerManager {
                 this.broadcastLobbyState();
                 break;
 
+            case 'SYNC_KEY': // guest lỡ 1 gói delta -> gửi ngay keyframe ở lần chụp tới
+                NetState.resetDelta();
+                break;
+
             case 'INPUT':
             case 'INPUT_UPDATE':
                 if (data.input && inputs && inputs.p2) {
@@ -619,6 +627,7 @@ class OnlineMultiplayerManager {
 
     // Host: thông báo bắt đầu hiệp kèm trang bị chuẩn của cả 2 bên
     sendStartRound() {
+        NetState.resetDelta();
         this.sendNetworkMessage({
             type: 'START_ROUND',
             round: gameState.round,
@@ -996,7 +1005,7 @@ class OnlineMultiplayerManager {
         NetState.recording = true;
         if (this.netTick % 2 !== 0) return;
         let world;
-        try { world = NetState.captureWorld(); } catch (e) { console.warn('captureWorld', e); return; }
+        try { world = NetState.captureSync(); } catch (e) { console.warn('captureSync', e); NetState.resetDelta(); return; }
         this.sendNetworkMessage({ type: 'SYNC', world, ev: NetState.flushEvents() });
     }
 
@@ -1004,6 +1013,7 @@ class OnlineMultiplayerManager {
     guestTick() {
         this.onGameLoopTick();
         if (screenShake.duration > 0) screenShake.duration--;
+        NetSmooth.step();
         if (!p2 || this.predX === null) return;
         const dir = (inputs.p2.r ? 1 : 0) - (inputs.p2.l ? 1 : 0);
         this.inHist.push({ seq: this.inSeq, dir });
@@ -1026,15 +1036,53 @@ class OnlineMultiplayerManager {
     applyHostSync(data) {
         if (!p1 || !p2 || !data.world) return;
         if (gameState.phase !== 'playing' && !fatalCinematic.active) return; // đang ở shop: bỏ qua ảnh chụp cũ
-        const shownX = p2.x;
-        try {
-            NetState.applyWorld(data.world);
-        } catch (e) {
-            console.warn('applyWorld', e);
+        let pk;
+        try { pk = JSON.parse(data.world); } catch (e) { return; }
+        if (!pk || !pk.w) { // gói kiểu cũ (ảnh chụp đầy đủ)
+            try { NetState.applyWorld(data.world); } catch (e) { return; }
+            NetState.lastHostT = null;
+            this.afterHostSync(data.ev);
             return;
         }
+        if (!this.syncPending) this.syncPending = new Map();
+        if (!pk.b && pk.s <= NetState._gotSeq) { NetState.replayEvents(data.ev); return; } // keyframe cũ đến trễ
+        if (pk.b && pk.b !== NetState._gotSeq) {
+            if (pk.s <= NetState._gotSeq) { NetState.replayEvents(data.ev); return; } // gói cũ đến trễ
+            // delta đến trước gói gốc của nó (lệch thứ tự): giữ lại chờ; chờ lâu / nhiều quá -> xin keyframe
+            this.syncPending.set(pk.b, { pk, ev: data.ev, at: Date.now() });
+            const oldest = Math.min(...[...this.syncPending.values()].map(x => x.at));
+            if ((this.syncPending.size > 6 || Date.now() - oldest > 200) && Date.now() - (this.lastKeyAsk || 0) > 250) {
+                this.lastKeyAsk = Date.now();
+                this.sendNetworkMessage({ type: 'SYNC_KEY' });
+            }
+            if (this.syncPending.size > 40) this.syncPending.clear();
+            return;
+        }
+        let cur = { pk, ev: data.ev };
+        while (cur) {
+            try {
+                if (!NetState.applySync(cur.pk)) break;
+            } catch (e) {
+                console.warn('applySync', e);
+                NetState.resetDelta();
+                this.syncPending.clear();
+                return;
+            }
+            this.afterHostSync(cur.ev);
+            const nx = this.syncPending.get(NetState._gotSeq);
+            this.syncPending.delete(NetState._gotSeq);
+            for (const k of [...this.syncPending.keys()]) if (k < NetState._gotSeq) this.syncPending.delete(k);
+            cur = nx;
+        }
+    }
+
+    // Guest: sau khi áp 1 ảnh chụp: phát sự kiện, nội suy, hoà giải dự đoán xe mình
+    afterHostSync(ev) {
+        const shownX = this.predX === null ? p2.x : this.predX + this.predOff;
         this.lastSnapshotAt = Date.now();
-        NetState.replayEvents(data.ev);
+        NetState.replayEvents(ev);
+        if (NetState.lastHostT === null) NetSmooth.reset();
+        else NetSmooth.onSnapshot(NetState.lastHostT, NetState.lastLate);
 
         // Hoà giải kiểu "client-side prediction": vị trí host là kết quả của phím seq netInSeq đã chạy
         // netInTicks tick -> bỏ các tick lịch sử đó, chạy lại phần phím host chưa xử lý từ vị trí host.
