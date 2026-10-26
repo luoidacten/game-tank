@@ -37,7 +37,7 @@ registerTankArt('wind', (p, k) => {
 // ---------- Đạn gió: lưỡi liềm gió ----------
 function wdDrawBullet(b) {
     const cx = b.x + b.w / 2, cy = b.y + b.h / 2, ang = Math.atan2(b.vy, b.vx) + Math.PI / 2;
-    const r = Math.max(b.w, b.h) * 0.6, col = b.wdFull ? WD_GOLD : (b.wdCh > 0.3 ? WD_MINT : WD_CYAN);
+    const r = Math.max(b.w, b.h) * 0.6, col = b.wdBlade ? WD_WHITE : b.wdFull ? WD_GOLD : (b.wdCh > 0.3 ? WD_MINT : WD_CYAN);
     ctx.save(); ctx.translate(cx, cy); ctx.rotate(ang);
     // vệt sau
     ctx.globalAlpha = 0.35; ctx.strokeStyle = col; ctx.lineWidth = 1;
@@ -213,6 +213,22 @@ CharHooks.register('wind', Object.assign(CharHooks.registry.wind || {}, {
             const k = 1 - p.wdRingFx / 24;
             ctx.globalAlpha = 1 - k; ctx.strokeStyle = WD_MINT; ctx.lineWidth = 3 * (1 - k); ctx.shadowBlur = 12; ctx.shadowColor = WD_MINT;
             ctx.beginPath(); ctx.arc(cx, cy, 14 + k * 76, 0, Math.PI * 2); ctx.stroke();
+        }
+        // Vệt Gió Cắt: các nút gió lơ lửng trên làn, xoay & nhấp nháy, nối bằng sợi tơ gió
+        const tr = p.wdTrail || [];
+        if (tr.length) {
+            ctx.shadowBlur = 10; ctx.shadowColor = WD_MINT;
+            ctx.globalAlpha = 0.35; ctx.strokeStyle = WD_MINT; ctx.lineWidth = 1; ctx.setLineDash([2, 4]);
+            ctx.beginPath(); tr.forEach((n, i) => { if (i) ctx.lineTo(n.x, cy); else ctx.moveTo(n.x, cy); }); ctx.stroke(); ctx.setLineDash([]);
+            for (const n of tr) {
+                const k = Math.min(1, n.t / 20), a0 = t * 7 + n.x * 0.1, r = 6 + (1 - n.t / WD_TRAIL_LIFE) * 3;
+                ctx.globalAlpha = 0.85 * k; ctx.strokeStyle = WD_WHITE; ctx.lineWidth = 1.6;
+                for (let j = 0; j < 2; j++) { ctx.beginPath(); ctx.arc(n.x, cy, r, a0 + j * Math.PI, a0 + j * Math.PI + 1.6); ctx.stroke(); }
+                ctx.fillStyle = WD_MINT; ctx.beginPath(); ctx.arc(n.x, cy, 1.6, 0, Math.PI * 2); ctx.fill();
+                // vạch chỉ hướng lưỡi gió sẽ bung
+                ctx.globalAlpha = 0.3 * k; ctx.strokeStyle = WD_CYAN; ctx.beginPath();
+                ctx.moveTo(n.x, cy + wdDir(p) * 8); ctx.lineTo(n.x, cy + wdDir(p) * 20); ctx.stroke();
+            }
         }
         if (p.wdFx > 0 || p.wdExitFx > 0) wdDrawBurst(p);
         if (p.wdShieldT > 0 && p.shield > 0) {

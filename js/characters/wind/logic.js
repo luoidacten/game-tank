@@ -1,17 +1,21 @@
 // ==========================================
 // Wind — Cơn Gió Mỏng Manh (wind) (docs/BODY_MOI_5.md #82)
 // ------------------------------------------
-// Nhấp (thả nút trước 0.4s): bắn Đạn Gió 0.8 dame.
-// GIÓ NHẸ: ngừng bắn 0.5s -> NGƯNG PHONG tích +35%/s (tối đa +150% = x2.5, Evo1 nhanh hơn 40%).
-//   Bắn liên tục (cách < 1.2s) -> LIÊN PHONG +1 tầng (tối đa 6 / Evo1 8): +15% tốc bắn, +12% tốc nạp mỗi tầng.
-// Giữ 0.4s (hồi 8s / Evo2 5.5s): HÓA GIÓ 3.5s (Evo2 4.5s) — bất tử, đạn xuyên qua, +35%→55% tốc chạy,
-//   nạp đạn & Ngưng Phong x2. Đứng yên 0.15s / nhấn bắn / hết giờ -> hiện hình + CUỒNG PHONG TỐC XẠ.
+// Nhấp (thả nút trước 0.3s): bắn Đạn Gió 1.1 dame.
+// GIÓ NHẸ: ngừng bắn 0.3s -> NGƯNG PHONG tích +50%/s (tối đa +150% = x2.5, Evo1 nhanh hơn 40%).
+//   Bắn liên tục (cách < 1.33s) -> LIÊN PHONG +1 tầng (tối đa 6 / Evo1 8): +15% tốc bắn, +12% tốc nạp mỗi tầng.
+// Giữ 0.3s (hồi 5.5s / Evo2 4s): HÓA GIÓ 4s (Evo2 5s) — bất tử, đạn xuyên qua, +35%→55% tốc chạy,
+//   nạp đạn & Ngưng Phong x2. Đứng yên 0.3s / nhấn bắn / hết giờ -> hiện hình + CUỒNG PHONG TỐC XẠ.
+// VỆT GIÓ CẮT: lướt trong Hóa Gió để lại vệt nút gió (1.5s); địch đi qua / đứng trên cột của nút
+//   -> nút bung LƯỠI GIÓ xuyên thấu 0.8x dame lao thẳng tới địch.
 // Mọi state là trường thuần trên player (đồng bộ online), timer tính bằng tick.
 // ==========================================
 
 const WD_CYAN = '#7dd3fc', WD_MINT = '#99f6e4', WD_WHITE = '#f0f9ff', WD_SILVER = '#e2e8f0', WD_GOLD = '#fde68a';
-const WD_HOLD = 24, WD_CHARGE_DELAY = 30, WD_CHAIN = 72, WD_STILL = 9, WD_MAXCH = 1.5;
-const WD_BASE_INT = 18, WD_RELOAD = 45;
+const WD_HOLD = 18, WD_CHARGE_DELAY = 18, WD_CHAIN = 80, WD_STILL = 18, WD_MAXCH = 1.5;
+const WD_BASE_INT = 13, WD_RELOAD = 34;
+// [BUFF] Vệt Gió Cắt: lướt trong Hóa Gió để lại nút gió mỗi 26px (sống 1.5s, tối đa 10)
+const WD_TRAIL_GAP = 26, WD_TRAIL_LIFE = 90, WD_TRAIL_MAX = 10;
 
 function wdE1(p) { return p.hasUpgrade('evo_wind_breeze_1'); }
 function wdE2(p) { return p.hasUpgrade('evo_wind_breeze_2'); }
@@ -22,8 +26,8 @@ function wdDir(p) { return p.id === 1 ? -1 : 1; }
 function wdSfx(n) { if (typeof soundSystem !== 'undefined' && soundSystem && !soundSystem.muted && soundSystem[n]) soundSystem[n](); }
 function wdTxt(o, s, c, sz, dy) { addFloatingText(o.x + o.w / 2, o.y + (o.id === 1 ? -18 - (dy || 0) : o.h + 22 + (dy || 0)), s, c, sz || 12); }
 function wdMaxStacks(p) { return wdE1(p) ? 8 : 6; }
-function wdFormMax(p) { return wdE2(p) ? 270 : 210; }
-function wdCdMax(p) { return wdE2(p) ? 330 : 480; }
+function wdFormMax(p) { return wdE2(p) ? 300 : 240; }
+function wdCdMax(p) { return wdE2(p) ? 240 : 330; }
 function wdBuffMax(p) { return wdE2(p) ? 210 : 150; }
 function wdBuffAmt(p) { return wdE2(p) ? 0.75 : 0.5; }
 function wdRateMult(p) { return 1 + 0.15 * (p.wdStacks || 0) + ((p.wdBuff || 0) > 0 ? wdBuffAmt(p) : 0); }
@@ -69,7 +73,7 @@ function wdFire(p) {
     const ch = p.wdCharge || 0, full = ch >= WD_MAXCH - 0.001, m = wdMuzzle(p);
     const dmg = Math.round(p.damage * (1 + ch) * 100) / 100;
     const sz = full ? 12 : 6 + Math.round(ch * 2.5);
-    const sp = C.bulletSpeed * (full ? 2.1 : 1.25 + ch * 0.3);
+    const sp = C.bulletSpeed * (full ? 2.4 : 1.6 + ch * 0.3);
     // Bắn thẳng theo nòng, không tự ngắm
     const vx = 0;
     const vy = wdDir(p) * sp;
@@ -92,9 +96,43 @@ function wdFire(p) {
     return true;
 }
 
+// ---------- Vệt Gió Cắt ----------
+function wdTrailTick(p) {
+    const tr = p.wdTrail || (p.wdTrail = []);
+    const cx = p.x + p.w / 2;
+    if (p.wdForm > 0 && p.hp > 0) {
+        const last = tr.length ? tr[tr.length - 1] : null;
+        if (!last || Math.abs(cx - p.wdTrailX) >= WD_TRAIL_GAP) {
+            p.wdTrailX = cx;
+            tr.push({ x: Math.round(cx), t: WD_TRAIL_LIFE });
+            if (tr.length > WD_TRAIL_MAX) tr.shift();
+        }
+    }
+    const e = wdEnemy(p);
+    const ecx = e && e.hp > 0 ? e.x + e.w / 2 : -1e9, hw = e ? e.w / 2 + 6 : 0;
+    for (let i = tr.length - 1; i >= 0; i--) {
+        const n = tr[i];
+        if (--n.t <= 0) { tr.splice(i, 1); continue; }
+        if (n.t < WD_TRAIL_LIFE - 6 && Math.abs(n.x - ecx) <= hw && p.hp > 0 && gameState.phase === 'playing') {
+            tr.splice(i, 1); wdBlade(p, n.x);
+        }
+    }
+}
+function wdBlade(p, x) {
+    const y = p.id === 1 ? p.y - 4 : p.y + p.h + 4;
+    spawnBullet(p, {
+        w: 8, h: 18, x: x - 4, y: y - 9, vx: 0, vy: wdDir(p) * C.bulletSpeed * 2.6,
+        dmg: Math.round(p.damage * 0.8 * 100) / 100, hook: 'wind', isPiercing: true, wdBlade: true, wdCh: 0.6,
+    });
+    spawnSparkParticles(x, y, WD_WHITE, 4);
+    p.wdCutFx = 10;
+    wdSfx('playLaser');
+}
+
 BulletHooks.register('wind', {
     hit(b, o, v, dealt) {
         if (!v || (v !== p1 && v !== p2) || v === o) return;
+        if (b.wdBlade) { spawnSparkParticles(b.x + b.w / 2, b.y + b.h / 2, WD_WHITE, 6); addFloatingText(v.x + v.w / 2, v.y + v.h / 2, 'GIÓ CẮT', WD_MINT, 10); return; }
         spawnSparkParticles(b.x + b.w / 2, b.y + b.h / 2, b.wdFull ? WD_GOLD : WD_CYAN, b.wdFull ? 10 : 4);
         if (b.wdKb && v.hp > 0) { // đẩy lùi nhẹ theo hướng ngang của đạn
             const s = b.vx ? Math.sign(b.vx) : ((v.x + v.w / 2) < canvas.width / 2 ? -1 : 1);
@@ -110,7 +148,7 @@ BulletHooks.register('wind', {
 
 // ---------- Hóa Gió ----------
 function wdEnter(p) {
-    p.wdForm = wdFormMax(p); p.wdFormAge = 0; p.wdStill = 0; p.wdFx = 18;
+    p.wdForm = wdFormMax(p); p.wdFormAge = 0; p.wdStill = 0; p.wdFx = 18; p.wdTrailX = -1e9;
     wdTxt(p, 'HÓA GIÓ!', WD_MINT, 15);
     spawnSparkParticles(p.x + p.w / 2, p.y + p.h / 2, WD_MINT, 14);
     wdSfx('playDash');
@@ -171,13 +209,14 @@ function wdFormTick(p) {
 
 // ---------- Tick chính (chạy cả khi bị choáng) ----------
 function wdTick(p) {
-    ['wdRecoil', 'wdFx', 'wdExitFx', 'wdRingFx', 'wdAbsFx', 'wdShotCd', 'wdSpdT'].forEach(k => { if (p[k] > 0) p[k]--; });
+    ['wdRecoil', 'wdFx', 'wdExitFx', 'wdRingFx', 'wdAbsFx', 'wdShotCd', 'wdSpdT', 'wdCutFx'].forEach(k => { if (p[k] > 0) p[k]--; });
     if (p.hp <= 0 || gameState.phase !== 'playing') { p.wdLastX = p.x; return; }
+    wdTrailTick(p);
     p.wdSince = (p.wdSince || 0) + 1;
     if (p.wdSince > WD_CHAIN && !(p.wdBuff > 0)) p.wdStacks = 0;
     if (p.wdBuff > 0) p.wdBuff--;
     if (p.wdSince > WD_CHARGE_DELAY && (p.wdCharge || 0) < WD_MAXCH)
-        p.wdCharge = Math.min(WD_MAXCH, (p.wdCharge || 0) + 0.35 / 60 * (wdE1(p) ? 1.4 : 1) * (p.wdForm > 0 ? 2 : 1));
+        p.wdCharge = Math.min(WD_MAXCH, (p.wdCharge || 0) + 0.5 / 60 * (wdE1(p) ? 1.4 : 1) * (p.wdForm > 0 ? 2 : 1));
     if (p.wdForm > 0) wdFormTick(p);
     else if (p.wdCd > 0) p.wdCd--;
     if (p.wdShieldT > 0 && --p.wdShieldT <= 0 && p.shield > 0) p.shield--;
@@ -194,6 +233,7 @@ CharHooks.register('wind', {
         this.wdForm = 0; this.wdFormAge = 0; this.wdCd = 0; this.wdCdBank = 0; this.wdStill = 0; this.wdBuff = 0;
         this.wdCharge = 0; this.wdStacks = 0; this.wdSince = 999; this.wdShotCd = 0; this.wdRl = 0; this.wdSpdT = 0;
         this.wdHold = 0; this.wdPrevS = false; this.wdUsed = false; this.wdHits = 0; this.wdShieldT = 0;
+        this.wdTrail = []; this.wdTrailX = this.x; this.wdCutFx = 0;
         this.wdRecoil = 0; this.wdFx = 0; this.wdExitFx = 0; this.wdRingFx = 0; this.wdAbsFx = 0; this.wdLastX = this.x;
         this.reloadTime = 1e12; // nạp đạn do wdTick xử lý
     },
@@ -217,9 +257,9 @@ CharHooks.register('wind', {
         }
         if (s) {
             if (this.wdUsed) return true;
-            if (++this.wdHold >= WD_HOLD) {
-                this.wdUsed = true; this.wdHold = 0;
-                if (this.wdCd <= 0 && !isGrounded(this)) wdEnter(this);
+            if (++this.wdHold === WD_HOLD) {
+                // [QoL] Hóa Gió đang hồi / bị khoá: không nuốt input — thả nút vẫn bắn như nhấp
+                if (this.wdCd <= 0 && !isGrounded(this)) { this.wdUsed = true; this.wdHold = 0; wdEnter(this); }
                 else if (this.wdCd > 0) wdTxt(this, 'HỒI ' + (this.wdCd / 60).toFixed(1) + 's', '#94a3b8', 11);
                 else groundedBlock(this);
             }
@@ -229,7 +269,7 @@ CharHooks.register('wind', {
         }
         return true;
     },
-    roundEnd() { this.wdForm = 0; this.wdBuff = 0; this.wdShieldT = 0; },
+    roundEnd() { this.wdTrail = []; this.wdForm = 0; this.wdBuff = 0; this.wdShieldT = 0; },
 });
 
 (function () {
@@ -264,6 +304,7 @@ function wdBotAction(p, e, aligned) {
             if (t >= WD_HOLD + 1 && t <= WD_HOLD + 14) return 'form';
         }
         if (p.hp <= p.maxHp * 0.5 && Math.random() < 0.01) return 'form';
+        if (!aligned && (p.wdCharge || 0) < 0.6 && Math.random() < 0.02) return 'form'; // lướt rạch Vệt Gió Cắt
     }
     if (!aligned || !(p.ammo > 0)) return 'wait';
     // xả loạt khi đang có Liên Phong / buff, hoặc khi Ngưng Phong đủ lớn

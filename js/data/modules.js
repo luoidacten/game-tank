@@ -164,7 +164,7 @@ const MODULES = {
         {
             id: 'sprayer',
             name: 'Bình Phun',
-            desc: 'HP:5 (+2 xe lớn) | Năng lượng. Nhấp: Bật/Tắt phun hình nón. Giữ 0.5s: đổi chất Lửa/Axit/Băng. Lớp phủ đầy 100% -> Nổ / Câm Lặng / Đóng Băng. Axit ăn mòn mọi vật không phải body (thùng, xe tiền, triệu hồi, công trình): x10 dame + mất 50% Max HP mỗi giây hứng luồng; xe tiền/xe bị đốt nhanh gấp 3. Vật cản chặn luồng phun.',
+            desc: 'HP:5 (+2 xe lớn) | Năng lượng. Nhấp: Bật/Tắt phun hình nón (khi phun: -18% tốc chạy, nhận thêm 12% st; hết năng lượng chỉ cần hồi 20% là phun lại). Giữ 0.37s: đổi chất Lửa/Axit/Băng. Lớp phủ đầy 100% -> Nổ / Câm Lặng / Đóng Băng. NGẤM SÂU: mỗi lần lớp phủ bùng -> địch +1 tầng Ngấm (tối đa 3, 8s): mỗi tầng +15% tốc phủ & +10% st lớp phủ / Nổ; đủ 3 tầng lớp phủ không còn phai — đổi chất xoay vòng để dồn tầng. Axit ăn mòn mọi vật không phải body (thùng, xe tiền, triệu hồi, công trình): x10 dame + mất 50% Max HP mỗi giây hứng luồng; xe tiền/xe bị đốt nhanh gấp 3. Vật cản chặn luồng phun.',
             type: 'body', role: ['Kiểm Soát', 'Đối Đầu'],
             size: { w: 34, h: 34 },
             stats: { hp: 5, dmg: 0, ammo: 0, speedMult: 0.825 }
@@ -420,10 +420,10 @@ const MODULES = {
         {
             id: 'the_clock',
             name: 'The Clock',
-            desc: '"Tích tắc... Đủ 24 nhịp kim gõ, thời gian sống của ngươi chính thức khép lại!" HP:4.5 | Dame:0.25 (Time Zone: 0.5) | Đạn:4 | Tốc: 3.8. Nhấp: bắn Kim Giây. ĐẾM NGƯỢC: mỗi phát trúng +1 nhịp trên địch (1 -> 24, giữ cả hiệp): cứ mỗi 3 nhịp CHOÁNG 1s; 12 nhịp mở DƯ CHẤN (mỗi lần Time Zone kết thúc địch khựng 0.25s); 24 nhịp -> KẾT LIỄU TỨC THÌ (xuyên máu, giáp, khiên). Giữ 0.5s (hồi 12s): TIME ZONE 5s toàn sân — địch, vật triệu hồi & đạn địch ngưng đọng; bạn di chuyển & bắn tự do nhưng không nạp đạn, đạn bắn ra hóa KIM GIỜ CƯỜNG HÓA (0.5 dame, xuyên vật cản, chậm 35% 1.5s) treo lơ lửng, hết giờ (hoặc giữ 0.4s tắt sớm) đồng loạt phóng đi. Ngoại lệ: Chrono vẫn bắn nhưng không di chuyển, Neo di chuyển nhưng không bắn; Paradox vừa Tua Ngược hoạt động bình thường. Hạ gục -> ĐỒNG HỒ ĐIỂM 12 GIỜ.',
+            desc: '"Tích tắc... Đủ 20 nhịp kim gõ, thời gian sống của ngươi chính thức khép lại!" HP:5 | Dame:0.4 (Time Zone: 0.8) | Đạn:4 | Tốc: 3.8. Nhấp: bắn Kim Giây. ĐẾM NGƯỢC: mỗi phát trúng +1 nhịp trên địch (1 -> 20, giữ cả hiệp): cứ mỗi 3 nhịp CHOÁNG 1s; 9 nhịp mở DƯ CHẤN (mỗi lần Time Zone kết thúc địch khựng 0.45s); 20 nhịp -> KẾT LIỄU TỨC THÌ (xuyên máu, giáp, khiên). Giữ 0.33s (hồi 9s): TIME ZONE 5s toàn sân — địch, vật triệu hồi & đạn địch ngưng đọng; bạn di chuyển & bắn tự do nhưng nạp đạn chậm 50%, đạn bắn ra hóa KIM GIỜ CƯỜNG HÓA (0.8 dame, xuyên vật cản, chậm 35% 1.5s) treo lơ lửng, hết giờ (hoặc giữ 0.3s tắt sớm) đồng loạt phóng đi & tự CHỤM về địch, trúng gõ 2 nhịp; khi Time Zone kết thúc địch luôn khựng 0.2s (TRỄ THỜI GIAN). KIM NGHỊCH CHUYỂN: khi Time Zone kết thúc, tối đa 6 viên đạn thường của địch đang lao về phía bạn (được đánh dấu tím) bị đảo chiều thành Kim Giờ bắn ngược về địch (dame Kim Giờ, tính nhịp Đếm Ngược). Ngoại lệ: Chrono vẫn bắn nhưng không di chuyển, Neo di chuyển nhưng không bắn; Paradox vừa Tua Ngược hoạt động bình thường. Hạ gục -> ĐỒNG HỒ ĐIỂM 12 GIỜ.',
             type: 'body', role: ['Kiểm Soát', 'Cơ Động'],
             size: { w: 28, h: 28 },
-            stats: { hp: 4.5, dmg: 0.25, ammo: 4, speedMult: 1.0857 }
+            stats: { hp: 5, dmg: 0.4, ammo: 4, speedMult: 1.0857 }
         },
         {
             id: 'coc',
@@ -460,10 +460,10 @@ const MODULES = {
         {
             id: 'wind',
             name: 'Wind',
-            desc: '"Cơn gió mỏng manh... chạm vào là tan biến, ngưng đọng là cuồng phong!" HP:3 | Dame:0.8 | Đạn:6 | Tốc: 4.4. GIÓ NHẸ: ngừng bắn 0.5s thì NGƯNG PHONG tích +35% dame/giây (tối đa x2.5, đạn gió to, bay nhanh, đẩy lùi); bắn liên tục (cách nhau <1.2s) tích LIÊN PHONG tối đa 6 tầng (+15% tốc bắn & +12% tốc nạp mỗi tầng). Giữ 0.4s (hồi 8s): HÓA GIÓ tối đa 3.5s — bất tử, đạn bay xuyên qua, +35%→55% tốc chạy, nạp đạn & tích Ngưng Phong x2; PHẢI di chuyển liên tục (đứng yên 0.15s, bắn hoặc hết giờ là hiện hình). Hiện hình: CUỒNG PHONG TỐC XẠ +50% tốc bắn 2.5s, phát đầu giữ nguyên Ngưng Phong.',
+            desc: '"Cơn gió mỏng manh... chạm vào là tan biến, ngưng đọng là cuồng phong!" HP:4.5 | Dame:1.1 | Đạn:6 | Tốc: 4.4. GIÓ NHẸ: ngừng bắn 0.3s thì NGƯNG PHONG tích +50% dame/giây (tối đa x2.5, đạn gió to, bay nhanh, đẩy lùi); bắn liên tục (cách nhau <1.33s) tích LIÊN PHONG tối đa 6 tầng (+15% tốc bắn & +12% tốc nạp mỗi tầng). Giữ 0.3s (hồi 5.5s): HÓA GIÓ tối đa 4s — bất tử, đạn bay xuyên qua, +35%→55% tốc chạy, nạp đạn & tích Ngưng Phong x2; PHẢI di chuyển liên tục (đứng yên 0.3s, bắn hoặc hết giờ là hiện hình). VỆT GIÓ CẮT: lướt trong Hóa Gió để lại vệt nút gió (1.5s) trên làn; địch bước vào cột của nút -> nút bung LƯỠI GIÓ xuyên thấu 0.8x dame lao thẳng tới địch (lướt qua lại dưới địch để rạch liên hoàn). Hiện hình: CUỒNG PHONG TỐC XẠ +50% tốc bắn 2.5s, phát đầu giữ nguyên Ngưng Phong.',
             type: 'body', role: ['Đối Đầu', 'Cơ Động'],
             size: { w: 24, h: 24 },
-            stats: { hp: 3, dmg: 0.8, ammo: 6, speedMult: 1.2571 }
+            stats: { hp: 4.5, dmg: 1.1, ammo: 6, speedMult: 1.2571 }
         },
         {
             id: 'diep_thanh_phong',

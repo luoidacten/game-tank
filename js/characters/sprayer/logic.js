@@ -19,6 +19,15 @@ function spHalfWidth(fwd, p) {
     return SP_HALF_NEAR + (far - SP_HALF_NEAR) * Math.max(0, Math.min(1, fwd / spMaxRange())) * w;
 }
 const SP_COAT_RATE = 55;       // % lớp phủ mỗi giây khi đứng trong luồng
+const SP_SWITCH_HOLD = 22;     // [BUFF] giữ 0.37s đổi chất (cũ 0.5s)
+// [MỚI] NGẤM SÂU: mỗi lần lớp phủ bùng (Nổ / Câm Lặng / Đóng Băng) -> địch +1 tầng Ngấm (tối đa 3, 8s, làm mới khi cộng)
+//   mỗi tầng: +15% tốc phủ & +10% sát thương mọi lớp phủ / Nổ. Đủ 3 tầng: lớp phủ không còn phai.
+const SP_SOAK_MAX = 3, SP_SOAK_DUR = 480;
+function spSoak(v) { return (v && v.spSoakT > 0) ? (v.spSoak || 0) : 0; }
+function spAddSoak(p, v) {
+    v.spSoak = Math.min(SP_SOAK_MAX, spSoak(v) + 1); v.spSoakT = SP_SOAK_DUR;
+    addFloatingText(v.x + v.w / 2, v.y + (v.id === 1 ? -30 : v.h + 30), 'NGẤM SÂU x' + v.spSoak, '#e879f9', 12);
+}
 
 function spIsFullEvo(p) { return p.hasUpgrade('evo_spray_1') && p.hasUpgrade('evo_spray_2'); }
 
@@ -101,12 +110,13 @@ function spAffectStructure(p, obj, chem, full) {
 
 function spUpdateCoats(p, enemy, full) {
     const coat = spCoatOf(enemy);
+    if (enemy.spSoakT > 0 && --enemy.spSoakT <= 0) enemy.spSoak = 0;
     const hasEvo2 = p.hasUpgrade('evo_spray_2');
     for (const c of SP_CHEMS) {
         if (coat[c] <= 0) { coat[c] = 0; continue; }
         enemy.spIdle[c]++;
         const delay = c === 'fire' ? 8 : (hasEvo2 ? 150 : 60);
-        if (enemy.spIdle[c] > delay) coat[c] = Math.max(0, coat[c] - (c === 'fire' ? 80 : 40) / 60);
+        if (enemy.spIdle[c] > delay && spSoak(enemy) < SP_SOAK_MAX) coat[c] = Math.max(0, coat[c] - (c === 'fire' ? 80 : 40) / 60);
         const k = coat[c] / 100;
         if (c === 'fire') {
             enemy.spAcc.fire += 0.25 / 60;
@@ -120,7 +130,7 @@ function spUpdateCoats(p, enemy, full) {
             addStatusSlow(enemy, 1 - (full ? 0.7 : 0.6) * k);
         }
         if (enemy.spAcc[c] >= 0.125) {
-            const dmg = enemy.spAcc[c]; enemy.spAcc[c] = 0;
+            const dmg = enemy.spAcc[c] * (1 + 0.1 * spSoak(enemy)); enemy.spAcc[c] = 0;
             enemy.takeDamage(dmg, p, { isDot: true });
         }
     }
@@ -162,7 +172,7 @@ function spApplySpray(p) {
         if (!blocked) {
             const coat = spCoatOf(enemy);
             for (const c of chems) {
-                coat[c] = Math.min(100, coat[c] + SP_COAT_RATE / 60);
+                coat[c] = Math.min(100, coat[c] + SP_COAT_RATE * (1 + 0.15 * spSoak(enemy)) / 60);
                 enemy.spIdle[c] = 0;
                 if (coat[c] >= 100) spTrigger(p, enemy, c, full);
             }
@@ -215,15 +225,17 @@ function spTrigger(p, enemy, chem, full) {
     const ex = enemy.x + enemy.w / 2, ey = enemy.y + enemy.h / 2;
     if (chem === 'fire') {
         coat.fire = 0;
-        enemy.takeDamage(full ? 7 : 5, p);
+        enemy.takeDamage((full ? 7 : 5) * (1 + 0.1 * spSoak(enemy)), p);
+        spAddSoak(p, enemy);
         explosions.push(new Explosion(ex, ey, full ? 90 : 55, 'rgba(255, 100, 0,', 0, p));
         triggerScreenShake(6, 10);
         addFloatingText(ex, enemy.y - 16, 'BỘC PHÁT! 🔥', '#ff6a1a', 15);
     } else if (chem === 'acid') {
-        if (!enemy.spSilenced) addFloatingText(ex, enemy.y - 16, 'CÂM LẶNG! 🧪', '#7bf85c', 14);
+        if (!enemy.spSilenced) { addFloatingText(ex, enemy.y - 16, 'CÂM LẶNG! 🧪', '#7bf85c', 14); spAddSoak(p, enemy); }
     } else if (chem === 'ice') {
         enemy.freezeTimer = Math.max(enemy.freezeTimer || 0, full ? 150 : 120);
         coat.ice = 25;
+        spAddSoak(p, enemy);
         explosions.push(new Explosion(ex, ey, 50, '#5ee7ff', 0, p));
         addFloatingText(ex, enemy.y - 16, 'ĐÓNG BĂNG! ❄️', '#5ee7ff', 15);
     }
@@ -235,14 +247,15 @@ CharHooks.register('sprayer', {
         this.spEnergy = 100; this.spOn = false; this.spChem = this.spChem || 'fire';
         this.spHold = 0; this.spPrevS = false; this.spRegenDelay = 0; this.spZoneTick = 0;
         this.spRange = 0; this.spFront = 0; this.spWiden = 0; this.spLock = false;
+        const en = this === p1 ? p2 : p1; if (en) { en.spSoak = 0; en.spSoakT = 0; }
     },
 
     update() {
         const evo1 = this.hasUpgrade('evo_spray_1');
         if (this.silenceTimer > 0 || this.freezeTimer > 0) this.spOn = false;
         if (this.spOn) {
-            this.spEnergy -= (spIsFullEvo(this) ? 10 : (evo1 ? 15.4 : 22)) / 60; // Full Evo: phun lâu hơn
-            addStatusVuln(this, 0.2); // Suy Yếu khi đang phun
+            this.spEnergy -= (spIsFullEvo(this) ? 9 : (evo1 ? 14 : 19)) / 60; // Full Evo: phun lâu hơn
+            addStatusVuln(this, 0.12); // Suy Yếu khi đang phun
             if (this.spEnergy <= 0) { this.spEnergy = 0; this.spOn = false; this.spLock = true; addFloatingText(this.x + this.w / 2, this.y - 14, 'HẾT NĂNG LƯỢNG!', '#94a3b8', 12); }
             this.spRegenDelay = 24;
             spApplySpray(this);
@@ -251,24 +264,24 @@ CharHooks.register('sprayer', {
             this.spFront = 0; this.spWiden = 0;
             if (this.spRegenDelay > 0) this.spRegenDelay--;
             else this.spEnergy = Math.min(100, this.spEnergy + (evo1 ? 27 : 18) / 60);
-            if (this.spLock && this.spEnergy >= 30) this.spLock = false;
+            if (this.spLock && this.spEnergy >= 20) { this.spLock = false; addFloatingText(this.x + this.w / 2, this.y - 14, 'SẴN SÀNG!', SP_CHEM_COLOR[this.spChem], 11); }
         }
         const enemy = this === p1 ? p2 : p1;
         if (enemy && enemy.spCoat) spUpdateCoats(this, enemy, spIsFullEvo(this));
     },
 
-    speed(s) { return this.spOn ? s * 0.7 : s; },
+    speed(s) { return this.spOn ? s * 0.82 : s; },
 
     shoot(inp) {
         if (inp.s) {
             this.spHold++;
-            if (this.spHold === 30) {
+            if (this.spHold === SP_SWITCH_HOLD) {
                 this.spChem = SP_CHEMS[(SP_CHEMS.indexOf(this.spChem) + 1) % SP_CHEMS.length];
                 addFloatingText(this.x + this.w / 2, this.y - 16, `CHẤT: ${SP_CHEM_NAME[this.spChem]}`, SP_CHEM_COLOR[this.spChem], 13);
                 if (soundSystem && !soundSystem.muted) soundSystem.playClick();
             }
         } else {
-            if (this.spHold > 0 && this.spHold < 30) {
+            if (this.spHold > 0 && this.spHold < SP_SWITCH_HOLD) {
                 if (this.spOn) this.spOn = false;
                 else if (!this.spLock && this.spEnergy > 5) this.spOn = true;
                 if (soundSystem && !soundSystem.muted) soundSystem.playClick();
@@ -278,3 +291,12 @@ CharHooks.register('sprayer', {
         return true;
     },
 });
+
+// Bot: chất muốn dùng — địch đang Đóng Băng / đã có Băng dày -> Lửa để Nổ; địch đang chạy thoát -> Băng
+function spBotWantChem(p, e) {
+    if (!e || spIsFullEvo(p)) return p.spChem;
+    const c = e.spCoat || { fire: 0, acid: 0, ice: 0 };
+    if ((e.freezeTimer || 0) > 30 || c.fire > 40) return 'fire';
+    if (c.ice < 70 && c.fire < 10 && (e.hp > e.maxHp * 0.5)) return 'ice';
+    return 'fire';
+}

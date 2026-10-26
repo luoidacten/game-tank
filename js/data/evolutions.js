@@ -176,7 +176,7 @@ const EVOLUTIONS = {
         { id: 'evo_kk_2', name: 'Thí Luyện', desc: '+1 ô bài tập làm cùng lúc. Đầu mỗi hiệp nhận sẵn 1 Khiên. FULL EVO: +2 ô bài tập, yêu cầu giảm sâu, mở 5 Bài Tập Cuối -> Hóa Thần.', cost: 360, type: 'evo' }
     ],
     sprayer: [
-        { id: 'evo_spray_1', name: 'Năng Lượng Xanh', desc: 'Hồi năng lượng nhanh hơn 50%, phun tiêu hao chậm hơn 30%.', cost: 160, type: 'evo' },
+        { id: 'evo_spray_1', name: 'Năng Lượng Xanh', desc: 'Hồi năng lượng nhanh hơn 50%, phun tiêu hao chậm hơn ~26%.', cost: 160, type: 'evo' },
         { id: 'evo_spray_2', name: 'Dấu Vết Độc Địa', desc: 'Lớp phủ bám lâu hơn. Phun liên tục để lại vũng Lửa/Axit/Băng 3s. FULL EVO: phun cùng lúc cả 3 chất, góc phun rộng hơn, phun lâu hơn; Nổ 7 dmg lan, Axit ăn mòn x2 & câm thêm 1s, Đóng băng 2.5s.', cost: 300, type: 'evo' }
     ],
     customize: [
@@ -305,7 +305,7 @@ const EVOLUTIONS = {
     ],
     the_clock: [
         { id: 'evo_clock_1', name: 'Dây Cót Dư Trữ', desc: 'Băng đạn +1 (5 viên), nạp đạn thường nhanh hơn 25%. Kích hoạt Time Zone: hồi ngay +2 viên & +35% tốc chạy ngang trong lúc ngưng đọng.', cost: 140, type: 'evo' },
-        { id: 'evo_clock_2', name: 'Kim Giờ Gia Tốc', desc: 'Hồi Time Zone 12s -> 8.5s. Kim Giờ Cường Hóa bay nhanh hơn 45%, Làm Chậm 45%. NHẢY KIM: mỗi lần Choáng 3 nhịp mà địch đang bị chậm bởi Kim Giờ -> hồi +1 viên. FULL EVO (Chúa Tể Thời Không — Án Tử 12 Giờ): Dư Chấn mở từ 10 nhịp (khựng 0.4s), KẾT LIỄU chỉ cần 20 nhịp; chủ động tắt sớm Time Zone: mỗi 1s còn dư giảm 1.2s hồi chiêu.', cost: 260, type: 'evo' },
+        { id: 'evo_clock_2', name: 'Kim Giờ Gia Tốc', desc: 'Hồi Time Zone 9s -> 6.5s. Kim Giờ Cường Hóa bay nhanh hơn 45%, Làm Chậm 45%. NHẢY KIM: mỗi lần Choáng 3 nhịp mà địch đang bị chậm bởi Kim Giờ -> hồi +1 viên. FULL EVO (Chúa Tể Thời Không — Án Tử 12 Giờ): Dư Chấn mở từ 7 nhịp (khựng 0.6s), KẾT LIỄU chỉ cần 16 nhịp; chủ động tắt sớm Time Zone: mỗi 1s còn dư giảm 1.2s hồi chiêu.', cost: 260, type: 'evo' },
     ],
     prism: [
         { id: 'evo_prism_1', name: 'Lăng Kính Khuếch Đại', desc: 'Phản thường 40% -> 70% dame, phạt khi phản 0.5 -> 0.25 HP. Cửa Sổ Vàng phản 125%. Mở Kính kéo dài 2.5s, hồi chiêu 7s. Đạn bị phản (giữ nguyên bản gốc) tự bẻ góc nhẹ về phía địch.', cost: 155, type: 'evo' },
@@ -313,7 +313,7 @@ const EVOLUTIONS = {
     ],
     wind: [
         { id: 'evo_wind_breeze_1', name: 'Thuận Chiều Gió Thổi', desc: 'Ngưng Phong tích nhanh hơn 40% (~2.5s đạt x2.5), phát tích đầy XUYÊN THẤU vật cản. Liên Phong tối đa 8 tầng (+120% tốc bắn & +100% tốc nạp); ở tầng tối đa mỗi phát bắn +15% tốc chạy. Bắn phát Ngưng Phong (>=50%) nhận ngay 3 tầng Liên Phong.', cost: 140, type: 'evo' },
-        { id: 'evo_wind_breeze_2', name: 'Vô Hình Phong Thể', desc: 'Hóa Gió hồi 5.5s, duy trì tối đa 4.5s. Mỗi viên đạn địch bay xuyên qua luồng gió: -0.5s hồi chiêu, +1 đạn, +25% Ngưng Phong. Hiện hình nổ vòng gió đẩy lùi đạn thường ở gần; Cuồng Phong Tốc Xạ 3.5s (+75% tốc bắn). FULL EVO (Tinh Linh Gió — Cơn Gió Vĩnh Cửu): phát Ngưng Phong chỉ tiêu 50% lượng tích; Hóa Gió lướt qua đạn nhỏ của địch sẽ làm lệch/xóa sổ chúng, lướt đủ 2s rồi hiện hình nhận 1 Khiên Gió 4s; mỗi 6 viên trúng địch giảm 1.5s hồi Hóa Gió.', cost: 260, type: 'evo' },
+        { id: 'evo_wind_breeze_2', name: 'Vô Hình Phong Thể', desc: 'Hóa Gió hồi 4s, duy trì tối đa 5s. Mỗi viên đạn địch bay xuyên qua luồng gió: -0.5s hồi chiêu, +1 đạn, +25% Ngưng Phong. Hiện hình nổ vòng gió đẩy lùi đạn thường ở gần; Cuồng Phong Tốc Xạ 3.5s (+75% tốc bắn). FULL EVO (Tinh Linh Gió — Cơn Gió Vĩnh Cửu): phát Ngưng Phong chỉ tiêu 50% lượng tích; Hóa Gió lướt qua đạn nhỏ của địch sẽ làm lệch/xóa sổ chúng, lướt đủ 2s rồi hiện hình nhận 1 Khiên Gió 4s; mỗi 6 viên trúng địch giảm 1.5s hồi Hóa Gió.', cost: 260, type: 'evo' },
     ],
     the_adapter: [
         { id: 'evo_adapter_1', name: 'Học Sâu Thời Gian Thực', desc: 'Vòng Xoay Thích Ứng tối đa 6 -> 8 nấc (48% Giảm Sát Thương, +0.96 dame). Tự xoay mỗi 2.5s thay vì 3.5s. Mỗi khi địch dùng Kỹ năng Giữ Bắn: +1 nấc ngay & +1 tầng Lộ Điểm Yếu lên địch.', cost: 170, type: 'evo' },

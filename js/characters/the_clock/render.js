@@ -58,8 +58,8 @@ function tcDrawNeedle(b) {
     ctx.save(); ctx.translate(cx, cy); ctx.rotate(a);
     if (b.tcTZ) {
         const pulse = b.tcHeld ? 0.5 + 0.5 * Math.sin(tcNow() * 10 + b.x) : 1;
-        ctx.shadowBlur = 10 + pulse * 8; ctx.shadowColor = TC_GOLD;
-        ctx.fillStyle = '#fde68a';
+        ctx.shadowBlur = 10 + pulse * 8; ctx.shadowColor = b.tcRev ? TC_VIO : TC_GOLD;
+        ctx.fillStyle = b.tcRev ? '#ddd6fe' : '#fde68a';
         ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(2, -3.2); ctx.lineTo(-7, -1.2); ctx.lineTo(-9, 0); ctx.lineTo(-7, 1.2); ctx.lineTo(2, 3.2); ctx.closePath(); ctx.fill();
         ctx.fillStyle = TC_WHITE; ctx.beginPath(); ctx.arc(-6, 0, 1.6, 0, Math.PI * 2); ctx.fill();
         if (b.tcHeld) {
@@ -108,9 +108,24 @@ CharHooks.register('the_clock', Object.assign(CharHooks.registry.the_clock || {}
         if (p.hp <= 0) return;
         const hold = p.tcHold || 0;
         if (hold > 4 && !p.tcUsed) {
-            const need = p.tcTZ > 0 ? 24 : 30, f = Math.min(1, hold / need), cx = p.x + p.w / 2, cy = p.y + p.h / 2;
+            const need = p.tcTZ > 0 ? TC_HOLD_END : TC_HOLD_TZ, f = Math.min(1, hold / need), cx = p.x + p.w / 2, cy = p.y + p.h / 2;
             ctx.save(); ctx.strokeStyle = p.tcTZ > 0 ? TC_GOLD : TC_CYAN; ctx.lineWidth = 2; ctx.shadowBlur = 8; ctx.shadowColor = ctx.strokeStyle;
             ctx.beginPath(); ctx.arc(cx, cy, p.w * 0.75, -Math.PI / 2, -Math.PI / 2 + f * Math.PI * 2); ctx.stroke(); ctx.restore();
+        }
+        // Time Zone: đánh dấu tím các viên đạn địch sẽ bị Kim Nghịch Chuyển đảo chiều
+        const e = tcEnemy(p);
+        if (p.tcTZ > 0 && e && e.bullets) {
+            const cx = p.x + p.w / 2, cy = p.y + p.h / 2, t = tcNow();
+            const list = e.bullets.filter(b => b && !b.isLazer && !b.isRaycast && !b.isBeam && (b.w || 0) <= 40 && (b.h || 0) <= 60 && (p.id === 1 ? (b.vy || 0) > 0 : (b.vy || 0) < 0))
+                .map(b => [Math.hypot(b.x + (b.w || 0) / 2 - cx, b.y + (b.h || 0) / 2 - cy), b]).sort((a, b) => a[0] - b[0]).slice(0, TC_REV_MAX);
+            ctx.save(); ctx.strokeStyle = TC_VIO; ctx.shadowBlur = 8; ctx.shadowColor = TC_VIO; ctx.lineWidth = 1.2;
+            for (const [, b] of list) {
+                const bx = b.x + (b.w || 0) / 2, by = b.y + (b.h || 0) / 2, r = Math.max(b.w || 0, b.h || 0) * 0.6 + 5;
+                ctx.globalAlpha = 0.6 + 0.3 * Math.sin(t * 8 + bx);
+                ctx.beginPath(); ctx.arc(bx, by, r, t * 3, t * 3 + Math.PI * 1.5); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(bx - 3, by - p.id * 0 + (p.id === 1 ? 4 : -4)); ctx.lineTo(bx, by + (p.id === 1 ? -2 : 2)); ctx.lineTo(bx + 3, by + (p.id === 1 ? 4 : -4)); ctx.stroke();
+            }
+            ctx.restore();
         }
     },
     drawUI() {

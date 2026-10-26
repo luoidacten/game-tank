@@ -555,10 +555,16 @@ function botShopBuy(playerId) {
     const f = SmartBot.prototype.fire;
     SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
         if (bot.weapon === 'the_clock' && typeof tcBotAction === 'function') {
+            // Time Zone: địch đứng im -> chạy tới ngay dưới cột địch (lệch nhẹ để rải kim) rồi gài kim
+            if (bot.tcTZ > 0 && enemy) {
+                const planted = bot.bullets.filter(b => b.tcTZ && b.tcHeld).length;
+                const tx = enemy.x + enemy.w / 2 + ((planted % 3) - 1) * 6, dx = tx - (bot.x + bot.w / 2);
+                inp.l = dx < -3; inp.r = dx > 3;
+            }
             if (this.tcB > 0) { this.tcB--; inp.s = this.tcB > 3; return; }
             const a = tcBotAction(bot, enemy);
-            if (a === 'tz') { this.tcB = 30 + 6; inp.s = true; return; }
-            if (a === 'end') { this.tcB = 24 + 6; inp.s = true; return; }
+            if (a === 'tz') { this.tcB = TC_HOLD_TZ + 6; inp.s = true; return; }
+            if (a === 'end') { this.tcB = TC_HOLD_END + 6; inp.s = true; return; }
             if (a === 'tap') { this.tcB = 5; inp.s = true; return; }
             if (bot.tcTZ > 0) { inp.s = false; return; }
         }
@@ -623,7 +629,19 @@ function botShopBuy(playerId) {
     };
 })();
 
-// Wind: giữ 0.4s Hóa Gió khi đạn địch sắp trúng; trong Hóa Gió luôn lướt qua lại (đứng yên là hiện hình), nhấp xuất kích khi Ngưng Phong đầy; ngoài ra nhấp xả Liên Phong hoặc đứng tích Ngưng Phong (wdBotAction)
+// Bình Phun: giữ 0.37s đổi chất theo tình huống (Băng để giữ chân, Lửa để Nổ khi địch bị đóng băng) — spBotWantChem
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon === 'sprayer' && typeof spBotWantChem === 'function') {
+            if (this.spB > 0) { this.spB--; inp.s = this.spB > 3; return; }
+            if (this.tapCool <= 0 && this.t % 20 === 0 && spBotWantChem(bot, enemy) !== bot.spChem) { this.spB = SP_SWITCH_HOLD + 5; inp.s = true; return; }
+        }
+        return f.call(this, bot, enemy, aligned, inp);
+    };
+})();
+
+// Wind: giữ 0.3s Hóa Gió khi đạn địch sắp trúng; trong Hóa Gió luôn lướt qua lại (đứng yên là hiện hình), nhấp xuất kích khi Ngưng Phong đầy; ngoài ra nhấp xả Liên Phong hoặc đứng tích Ngưng Phong (wdBotAction)
 (function () {
     const f = SmartBot.prototype.fire;
     SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {

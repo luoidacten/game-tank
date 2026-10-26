@@ -1,12 +1,14 @@
 // ==========================================
 // The Clock (the_clock) — Kẻ Ngưng Đọng Thời Gian (docs/BODY_MOI_5.md #97)
 // ------------------------------------------
-// Nhấp: bắn Kim Giây 0.25 dame. Giữ 0.5s (hồi 12s, Evo2 8.5s): mở TIME_ZONE 5s toàn sân —
-//   địch, vật triệu hồi & đạn của địch ngưng đọng; đạn của mình cũng treo tại chỗ, khóa nạp đạn.
-//   Bắn trong Time_Zone -> Kim Giờ Cường Hóa (0.5 dame, xuyên vật cản, chậm 35% 1.5s) treo lơ lửng,
-//   hết giờ (hoặc giữ 0.4s để tắt sớm) thì đồng loạt phóng đi.
-// ĐẾM NGƯỢC: mỗi phát trúng +1 nhịp trên địch: mỗi 3 nhịp Choáng 1s; 12 nhịp (Full 10) mở Dư Chấn
-//   (thoát Time_Zone -> địch khựng 0.25s / Full 0.4s); 24 nhịp (Full 20) -> KẾT LIỄU TỨC THÌ.
+// Nhấp: bắn Kim Giây 0.4 dame. Giữ 0.33s (hồi 9s, Evo2 6.5s): mở TIME_ZONE 5s toàn sân —
+//   địch, vật triệu hồi & đạn của địch ngưng đọng; đạn của mình cũng treo tại chỗ, nạp đạn chậm 50%.
+//   Bắn trong Time_Zone -> Kim Giờ Cường Hóa (0.8 dame, xuyên vật cản, chậm 35% 1.5s) treo lơ lửng,
+//   hết giờ (hoặc giữ 0.3s để tắt sớm) thì đồng loạt phóng đi.
+//   KIM NGHỊCH CHUYỂN: khi Time_Zone kết thúc, tối đa 6 viên đạn thường của địch đang lao về phía mình
+//   bị đảo chiều thành Kim Giờ tím bắn ngược về địch. Kim Giờ (kể cả Nghịch Chuyển) khi phóng tự chụm về địch, trúng gõ 2 nhịp.
+// ĐẾM NGƯỢC: mỗi phát trúng +1 nhịp trên địch: mỗi 3 nhịp Choáng 1s; 9 nhịp (Full 7) mở Dư Chấn
+//   (thoát Time_Zone -> địch khựng 0.25s / Full 0.4s); 20 nhịp (Full 16) -> KẾT LIỄU TỨC THÌ.
 // Ngoại lệ: Chrono (đạn vẫn bay, xe không di chuyển) / Neo (di chuyển được, không bắn);
 //   Paradox vừa Tua Ngược (<3s) hoạt động bình thường trong Time_Zone.
 // Trạng thái là trường thuần trên player / entity trong bodyEffects (đồng bộ online).
@@ -14,6 +16,7 @@
 
 const TC_GOLD = '#fbbf24', TC_CYAN = '#67e8f9', TC_WHITE = '#f8fafc', TC_VIO = '#a78bfa';
 const TC_TZ_DUR = 300;
+const TC_HOLD_TZ = 20, TC_HOLD_END = 18, TC_REV_MAX = 6; // [BUFF] giữ ngắn hơn; Kim Nghịch Chuyển tối đa 6 viên
 
 function tcE1(p) { return p.hasUpgrade('evo_clock_1'); }
 function tcE2(p) { return p.hasUpgrade('evo_clock_2'); }
@@ -25,9 +28,9 @@ function tcDir(p) { return p.id === 1 ? -1 : 1; }
 function tcSfx(n) { if (typeof soundSystem !== 'undefined' && soundSystem && !soundSystem.muted && soundSystem[n]) soundSystem[n](); }
 function tcTxt(o, s, c, sz, dy) { addFloatingText(o.x + o.w / 2, o.y + (o.id === 1 ? -18 - (dy || 0) : o.h + 22 + (dy || 0)), s, c, sz || 12); }
 function tcImmune(e) { return e && e.weapon === 'juggernaut'; }
-function tcCdMax(p) { return tcE2(p) ? 510 : 720; }
-function tcExecN(p) { return tcFull(p) ? 20 : 24; }
-function tcAfterN(p) { return tcFull(p) ? 10 : 12; }
+function tcCdMax(p) { return tcE2(p) ? 390 : 540; }
+function tcExecN(p) { return tcFull(p) ? 16 : 20; }
+function tcAfterN(p) { return tcFull(p) ? 7 : 9; }
 function tcStun(e, t) { if (tcAlive(e) && !tcImmune(e)) e.freezeTimer = Math.max(e.freezeTimer || 0, t); }
 // Đồng hồ (đối thủ) đang mở Time_Zone lên p?
 function tcZoneOn(p) {
@@ -82,10 +85,16 @@ function tcEndTZ(p, early, silent) {
     for (const b of p.bullets) {
         if (!b.tcHeld) continue;
         b.vx = b.tcVx || 0; b.vy = b.tcVy || 0; b.tcHeld = false; n++;
+        // [MỚI] Kim Giờ HỘI TỤ: kim treo khi phóng đi tự chỉnh hướng về địch (như kim đồng hồ chụm về 12 giờ)
+        if (b.tcTZ && tcAlive(e)) {
+            const sp = Math.hypot(b.vx, b.vy) || C.bulletSpeed * 1.15, v = aimVelocity(b.x + b.w / 2, b.y + b.h / 2, e, sp, false);
+            if (v.vy * tcDir(p) > 0) { b.vx = v.vx; b.vy = v.vy; }
+        }
         if (b.tcTZ) spawnSparkParticles(b.x + 3, b.y + 3, TC_GOLD, 3);
     }
+    n += tcReverse(p, e);
+    if (tcAlive(e)) tcStun(e, p.tcAfter ? (tcFull(p) ? 36 : 27) : 12); // [BUFF] Trễ Thời Gian 0.2s; Dư Chấn 0.45s / Full 0.6s
     if (p.tcAfter && tcAlive(e)) {
-        tcStun(e, tcFull(p) ? 24 : 15);
         if (!tcImmune(e)) tcTxt(e, 'DƯ CHẤN!', TC_VIO, 12);
     }
     tcTxt(p, n ? 'THỜI GIAN TRÔI! x' + n : 'THỜI GIAN TRÔI!', TC_GOLD, 13);
@@ -94,13 +103,42 @@ function tcEndTZ(p, early, silent) {
     tcSfx('playShoot');
 }
 
+function tcRevVx(x, y, e, sp, dir) { const v = aimVelocity(x, y, e, sp, false); return v.vy * dir > 0 ? v.vx / Math.abs(v.vy) * sp : 0; }
+// Kim Nghịch Chuyển: đảo chiều đạn thường của địch đang lao về phía mình thành Kim Giờ vàng
+function tcReverse(p, e) {
+    if (!e || !e.bullets || !tcAlive(e)) return 0;
+    const cx = p.x + p.w / 2, cy = p.y + p.h / 2, dir = tcDir(p), sp = C.bulletSpeed * 1.15 * (tcE2(p) ? 1.45 : 1);
+    const cand = [];
+    for (let i = 0; i < e.bullets.length; i++) {
+        const b = e.bullets[i];
+        if (!b || b.isLazer || b.isRaycast || b.isBeam || b.hook && b.hook !== 'basic' && (b.w || 0) > 30) continue;
+        const vy = b.vy || 0;
+        if (!(p.id === 1 ? vy > 0 : vy < 0) && !(e.tcFrozen && (b.vy || 0) * dir < 0)) continue;
+        if ((b.w || 0) > 40 || (b.h || 0) > 60) continue;
+        const bx = b.x + (b.w || 0) / 2, by = b.y + (b.h || 0) / 2;
+        cand.push([Math.hypot(bx - cx, by - cy), i, bx, by]);
+    }
+    cand.sort((a, b) => a[0] - b[0]);
+    const take = cand.slice(0, TC_REV_MAX).sort((a, b) => b[1] - a[1]);
+    for (const c of take) {
+        e.bullets.splice(c[1], 1);
+        spawnBullet(p, {
+            w: 6, h: 10, x: c[2] - 3, y: c[3] - 5, vx: tcRevVx(c[2], c[3], e, sp, dir), vy: dir * sp, tcTZ: true, tcRev: true,
+            dmg: p.damage * 2, isPiercing: true, hook: 'the_clock',
+        });
+        spawnSparkParticles(c[2], c[3], TC_VIO, 5);
+    }
+    if (take.length) tcTxt(p, 'NGHỊCH CHUYỂN x' + take.length, TC_VIO, 12, 14);
+    return take.length;
+}
+
 // ---------- Bắn ----------
 function tcFire(p, now) {
     if (!(p.ammo > 0)) return;
     const inTZ = p.tcTZ > 0;
-    if (now - (p.lastShot || 0) < (inTZ ? 220 : 450)) return;
+    if (now - (p.lastShot || 0) < (inTZ ? 200 : 330)) return;
     p.ammo--; p.lastShot = now; p.tcRecoil = 8;
-    const dir = tcDir(p), sp = C.bulletSpeed * 1.15;
+    const dir = tcDir(p), sp = C.bulletSpeed * 1.4;
     if (inTZ) {
         spawnBullet(p, {
             w: 6, h: 10, x: p.x + p.w / 2 - 3, y: p.id === 1 ? p.y - 12 : p.y + p.h + 2,
@@ -150,6 +188,7 @@ BulletHooks.register('the_clock', {
         if (!tcIs(o) || !v || (v !== p1 && v !== p2) || v === o) return;
         if (b.tcTZ && !tcImmune(v)) { v.tcSlowT = 90; v.tcSlowM = tcE2(o) ? 0.55 : 0.65; }
         tcCount(o, v);
+        if (b.tcTZ && tcAlive(v)) tcCount(o, v); // [BUFF] Kim Giờ gõ 2 nhịp
     },
     draw(b) { if (typeof tcDrawNeedle === 'function') tcDrawNeedle(b); },
 });
@@ -163,7 +202,7 @@ function tcTick(p) {
     if (e) { if (e.tcPop > 0) e.tcPop--; if (e.tcRing > 0) e.tcRing--; }
     if (p.hp <= 0 || gameState.phase !== 'playing') { if (p.tcTZ > 0) tcEndTZ(p, false, true); return; }
     if (p.tcTZ > 0) {
-        p.lastReload = Date.now(); // khóa nạp đạn
+        p.lastReload = Math.max(p.lastReload || 0, Date.now() - 500) + 1000 / 120; // nạp đạn chậm 50%
         tcHoldBullets(p);
         if (--p.tcTZ <= 0) { p.tcTZ = 1; tcEndTZ(p, false); }
     } else if (p.tcCd > 0) p.tcCd--;
@@ -185,11 +224,11 @@ CharHooks.register('the_clock', {
         if (s) {
             if (this.tcUsed) return true;
             this.tcHold++;
-            const need = this.tcTZ > 0 ? 24 : 30;
-            if (this.tcHold >= need) {
-                this.tcUsed = true; this.tcHold = 0;
-                if (this.tcTZ > 0) tcEndTZ(this, true);
-                else if (this.tcCd <= 0) tcStartTZ(this);
+            const need = this.tcTZ > 0 ? TC_HOLD_END : TC_HOLD_TZ;
+            if (this.tcHold === need) {
+                // [QoL] Time Zone đang hồi: không nuốt input — thả nút vẫn bắn Kim Giây
+                if (this.tcTZ > 0) { this.tcUsed = true; this.tcHold = 0; tcEndTZ(this, true); }
+                else if (this.tcCd <= 0) { this.tcUsed = true; this.tcHold = 0; tcStartTZ(this); }
                 else tcTxt(this, 'HỒI ' + (this.tcCd / 60).toFixed(1) + 's', '#94a3b8', 11);
             }
         } else {
@@ -281,9 +320,13 @@ function tcBotAction(p, e) {
     if (p.tcTZ > 0) {
         const planted = p.bullets.filter(b => b.tcTZ && b.tcHeld).length;
         if (p.ammo <= 0 && planted > 0 && p.tcTZ > 60) return 'end';
-        if (p.ammo > 0 && now - (p.lastShot || 0) >= 240 && Math.abs((p.x + p.w / 2) - (e.x + e.w / 2)) < 40 + planted * 8) return 'tap';
+        if (p.ammo > 0 && now - (p.lastShot || 0) >= 220 && Math.abs((p.x + p.w / 2) - (e.x + e.w / 2)) < 12) return 'tap';
         return null;
     }
-    if (p.tcCd <= 0 && p.ammo >= Math.min(3, p.maxAmmo) && Math.random() < 0.04) return 'tz';
+    if (p.tcCd <= 0 && p.ammo >= Math.min(2, p.maxAmmo)) {
+        // mở Time Zone khi có nhiều đạn địch đang lao tới (để Nghịch Chuyển) hoặc địch vừa bị choáng
+        const inc = e.bullets.filter(b => (p.id === 1 ? (b.vy || 0) > 0 : (b.vy || 0) < 0)).length;
+        if (inc >= 2 || (e.freezeTimer || 0) > 20 || Math.random() < 0.03) return 'tz';
+    }
     return null;
 }
