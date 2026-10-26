@@ -810,5 +810,15 @@ const BODY_GUIDES = {
         passive: ['Bom trong 140px nổ lan cả chuỗi', 'x3 sát thương lên công trình / vật triệu hồi', 'Phá thùng/xe tiền +$10, mỗi 3 lần trúng +$5'],
         evo: { e1: '4 bó, bom sống 9s, tối đa 3, nổ lan xa hơn', e2: 'Kích nổ sớm 2.2 dame, bom dính bị kích -> choáng', full: '5 bó, 12s, x5 công trình, vàng + khói chậm' },
         tips: ['Ném Cao rải bom trước, rồi Nhấp Bắn kích nổ cả chuỗi']
+    },
+    twin_gun: {
+        tag: 'Hai viên song song, khó lách', diff: 1,
+        controls: [
+            { input: 'TAP', name: 'Song Xạ', what: '2 viên trái/phải, cách 24px' },
+            { input: 'HOLD 0.4s', name: 'Đổi Nòng', what: 'Rộng 75px ↔ Hẹp 20px' }
+        ],
+        passive: ['Trúng cả 2 viên: phát kế +25% tốc đạn, +0.3 Dame'],
+        evo: { e1: '+2 đạn, nạp nhanh 30%', e2: 'Trúng 1 viên: hút địch về làn viên kia', full: 'Mỗi phát thứ 3: +1 viên giữa xuyên vật cản' },
+        tips: ['Nòng Rộng khi địch lách ngang, Nòng Hẹp khi địch đứng yên']
     }
 };

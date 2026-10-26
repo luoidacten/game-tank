@@ -315,6 +315,8 @@ function renderFrame() {
     if (typeof mnfFxOver === 'function') mnfFxOver();
     // Kết liễu Dynamite (SẬP HẦM MỎ VÀNG) - js/characters/dynamite/logic.js + render.js
     if (typeof dynFxOver === 'function') dynFxOver();
+    // Kết liễu Hai Nòng (SONG XẠ GIAO THOA) - js/characters/twin_gun/render.js
+    if (typeof tgFxOver === 'function') tgFxOver();
 
     // Particles & Floating Numbers
     updateAndDrawParticles();
@@ -343,7 +345,7 @@ function renderFrame() {
 const VICTORY_BANNER_SPAN = 87;
 const VICTORY_FX_DELAY = 0;        // kết liễu diễn xong là hiện màn thắng ngay
 const VICTORY_TOTAL_CAP = 600;     // tối đa 10s cho cả màn kết hiệp (không bao giờ treo)
-const FINISHER_FX_CLASSES = ['FsFinisher', 'TsFinisher', 'JkFinisher', 'JgFinisher', 'CgFinisher', 'ClFinisher', 'JpFinisher', 'WsFinisher', 'StFinisher', 'TatFinisher', 'OpFinisher', 'BmFinisher', 'ArFinisher', 'PsyFinisher', 'TlFinisher', 'JlFinisher', 'KgFinisher', 'BodyFinisher', 'TcFinisher', 'CocFinisher', 'PrFinisher', 'AdFinisher', 'TnFinisher', 'WdFinisher', 'DtpFinisher', 'RgFinisher', 'SwFinisher', 'IdolFinisher', 'ThFinisher', 'MainFinisher', 'DynFinisher'];
+const FINISHER_FX_CLASSES = ['FsFinisher', 'TsFinisher', 'JkFinisher', 'JgFinisher', 'CgFinisher', 'ClFinisher', 'JpFinisher', 'WsFinisher', 'StFinisher', 'TatFinisher', 'OpFinisher', 'BmFinisher', 'ArFinisher', 'PsyFinisher', 'TlFinisher', 'JlFinisher', 'KgFinisher', 'BodyFinisher', 'TcFinisher', 'CocFinisher', 'PrFinisher', 'AdFinisher', 'TnFinisher', 'WdFinisher', 'DtpFinisher', 'RgFinisher', 'SwFinisher', 'IdolFinisher', 'ThFinisher', 'MainFinisher', 'DynFinisher', 'TgFinisher'];
 function finisherFxActive() {
     if (typeof bodyEffects === 'undefined') return false;
     for (const e of bodyEffects) {

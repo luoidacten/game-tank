@@ -505,6 +505,14 @@ const MODULES = {
             size: { w: 30, h: 30 },
             stats: { hp: 5.0, dmg: 1.5, ammo: 3, speedMult: 1.0 }
         },
+        {
+            id: 'twin_gun',
+            name: 'Hai Nòng',
+            desc: '"Hai viên song song, lách đi đâu?" HP:5.5 | Dame:0.75 (×2 viên = 1.5) | Đạn:6 | Tốc:3.6. NHẤP: 2 viên bay dọc — viên trái trước rồi viên phải (phát sau đảo lại), cách nhau 24px (vừa khít thân xe). Cả 2 viên cùng 1 phát đều trúng -> phát kế +25% tốc đạn & +0.3 Dame. GIỮ 0.4s: đổi NÒNG RỘNG (75px, khóa 2 bên Trái/Phải, khe trống ở giữa) <-> NÒNG HẸP (20px, dồn sát thương 1 mục tiêu).',
+            type: 'body', role: ['Đối Đầu'],
+            size: { w: 30, h: 30 },
+            stats: { hp: 5.5, dmg: 0.75, ammo: 6, speedMult: 1.0286 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 35 },

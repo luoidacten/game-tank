@@ -740,3 +740,18 @@ function botShopBuy(playerId) {
         return f.call(this, bot, enemy, aligned, inp);
     };
 })();
+
+// Hai Nòng: nhấp khi địch nằm trên làn đạn, giữ 0.4s đổi Nòng Rộng/Hẹp theo kiểu chạy của địch (tgBotAction)
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon === 'twin_gun' && typeof tgBotAction === 'function') {
+            if (this.tgB > 0) { this.tgB--; inp.s = this.tgB > 2; return; }
+            const a = tgBotAction(bot, enemy);
+            if (a === 'tap') { this.tgB = 5; inp.s = true; return; }
+            if (a === 'toggle') { this.tgB = TG_HOLD + 5; inp.s = true; return; }
+            inp.s = false; return;
+        }
+        return f.call(this, bot, enemy, aligned, inp);
+    };
+})();
