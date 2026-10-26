@@ -234,14 +234,19 @@ function renderStandardCards(playerId, list) {
             div.style.border = '2px solid #ff2bd6';
             div.style.boxShadow = '0 0 14px rgba(255,43,214,0.65), inset 0 0 10px rgba(255,179,0,0.25)';
         }
+        // Thẻ chọn Body gọn cho điện thoại: chỉ Hình xe + Tên + 📖 HƯỚNG DẪN + 🔄 ĐỔI.
+        // Mô tả / chỉ số / vai trò nằm trong bảng Hướng Dẫn.
+        div.classList.add('body-pick-card');
         div.innerHTML = `
-            <h4>${collabBonusOf(mod.id) ? '★ ' : ''}${mod.name}</h4>
-            ${roleBadges(mod)}
-            <p>${mod.desc}</p>
-            <button type="button" class="gear-card-reroll-btn${isRerolled ? ' is-used' : ''}" ${isRerolled ? 'disabled' : ''} title="${isRerolled ? 'Ô này đã dùng lượt đổi lại' : 'Đổi lại riêng vũ khí ở ô này (1 lần/ô)'}">
-                ${isRerolled ? '✔ ĐÃ ĐỔI' : '🔄 ĐỔI LẠI'}
+            ${collabBonusOf(mod.id) ? '<span class="pick-chip">★ COLLAB</span>' : ''}
+            <canvas class="pick-art" width="128" height="128"></canvas>
+            <h4>${mod.name}</h4>
+            <button type="button" class="gear-card-reroll-btn${isRerolled ? ' is-used' : ''}" ${isRerolled ? 'disabled' : ''} title="${isRerolled ? 'Ô này đã dùng lượt đổi lại' : 'Đổi lại riêng body ở ô này (1 lần/ô)'}">
+                ${isRerolled ? '✔ ĐÃ ĐỔI' : '🔄 ĐỔI'}
             </button>
         `;
+        const artCv = div.querySelector('.pick-art');
+        if (artCv && typeof drawGuideArt === 'function') { try { drawGuideArt(artCv, mod.id, 0, playerId === 'p2' ? 2 : 1); } catch (e) { /* bỏ qua */ } }
 
         // Nút "📖 HƯỚNG DẪN": mở bảng hướng dẫn trực quan (không chọn body)
         if (typeof makeBodyGuideButton === 'function') {

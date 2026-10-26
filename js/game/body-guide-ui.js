@@ -86,6 +86,8 @@ function drawGuideArt(cv, id, evo, team) {
         fp.ammo = fp.maxAmmo = (mod && mod.stats && mod.stats.ammo) || 3;
         const sc = S / 32 * 0.78;
         ctx.translate(S / 2, S / 2);
+        // Xe P2 tự lật dọc khi vẽ -> lật lại để nòng luôn hướng "lên" so với người xem thẻ (cột P2 đã xoay 180°)
+        if (fp.id === 2) ctx.scale(1, -1);
         ctx.scale(sc, sc);
         ctx.translate(-16, -16);
         drawTankArt(fp, fp.color);
@@ -108,10 +110,10 @@ function ensureGuideCss() {
     st.textContent = `
 .bg-guide-btn{display:block;width:100%;margin:4px 0 2px;padding:5px 4px;font-size:11px;font-weight:800;letter-spacing:.5px;color:#e0f2fe;background:linear-gradient(90deg,rgba(14,165,233,.35),rgba(168,85,247,.35));border:1px solid #38bdf8;border-radius:8px;cursor:pointer;box-shadow:0 0 8px rgba(56,189,248,.35)}
 .bg-guide-btn:active{transform:scale(.97)}
-#bodyGuideModal{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;background:rgba(2,6,23,.78);backdrop-filter:blur(3px);padding:10px;box-sizing:border-box}
-#bodyGuideModal .bg-box{position:relative;width:100%;max-width:400px;max-height:92vh;overflow-y:auto;background:linear-gradient(180deg,#0f172a,#111827 60%,#0b1020);border:1.5px solid #38bdf8;border-radius:16px;box-shadow:0 0 24px rgba(56,189,248,.45),inset 0 0 18px rgba(168,85,247,.15);color:#e2e8f0;padding:12px 12px 14px;box-sizing:border-box;font-family:inherit;text-align:left}
-#bodyGuideModal .bg-x{position:absolute;top:6px;right:8px;width:32px;height:32px;border-radius:50%;border:1px solid #475569;background:#1e293b;color:#f8fafc;font-size:16px;cursor:pointer;line-height:30px;padding:0}
-.bg-head{display:flex;gap:10px;align-items:center;padding-right:30px}
+#bodyGuideModal{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;background:rgba(2,6,23,.78);backdrop-filter:blur(3px);padding:max(10px,env(safe-area-inset-top)) 10px max(10px,env(safe-area-inset-bottom));box-sizing:border-box;touch-action:manipulation}
+#bodyGuideModal .bg-box{position:relative;width:100%;max-width:400px;max-height:92vh;max-height:calc(100dvh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom));overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;background:linear-gradient(180deg,#0f172a,#111827 60%,#0b1020);border:1.5px solid #38bdf8;border-radius:16px;box-shadow:0 0 24px rgba(56,189,248,.45),inset 0 0 18px rgba(168,85,247,.15);color:#e2e8f0;padding:12px 12px 14px;box-sizing:border-box;font-family:inherit;text-align:left}
+#bodyGuideModal .bg-x{position:sticky;float:right;top:0;margin:-6px -6px 0 0;z-index:3;width:44px;height:44px;border-radius:50%;border:1px solid #475569;background:#1e293b;color:#f8fafc;font-size:16px;cursor:pointer;line-height:42px;padding:0;touch-action:manipulation}
+.bg-head{display:flex;gap:10px;align-items:center}
 .bg-art{flex:0 0 auto;width:92px;height:92px;border-radius:14px;background:radial-gradient(circle at 50% 45%,rgba(56,189,248,.25),rgba(15,23,42,.9) 70%);border:1px solid rgba(56,189,248,.45)}
 .bg-name{font-size:19px;font-weight:900;color:#fff;text-shadow:0 0 8px rgba(56,189,248,.8);line-height:1.15}
 .bg-tag{font-size:12.5px;color:#7dd3fc;margin:2px 0 3px;font-weight:600}
@@ -155,6 +157,8 @@ function ensureGuideCss() {
 .bg-ev.full b{color:#fde047}
 .bg-tips{font-size:12px;line-height:1.4;color:#fef3c7}
 .bg-tips div:before{content:'💡 '}
+.bg-desc{font-size:12.5px;line-height:1.45;color:#cbd5e1;background:rgba(30,41,59,.6);border:1px solid #334155;border-radius:10px;padding:7px 9px}
+.bg-desc .bg-collab{margin-top:5px;color:#ffd166;font-weight:700}
 .bg-auto{font-size:10px;color:#64748b;margin-top:8px;text-align:center}
 `;
     document.head.appendChild(st);
@@ -163,9 +167,11 @@ function ensureGuideCss() {
 function closeBodyGuide() {
     const m = document.getElementById('bodyGuideModal');
     if (m) m.remove();
+    document.removeEventListener('keydown', guideEscKey);
     if (window._bodyGuideRaf) { cancelAnimationFrame(window._bodyGuideRaf); window._bodyGuideRaf = 0; }
 }
 
+function guideEscKey(e) { if (e.key === 'Escape') closeBodyGuide(); }
 function guideEsc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 
 function openBodyGuide(id, team, flip) {
@@ -227,6 +233,7 @@ function openBodyGuide(id, team, flip) {
         ${g.passive && g.passive.length ? `<div class="bg-sec"><h5>✨ NỘI TẠI</h5><div class="bg-pas">${g.passive.map(p => `<div>${guideEsc(p)}</div>`).join('')}</div></div>` : ''}
         <div class="bg-sec"><h5>⬆ TIẾN HÓA</h5><div class="bg-evo">${evoHtml}</div></div>
         ${g.tips && g.tips.length ? `<div class="bg-sec"><h5>MẸO</h5><div class="bg-tips">${g.tips.map(t => `<div>${guideEsc(t)}</div>`).join('')}</div></div>` : ''}
+        <div class="bg-sec"><h5>📜 MÔ TẢ ĐẦY ĐỦ</h5><div class="bg-desc">${guideEsc(mod.desc)}${typeof collabBonusOf === 'function' && collabBonusOf(id) ? `<div class="bg-collab">★ Tướng COLLAB: đối thủ được bù +$${collabBonusOf(id)} đầu trận</div>` : ''}${typeof GAMBLER_BODIES !== 'undefined' && GAMBLER_BODIES.includes(id) ? '<div class="bg-collab">🎲 Cờ Bạc: Reroll đầu tiên mỗi hiệp miễn phí, +1 ô lựa chọn shop &amp; G.E.A.R</div>' : ''}</div></div>
         ${g.auto ? '<div class="bg-auto">(tự tóm tắt từ mô tả)</div>' : ''}
     </div>`;
     const stop = e => e.stopPropagation();
@@ -234,6 +241,7 @@ function openBodyGuide(id, team, flip) {
     wrap.querySelector('.bg-box').addEventListener('click', stop);
     wrap.querySelector('.bg-x').addEventListener('click', e => { e.stopPropagation(); closeBodyGuide(); });
     document.body.appendChild(wrap);
+    document.addEventListener('keydown', guideEscKey);
 
     const tm = team === 2 ? 2 : 1;
     wrap.querySelectorAll('.bg-ev canvas').forEach(cv => drawGuideArt(cv, id, +cv.dataset.evo, tm));

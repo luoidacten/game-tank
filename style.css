@@ -1966,7 +1966,7 @@ body.online-active .ready-badge {
     touch-action: manipulation;
     -webkit-touch-callout: none;
 }
-canvas,
+#gameCanvas,
 .controls-area,
 .controls-area * {
     touch-action: none;
@@ -2834,4 +2834,132 @@ body.ctrl-new .btn-group { padding: 0 14px 0 24px; }
     background: rgba(56, 189, 248, 0.18);
     color: #7dd3fc;
     border-color: rgba(56, 189, 248, 0.45);
+}
+
+/* ============================================================================
+   THẺ CHỌN BODY GỌN (ĐIỆN THOẠI): Hình xe + Tên + HƯỚNG DẪN + ĐỔI
+   ============================================================================ */
+.card.body-pick-card {
+    width: clamp(104px, 30vw, 128px);
+    height: auto;
+    min-height: 0;
+    max-height: 100%;
+    justify-content: flex-start;
+    gap: 6px;
+    padding: 8px 7px;
+    overflow: visible;
+}
+.body-pick-card .pick-art {
+    width: 64px;
+    height: 64px;
+    flex: 0 0 auto;
+    border-radius: 12px;
+    background: radial-gradient(circle at 50% 45%, rgba(56, 189, 248, 0.22), rgba(15, 23, 42, 0.9) 70%);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    pointer-events: none;
+}
+.body-pick-card h4 {
+    font-size: 12.5px;
+    min-height: 2.5em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    word-break: break-word;
+}
+.body-pick-card .bg-guide-btn,
+.body-pick-card .gear-card-reroll-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 40px;
+    margin: 0;
+    padding: 4px;
+    font-size: 11.5px;
+    border-radius: 9px;
+    touch-action: manipulation;
+}
+.body-pick-card .gear-card-reroll-btn { margin-top: 0; }
+.body-pick-card .pick-chip {
+    position: absolute;
+    top: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    font-size: 9.5px;
+    font-weight: 900;
+    padding: 1px 6px;
+    border-radius: 8px;
+    white-space: nowrap;
+    color: #fff;
+    background: linear-gradient(90deg, #ff2bd6, #ffb300);
+    box-shadow: 0 0 6px #ff2bd6;
+}
+.upgrade-container .player-column:has(.body-pick-card) { justify-content: safe center; }
+.body-pick-card .bg-guide-btn,
+.body-pick-card .gear-card-reroll-btn {
+    font-family: 'Rajdhani', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: clamp(10.5px, 3.1vw, 13px);
+    padding: 4px 2px;
+    overflow: hidden;
+    font-weight: 800;
+    letter-spacing: 0;
+    white-space: nowrap;
+}
+/* 3 thẻ luôn vừa 1 hàng trên màn hẹp (360px) */
+.card.body-pick-card { flex: 1 1 0; min-width: 96px; max-width: 128px; }
+body.online-active .card.body-pick-card { width: auto; height: auto; }
+body.online-active .player-column:has(.body-pick-card) { flex-wrap: nowrap; gap: 8px; padding: 10px 8px; }
+
+/* ============================================================================
+   ĐIỆN THOẠI: VÙNG CHẠM >= 44px, NÚT ĐÓNG RÕ, CUỘN MƯỢT
+   ============================================================================ */
+.close-btn {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: -8px -10px -8px 4px;
+    border-radius: 50%;
+    flex: 0 0 auto;
+    touch-action: manipulation;
+}
+.close-btn:active { background: rgba(255, 255, 255, 0.12); color: #fff; }
+.round-title {
+    max-width: calc(100% - 16px);
+    text-align: center;
+}
+/* Các vùng cuộn: chỉ cuộn dọc, không kéo theo trang / sân đấu */
+.modal-body,
+.modal-overlay,
+.menu-overlay,
+#trainingToolbar .tb-content,
+#botWeaponGrid,
+#sandboxBoxGrid,
+#gearSandboxGrid {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+@media (hover: none) and (pointer: coarse) {
+    .tb-btn {
+        min-height: 34px;
+        font-size: 10px;
+        padding: 6px 8px;
+    }
+    .tb-toggle-btn {
+        min-width: 40px;
+        min-height: 32px;
+        font-size: 14px;
+    }
+    .tb-title { font-size: 10px; }
+    .tb-sec-label { font-size: 9.5px; }
+    #trainingToolbar { max-width: 172px; max-height: 70dvh; }
+    #trainingToolbar .tb-content { max-height: calc(70dvh - 44px); }
+    #trainingToolbar.collapsed { max-width: 130px; }
+}
+@media (max-height: 700px) {
+    .body-pick-card .pick-art { width: 48px; height: 48px; }
+    .body-pick-card .bg-guide-btn,
+    .body-pick-card .gear-card-reroll-btn { min-height: 36px; }
 }

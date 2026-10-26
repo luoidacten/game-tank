@@ -275,9 +275,19 @@ function setupControls() {
     };
     // [FIX] Nút tròn chỉ nhận chạm trong hình tròn -> ngón cái lệch ra góc / khe giữa 2 nút là bị nhả (xe khựng).
     // Nhận cả vùng chữ nhật quanh nút + 14px; ngón đang giữ nút thì còn "dính" thêm tới 30px.
+    // [FIX ĐT] Chỉ "hút" chạm về nút khi điểm chạm thật sự nằm trên vùng điều khiển / sân đấu.
+    // Trước đây chạm vào menu / shop / bảng hướng dẫn nằm đè lên (hoặc sát) nút điều khiển bị nuốt
+    // (preventDefault) -> không bấm được nút ✕, không chạm ra ngoài để đóng, không vuốt cuộn được.
+    const onPlayfield = (x, y) => {
+        const el = document.elementFromPoint(x, y);
+        if (!el) return false;
+        if (el.closest('.controls-area')) return true;
+        return el.tagName === 'CANVAS' && el.closest('#gameContainer') && !el.closest('#upgradeScreen, .modal-overlay, .menu-overlay');
+    };
     const btnNear = (x, y, prev) => {
         const hit = btnAt(x, y);
         if (hit) return hit;
+        if (!onPlayfield(x, y)) return null;
         if (prev && prev.offsetParent !== null && rectDist(prev, x, y) <= 30) return prev;
         let best = null, bd = 14;
         for (const b of allBtns) {
@@ -496,3 +506,21 @@ function setupControls() {
         }
     });
 }
+
+// [ĐT] Chạm ra vùng tối bên ngoài bảng (hoặc nhấn Esc) = bấm nút ✕ của bảng đó.
+// Chỉ áp dụng cho bảng có nút .close-btn (bảng Tạm Dừng không có -> không tự đóng nhầm).
+(function initModalOutsideClose() {
+    const closeOf = (ov) => ov && ov.querySelector(".modal-header .close-btn, .close-btn");
+    document.addEventListener("click", (e) => {
+        const ov = e.target;
+        if (!ov || !ov.classList || !ov.classList.contains("modal-overlay")) return;
+        const b = closeOf(ov);
+        if (b) b.click();
+    });
+    document.addEventListener("keydown", (e) => {
+        if (e.key !== "Escape" || document.getElementById("bodyGuideModal")) return;
+        const open = [...document.querySelectorAll(".modal-overlay")].filter(m => getComputedStyle(m).display !== "none");
+        const b = open.length ? closeOf(open[open.length - 1]) : null;
+        if (b) b.click();
+    });
+})();
