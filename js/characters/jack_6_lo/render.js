@@ -59,17 +59,105 @@ registerTankArt('jack_6_lo', (p, k) => {
 });
 
 // ---------- Đạn ----------
+// Đạn The Hand: mỗi loại 1 màu / hình riêng (đọc b.jlT)
 function jlDrawHanderBullet(b) {
-    const x = b.x + b.w / 2, y = b.y + b.h / 2, an = Math.atan2(b.vy || 0, b.vx || 0);
-    ctx.save(); ctx.translate(x, y); ctx.rotate(an);
-    const c = b.jlCrit ? JL_GOLD : '#fde68a';
+    const x = b.x + b.w / 2, y = b.y + b.h / 2, an = Math.atan2(b.vy || 0, b.vx || 0), t = jlNow();
+    const A = (typeof JL_AMMO !== 'undefined' && JL_AMMO[b.jlT]) || { k: 'gold', c: JL_GOLD };
+    const c = A.c, k = A.k;
+    ctx.save(); ctx.translate(x, y);
+    if (k === 'smoke' || k === 'curse') { // khối khói cuộn
+        ctx.globalAlpha = 0.85;
+        for (let i = 0; i < 4; i++) {
+            const a = t * 5 + i * 1.6, r = 4 + (i % 2) * 1.5;
+            ctx.fillStyle = k === 'curse' ? (i % 2 ? 'rgba(75,85,99,0.75)' : 'rgba(126,34,206,0.45)') : (i % 2 ? 'rgba(148,163,184,0.7)' : 'rgba(226,232,240,0.55)');
+            ctx.beginPath(); ctx.arc(Math.cos(a) * 3, Math.sin(a) * 3 - (b.vy > 0 ? -i : i) * 2.2, r, 0, Math.PI * 2); ctx.fill();
+        }
+        if (k === 'curse') { ctx.globalAlpha = 1; ctx.font = '7px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('💀', 0, 0); }
+        ctx.restore(); return;
+    }
+    if (k === 'toy') { // bóng nhựa lắc lư
+        const wob = Math.sin(t * 18) * 2;
+        ctx.translate(wob, 0);
+        ctx.fillStyle = '#f472b6'; ctx.shadowBlur = 6; ctx.shadowColor = '#f472b6';
+        ctx.beginPath(); ctx.arc(0, 0, 3.6, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+        ctx.fillStyle = '#fde047'; ctx.beginPath(); ctx.arc(0, 0, 3.6, 0, Math.PI); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(-1.2, -1.2, 0.9, 0, Math.PI * 2); ctx.fill();
+        ctx.restore(); return;
+    }
+    ctx.rotate(an);
+    const L = k === 'pierce' ? 26 : (k === 'gold' ? 22 : 16);
     ctx.globalCompositeOperation = 'lighter';
-    const g = ctx.createLinearGradient(-18, 0, 0, 0); g.addColorStop(0, 'rgba(252,211,77,0)'); g.addColorStop(1, b.jlCrit ? 'rgba(252,211,77,0.8)' : 'rgba(253,230,138,0.45)');
-    ctx.strokeStyle = g; ctx.lineWidth = b.jlCrit ? 3 : 1.8; ctx.beginPath(); ctx.moveTo(-18, 0); ctx.lineTo(0, 0); ctx.stroke();
+    const g = ctx.createLinearGradient(-L, 0, 0, 0); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, c);
+    ctx.strokeStyle = g; ctx.globalAlpha = 0.8; ctx.lineWidth = k === 'gold' || k === 'blast' ? 3.4 : 2.2;
+    ctx.beginPath(); ctx.moveTo(-L, 0);
+    if (k === 'shock') { for (let i = 1; i <= 4; i++) ctx.lineTo(-L + i * L / 4, (i % 2 ? 2.5 : -2.5) * Math.sin(t * 30 + i)); }
+    else ctx.lineTo(0, 0);
+    ctx.stroke(); ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-over';
-    ctx.shadowBlur = b.jlCrit ? 12 : 6; ctx.shadowColor = c; ctx.fillStyle = b.jlCrit ? '#fff7ed' : '#d97706';
-    const L = b.jlCrit ? 5 : 4, W = b.jlCrit ? 2.4 : 1.8;
-    ctx.beginPath(); ctx.moveTo(-L, -W); ctx.lineTo(L * 0.4, -W); ctx.quadraticCurveTo(L + 1.5, 0, L * 0.4, W); ctx.lineTo(-L, W); ctx.closePath(); ctx.fill();
+    ctx.shadowBlur = b.jlCrit ? 14 : 9; ctx.shadowColor = c; ctx.fillStyle = c;
+    const S = k === 'gold' || k === 'blast' ? 1.35 : 1, Lb = 4.6 * S, W = 2.2 * S;
+    if (k === 'ice') { // tinh thể băng
+        ctx.beginPath(); ctx.moveTo(Lb + 1, 0); ctx.lineTo(0, -W - 0.6); ctx.lineTo(-Lb, 0); ctx.lineTo(0, W + 0.6); ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = '#eff6ff'; ctx.lineWidth = 0.7; ctx.stroke();
+    } else if (k === 'poison' || k === 'blood') { // giọt
+        ctx.beginPath(); ctx.arc(-0.5, 0, W + 0.5, Math.PI / 2, -Math.PI / 2); ctx.quadraticCurveTo(Lb, -W * 0.3, Lb + 1.5, 0); ctx.quadraticCurveTo(Lb, W * 0.3, -0.5, W + 0.5); ctx.fill();
+    } else if (k === 'hype') { // viên trắng viền vàng
+        ctx.beginPath(); ctx.moveTo(-Lb, -W); ctx.lineTo(Lb * 0.4, -W); ctx.quadraticCurveTo(Lb + 1.5, 0, Lb * 0.4, W); ctx.lineTo(-Lb, W); ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = JL_GOLD; ctx.lineWidth = 0.8; ctx.stroke();
+    } else {
+        ctx.beginPath(); ctx.moveTo(-Lb, -W); ctx.lineTo(Lb * 0.4, -W); ctx.quadraticCurveTo(Lb + 1.5, 0, Lb * 0.4, W); ctx.lineTo(-Lb, W); ctx.closePath(); ctx.fill();
+        if (k === 'gold' || b.jlCrit) { ctx.fillStyle = '#fff7ed'; ctx.fillRect(-Lb * 0.6, -W * 0.35, Lb, W * 0.5); }
+        if (k === 'blast') { ctx.fillStyle = '#7c2d12'; ctx.fillRect(-Lb * 0.2, -W, 1.2, W * 2); }
+    }
+    ctx.restore();
+}
+// Ổ đạn 6 icon cạnh xe (The Hand, mặc định bên trái vì bên phải có vòng chỉ báo chung): viên kế tiếp sáng, viên đã bắn mờ
+function jlDrawAmmoCyl(p) {
+    if (p.jlMode === 'boy' || !p.jlCyl || !p.jlCyl.length || typeof JL_AMMO === 'undefined') return;
+    const side = p.x - 42 > 0 ? -1 : 1, cx = p.x + p.w / 2 + (side < 0 ? -(p.w / 2 + 22) : p.w / 2 + 48), cy = p.y + p.h / 2 + (p.id === 1 ? -3 : 3), idx = p.jlCylIdx || 0;
+    const R = 14, rot = -idx * Math.PI / 3, load = (p.jlLoadFx || 0) / 30;
+    const guest = typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'guest';
+    ctx.save(); ctx.translate(cx, cy);
+    ctx.fillStyle = 'rgba(15,23,42,0.72)'; ctx.strokeStyle = p.jlReload > 0 ? '#64748b' : JL_GOLD; ctx.lineWidth = 1.2;
+    ctx.shadowBlur = 8; ctx.shadowColor = p.jlReload > 0 ? '#475569' : JL_GOLD;
+    ctx.beginPath(); ctx.arc(0, 0, R + 5, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); ctx.shadowBlur = 0;
+    if (p.jlReload > 0) { // vòng nạp
+        const k = 1 - p.jlReload / jlReloadTicks(p);
+        ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, R + 5, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * k); ctx.stroke();
+    }
+    ctx.font = '8px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    for (let i = 0; i < 6; i++) {
+        const a = (i - idx) * Math.PI / 3 + (p.id === 1 ? -Math.PI / 2 : Math.PI / 2) + load * 3, A = JL_AMMO[p.jlCyl[i]];
+        const used = i < idx || p.jlReload > 0, next = !used && i === idx;
+        const x = Math.cos(a) * R, y = Math.sin(a) * R;
+        ctx.globalAlpha = used ? 0.22 : 1;
+        ctx.fillStyle = used ? '#0f172a' : 'rgba(2,6,23,0.85)';
+        if (next) { ctx.shadowBlur = 8; ctx.shadowColor = A.c; }
+        ctx.strokeStyle = A.c; ctx.lineWidth = next ? 1.6 : 0.9;
+        ctx.beginPath(); ctx.arc(x, y, next ? 6 : 5, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); ctx.shadowBlur = 0;
+        ctx.save(); ctx.translate(x, y); if (guest) ctx.rotate(Math.PI); ctx.fillText(A.ic, 0, 0.5); ctx.restore();
+    }
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#1e293b'; ctx.beginPath(); ctx.arc(0, 0, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    void rot;
+}
+// Đạn Khói Mù: phủ khói lên hàng HUD của địch (che HP / đạn / chỉ báo)
+function jlDrawBlindSmoke(e) {
+    if (!e || !(e.jlBlindT > 0) || e.hp <= 0) return;
+    const k = Math.min(1, e.jlBlindT / 12), t = jlNow(), cx = e.x + e.w / 2;
+    const y0 = e.id === 1 ? e.y + e.h + 1 : e.y - 26, y1 = y0 + 25;
+    ctx.save(); ctx.globalAlpha = 0.92 * k;
+    for (let i = 0; i < 9; i++) {
+        const fx = cx + (i - 4) * 8 + Math.sin(t * 2 + i) * 3, fy = (y0 + y1) / 2 + Math.cos(t * 2.4 + i * 1.7) * 6;
+        ctx.fillStyle = i % 2 ? 'rgba(71,85,105,0.95)' : 'rgba(148,163,184,0.9)';
+        ctx.beginPath(); ctx.arc(fx, fy, 9 + (i % 3) * 2, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = k; ctx.font = "900 7px 'Orbitron', Arial"; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#f8fafc'; ctx.strokeStyle = '#000'; ctx.lineWidth = 2;
+    ctx.translate(cx, (y0 + y1) / 2);
+    if (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'guest') ctx.rotate(Math.PI);
+    ctx.strokeText('💨 MÙ', 0, 0); ctx.fillText('💨 MÙ', 0, 0);
     ctx.restore();
 }
 function jlDrawBoyBullet(b) {
@@ -128,6 +216,17 @@ function jlDrawAura(p) {
             ctx.beginPath(); ctx.ellipse(cx + Math.cos(a) * r, cy + Math.sin(a) * r, 2.6, 1.6, a, 0, Math.PI * 2); ctx.stroke();
         }
     }
+    if (p.jlHypeT > 0) {
+        ctx.strokeStyle = 'rgba(248,250,252,0.85)'; ctx.lineWidth = 1.4; ctx.shadowBlur = 10; ctx.shadowColor = '#f8fafc';
+        ctx.beginPath(); ctx.arc(cx, cy, p.w * 0.72, t * 6, t * 6 + Math.PI * 1.4); ctx.stroke(); ctx.shadowBlur = 0;
+    }
+    if (p.jlCurseT > 0) {
+        for (let i = 0; i < 5; i++) {
+            const a = t * 2 + i * 1.26;
+            ctx.fillStyle = i % 2 ? 'rgba(75,85,99,0.5)' : 'rgba(126,34,206,0.35)';
+            ctx.beginPath(); ctx.arc(cx + Math.cos(a) * p.w * 0.5, cy + Math.sin(a) * p.h * 0.5, 6, 0, Math.PI * 2); ctx.fill();
+        }
+    }
     if (p.jlBackFx > 0) {
         const k = p.jlBackFx / 40;
         ctx.fillStyle = `rgba(30,41,59,${0.55 * k})`; ctx.beginPath(); ctx.arc(cx, cy, p.w * (1.3 - k * 0.4), 0, Math.PI * 2); ctx.fill();
@@ -163,6 +262,7 @@ CharHooks.register('jack_6_lo', Object.assign(CharHooks.registry.jack_6_lo || {}
             ctx.beginPath(); ctx.arc(cx, cy, this.w * 0.95, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * k); ctx.stroke(); ctx.restore();
         }
         jlDrawRoulette(this);
+        jlDrawAmmoCyl(this);
         jlDrawCoin(this);
     },
     drawUI() {
@@ -250,6 +350,7 @@ function jlDrawFinisherOver(f) {
     }
 }
 function jlFxOver() {
+    if (typeof p1 !== 'undefined' && typeof p2 !== 'undefined') [p1, p2].forEach(p => { if (jlIs(p)) jlDrawBlindSmoke(jlEnemy(p)); });
     if (typeof bodyEffects === 'undefined') return;
     for (const e of bodyEffects) if (e instanceof JlFinisher && e.active) e.drawOver();
 }
@@ -263,8 +364,9 @@ function jlRegisterHUD() {
         }
         if (p.jlBoyCd > 0) return { pct: 1 - p.jlBoyCd / Math.max(1, p.jlBoyCdMax), ready: false, color: '#64748b', label: 'THE BOY ' + Math.ceil(p.jlBoyCd / 60) + 's', btnIcon: '🎲', dim: true };
         if (p.jlHold > 0) return { pct: Math.min(1, p.jlHold / JL_HOLD), ready: p.jlHold >= JL_HOLD, color: JL_PURP, label: 'RÚT THE BOY...', btnIcon: '🔫' };
-        if (p.jlReload > 0) return { pct: 1 - p.jlReload / 84, ready: false, color: '#94a3b8', label: 'NẠP ĐẠN', btnIcon: '🎲', dim: true };
-        return { pct: 1, ready: true, color: p.jlLuck > 0 ? JL_GOLD : (p.jlDebt > 0 ? JL_RED : JL_GOLD), label: p.jlLuck > 0 ? 'LUCK! GIỮ: THE BOY' : (p.jlDebt > 0 ? 'NỢ x' + p.jlDebt + ' · GIỮ: THE BOY' : 'GIỮ: THE BOY'), btnIcon: '🎲' };
+        if (p.jlReload > 0) return { pct: 1 - p.jlReload / jlReloadTicks(p), ready: false, color: '#94a3b8', label: 'NẠP ĐẠN', btnIcon: '🎲', dim: true };
+        const nx = p.jlCyl && typeof JL_AMMO !== 'undefined' ? JL_AMMO[p.jlCyl[p.jlCylIdx || 0]] : null;
+        return { pct: 1, ready: true, color: nx ? nx.c : JL_GOLD, label: nx ? 'KẾ: ' + nx.n : 'GIỮ: THE BOY', btnIcon: nx ? nx.ic : '🎲' };
     });
 }
 if (typeof window !== 'undefined') window.addEventListener('load', jlRegisterHUD);
