@@ -37,12 +37,12 @@ Object.assign(Player.prototype, {
                 if (spawnY < 5) spawnY = 5;
                 floatingSwords.push(new FloatingSword(this.x - 15, spawnY, 60, 120, 0, dirY * 25, 120, this.damage * 3.5, true, false, this, true));
             } else if (this.bladeShotCount % 2 !== 0) {
-                // 2. Quang Kiếm: lơ lửng tại chỗ trên đầu, 2s sau tự phóng tia
+                // 2. Quang Kiếm: lơ lửng tại chỗ trên đầu, 2s sau tự phóng tia (buff: 0.45x+1 → 0.5x+1.1)
                 const y = this.id === 1 ? this.y - 30 : this.y + this.h + 30;
-                bodyEffects.push(new BgLightSword(this, cx, y, this.damage * 0.45 + 1, 120));
+                bodyEffects.push(new BgLightSword(this, cx, y, this.damage * 0.5 + 1.1, 120));
             } else {
-                // 3. Ám Kiếm: kiếm bay
-                bgSpawnDark(this, cx, this.id === 1 ? this.y - 18 : this.y + this.h + 18, 0, dirY * (C.bulletSpeed + 2), this.damage * 0.75);
+                // 3. Ám Kiếm: kiếm bay (buff: 0.75x → 0.85x)
+                bgSpawnDark(this, cx, this.id === 1 ? this.y - 18 : this.y + this.h + 18, 0, dirY * (C.bulletSpeed + 2), this.damage * 0.85);
             }
             if (soundSystem && !soundSystem.muted && soundSystem.playClick) soundSystem.playClick();
             this.ammo--; this.lastShot = now; inp.s = false;
