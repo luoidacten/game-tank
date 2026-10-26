@@ -124,13 +124,22 @@ function tatStartCombo(p, e, mult, big) {
 class TatZone {
     constructor(team, x, y, r, delay, kind, dmg, opts) {
         opts = opts || {};
-        this.team = team; this.x = x; this.y = y; this.r = r;
+        // Vùng tròn: bán kính ~ cùng diện tích với vùng chữ nhật cũ (r*1.3 x r*0.75)
+        this.team = team; this.x = x; this.y = y; this.r = r * 1.11;
         this.delay = delay; this.maxDelay = delay; this.kind = kind; this.dmg = dmg;
         this.clear = !!opts.clear; this.pull = !!opts.pull; this.breakSummon = !!opts.breakSummon;
         this.t = 0; this.fired = false; this.slowT = 0; this.active = true;
-        if (typeof zoneFit === 'function') zoneFit(this, r);
+        const R = this.r;
+        if (canvas.height > R * 2) this.y = Math.max(R, Math.min(canvas.height - R, this.y));
+        if (canvas.width > R * 2) this.x = Math.max(R, Math.min(canvas.width - R, this.x));
     }
-    inZone(o) { return o && zoneDist(o.x + o.w / 2 - this.x, o.y + o.h / 2 - this.y) < this.r + Math.min(o.w, o.h) * 0.3; }
+    // tròn: khoảng cách từ tâm tới điểm gần nhất của mục tiêu <= bán kính
+    inZone(o) {
+        if (!o || typeof o.x !== 'number') return false;
+        const w = o.w || 0, h = o.h || 0;
+        const nx = Math.max(o.x, Math.min(this.x, o.x + w)), ny = Math.max(o.y, Math.min(this.y, o.y + h));
+        return Math.hypot(nx - this.x, ny - this.y) <= this.r;
+    }
     update() {
         const o = tatTeam(this.team), e = tatEnemy(o);
         this.t++;
@@ -167,7 +176,7 @@ class TatZone {
                 for (let i = e.bullets.length - 1; i >= 0; i--) {
                     const b = e.bullets[i];
                     if (b.isLazer || b.isBeam || b.isUltimate) continue;
-                    if (zoneDist(b.x + (b.w || 6) / 2 - this.x, b.y + (b.h || 6) / 2 - this.y) < this.r) { e.bullets.splice(i, 1); spawnSparkParticles(b.x, b.y, '#fecdd3', 3); }
+                    if (Math.hypot(b.x + (b.w || 6) / 2 - this.x, b.y + (b.h || 6) / 2 - this.y) < this.r) { e.bullets.splice(i, 1); spawnSparkParticles(b.x, b.y, '#fecdd3', 3); }
                 }
                 if (hitE) this.slowT = 120;
             }

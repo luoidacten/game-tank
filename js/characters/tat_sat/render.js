@@ -167,37 +167,52 @@ CharHooks.registry.tat_sat.drawUI = function () {
 
 // ---------- Vùng cảnh báo ----------
 function tatDrawZone(z) {
-    const t = z.t, stun = z.kind === 'stun';
+    const t = z.t, stun = z.kind === 'stun', r = z.r, TAU = Math.PI * 2;
     const col = stun ? TAT_VIOLET : TAT_RED, rgb = stun ? '192, 132, 252' : '255, 45, 85';
+    const circ = (rr) => { ctx.beginPath(); ctx.arc(z.x, z.y, Math.max(0, rr), 0, TAU); };
     ctx.save();
     if (!z.fired) {
         const k = Math.min(1, t / z.maxDelay), blink = Math.floor(t / 4) % 2 ? 0.6 : 1;
-        ctx.globalAlpha = 0.14 + 0.2 * k; ctx.fillStyle = col;
-        zoneRectPath(z.x, z.y, z.r); ctx.fill();
+        // nền gradient tỏa tâm (đậm dần ở mép)
+        const g = ctx.createRadialGradient(z.x, z.y, r * 0.05, z.x, z.y, r);
+        g.addColorStop(0, `rgba(${rgb}, ${0.05 + 0.15 * k})`); g.addColorStop(0.75, `rgba(${rgb}, ${0.1 + 0.15 * k})`); g.addColorStop(1, `rgba(${rgb}, ${0.3 + 0.25 * k})`);
+        ctx.fillStyle = g; circ(r); ctx.fill();
+        // viền nét đứt xoay
         ctx.globalAlpha = blink; ctx.strokeStyle = col; ctx.lineWidth = 1.6; ctx.setLineDash([8, 5]); ctx.lineDashOffset = -t;
-        zoneRectPath(z.x, z.y, z.r); ctx.stroke(); ctx.setLineDash([]);
+        circ(r); ctx.stroke(); ctx.setLineDash([]);
+        // vạch chia xoay ngược chiều
+        ctx.globalAlpha = 0.85; ctx.lineWidth = 1.5; ctx.shadowColor = col; ctx.shadowBlur = 8;
+        const rot = -t * 0.06;
+        for (let i = 0; i < 16; i++) {
+            const a = rot + i * TAU / 16, l = i % 4 === 0 ? 8 : 4, r0 = r - 3;
+            ctx.beginPath(); ctx.moveTo(z.x + Math.cos(a) * (r0 - l), z.y + Math.sin(a) * (r0 - l)); ctx.lineTo(z.x + Math.cos(a) * r0, z.y + Math.sin(a) * r0); ctx.stroke();
+        }
         // vòng co lại = sắp chém
-        ctx.globalAlpha = 0.9; ctx.lineWidth = 2.2; ctx.shadowColor = col; ctx.shadowBlur = 10;
-        zoneRectPath(z.x, z.y, z.r * (1 - k * 0.92)); ctx.stroke();
+        ctx.globalAlpha = 0.9; ctx.lineWidth = 2.2; ctx.shadowBlur = 10;
+        circ(r * (1 - k * 0.92)); ctx.stroke();
         // ký hiệu kiếm chéo
         ctx.globalAlpha = 0.5 + 0.5 * k; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.4;
         const s = 9;
         ctx.beginPath(); ctx.moveTo(z.x - s, z.y - s); ctx.lineTo(z.x + s, z.y + s); ctx.moveTo(z.x + s, z.y - s); ctx.lineTo(z.x - s, z.y + s); ctx.stroke();
         if (z.pull) {
-            ctx.globalAlpha = 0.5; ctx.strokeStyle = col;
-            for (const sx of [-1, 1]) { const xx = z.x + sx * z.r * ZONE_AX * (0.9 - (t % 20) / 40); ctx.beginPath(); ctx.moveTo(xx, z.y - 6); ctx.lineTo(xx - sx * 6, z.y); ctx.lineTo(xx, z.y + 6); ctx.stroke(); }
+            ctx.globalAlpha = 0.6; ctx.strokeStyle = col;
+            for (const sx of [-1, 1]) { const xx = z.x + sx * r * (0.9 - (t % 20) / 40); ctx.beginPath(); ctx.moveTo(xx, z.y - 6); ctx.lineTo(xx - sx * 6, z.y); ctx.lineTo(xx, z.y + 6); ctx.stroke(); }
         }
     } else {
         const k = Math.min(1, (t - z.delay) / 20);
         ctx.globalCompositeOperation = 'lighter';
-        ctx.globalAlpha = 1 - k; ctx.strokeStyle = '#ffffff'; ctx.shadowColor = col; ctx.shadowBlur = 18; ctx.lineCap = 'round';
-        const hw = z.r * ZONE_AX, hh = z.r * ZONE_AY;
+        // sóng tròn lan ra
+        ctx.globalAlpha = (1 - k) * 0.8; ctx.strokeStyle = col; ctx.lineWidth = 3 * (1 - k) + 0.5; ctx.shadowColor = col; ctx.shadowBlur = 16;
+        circ(r * (0.85 + k * 0.2)); ctx.stroke();
+        ctx.save(); circ(r); ctx.clip();
+        ctx.globalAlpha = 1 - k; ctx.strokeStyle = '#ffffff'; ctx.shadowBlur = 18; ctx.lineCap = 'round';
         for (let i = 0; i < (stun ? 2 : 3); i++) {
-            const sgn = i % 2 ? 1 : -1, off = (i - 1) * hh * 0.4;
+            const sgn = i % 2 ? 1 : -1, off = (i - 1) * r * 0.3;
             ctx.lineWidth = (6 - i * 1.5) * (1 - k * 0.6);
-            ctx.beginPath(); ctx.moveTo(z.x - hw * (0.3 + k * 0.7), z.y + off - sgn * hh * 0.5); ctx.lineTo(z.x + hw * (0.3 + k * 0.7), z.y + off + sgn * hh * 0.5); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(z.x - r * (0.3 + k * 0.7), z.y + off - sgn * r * 0.35); ctx.lineTo(z.x + r * (0.3 + k * 0.7), z.y + off + sgn * r * 0.35); ctx.stroke();
         }
-        ctx.globalAlpha = (1 - k) * 0.25; ctx.fillStyle = `rgba(${rgb}, 1)`; zoneRectPath(z.x, z.y, z.r); ctx.fill();
+        ctx.restore();
+        ctx.globalAlpha = (1 - k) * 0.25; ctx.fillStyle = `rgba(${rgb}, 1)`; circ(r); ctx.fill();
     }
     ctx.restore();
 }

@@ -245,16 +245,35 @@ function kzDrawTornado(o) {
     ctx.restore();
 }
 
+// Vòng tròn neon: nền gradient tỏa tâm + viền phát sáng + vạch chia xoay
+function kzRing(x, y, r, col, rgb, rot, ticks, fillA) {
+    const g = ctx.createRadialGradient(x, y, r * 0.1, x, y, r);
+    g.addColorStop(0, `rgba(${rgb}, ${fillA * 0.25})`); g.addColorStop(0.7, `rgba(${rgb}, ${fillA * 0.6})`); g.addColorStop(1, `rgba(${rgb}, ${fillA})`);
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = col; ctx.lineWidth = 1.8; ctx.shadowBlur = 12; ctx.shadowColor = col;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke();
+    ctx.lineWidth = 1.4;
+    for (let i = 0; i < ticks; i++) {
+        const a = rot + i * Math.PI * 2 / ticks, l = i % 3 === 0 ? 7 : 4;
+        ctx.beginPath(); ctx.moveTo(x + Math.cos(a) * (r - l), y + Math.sin(a) * (r - l)); ctx.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r); ctx.stroke();
+    }
+    ctx.shadowBlur = 0;
+}
+
 function kzDrawScar(o) {
-    const k = o.life / o.maxLife;
+    const k = o.life / o.maxLife, t = o.maxLife - o.life, r = o.r;
     ctx.save();
     ctx.globalAlpha = Math.min(1, k * 3) * 0.9;
-    ctx.fillStyle = 'rgba(244, 114, 182, 0.12)';
-    ctx.fillRect(o.x - o.hw, o.y - o.hh, o.hw * 2, o.hh * 2);
+    kzRing(o.x, o.y, r, '#f472b6', '244, 114, 182', t * 0.03, 12, 0.22);
+    // vòng nét đứt xoay ngược
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)'; ctx.lineWidth = 1; ctx.setLineDash([5, 6]); ctx.lineDashOffset = t * 0.6;
+    ctx.beginPath(); ctx.arc(o.x, o.y, r * 0.68, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+    // vết chém chéo trong vòng
     ctx.strokeStyle = '#f472b6'; ctx.lineWidth = 3; ctx.shadowBlur = 12; ctx.shadowColor = '#f472b6'; ctx.lineCap = 'round';
+    const d = r * 0.62;
     ctx.beginPath();
-    ctx.moveTo(o.x - o.hw * 0.8, o.y - o.hh * 0.6); ctx.lineTo(o.x + o.hw * 0.8, o.y + o.hh * 0.6);
-    ctx.moveTo(o.x - o.hw * 0.8, o.y + o.hh * 0.6); ctx.lineTo(o.x + o.hw * 0.8, o.y - o.hh * 0.6);
+    ctx.moveTo(o.x - d, o.y - d * 0.55); ctx.lineTo(o.x + d, o.y + d * 0.55);
+    ctx.moveTo(o.x - d, o.y + d * 0.55); ctx.lineTo(o.x + d, o.y - d * 0.55);
     ctx.stroke();
     ctx.strokeStyle = '#fff'; ctx.lineWidth = 1; ctx.stroke();
     ctx.restore();
@@ -327,30 +346,38 @@ function kzDrawLoanVu(o) {
 }
 
 function kzDrawDomain(o) {
-    const k = o.life / o.maxLife, t = o.tick;
+    const k = o.life / o.maxLife, t = o.tick, r = o.r;
     ctx.save();
     const a = Math.min(1, (o.maxLife - o.life) / 12) * Math.min(1, o.life / 20);
     ctx.globalAlpha = a;
-    const g = ctx.createLinearGradient(o.x - o.hw, 0, o.x + o.hw, 0);
-    g.addColorStop(0, 'rgba(34, 211, 238, 0.05)'); g.addColorStop(0.5, 'rgba(167, 139, 250, 0.22)'); g.addColorStop(1, 'rgba(34, 211, 238, 0.05)');
-    ctx.fillStyle = g;
-    ctx.fillRect(o.x - o.hw, o.y - o.hh, o.hw * 2, o.hh * 2);
-    ctx.strokeStyle = '#22d3ee'; ctx.lineWidth = 1.5; ctx.shadowBlur = 12; ctx.shadowColor = '#22d3ee';
-    ctx.strokeRect(o.x - o.hw, o.y - o.hh, o.hw * 2, o.hh * 2);
-    // lưỡi kiếm chém liên tục (vệt chéo lóe)
-    ctx.lineCap = 'round';
+    const g = ctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, r);
+    g.addColorStop(0, 'rgba(167, 139, 250, 0.28)'); g.addColorStop(0.65, 'rgba(34, 211, 238, 0.08)'); g.addColorStop(1, 'rgba(34, 211, 238, 0.26)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(o.x, o.y, r, 0, Math.PI * 2); ctx.fill();
+    // viền đôi + vạch chia xoay
+    ctx.strokeStyle = '#22d3ee'; ctx.lineWidth = 2; ctx.shadowBlur = 14; ctx.shadowColor = '#22d3ee';
+    ctx.beginPath(); ctx.arc(o.x, o.y, r, 0, Math.PI * 2); ctx.stroke();
+    ctx.lineWidth = 1.4;
+    for (let i = 0; i < 24; i++) {
+        const an = t * 0.025 + i * Math.PI / 12, l = i % 3 === 0 ? 9 : 4;
+        ctx.beginPath(); ctx.moveTo(o.x + Math.cos(an) * (r - l), o.y + Math.sin(an) * (r - l)); ctx.lineTo(o.x + Math.cos(an) * r, o.y + Math.sin(an) * r); ctx.stroke();
+    }
+    ctx.strokeStyle = 'rgba(167, 139, 250, 0.8)'; ctx.lineWidth = 1; ctx.shadowColor = '#a78bfa'; ctx.setLineDash([10, 7]); ctx.lineDashOffset = t * 0.8;
+    ctx.beginPath(); ctx.arc(o.x, o.y, r * 0.78, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+    // lưỡi kiếm chém liên tục (vệt chéo lóe) bên trong vòng
+    ctx.save(); ctx.beginPath(); ctx.arc(o.x, o.y, r - 2, 0, Math.PI * 2); ctx.clip();
+    ctx.lineCap = 'round'; ctx.shadowBlur = 8;
     for (let i = 0; i < 7; i++) {
-        const s = (i * 37 + t * 5) % 100 / 100;
-        const x = o.x - o.hw + ((i * 53 + t * 3) % (o.hw * 2));
-        const y = o.y - o.hh + s * o.hh * 2;
+        const an0 = i * 2.4 + t * 0.05, rr = r * (0.2 + ((i * 37 + t * 2) % 70) / 100);
+        const x = o.x + Math.cos(an0) * rr, y = o.y + Math.sin(an0) * rr * 0.9;
         const ang = (i % 2 ? 0.7 : -0.7);
         ctx.strokeStyle = i % 3 ? 'rgba(255,255,255,0.85)' : '#f472b6';
         ctx.lineWidth = 1.3;
         ctx.beginPath(); ctx.moveTo(x - Math.cos(ang) * 10, y - Math.sin(ang) * 10); ctx.lineTo(x + Math.cos(ang) * 10, y + Math.sin(ang) * 10); ctx.stroke();
     }
-    // vạch thời gian
-    ctx.fillStyle = '#22d3ee'; ctx.shadowBlur = 0;
-    ctx.fillRect(o.x - o.hw, o.y + o.hh + 2, o.hw * 2 * k, 2);
+    ctx.restore();
+    // vạch thời gian: cung tròn bên ngoài
+    ctx.strokeStyle = '#22d3ee'; ctx.shadowBlur = 6; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.arc(o.x, o.y, r + 4, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * k); ctx.stroke();
     ctx.restore();
 }
 

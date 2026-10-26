@@ -27,6 +27,15 @@ function kzSmall(b, max = 16) {
 function kzOverlap(cx, cy, hw, hh, t) {
     return Math.abs(t.x + t.w / 2 - cx) < hw + t.w / 2 && Math.abs(t.y + t.h / 2 - cy) < hh + t.h / 2;
 }
+// Vùng tròn: khoảng cách từ tâm tới điểm gần nhất của hộp mục tiêu <= r
+function kzCircleHit(cx, cy, r, t) {
+    const nx = Math.max(t.x, Math.min(cx, t.x + t.w)), ny = Math.max(t.y, Math.min(cy, t.y + t.h));
+    return Math.hypot(nx - cx, ny - cy) <= r;
+}
+function kzBreakCratesR(owner, cx, cy, r) {
+    if (typeof crates === 'undefined') return;
+    for (const c of crates) if (c.active && kzCircleHit(cx, cy, r, c)) { c.active = false; crateOnBreak(c, owner); grantCrateLoot(c, owner); }
+}
 function kzBreakCrates(owner, cx, cy, hw, hh) {
     if (typeof crates === 'undefined') return;
     for (const c of crates) {
@@ -68,7 +77,7 @@ class KazTornado {
                 }
             }
         }
-        kzBreakCrates(o, this.x, this.y, this.r * 0.8, this.r * 0.8);
+        kzBreakCratesR(o, this.x, this.y, this.r * 0.9);
         if (this.hitCd > 0) this.hitCd--;
         if (e && kzAlive(e) && this.hitsLeft > 0 && this.hitCd <= 0 && kzOverlap(this.x, this.y, this.r * 0.85, this.r * 0.85, e)) {
             e.takeDamage(this.dmg, o);
@@ -82,14 +91,14 @@ class KazTornado {
 // ---------- Entity: Vệt kiếm dưới đất (BA Evo 2): chậm + cấm hồi máu ----------
 class KazScar {
     constructor(owner, x, y) {
-        this.owner = owner; this.x = x; this.y = y; this.hw = 46; this.hh = 16;
+        this.owner = owner; this.x = x; this.y = y; this.r = 34; // vùng tròn (~ diện tích vệt 92x32 cũ)
         this.life = 180; this.maxLife = 180; this.active = true;
     }
     update() {
         if (!this.active) return;
         if (--this.life <= 0) { this.active = false; return; }
         const o = this.owner, e = kzEnemy(o);
-        if (e && kzAlive(e) && kzOverlap(this.x, this.y, this.hw, this.hh, e)) {
+        if (e && kzAlive(e) && kzCircleHit(this.x, this.y, this.r, e)) {
             addStatusSlow(e, 0.6);
             o.kazCutT = Math.max(o.kazCutT || 0, 2); o.kazCutMult = 1;
         }
@@ -179,7 +188,7 @@ class KazDomain {
     constructor(owner, target) {
         this.owner = owner;
         this.x = target.x + target.w / 2; this.y = target.y + target.h / 2;
-        this.hw = 95; this.hh = 34;
+        this.r = 70; // vùng tròn (~ diện tích 190x68 cũ)
         this.life = 240; this.maxLife = 240; this.tick = 0;
         this.lastX = target.x; this.active = true;
     }
@@ -189,7 +198,7 @@ class KazDomain {
         this.tick++;
         const o = this.owner, e = kzEnemy(o);
         if (!e || !kzAlive(e)) return;
-        const inside = kzOverlap(this.x, this.y, this.hw, this.hh, e);
+        const inside = kzCircleHit(this.x, this.y, this.r, e);
         if (inside) {
             // Cấm lướt / dịch chuyển: chặn mọi cú nhảy ngang lớn trong 1 tick
             if (Math.abs(e.x - this.lastX) > 12) e.x = this.lastX + Math.sign(e.x - this.lastX) * 4;
