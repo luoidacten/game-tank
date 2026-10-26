@@ -25,7 +25,7 @@ function opFist(x, y, s, glow) {
 
 // ---------- Xe ----------
 registerTankArt('one_punch', (p, k) => {
-    const t = k.t, rec = (p.opRecoil || 0) / 16 - (p.opWindT > 0 ? (1 - p.opWindT / 21) * 0.9 : 0), exc = (p.opExc || 0) / 100;
+    const t = k.t, rec = (p.opRecoil || 0) / 16 - (p.opWindT > 0 ? (1 - p.opWindT / OP_WIND) * 0.9 : 0), exc = (p.opExc || 0) / 100;
     // áo choàng đỏ bay phía sau
     const wave = Math.sin(t * 7) * 1.6;
     ctx.fillStyle = TA.vgrad(6, 17, '#dc2626', '#7f1d1d');
@@ -136,9 +136,13 @@ Object.assign(CharHooks.registry.one_punch, {
             const lx = this.opWindX || cx, y0 = dir < 0 ? this.y : this.y + this.h, y1 = dir < 0 ? 0 : canvas.height;
             const top = Math.min(y0, y1), H = Math.abs(y1 - y0), k = 1 - this.opWindT / OP_WIND;
             const fl = 0.55 + 0.45 * Math.abs(Math.sin(t * 28));
-            ctx.fillStyle = `rgba(239, 68, 68, ${0.06 + 0.12 * k})`;
+            ctx.fillStyle = `rgba(239, 68, 68, ${0.12 + 0.2 * k})`;
             ctx.fillRect(lx - OP_CENTER, top, OP_CENTER * 2, H);
-            ctx.strokeStyle = `rgba(248, 113, 113, ${0.5 + 0.4 * fl})`; ctx.lineWidth = 1.2; ctx.setLineDash([6, 5]);
+            ctx.fillStyle = `rgba(239, 68, 68, ${0.04 + 0.08 * k})`;
+            ctx.fillRect(lx - OP_EDGE, top, OP_EDGE * 2, H);
+            ctx.font = "900 13px 'Orbitron', Arial"; ctx.textAlign = 'center'; ctx.fillStyle = `rgba(254, 202, 202, ${0.6 + 0.4 * fl})`;
+            drawWorldText(ctx, '!', lx, dir < 0 ? this.y - 26 : this.y + this.h + 34);
+            ctx.strokeStyle = `rgba(248, 113, 113, ${0.6 + 0.4 * fl})`; ctx.lineWidth = 2; ctx.setLineDash([6, 5]);
             ctx.lineDashOffset = -t * 80 * dir;
             ctx.beginPath(); ctx.moveTo(lx - OP_CENTER, top); ctx.lineTo(lx - OP_CENTER, top + H); ctx.moveTo(lx + OP_CENTER, top); ctx.lineTo(lx + OP_CENTER, top + H); ctx.stroke();
             ctx.setLineDash([]);
@@ -158,11 +162,11 @@ Object.assign(CharHooks.registry.one_punch, {
             const top = Math.min(y0, y1), H = Math.abs(y1 - y0);
             const prog = Math.min(1, (this.opHold || 0) / opHoldN(this)), ready = prog >= 1;
             const fl = ready ? 0.75 + 0.25 * Math.sin(t * 30) : 0.55;
-            ctx.fillStyle = `rgba(239, 68, 68, ${0.13 + 0.12 * prog})`;
+            ctx.fillStyle = `rgba(239, 68, 68, ${0.18 + 0.16 * prog})`;
             ctx.fillRect(lx - OP_SER_HW, top, OP_SER_HW * 2, H);
             ctx.fillStyle = `rgba(239, 68, 68, ${0.12 + 0.2 * prog})`;
             ctx.fillRect(lx - OP_CENTER, top, OP_CENTER * 2, H);
-            ctx.strokeStyle = `rgba(248, 113, 113, ${fl})`; ctx.lineWidth = 1.6; ctx.setLineDash([8, 6]);
+            ctx.strokeStyle = `rgba(248, 113, 113, ${fl})`; ctx.lineWidth = 2.4; ctx.setLineDash([8, 6]);
             ctx.lineDashOffset = -t * 60 * dir;
             ctx.beginPath(); ctx.moveTo(lx - OP_SER_HW, top); ctx.lineTo(lx - OP_SER_HW, top + H); ctx.moveTo(lx + OP_SER_HW, top); ctx.lineTo(lx + OP_SER_HW, top + H); ctx.stroke();
             ctx.setLineDash([]);
@@ -192,7 +196,7 @@ Object.assign(CharHooks.registry.one_punch, {
         }
         // Giáp Ảo: vỏ trắng mờ
         if (this.opVS > 0.01) {
-            const a = Math.min(1, 0.35 + this.opVS / 4 * 0.5) + (this.opVSFx > 0 ? 0.3 : 0);
+            const a = Math.min(1, 0.35 + this.opVS / 2.5 * 0.5) + (this.opVSFx > 0 ? 0.3 : 0);
             ctx.strokeStyle = `rgba(248, 250, 252, ${Math.min(1, a)})`; ctx.lineWidth = 1.8; ctx.shadowBlur = 10; ctx.shadowColor = '#ffffff';
             ctx.fillStyle = `rgba(248, 250, 252, ${0.06 + (this.opVSFx > 0 ? 0.12 : 0)})`;
             ctx.beginPath();
@@ -219,9 +223,9 @@ Object.assign(CharHooks.registry.one_punch, {
     drawUI() {
         if (typeof hudExtraBar !== 'function') return;
         const exc = (this.opExc || 0) / 100;
-        const col = exc >= 0.55 ? (this.opSerCd > 0 ? '#f97316' : OP_RED) : OP_YEL;
-        hudExtraBar(this, 0, exc, col, { h: 2.5, marks: [0.55] });
-        if (this.opVS > 0.01) hudExtraBar(this, 0.7, Math.min(1, this.opVS / 4), OP_WHITE, { h: 1.5 });
+        const col = exc >= 0.65 ? (this.opSerCd > 0 ? '#f97316' : OP_RED) : OP_YEL;
+        hudExtraBar(this, 0, exc, col, { h: 2.5, marks: [0.65] });
+        if (this.opVS > 0.01) hudExtraBar(this, 0.7, Math.min(1, this.opVS / 2.5), OP_WHITE, { h: 1.5 });
     },
 });
 
@@ -334,7 +338,7 @@ function opRegisterHUD() {
         }
         if (opUnlocked(p)) return { pct: 1, ready: true, color: OP_RED, label: 'GIỮ: ĐẤM NGHIÊM TÚC', btnIcon: '✊' };
         if (p.opSerCd > 0) return { pct: 1 - p.opSerCd / opSerCdMax(p), ready: false, color: '#f97316', label: 'NGHIÊM TÚC ' + Math.ceil(p.opSerCd / 60) + 's', btnIcon: '✊', dim: true };
-        return { idle: exc <= 0, pct: Math.min(1, exc / 55), ready: false, color: OP_YEL, label: 'THÚ VỊ ' + Math.round(exc) + '%', btnIcon: '👊' };
+        return { idle: exc <= 0, pct: Math.min(1, exc / 65), ready: false, color: OP_YEL, label: 'THÚ VỊ ' + Math.round(exc) + '%', btnIcon: '👊' };
     });
 }
 if (typeof window !== 'undefined') window.addEventListener('load', opRegisterHUD);

@@ -364,10 +364,10 @@ const MODULES = {
         {
             id: 'one_punch',
             name: 'Nhất Quyền / Một Đấm',
-            desc: '"Chỉ cần một đấm." HP:8 | Dame:2.5 | Đạn:1 (nạp 2.2s; mỗi viên đạn cộng thêm -> +20% tốc nạp & +15% st) | Tốc: 3.6. THÚ VỊ: nhận sát thương (tính st gốc) -> +22% Thú Vị mỗi 1 dame; Thú Vị tăng tốc chạy (tối đa +35%) & giảm st nhận (tối đa 30%). 5s không bị đánh -> tiêu Thú Vị hồi máu (10% = +1 HP). Nhấp: ĐẤM THƯỜNG - gồng quyền 0.35s, vạch cảnh báo đỏ khoá trục X lúc nhấp (né được!) rồi phóng cột áp lực dọc sân: tâm 1.8 st, đẩy lùi & phá 1 lớp Khiên; rìa 0.6 st; xoá đạn thường trên đường quyền, x3 st lên Tường/Vật triệu hồi. Giữ 1s khi Thú Vị >= 55% (hồi 12s): ĐẤM NGHIÊM TÚC - khi tụ giảm 50% st nhận, miễn đẩy/kéo, hiện đường cảnh báo đỏ; nhả -> tiêu hết Thú Vị nhận GIÁP ẢO (tối đa 4, giảm dần 12s), hitscan 4.0 st xuyên MỌI tường, xoá đạn/triệu hồi/vũng trên đường. Hạ gục địch -> kết liễu CÚ ĐẤM RẼ ĐÔI BẦU TRỜI.',
+            desc: '"Chỉ cần một đấm." HP:6 | Dame:2.5 | Đạn:1 (nạp 2.7s; mỗi viên đạn cộng thêm -> +20% tốc nạp & +15% st) | Tốc: 3.6. THÚ VỊ: nhận sát thương (tính st gốc) -> +16% Thú Vị mỗi 1 dame; Thú Vị tăng tốc chạy (tối đa +35%) & giảm st nhận (tối đa 20%). 6s không bị đánh -> tiêu Thú Vị hồi máu (10% = +1 HP). Nhấp: ĐẤM THƯỜNG - gồng quyền 0.53s, vạch cảnh báo đỏ đậm + dấu "!" khoá trục X lúc nhấp (né được!) rồi phóng cột áp lực dọc sân: tâm 0.8 st, đẩy lùi & phá 1 lớp Khiên; rìa 0.28 st; xoá đạn thường trên đường quyền, x3 st lên Tường/Vật triệu hồi. Giữ 1.25s khi Thú Vị >= 65% (hồi 17s): ĐẤM NGHIÊM TÚC - khi tụ giảm 50% st nhận, miễn đẩy/kéo, hiện đường cảnh báo đỏ rộng; nhả -> tiêu hết Thú Vị nhận GIÁP ẢO (tối đa 2.5, giảm dần 12s), hitscan 1.8 st xuyên MỌI tường, xoá đạn/triệu hồi/vũng trên đường. Hạ gục địch -> kết liễu CÚ ĐẤM RẼ ĐÔI BẦU TRỜI.',
             type: 'body', role: ['Đối Đầu', 'Sinh Tồn'],
             size: { w: 30, h: 30 },
-            stats: { hp: 8, dmg: 2.5, ammo: 1, speedMult: 1.0286 }
+            stats: { hp: 6, dmg: 2.5, ammo: 1, speedMult: 1.0286 }
         },
         {
             id: 'boomerang',
@@ -412,10 +412,10 @@ const MODULES = {
         {
             id: 'kusarigama',
             name: 'Kusarigama',
-            desc: '"Nếm máu... có vị gì nhỉ?" HP:5 | Dame:0.25 (Tích Lũy x1 -> x3) | Đạn: — (Xích Liêm) | Tốc: 4.5. HÚT MÁU 25% mọi st gây ra; mọi đòn trúng gây CHẢY MÁU 0.2 HP/s trong 3s (cũng hút máu). TÍCH LŨY SÁT Ý: không ra đòn +2 tầng/s (tối đa 5) -> dame x1.0 -> x3.0, ra đòn về 0. Giữ 0.5s: đổi Phong Cách; nhấp: ra đòn. ⚔ TRẢM (hồi 0.6s): ném liềm xuyên tới biên (không st) rồi giật về chém 1.0x; địch đang Chảy Máu -> x2, kéo giật & hút máu x2. ⛓ KHÓA (hồi 1.2s): tạ xích tạo LỐC MÁU r 55->110 tối đa 3s, chậm 35%, 0.5x mỗi 0.25s; nhấp lại thu xích nổ 1.0x. 🌀 LINH (hồi 2.5s): lướt lên (vẫn ăn đạn), chạm địch / vật cản / hết tầm -> Vòng Cảnh Báo 1s r 75->140 rồi xoay 360°: hút mạnh, Choáng 1s, tổng 4.0x, bật về làn. CUỒNG HUYẾT (máu chạm 1.0, 1 lần / hiệp): chặn ở 1 HP, giải khống chế, Bất Tử 3s; máu khoá, mọi hút máu / hồi máu -> GIÁP TRẮNG x1.25 (tụt 0.2/s); Tích Lũy nhanh x2, +15% tốc, chiêu cường hoá (Trảm lượt đi 50% st & luôn x2 + vệt máu; Lốc to hơn đuổi theo & hút vào; Linh giảm 50% st khi lướt, cảnh báo 0.5s, +0.5 Giáp Trắng). Juggernaut miễn kéo/choáng/chậm. Hạ gục địch -> kết liễu HUYẾT LIÊM ĐOẠT MỆNH.',
+            desc: '"Nếm máu... có vị gì nhỉ?" HP:3 | Dame:0.25 (Tích Lũy x1 -> x3) | Đạn: — (Xích Liêm) | Tốc: 4.5. HÚT MÁU 35% mọi st gây ra; MÁU THẤP (<= 1.0 HP hoặc <= 20%): hút máu còn đắp thêm GIÁP TRẮNG bằng 100% lượng hút; mọi đòn trúng gây CHẢY MÁU 0.2 HP/s trong 3s (cũng hút máu). TÍCH LŨY SÁT Ý: không ra đòn +2 tầng/s (tối đa 5) -> dame x1.0 -> x3.0, ra đòn về 0. Giữ 0.5s: đổi Phong Cách; nhấp: ra đòn. ⚔ TRẢM (hồi 0.6s): ném liềm xuyên tới biên (không st) rồi giật về chém 1.0x; địch đang Chảy Máu -> x2, kéo giật & hút máu x2. ⛓ KHÓA (hồi 1.2s): tạ xích tạo LỐC MÁU r 55->110 tối đa 3s, chậm 35%, 0.5x mỗi 0.25s; nhấp lại thu xích nổ 1.0x. 🌀 LINH (hồi 2.5s): lướt lên (vẫn ăn đạn), chạm địch / vật cản / hết tầm -> Vòng Cảnh Báo 1s r 75->140 rồi xoay 360°: hút mạnh, Choáng 1s, tổng 4.0x, bật về làn. CUỒNG HUYẾT (máu chạm 1.0, 1 lần / hiệp): chặn ở 1 HP, giải khống chế, Bất Tử 3s; máu khoá, mọi hút máu / hồi máu -> GIÁP TRẮNG x2.75 (chỉ tụt 0.3/s khi 2s liền không nhận thêm Giáp Trắng & không bị đánh); Tích Lũy nhanh x2, +15% tốc, chiêu cường hoá (Trảm lượt đi 50% st & luôn x2 + vệt máu; Lốc to hơn đuổi theo & hút vào; Linh giảm 50% st khi lướt, cảnh báo 0.5s, +0.5 Giáp Trắng). Juggernaut miễn kéo/choáng/chậm. Hạ gục địch -> kết liễu HUYẾT LIÊM ĐOẠT MỆNH.',
             type: 'body', role: ['Đối Đầu', 'Sinh Tồn'],
             size: { w: 26, h: 26 },
-            stats: { hp: 5.0, dmg: 0.25, ammo: 0, speedMult: 1.2857 }
+            stats: { hp: 3.0, dmg: 0.25, ammo: 0, speedMult: 1.2857 }
         },
         {
             id: 'the_clock',

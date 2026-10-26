@@ -2,22 +2,22 @@
 // Nhất Quyền / Một Đấm (one_punch) — Logic (docs/BODY_MOI_2.md)
 // ------------------------------------------
 // Nội tại: maxAmmo cố định 1 (mỗi viên cộng thêm -> +20% tốc nạp & +15% st). Thanh THÚ VỊ (opExc 0..100)
-//   tích theo sát thương GỐC nhận (trước giảm): x22 / Evo1 x30 / Full x40 mỗi 1.0 dame.
-//   Buff: +exc*0.35% tốc chạy, -exc*0.30% st nhận. 5s không bị đánh -> hồi máu (base tiêu 10%/HP,
-//   Evo1 7%/HP, xả 20%/s; Full: không tiêu Thú Vị, +0.5 HP/s khi Thú Vị > 0).
-// Nhấp: ĐẤM THƯỜNG — gồng 0.35s (vạch cảnh báo đỏ khoá trục X lúc nhấp) rồi phóng cột áp lực: tâm |dx|<30 = 0.72x + đẩy nhẹ + phá 1 lớp Khiên; rìa 30–85 = 0.24x.
+//   tích theo sát thương GỐC nhận (trước giảm): x16 / Evo1 x22 / Full x30 mỗi 1.0 dame.
+//   Buff: +exc*0.35% tốc chạy, -exc*0.20% st nhận. 6s không bị đánh -> hồi máu (base tiêu 10%/HP,
+//   Evo1 7%/HP, xả 20%/s; Full: không tiêu Thú Vị, +0.25 HP/s khi Thú Vị > 0).
+// Nhấp: ĐẤM THƯỜNG — gồng 0.53s (vạch cảnh báo đỏ khoá trục X lúc nhấp) rồi phóng cột áp lực: tâm |dx|<30 = 0.32x + đẩy nhẹ + phá 1 lớp Khiên; rìa 30–85 = 0.11x.
 //   Xoá đạn thường trên đường quyền, x3 st lên Tường chắn/Vật triệu hồi (tường đầu tiên chặn cú đấm).
-//   Evo 1: trong 0.4s sau Đấm Thường, nhấp tiếp -> 4 luồng quyền phong nhỏ (tổng +1.2).
-// Giữ 1s (Full 0.5s) khi THÚ VỊ >= 55% & hồi 12s (Full 8s) xong: ĐẤM NGHIÊM TÚC. Khi tụ: -50% st nhận, miễn
+//   Evo 1: trong 0.4s sau Đấm Thường, nhấp tiếp -> 4 luồng quyền phong nhỏ (tổng +0.8).
+// Giữ 1.25s (Full 0.8s) khi THÚ VỊ >= 65% & hồi 17s (Full 12s) xong: ĐẤM NGHIÊM TÚC. Khi tụ: -50% st nhận, miễn
 //   đẩy/kéo, đường cảnh báo đỏ rộng (Full: hút nhẹ địch về tâm); Evo 2: Trái/Phải -> bật ngang 120px.
-//   Nhả: tiêu hết Thú Vị -> GIÁP ẢO = consumed/100*4 (giảm dần 12s; Full vĩnh viễn), hitscan 4.0 xuyên MỌI
-//   tường, xoá đạn/triệu hồi/vũng trên đường. Full: DEATH PUNCH hạ gục ngay địch ở tâm có hp <= 35%.
+//   Nhả: tiêu hết Thú Vị -> GIÁP ẢO = consumed/100*2.5 (giảm dần 12s; Full 20s), hitscan 1.8 xuyên MỌI
+//   tường, xoá đạn/triệu hồi/vũng trên đường. Full: DEATH PUNCH hạ gục ngay địch ở tâm có hp <= 20%.
 // Toàn bộ trạng thái là trường thuần trên player / entity trong bodyEffects -> đồng bộ online.
 // ==========================================
 
 const OP_YEL = '#facc15', OP_RED = '#ef4444', OP_CRIMSON = '#b91c1c', OP_WHITE = '#f8fafc';
 const OP_CENTER = 30, OP_EDGE = 85, OP_SER_HW = 52;
-const OP_TAP = 14, OP_CHARGE_START = 8, OP_NOHIT = 300, OP_FOLLOW = 24;
+const OP_TAP = 14, OP_CHARGE_START = 8, OP_NOHIT = 360, OP_FOLLOW = 24;
 
 function opE1(p) { return p.hasUpgrade('evo_punch_1'); }
 function opE2(p) { return p.hasUpgrade('evo_punch_2'); }
@@ -29,9 +29,9 @@ function opAlive(t) { return t && t.hp > 0; }
 function opSfx(n) { if (typeof soundSystem !== 'undefined' && soundSystem && !soundSystem.muted && soundSystem[n]) soundSystem[n](); }
 function opTxt(p, s, c, sz) { addFloatingText(p.x + p.w / 2, p.y + (p.id === 1 ? -20 : p.h + 24), s, c, sz || 12); }
 function opScale(p) { return (p.damage || 2.5) / 2.5; }
-function opHoldN(p) { return opFull(p) ? 30 : 60; }
-function opSerCdMax(p) { return opFull(p) ? 480 : 720; }
-function opUnlocked(p) { return (p.opSerCd || 0) <= 0 && (p.opExc || 0) >= 55; }
+function opHoldN(p) { return opFull(p) ? 48 : 75; }
+function opSerCdMax(p) { return opFull(p) ? 720 : 1020; }
+function opUnlocked(p) { return (p.opSerCd || 0) <= 0 && (p.opExc || 0) >= 65; }
 function opBotWantsSerious(p) { return opUnlocked(p) && !p.opCharging; }
 
 // ---------- Chuyển hoá đạn: maxAmmo luôn = 1 ----------
@@ -131,7 +131,7 @@ class OpFinisher {
 
 // ---------- Đấm Thường ----------
 // Nhấp: gồng quyền 0.35s (OP_WIND) — vạch cảnh báo đỏ khoá trục X lúc nhấp — rồi mới phóng cột áp lực.
-const OP_WIND = 21, OP_DMG_C = 0.72, OP_DMG_E = 0.24;
+const OP_WIND = 32, OP_DMG_C = 0.32, OP_DMG_E = 0.11, OP_SER_DMG = 1.8;
 function opNormalPunch(p, now) {
     if (!(p.ammo > 0)) { opTxt(p, 'ĐANG NẠP...', '#94a3b8', 10); return; }
     if (p.opWindT > 0) return;
@@ -178,7 +178,7 @@ function opFirePunch(p, cx) {
 
 function opGust(p) {
     const dir = opDir(p), cx = p.x + p.w / 2 + ((p.opGustQ % 2) ? -7 : 7);
-    spawnBullet(p, { x: cx - 5, y: dir < 0 ? p.y - 14 : p.y + p.h, w: 10, h: 14, vx: 0, vy: dir * 12, dmg: 0.6 * opScale(p), hook: 'one_punch', opGust: true });
+    spawnBullet(p, { x: cx - 5, y: dir < 0 ? p.y - 14 : p.y + p.h, w: 10, h: 14, vx: 0, vy: dir * 12, dmg: 0.2 * opScale(p), hook: 'one_punch', opGust: true });
     p.opRecoil = 6;
     opSfx('playShoot');
 }
@@ -192,13 +192,13 @@ function opStartCharge(p) {
 function opSeriousPunch(p) {
     const consumed = p.opExc || 0;
     p.opExc = 0; p.opCharging = false; p.opSerCd = opSerCdMax(p); p.opRecoil = 16;
-    const gain = consumed / 100 * 4;
+    const gain = consumed / 100 * 2.5;
     p.opVS = Math.max(p.opVS || 0, gain); p.opVSMax = p.opVS;
-    p.opVSDecay = opFull(p) ? 0 : p.opVS / 720;
+    p.opVSDecay = p.opVS / (opFull(p) ? 1200 : 720);
     const dir = opDir(p), cx = p.x + p.w / 2, y0 = dir < 0 ? p.y : p.y + p.h, yEnd = dir < 0 ? -40 : canvas.height + 40, e = opEnemy(p);
     opClearBullets(p, cx, OP_SER_HW, y0, yEnd, true);
     for (const o of opSummons(p)) if (opInCol(o, cx, OP_SER_HW, y0, yEnd)) opKillObj(o);
-    for (const o of opWalls(p)) if (o !== (typeof movingObstacle !== 'undefined' ? movingObstacle : null) && opInCol(o, cx, OP_SER_HW, y0, yEnd)) opHitObj(o, 4 * opScale(p) * 3, p);
+    for (const o of opWalls(p)) if (o !== (typeof movingObstacle !== 'undefined' ? movingObstacle : null) && opInCol(o, cx, OP_SER_HW, y0, yEnd)) opHitObj(o, OP_SER_DMG * opScale(p) * 3, p);
     opClearZones(p, cx, OP_SER_HW);
     opBreakCrates(p, cx, OP_SER_HW, y0, yEnd);
     bodyEffects.push(new OpPunchFx(p, cx, y0, yEnd, 'serious'));
@@ -209,7 +209,7 @@ function opSeriousPunch(p) {
     if (!opAlive(e)) return;
     const dx = Math.abs(e.x + e.w / 2 - cx);
     if (dx >= OP_SER_HW) return;
-    if (opFull(p) && dx < OP_CENTER && e.hp <= e.maxHp * 0.35) {
+    if (opFull(p) && dx < OP_CENTER && e.hp <= e.maxHp * 0.2) {
         addFloatingText(e.x + e.w / 2, e.y + (e.id === 1 ? -30 : e.h + 34), 'DEATH (TỬ)', OP_RED, 20);
         p.opDeathMark = true;
         e.invincibleTimer = 0;
@@ -222,7 +222,7 @@ function opSeriousPunch(p) {
         p.opDeathMark = false;
         return;
     }
-    e.takeDamage(4 * opScale(p), p, { isPiercing: true });
+    e.takeDamage(OP_SER_DMG * opScale(p), p, { isPiercing: true });
     explosions.push(new Explosion(e.x + e.w / 2, e.y + e.h / 2, 60, 'rgba(239, 68, 68,', 0, p));
 }
 
@@ -241,7 +241,7 @@ BulletHooks.register('one_punch', {
 
 CharHooks.register('one_punch', {
     setup() {
-        this.reloadTime *= (opE1(this) ? 1500 : 2200) / 1500;
+        this.reloadTime *= (opE1(this) ? 2400 : 3200) / 1500;
         this.opAmmoBonus = 0; opConvertAmmo(this);
         this.opExc = 0; this.opNoHit = 0; this.opLastHp = this.maxHp; this.opRegenFx = 0;
         this.opPrevS = false; this.opHold = 0; this.opHoldEat = false; this.opCharging = false;
@@ -265,7 +265,7 @@ CharHooks.register('one_punch', {
         // Hồi máu sau 5s không nhận sát thương
         if (this.hp < this.opLastHp - 1e-6) this.opNoHit = 0; else this.opNoHit++;
         if (this.opNoHit >= OP_NOHIT && this.hp > 0 && this.hp < this.maxHp && this.opExc > 0) {
-            if (opFull(this)) this.hp = Math.min(this.maxHp, this.hp + 0.5 / 60);
+            if (opFull(this)) this.hp = Math.min(this.maxHp, this.hp + 0.25 / 60);
             else {
                 const use = Math.min(this.opExc, 20 / 60);
                 this.opExc -= use;
@@ -342,7 +342,7 @@ CharHooks.register('one_punch', {
         if (me) {
             const opt = options || {};
             const raw = amount;
-            let a = amount * (1 - Math.min(30, (this.opExc || 0) * 0.30) / 100);
+            let a = amount * (1 - Math.min(20, (this.opExc || 0) * 0.20) / 100);
             if (this.opCharging) a *= 0.5;
             const blocked = (this.invincibleTimer > 0 && !opt.ignoreInvincible && !opt.unavoidable) || (this.shield > 0 && !opt.bypassShield);
             let absorbed = 0;
@@ -356,7 +356,7 @@ CharHooks.register('one_punch', {
                 r = 0;
             } else r = origTD.call(this, a, attacker, options);
             if (this.hp < before || absorbed > 0) {
-                const rate = opFull(this) ? 40 : (opE1(this) ? 30 : 22);
+                const rate = opFull(this) ? 30 : (opE1(this) ? 22 : 16);
                 this.opExc = Math.min(100, (this.opExc || 0) + raw * rate);
                 this.opNoHit = 0;
             }

@@ -631,11 +631,11 @@ const BODY_GUIDES = {
     one_punch: {
         tag: 'Một đấm — càng ăn đòn càng mạnh', diff: 3,
         controls: [
-            { input: 'TAP', name: 'Đấm Thường', what: 'Cột áp lực dọc sân, báo trước 0.35s' },
-            { input: 'HOLD 1s', name: 'Đấm Nghiêm Túc', what: 'Thú Vị ≥55%: hitscan 4.0 xuyên tường' }
+            { input: 'TAP', name: 'Đấm Thường', what: 'Cột áp lực dọc sân, báo trước 0.53s' },
+            { input: 'HOLD 1.25s', name: 'Đấm Nghiêm Túc', what: 'Thú Vị ≥65%: hitscan 1.8 xuyên tường (hồi 17s)' }
         ],
-        passive: ['Bị đánh tích Thú Vị: tăng tốc, giảm st', '5s không bị đánh: Thú Vị hồi máu'],
-        evo: { e1: 'Nạp 1.5s, đấm bồi 4 luồng', e2: 'Khi tụ: ←/→ bật nhảy ngang', full: 'DEATH PUNCH: kết liễu ≤35% máu' },
+        passive: ['Bị đánh tích Thú Vị: tăng tốc, giảm st', '6s không bị đánh: Thú Vị hồi máu'],
+        evo: { e1: 'Nạp 2.0s, đấm bồi 4 luồng', e2: 'Khi tụ: ←/→ bật nhảy ngang', full: 'DEATH PUNCH: kết liễu ≤20% máu' },
         tips: ['Ăn vài đòn để có Thú Vị rồi Đấm Nghiêm Túc']
     },
     boomerang: {
@@ -695,8 +695,8 @@ const BODY_GUIDES = {
             { input: 'TAP', name: 'Ra Đòn', what: 'Trảm / Khóa / Linh tùy phong cách' },
             { input: 'HOLD 0.5s', name: 'Đổi Phong Cách', what: '⚔ Trảm → ⛓ Khóa → 🌀 Linh' }
         ],
-        passive: ['Hút máu 25%, mọi đòn gây Chảy Máu', 'Không ra đòn tích Sát Ý tới x3'],
-        evo: { e1: 'Hút máu 50%, tích nhanh', e2: 'Cuồng Huyết mạnh, Linh giảm st', full: 'Hút 100%, Tam Thức Hợp Nhất' },
+        passive: ['Hút máu 35%, mọi đòn gây Chảy Máu', 'Máu thấp: hút máu -> Giáp Trắng cực mạnh', 'Giáp chỉ tụt sau 2s không nhận giáp & không bị đánh', 'HP chỉ 3 — dễ vỡ'],
+        evo: { e1: 'Hút máu 65%, tích nhanh', e2: 'Cuồng Huyết mạnh, Linh giảm st', full: 'Hút 120%, Tam Thức Hợp Nhất' },
         tips: ['Nghỉ 2-3s để tích Sát Ý rồi ra đòn']
     },
     the_clock: {

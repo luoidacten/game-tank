@@ -2,14 +2,14 @@
 // Kusarigama (kusarigama) — "Nếm máu... có vị gì nhỉ?" (docs/BODY_MOI_3.md #73)
 // ------------------------------------------
 // Không đạn: vũ khí xích liêm. Nhấp: ra đòn theo Phong Cách; giữ 0.5s (Evo1 0.3s): đổi Phong Cách.
-// HÚT MÁU 25% (Evo1 50% / Evo2 50% / Full 100%) mọi st vũ khí & Chảy Máu (0.2 HP/s 3s, Evo1 cộng 3 tầng + chậm 20%).
+// HÚT MÁU 35% (Evo1 65% / Evo2 65% / Full 120%); máu thấp: +100% lượng hút thành Giáp Trắng mọi st vũ khí & Chảy Máu (0.2 HP/s 3s, Evo1 cộng 3 tầng + chậm 20%).
 // TÍCH LŨY SÁT Ý 0 -> 5 tầng (+2/s khi không ra đòn; Evo1 nhanh 40%): dame x1.0 -> x3.0 (Evo1 x3.5), ra đòn về 0.
 // TRẢM: liềm bay đi (không st) chạm biên rồi giật về chém 1.0x; địch đang Chảy Máu -> x2, kéo giật, hút máu x2. Hồi 0.6s.
 // KHÓA: tạ xích tạo LỐC MÁU r 55->110 tối đa 3s: chậm 35%, 0.5x mỗi 0.25s; nhấp lại thu xích nổ 1.0x. Hồi 1.2s.
 // LINH: lướt lên (vẫn ăn đạn) -> dừng khi chạm địch / vật cản / hết tầm -> Vòng Cảnh Báo 1s r 75->140 -> xoay 360°
 //   hút mạnh, choáng 1s, tổng 4.0x, rồi bật về làn. Hồi 2.5s.
 // CUỒNG HUYẾT (1 lần / hiệp, khi máu chạm 1.0): chặn ở 1 HP, giải khống chế, bất tử 3s; máu khoá (không hồi),
-//   hút máu & mọi nguồn hồi -> Giáp Trắng (gearWhiteShield dùng chung) x1.25, tụt 0.2/s; tích lũy x2, +15% tốc, chiêu mạnh hơn.
+//   hút máu & mọi nguồn hồi -> Giáp Trắng (gearWhiteShield dùng chung) x2.75; giáp chỉ tụt 0.3/s sau 2s không nhận giáp & không bị đánh; tích lũy x2, +15% tốc, chiêu mạnh hơn.
 // Juggernaut (miễn khống chế): không bị kéo / choáng / chậm.
 // Trạng thái là trường thuần trên player / entity trong bodyEffects (đồng bộ online).
 // ==========================================
@@ -32,8 +32,10 @@ function kgImmune(e) { return e && e.weapon === 'juggernaut'; }
 function kgCx(o) { return o.x + o.w / 2; }
 function kgCy(o) { return o.y + o.h / 2; }
 function kgHoldN(p) { return kgE1(p) ? 18 : 30; }
-function kgLs(p) { return kgFull(p) ? 1.0 : ((kgE1(p) || kgE2(p)) ? 0.5 : 0.25); }
-function kgEff(p) { return kgE2(p) ? 1.5 : 1.25; }
+function kgLs(p) { return kgFull(p) ? 1.2 : ((kgE1(p) || kgE2(p)) ? 0.65 : 0.35); }
+// Máu thấp (<= 1.0 HP hoặc <= 20% máu tối đa, hoặc đang Cuồng Huyết): Giáp Trắng hồi cực mạnh
+function kgLow(p) { return !!p.kgBers || p.hp <= Math.max(1.0, p.maxHp * 0.2); }
+function kgEff(p) { return (kgE2(p) ? 1.5 : 1.25) * (kgLow(p) ? 2.2 : 1); }
 function kgMaxMult(p) { return (kgFull(p) && p.kgBers) ? 4.0 : (kgE1(p) ? 3.5 : 3.0); }
 function kgMult(p) { return 1 + (kgMaxMult(p) - 1) * Math.min(5, p.kgStk || 0) / 5; }
 function kgRate(p) { return (kgE1(p) ? 5 / 1.5 : 2) * (p.kgBers ? 2 : 1) / 60; }
@@ -72,13 +74,15 @@ function kgSteal(p, dealt) {
     if (!(dealt > 0) || !kgAlive(p)) return;
     const amt = dealt * kgLs(p);
     if (p.kgBers) { kgAddWS(p, amt * kgEff(p)); return; }
+    const low = kgLow(p), lowEff = kgEff(p) / 2.2;
     const heal = Math.min(Math.max(0, p.maxHp - p.hp), amt);
     p.hp += heal; p.kgLsAcc = (p.kgLsAcc || 0) + heal;
     if (kgFull(p) && amt > heal) kgAddWS(p, (amt - heal) * 0.5);
+    if (low) kgAddWS(p, amt * 0.5 * lowEff); // máu thấp: hút máu còn đắp thêm Giáp Trắng
 }
 function kgAddWS(p, v) {
     if (!(v > 0)) return;
-    p.gearWhiteShield = (p.gearWhiteShield || 0) + v; p.kgWsAcc = (p.kgWsAcc || 0) + v; p.kgWsFx = 12;
+    p.gearWhiteShield = (p.gearWhiteShield || 0) + v; p.kgWsAcc = (p.kgWsAcc || 0) + v; p.kgWsFx = 12; p.kgWsIdle = 0;
 }
 // Gây st + Chảy Máu + Hút Máu theo lượng st thực (máu + Giáp Trắng mất)
 function kgHit(p, e, amt, o) {
@@ -373,8 +377,13 @@ function kgTick(p) {
     if (p.kgBers) {
         if (p.hp > p.kgHpCap + 1e-6) { kgAddWS(p, (p.hp - p.kgHpCap) * kgEff(p)); p.hp = p.kgHpCap; }
         p.kgHpCap = Math.min(p.kgHpCap, p.hp);
-        if (p.gearWhiteShield > 0) p.gearWhiteShield = Math.max(0, p.gearWhiteShield - (kgE2(p) ? 0.1 : 0.2) / 60);
     }
+    // Giáp Trắng chỉ tụt khi 2s liền KHÔNG nhận thêm Giáp Trắng VÀ KHÔNG nhận sát thương (mỗi lần nhận / bị đánh -> đếm lại)
+    const ws = p.gearWhiteShield || 0;
+    if (Math.abs(ws - (p.kgWsLast || 0)) > 1e-6 || p.hp < (p.kgHpLast || 0) - 1e-6) p.kgWsIdle = 0; // giáp tăng / bị trừ giáp / mất máu
+    if (p.kgWsIdle < 120) p.kgWsIdle++;
+    else if (p.kgBers && ws > 0) p.gearWhiteShield = Math.max(0, ws - (kgE2(p) ? 0.15 : 0.3) / 60);
+    p.kgWsLast = p.gearWhiteShield || 0; p.kgHpLast = p.hp;
     // chữ nổi gộp (hút máu / giáp)
     if (++p.kgTxtT >= 24) {
         p.kgTxtT = 0;
@@ -415,7 +424,7 @@ CharHooks.register('kusarigama', {
         this.kgStyle = 0; this.kgStk = 0; this.kgCds = [0, 0, 0]; this.kgMode = 'idle'; this.kgOrigin = null; this.kgModeT = 0;
         this.kgPrevS = false; this.kgHold = 0; this.kgUsed = false; this.kgSwing = 0; this.kgSwitchFx = 0;
         this.kgBers = false; this.kgHpCap = 99; this.kgInvul = 0; this.kgBersFx = 0; this.kgWsFx = 0;
-        this.kgLsAcc = 0; this.kgWsAcc = 0; this.kgTxtT = 0; this.kgLinhM = 0; this.kgLinhR = 75; this.kgWarnN = 60; this.kgLinhHit = false;
+        this.kgLsAcc = 0; this.kgWsAcc = 0; this.kgWsIdle = 0; this.kgWsLast = 0; this.kgHpLast = 0; this.kgTxtT = 0; this.kgLinhM = 0; this.kgLinhR = 75; this.kgWarnN = 60; this.kgLinhHit = false;
         this.maxAmmo = 0; this.ammo = 0;
         kgClearVictim(this); kgClearVictim(kgEnemy(this));
     },
@@ -469,6 +478,7 @@ CharHooks.register('kusarigama', {
         const before = this.hp;
         const r = origTD.call(this, amount, attacker, options, ...Array.prototype.slice.call(arguments, 3));
         if (kgIs(this)) {
+            if (typeof amount === 'number' && amount > 0) this.kgWsIdle = 0; // bị đánh -> đếm lại 2s tụt giáp
             if (this.hp > 0 && this.hp < 1 && !this.kgBers) kgBerserk(this);
             if (this.hp <= 0 && this.kgMode !== 'idle') kgBack(this, true);
         }

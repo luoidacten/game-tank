@@ -299,7 +299,7 @@ class SmartBot {
             const n = this.tapCool <= 0 && typeof jpBotHold === 'function' ? jpBotHold(bot) : 0;
             if (n) { this.jpHoldN = n; this.hold = 1; inp.s = true; return; }
         }
-        // Nhất Quyền: nhấp = Đấm Thường; Thú Vị >= 55% & hết hồi -> giữ tụ Đấm Nghiêm Túc rồi nhả khi thẳng hàng
+        // Nhất Quyền: nhấp = Đấm Thường; Thú Vị >= 65% & hết hồi -> giữ tụ Đấm Nghiêm Túc rồi nhả khi thẳng hàng
         if (bot.weapon === 'one_punch') {
             if (this.hold > 0) {
                 this.hold++;
