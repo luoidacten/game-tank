@@ -473,6 +473,14 @@ const MODULES = {
             size: { w: 26, h: 26 },
             stats: { hp: 4.0, dmg: 1.0, ammo: 100, speedMult: 1.1143 }
         },
+        {
+            id: 'railgun',
+            name: 'Railgun',
+            desc: '"Only my railgun - Đùa Thôi" HP:4.5 | Dame:0.9 → 2.4 (theo thời gian nạp) | Đạn:4 (nạp 0.9s/viên) | Tốc: 3.6. TỪ TRƯỜNG: nhấp lần 1 (tốn 1 đạn) tạo QUẢ CẦU NĂNG LƯỢNG lơ lửng trước mũi xe, bám theo xe & tự nạp: 1s SƠ CẤP 1.4 st +35% tốc, XUYÊN VẬT THỂ | 2s TRUNG CẤP 1.9 st +70% tốc, XUYÊN GIÁP & KHIÊN | 3s LÕI LAZER 2.4 st. Nhấp lần 2 phóng thẳng; cầu Lazer khoá cột, cảnh báo 0.35s (xe đứng yên) rồi chiếu xuyên toàn sân. Giữ 0.5s (hồi 15s): VÙNG ĐIỆN TÍCH trước mặt 5s — đạn đạo địch lọt vào hoá Cầu Năng Lượng của bạn; hitscan / lazer địch bị chặn ở rìa vùng, kết tinh 1 cầu (vùng -1s / 1 st, về 0 thì đỡ trọn rồi vỡ). Trong vùng: nhấp thả cầu (phát đầu giữa mặt, sau đó ngẫu nhiên); giữ 0.5s (hoặc hết giờ) đóng vùng & PHÓNG ĐỒNG LOẠT theo cột (Lazer cảnh báo 0.4s); giữ 1.0s KHOÁ MỤC TIÊU: 3 cầu nạp lâu nhất tự ngắm bắn lần lượt cách 0.25s (mỗi viên chiếu hồng tâm 0.25s), vùng vẫn giữ. Hạ gục địch -> kết liễu LEVEL 5: RAILGUN.',
+            type: 'body', role: ['Kiểm Soát', 'Đối Đầu'],
+            size: { w: 28, h: 28 },
+            stats: { hp: 4.5, dmg: 0.9, ammo: 4, speedMult: 1.0286 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 35 },

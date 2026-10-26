@@ -661,3 +661,20 @@ function botShopBuy(playerId) {
         return f.call(this, bot, enemy, aligned, inp);
     };
 })();
+
+// trong vùng nhấp thả cầu, giữ 0.5s phóng đồng loạt hoặc giữ 1.0s khoá mục tiêu (rgBotAction)
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon === 'railgun' && typeof rgBotAction === 'function') {
+            if (this.rgB > 0) { this.rgB--; inp.s = this.rgB > 2; return; }
+            const a = rgBotAction(bot, enemy, aligned);
+            if (a === 'open') { this.rgB = RG_HOLD_ZONE + 8; inp.s = true; return; }
+            if (a === 'volley') { this.rgB = RG_HOLD_ZONE + 14; inp.s = true; return; }
+            if (a === 'aim') { this.rgB = RG_HOLD_AIM + 8; inp.s = true; return; }
+            if (a === 'tap') { this.rgB = 5; inp.s = true; return; }
+            inp.s = false; return;
+        }
+        return f.call(this, bot, enemy, aligned, inp);
+    };
+})();
