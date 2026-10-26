@@ -114,14 +114,16 @@ Object.assign(Player.prototype, {
             return 0;
         }
 
+        // Chỉ đòn đánh thật mới ngắt niệm: bỏ qua sát thương môi trường / G.E.A.R / DoT nhỏ (< 0.5)
+        const jjkBreak = !options.isEnvironmental && !options.isDot && amount >= 0.5;
         // Gojo: Đang gồng niệm Chú Lực / Lãnh Địa mà ăn sát thương -> Bị ngắt niệm!
-        if (this.weapon === 'the_strongest' && (this.gojoChargeTimer || 0) > 0) {
+        if (jjkBreak && this.weapon === 'the_strongest' && (this.gojoChargeTimer || 0) > 0) {
             this.gojoChargeTimer = 0;
             addFloatingText(this.x + this.w / 2, this.y - 15, "NIỆM CHÚ BỊ NGẮT! 💥", "#00ffff", 14);
         }
 
         // Sukuna: Đang gồng Lãnh Địa / Phản Chuyển mà ăn sát thương -> Bị phá niệm!
-        if (this.weapon === 'sukuna' && (this.sukunaChargeTimer || 0) > 0 && !this.skFugaArmed) { // Fuga đã nạp: không bị ngắt
+        if (jjkBreak && this.weapon === 'sukuna' && (this.sukunaChargeTimer || 0) > 0 && !this.skFugaArmed) { // Fuga đã nạp: không bị ngắt
             this.sukunaChargeTimer = 0;
             this.domainActive = false;
             addFloatingText(this.x + this.w / 2, this.y - 15, "LÃNH ĐỊA BỊ PHÁ! 💥", "#e74c3c", 14);

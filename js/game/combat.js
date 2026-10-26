@@ -62,12 +62,12 @@ function checkHits(attacker, victim) {
             }
 
             // Ngắt Lãnh địa / Phản chuyển khi bị đánh trúng
-            if (!victim.skFugaArmed) victim.sukunaChargeTimer = 0; // Fuga đã nạp: không bị ngắt
-            if (victim.domainActive) victim.domainActive = false;
+            if (!victim.skFugaArmed && !b.isGearBonusShot && (b.dmg || 1) >= 0.5) victim.sukunaChargeTimer = 0; // Fuga đã nạp / đạn G.E.A.R / đạn nhỏ: không bị ngắt
+            if (victim.domainActive && !b.isGearBonusShot && (b.dmg || 1) >= 0.5) victim.domainActive = false;
         }
         if (victim.weapon === 'the_strongest') {
-            // Ngắt niệm Chú Lực khi bị đánh trúng
-            victim.gojoChargeTimer = 0;
+            // Ngắt niệm Chú Lực khi bị đánh trúng (bỏ qua đạn G.E.A.R / đạn nhỏ < 0.5)
+            if (!b.isGearBonusShot && (b.dmg || 1) >= 0.5) victim.gojoChargeTimer = 0;
         }
         // =========================================================================
         // HÀM DÙNG CHUNG: KÍCH HOẠT HIỆU ỨNG LÊN VẬT CẢN (Y HỆT NHƯ LÊN NGƯỜI CHƠI)
