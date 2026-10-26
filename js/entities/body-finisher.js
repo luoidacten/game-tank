@@ -25,7 +25,7 @@ const BODY_FINISHERS = {
     engineer:     { t1: 'ĐỒNG LOẠT', t2: 'KHAI HỎA', c: '#f59e0b', c2: '#cbd5e1', g: '⚒', s: 'rain', n: 20 },
     ghost:        { t1: 'VÔ ẢNH', t2: 'ĐOẠT HỒN', c: '#c7d2fe', c2: '#818cf8', g: '☾', s: 'slash', n: 3 },
     aaa:          { t1: 'PHÁO KÍCH', t2: 'TỔNG LỰC', c: '#f97316', c2: '#fde047', g: '❋', s: 'rain', p: '●', n: 14 },
-    blade_god:    { t1: 'PHÁ THIÊN', t2: 'KIẾM', c: '#fde68a', c2: '#a78bfa', g: '†', s: 'slash', n: 1 },
+    blade_god:    { t1: 'PHÁ THIÊN', t2: 'KIẾM', c: '#fde68a', c2: '#a78bfa', g: '†', s: 'slash', n: 1, own: 1 },
     van_kiem:     { t1: 'VẠN KIẾM', t2: 'QUY TÔNG', c: '#38bdf8', c2: '#e0f2fe', g: '萬', s: 'rain', p: '†', n: 24 },
     water_gun:    { t1: 'THỦY LONG', t2: 'TRẢM', c: '#38bdf8', c2: '#e0f2fe', g: '≋', s: 'beam' },
     furnace:      { t1: 'HỎA', t2: 'TÁNG', c: '#f97316', c2: '#ef4444', g: '♨', s: 'burn' },
@@ -60,11 +60,11 @@ const BODY_FINISHERS = {
     raven_oca:    { t1: 'CUỘC SĂN', t2: 'KẾT THÚC', c: '#f43f5e', c2: '#e2e8f0', g: 'Ѵ', s: 'scope' },
     lazer_beam:   { t1: 'TIA', t2: 'THIÊU ĐỐT', c: '#ef4444', c2: '#fde68a', g: '☀', s: 'beam' },
     healer:       { t1: 'NHỊP TIM', t2: 'NGỪNG ĐẬP', c: '#4ade80', c2: '#f0fdf4', g: '✚', s: 'implode' },
-    chrononeo:    { t1: 'HAI THỜI ĐẠI', t2: 'MỘT KẾT CỤC', c: '#f59e0b', c2: '#22d3ee', g: '⧗', s: 'glitch' },
+    chrononeo:    { t1: 'HAI THỜI ĐẠI', t2: 'MỘT KẾT CỤC', c: '#f59e0b', c2: '#22d3ee', g: '⧗', s: 'glitch', own: 1 },
     gemini:       { t1: 'SONG TỬ', t2: 'HỢP KÍCH', c: '#60a5fa', c2: '#f472b6', g: '♊', s: 'slash', n: 2 },
     blood_lord:   { t1: 'HUYẾT', t2: 'TẾ', c: '#dc2626', c2: '#fecaca', g: '♦', s: 'implode', pal: ['#dc2626', '#7f1d1d', '#fecaca'] },
     berserker:    { t1: 'CUỒNG', t2: 'NỘ', c: '#ef4444', c2: '#f97316', g: '✖', s: 'slash', n: 4 },
-    kazuki:       { t1: 'SONG KIẾM', t2: 'VÔ NIỆM', c: '#e2e8f0', c2: '#60a5fa', g: '⚔', s: 'slash', n: 2 },
+    kazuki:       { t1: 'SONG KIẾM', t2: 'VÔ NIỆM', c: '#e2e8f0', c2: '#60a5fa', g: '⚔', s: 'slash', n: 2, own: 1 },
 };
 const BF_DUR = 120; // 2s
 const BF_HIT = 60;  // khoảnh khắc ra đòn chính
@@ -160,7 +160,7 @@ function bfDraw(f, cfg) {
         ctx.restore();
     }
     // ký hiệu lớn phía sau mục tiêu
-    if (t >= 6) {
+    if (t >= 6 && !cfg.own) {
         const k = Math.min(1, (t - 6) / 14), pulse = t >= BF_HIT ? 1 + 0.25 * Math.max(0, 1 - (t - BF_HIT) / 12) : 1;
         ctx.save(); ctx.translate(f.x, f.y);
         if (typeof onlineManager !== 'undefined' && onlineManager.isOnline && onlineManager.role === 'guest') ctx.rotate(Math.PI);
@@ -172,7 +172,7 @@ function bfDraw(f, cfg) {
     }
     ctx.restore();
     // chữ tiêu đề
-    if (t >= 16) {
+    if (t >= 16 && !cfg.own) {
         const a = Math.min(1, (t - 16) / 8) * fade;
         const fc = typeof fatalCinematic !== 'undefined' && fatalCinematic && fatalCinematic.active;
         const cxv = fc ? fatalCinematic.victimX : f.x, cyv = fc ? fatalCinematic.victimY : f.y;

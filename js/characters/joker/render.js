@@ -503,10 +503,52 @@ function jkDrawFinisher(f) {
     ctx.restore();
 }
 function jkDrawFinisherOver(f) {
-    const t = f.t, W = canvas.width, H = canvas.height;
+    const t = f.t, W = canvas.width, H = canvas.height, away = f.team === 1 ? -1 : 1;
+    const E = (a, b) => Math.max(0, Math.min(1, (t - a) / (b - a)));
+    const out = 1 - E(100, 118);
     ctx.save();
     const dark = t < 8 ? t / 8 : (t < 70 ? 1 : Math.max(0, 1 - (t - 70) / 30));
     if (dark > 0) { ctx.fillStyle = `rgba(10, 2, 24, ${0.55 * dark})`; ctx.fillRect(-W, -H, W * 3, H * 3); }
+    // đèn sân khấu rọi xuống nạn nhân
+    const sp = E(4, 18) * out;
+    if (sp > 0) {
+        const ax = f.x, ay = f.y + away * 330, g = ctx.createLinearGradient(ax, ay, f.x, f.y);
+        g.addColorStop(0, `rgba(253,224,71,${0.05 * sp})`); g.addColorStop(1, `rgba(253,224,71,${0.28 * sp})`);
+        ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = g;
+        ctx.beginPath(); ctx.moveTo(ax - 14, ay); ctx.lineTo(ax + 14, ay); ctx.lineTo(f.x + 95, f.y); ctx.lineTo(f.x - 95, f.y); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(f.x, f.y, 95, 30, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.globalCompositeOperation = 'source-over';
+    }
+    // nụ cười Joker khổng lồ phía sau
+    const gr = E(16, 40) * out;
+    if (gr > 0) {
+        ctx.save(); ctx.translate(f.x, f.y); if (f.team !== 1) ctx.rotate(Math.PI);
+        ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.5 * gr; ctx.shadowBlur = 20; ctx.shadowColor = JK_PURPLE;
+        const w = 120 * (0.6 + 0.4 * gr), d = 40 + 24 * gr;
+        ctx.fillStyle = 'rgba(168,85,247,0.55)';
+        ctx.beginPath(); ctx.moveTo(-w, -10); ctx.quadraticCurveTo(0, d * 2.1, w, -10); ctx.quadraticCurveTo(0, d * 1.1, -w, -10); ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 2; ctx.beginPath();
+        for (let i = 1; i < 8; i++) { const x = -w + i * w / 4, k = 1 - Math.pow(x / w, 2); ctx.moveTo(x, -10 + d * 0.55 * k); ctx.lineTo(x, -10 + d * 1.05 * k); }
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(74,222,128,0.75)';
+        for (const s of [-1, 1]) { ctx.beginPath(); ctx.moveTo(s * 30, -70); ctx.quadraticCurveTo(s * 62, -96, s * 92, -66); ctx.quadraticCurveTo(s * 60, -78, s * 30, -70); ctx.fill(); }
+        ctx.restore();
+    }
+    // vòng chất bài xoay
+    const rr = E(8, 26) * out;
+    if (rr > 0) {
+        ctx.save(); ctx.globalAlpha = rr; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = "900 15px Arial";
+        ctx.shadowBlur = 10;
+        const R = 160 - 30 * E(8, 40);
+        for (let i = 0; i < 16; i++) {
+            const a = i / 16 * Math.PI * 2 + t * 0.03, s = '♠♥♦♣'[i % 4];
+            ctx.fillStyle = i % 2 ? '#f43f5e' : '#e2e8f0'; ctx.shadowColor = i % 2 ? '#f43f5e' : JK_PURPLE;
+            ctx.fillText(s, f.x + Math.cos(a) * R, f.y + Math.sin(a) * R * 0.85);
+        }
+        ctx.strokeStyle = `rgba(253,224,71,${0.5 * rr})`; ctx.lineWidth = 1.2; ctx.setLineDash([3, 6]); ctx.lineDashOffset = -t;
+        ctx.beginPath(); ctx.ellipse(f.x, f.y, R + 16, (R + 16) * 0.85, 0, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+        ctx.restore();
+    }
     // bài nổ tung tứ phía
     if (t < 100) {
         const k = jkEase(Math.min(1, t / 50)), fade = t > 70 ? 1 - (t - 70) / 30 : 1;
@@ -515,6 +557,15 @@ function jkDrawFinisherOver(f) {
             const a = f.seed + i * (Math.PI * 2 / 20), d = 14 + (110 + (i % 4) * 22) * k;
             jkCard(f.x + Math.cos(a) * d, f.y + Math.sin(a) * d * 0.8, 11, 15, a + t * 0.2 * (i % 2 ? 1 : -1), Math.cos(t * 0.3 + i), i % 5 === 0 ? 'J' : suits[i % 4], fade, 8);
         }
+    }
+    // lật lá Joker: tia sáng vàng + sóng
+    if (t >= 36 && typeof fcRays === 'function') {
+        const k = E(36, 90);
+        fcRays(f.x, f.y, 16, 300 * fcOut(Math.min(1, k * 3)), JK_GOLD, 0.6 * (1 - k), f.seed + t * 0.004, 0.06);
+        ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.shadowBlur = 16; ctx.shadowColor = JK_PURPLE;
+        ctx.strokeStyle = `rgba(253,224,71,${1 - k})`; ctx.lineWidth = 4 * (1 - k) + 1; ctx.beginPath(); ctx.arc(f.x, f.y, 30 + k * 170, 0, Math.PI * 2); ctx.stroke();
+        ctx.strokeStyle = `rgba(168,85,247,${1 - k})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(f.x, f.y, 20 + k * 120, 0, Math.PI * 2); ctx.stroke();
+        ctx.restore();
     }
     // lá Joker khổng lồ lật mặt
     if (t >= 10 && t < 105) {
@@ -529,19 +580,26 @@ function jkDrawFinisherOver(f) {
         ctx.globalCompositeOperation = 'source-over';
         jkCard(f.x, f.y, 70 * sc, 100 * sc, f.team === 1 ? 0 : Math.PI, Math.abs(sx) < 0.05 ? 0.05 : sx, 'JR', fade, 26);
     }
+    // mưa giấy kim tuyến
+    if (t >= 36 && t < 118) {
+        const k = E(36, 118);
+        for (let i = 0; i < 30; i++) {
+            const r1 = jkHash(f.seed, i), r2 = jkHash(f.seed, i + 40), sw = Math.sin(t * 0.15 + i) * 10;
+            const x = f.x + (r1 - 0.5) * 340 + sw, y = f.y - 200 + (k * 420 + r2 * 160) % 420;
+            ctx.save(); ctx.translate(x, y); ctx.rotate(t * 0.2 * (i % 2 ? 1 : -1) + i); ctx.globalAlpha = 0.9 * (1 - E(96, 118));
+            ctx.fillStyle = [JK_GOLD, JK_PURPLE, '#f43f5e', JK_GREEN, '#ffffff'][i % 5]; ctx.fillRect(-3, -1.5 * Math.abs(Math.cos(t * 0.3 + i)) - 0.5, 6, 3 * Math.abs(Math.cos(t * 0.3 + i)) + 1);
+            ctx.restore();
+        }
+    }
     ctx.restore();
-    if (t >= 30 && t < 115) {
-        ctx.save();
-        ctx.globalAlpha = Math.min(1, (t - 30) / 8) * (t > 95 ? 1 - (t - 95) / 20 : 1);
-        ctx.font = "900 24px 'Orbitron', Arial"; ctx.textAlign = 'center';
-        ctx.shadowBlur = 18; ctx.shadowColor = JK_PURPLE; ctx.fillStyle = JK_GOLD;
-        const ty = Math.max(60, Math.min(H - 60, f.y + (f.team === 1 ? 84 : -76)));
-        const sc = 1 + Math.max(0, 1 - (t - 30) / 8) * 0.5;
-        ctx.translate(W / 2, ty); ctx.scale(sc, sc);
-        if (typeof drawWorldText === 'function') drawWorldText(ctx, '♠ ALL IN ♠', 0, 0); else ctx.fillText('♠ ALL IN ♠', 0, 0);
-        ctx.restore();
+    if (typeof fcLetterbox === 'function') {
+        fcVignette(0.5 * fcBarK(t, 12, 100, 118), '#1e0638');
+        const bh = fcLetterbox(fcBarK(t, 10, 104, 118), JK_PURPLE);
+        fcBadge(E(6, 20) * out, 'JOKER', JK_PURPLE, bh);
+        fcTitle('ALL IN', '♠ ♥  BÀI TẨY CUỐI CÙNG  ♦ ♣', E(36, 46), { c: JK_PURPLE, c2: JK_GOLD, alpha: out, sw: E(40, 66) * 1.2 - 0.1, size: 38 });
     }
 }
+function jkHash(s, i) { const x = Math.sin(s * 12.9898 + i * 78.233) * 43758.5453; return x - Math.floor(x); }
 function jkFxOver() {
     if (typeof bodyEffects === 'undefined') return;
     for (const e of bodyEffects) if ((e instanceof JkFinisher || e instanceof JkVerdict) && e.active) e.drawOver();

@@ -446,25 +446,6 @@ const BF_MOTIFS = {
         }
         if (post > 0) bfRing(f.x, f.y, 20 + post * 120, bfA(c.c, 1 - post), 5);
     },
-    // Kiếm Tôn: thanh cự kiếm giáng từ trời ghim xuyên nạn nhân, mặt đất nứt toác + cột sáng
-    blade_god(f, c, t) {
-        const A = bfAway(f), k = bfE(t, 18, BF_HIT), post = bfE(t, BF_HIT, BF_HIT + 45), e = k * k * k;
-        ctx.globalCompositeOperation = 'lighter';
-        if (t >= 12) {
-            const tipY = f.y + A * (300 * (1 - e)) - A * 4;
-            ctx.save(); ctx.translate(f.x, tipY + A * 170); ctx.rotate(A < 0 ? 0 : Math.PI); // mũi kiếm hướng về nạn nhân
-            ctx.globalAlpha *= 1 - post * 0.7; bfGlow(c.c2, 30);
-            ctx.translate(0, -170); ctx.rotate(Math.PI); bfSword(170, 13, c.c, '#ffffff');
-            ctx.restore();
-        }
-        if (t >= BF_HIT) {
-            ctx.save(); ctx.globalCompositeOperation = 'source-over'; ctx.shadowBlur = 0; bfCracks(f.x, f.y, 8, 160 * Math.min(1, post * 3), f.seed, bfA(c.c, 1 - post * 0.6), 2.5); ctx.restore();
-            bfGlow(c.c, 30); const pw = 30 * (1 - post); const g = ctx.createLinearGradient(f.x - pw, 0, f.x + pw, 0);
-            g.addColorStop(0, bfA(c.c, 0)); g.addColorStop(0.5, bfA('#ffffff', 0.8 * (1 - post))); g.addColorStop(1, bfA(c.c, 0));
-            ctx.fillStyle = g; ctx.fillRect(f.x - pw, f.y - 600, pw * 2, 1200);
-            bfRing(f.x, f.y, 20 + post * 140, bfA(c.c2, 1 - post), 5);
-        }
-    },
     // Kiếm Trận: vòng kiếm xoay quanh nạn nhân, đồng loạt chụm vào
     van_kiem(f, c, t) {
         const conv = bfE(t, 46, BF_HIT), post = bfE(t, BF_HIT, BF_HIT + 40);
@@ -1090,25 +1071,6 @@ const BF_MOTIFS = {
         if (t < BF_HIT + 10) for (let i = 0; i < 12; i++) { const ph = (t * 0.025 + i / 12) % 1; if (t < 8) continue; const mx = (f.x + f.ox) / 2 + (bfR(f.seed, i) - 0.5) * 120, my = (f.y + f.oy) / 2; const px = (1 - ph) * (1 - ph) * f.x + 2 * (1 - ph) * ph * mx + ph * ph * f.ox, py = (1 - ph) * (1 - ph) * f.y + 2 * (1 - ph) * ph * my + ph * ph * f.oy; bfGlow(c.c, 10); ctx.fillStyle = bfA(i % 3 ? c.c : c.c2, 0.9); ctx.beginPath(); ctx.arc(px, py, 3.2, 0, BF_TAU); ctx.fill(); }
         if (post > 0) { bfDisc(f.ox, f.oy, 20 + post * 30, c.c2, c.c, 0.6 * (1 - post)); bfRing(f.x, f.y, 14 + post * 70, bfA('#94a3b8', 1 - post), 3); }
     },
-    // Chrono & Neo: đồng hồ Quá Khứ (vàng, quay ngược) và Tương Lai (lam, quay xuôi) đâm sầm vào nhau
-    chrononeo(f, c, t) {
-        const k = bfE(t, 4, 18), mv = bfE(t, 18, BF_HIT), post = bfE(t, BF_HIT, BF_HIT + 40), d = 80 * (1 - mv * mv);
-        const clock = (x, y, col, dir) => {
-            ctx.save(); ctx.translate(x, y); ctx.globalAlpha *= k; bfGlow(col, 14);
-            ctx.fillStyle = 'rgba(15,23,42,0.75)'; ctx.beginPath(); ctx.arc(0, 0, 32, 0, BF_TAU); ctx.fill(); ctx.strokeStyle = col; ctx.lineWidth = 2.5; ctx.stroke();
-            for (let i = 0; i < 12; i++) { const a = i / 12 * BF_TAU; ctx.fillStyle = col; ctx.fillRect(Math.cos(a) * 26 - 1.5, Math.sin(a) * 26 - 1.5, 3, 3); }
-            ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(dir * t * 0.1) * 14, Math.sin(dir * t * 0.1) * 14); ctx.stroke();
-            ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(dir * t * 0.35) * 22, Math.sin(dir * t * 0.35) * 22); ctx.stroke();
-            ctx.restore();
-            ctx.save(); ctx.translate(x - dir * 26, y + 22); ctx.rotate(dir * t * 0.08); ctx.globalAlpha *= k * 0.8; ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.arc(0, 0, 10, 0, BF_TAU); ctx.stroke(); ctx.restore();
-        };
-        if (t < BF_HIT) { clock(f.x - d, f.y, c.c, -1); clock(f.x + d, f.y, c.c2, 1); }
-        else {
-            ctx.globalCompositeOperation = 'lighter';
-            for (let i = 0; i < 12; i++) { const a = i / 12 * BF_TAU, r = 20 + post * 120; ctx.save(); ctx.translate(f.x + Math.cos(a) * r, f.y + Math.sin(a) * r); ctx.rotate(a + post * 4); ctx.fillStyle = bfA(i % 2 ? c.c : c.c2, 1 - post); ctx.fillRect(-2, -6, 4, 12); ctx.restore(); }
-            bfGlow(c.c, 20); bfRing(f.x, f.y, 30 + post * 80, bfA(c.c, 1 - post), 4); bfRing(f.x, f.y, 24 + post * 110, bfA(c.c2, 1 - post), 3);
-        }
-    },
     // Gemini: 2 sao song tử xoắn quanh nhau, tách ra 2 phía rồi chém chéo chữ X cùng lúc
     gemini(f, c, t) {
         const orb = bfE(t, 4, 44), sep = bfE(t, 44, BF_HIT - 2), post = bfE(t, BF_HIT, BF_HIT + 40);
@@ -1165,25 +1127,6 @@ const BF_MOTIFS = {
             ctx.save(); ctx.globalCompositeOperation = 'source-over'; ctx.shadowBlur = 0; ctx.globalAlpha *= 1 - post * 0.7; bfCracks(f.x + Math.cos(ang) * 6, f.y + Math.sin(ang) * 6, 3, 60 + i * 14, f.seed + i, bfA('#fca5a5', 0.8), 2); ctx.restore();
         });
         if (post > 0) { ctx.globalCompositeOperation = 'lighter'; bfGlow(c.c, 18); bfShards(f, 16, 140, c.c, '#78716c', post, 7); bfRing(f.x, f.y, 20 + post * 120, bfA(c.c2, 1 - post), 6); }
-    },
-    // Kazuki: 2 thanh katana bắt chéo lóe sáng, khoảnh khắc tĩnh lặng, chém chữ X – nạn nhân tách 4 mảnh
-    kazuki(f, c, t) {
-        const k = bfE(t, 6, 26), still = bfE(t, 36, 52), post = bfE(t, BF_HIT, BF_HIT + 40);
-        if (t < BF_HIT) {
-            for (const s of [-1, 1]) {
-                ctx.save(); ctx.translate(f.x, f.y); ctx.rotate(s * Math.PI / 4); ctx.globalAlpha *= k * (1 - still * 0.7); ctx.scale(0.8 + 0.2 * k, 0.8 + 0.2 * k); ctx.translate(0, 55);
-                ctx.globalCompositeOperation = 'lighter'; bfGlow(c.c2, 14); bfSword(110, 4, bfA(c.c, 0.85), c.c2);
-                const sh = ((t * 4) % 160) - 30; ctx.fillStyle = bfA('#ffffff', 0.9); ctx.fillRect(-3, -sh - 6, 6, 6);
-                ctx.restore();
-            }
-        }
-        if (t >= BF_HIT) {
-            const kk = bfE(t, BF_HIT, BF_HIT + 4), L = 160;
-            ctx.globalCompositeOperation = 'lighter';
-            for (const s of [-1, 1]) { const a = s * Math.PI / 4 - Math.PI / 2, dx = Math.cos(a) * L, dy = Math.sin(a) * L; bfGlow(s < 0 ? c.c : c.c2, 24); ctx.strokeStyle = bfA(s < 0 ? c.c : c.c2, 1 - post); ctx.lineWidth = 8 * (1 - post) + 1; ctx.beginPath(); ctx.moveTo(f.x - dx, f.y - dy); ctx.lineTo(f.x - dx + dx * 2 * kk, f.y - dy + dy * 2 * kk); ctx.stroke(); ctx.strokeStyle = bfA('#ffffff', 1 - post); ctx.lineWidth = 2; ctx.stroke(); }
-            ctx.globalCompositeOperation = 'source-over'; ctx.shadowBlur = 0;
-            for (let q = 0; q < 4; q++) { const a = q * Math.PI / 2, d = post * 30; ctx.save(); ctx.translate(f.x + Math.cos(a) * d, f.y + Math.sin(a) * d); ctx.rotate(a + post * 0.6); ctx.globalAlpha *= 1 - post; ctx.fillStyle = '#1e293b'; ctx.strokeStyle = c.c2; ctx.lineWidth = 1.5; bfPoly([[0, 0], [f.vw * 0.5, -f.vw * 0.5], [f.vw * 0.5, f.vw * 0.5]]); ctx.fill(); ctx.stroke(); ctx.restore(); }
-        }
     },
 };
 function c2safe(c) { return c.c2 || '#ffffff'; }

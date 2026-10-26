@@ -300,7 +300,7 @@ CharHooks.register('diep_thanh_phong', Object.assign(CharHooks.registry.diep_tha
         if (p.dtpValid && !p.dtpUsed && h > 6 && m === 'idle') {
             const sN = dtpSwitchN(p), ok = h >= sN;
             const teal = h >= Math.min(24, sN) && h < 51;
-            ctx.lineWidth = 2.2; ctx.shadowBlur = 10;
+            ctx.lineWidth = 2.2 + h * 2.2; ctx.shadowBlur = 10;
             ctx.strokeStyle = teal || ok && h < 51 ? DTP_TEAL : (h >= 51 ? (p.dtpZoneCd > 0 ? '#64748b' : '#fde047') : 'rgba(45,212,191,0.4)');
             ctx.shadowColor = ctx.strokeStyle;
             ctx.beginPath(); ctx.arc(cx, cy, p.w * 0.95, -Math.PI / 2, -Math.PI / 2 + Math.min(1, h / DTP_ZONE_HOLD) * Math.PI * 2); ctx.stroke();
@@ -365,92 +365,134 @@ CharHooks.register('diep_thanh_phong', Object.assign(CharHooks.registry.diep_tha
     },
 }));
 
-// ---------- Kết liễu PHONG THẦN TUYỆT TỨC ----------
+// ---------- Kết liễu PHONG THẦN TUYỆT TỨC (điện ảnh, 180 tick; nổ tại t=132) ----------
+// 1) quạt khép, trời ngả ngọc bích  2) cửu trùng vân (9 tầng mây) kết vòng  3) mục tiêu bị cuốn xoáy bay lên qua các tầng mây
+// 4) vạn đạo phong nhận cắt chéo theo từng đợt  5) quạt bung mở: sóng xung kích ngọc bích, mục tiêu tan thành bụi + lá  6) tiêu đề
+function dtpFE(t, a, b) { return Math.max(0, Math.min(1, (t - a) / (b - a))); }
+function dtpFHash(s, i) { const x = Math.sin(s * 12.9898 + i * 78.233) * 43758.5453; return x - Math.floor(x); }
+function dtpLeaf(x, y, s, rot, col, a) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.globalAlpha *= a; ctx.fillStyle = col;
+    ctx.beginPath(); ctx.moveTo(-s, 0); ctx.quadraticCurveTo(0, -s * 0.55, s, 0); ctx.quadraticCurveTo(0, s * 0.55, -s, 0); ctx.fill();
+    ctx.strokeStyle = 'rgba(2,44,34,0.6)'; ctx.lineWidth = 0.6; ctx.beginPath(); ctx.moveTo(-s * 0.8, 0); ctx.lineTo(s * 0.8, 0); ctx.stroke();
+    ctx.restore();
+}
 function dtpDrawFinisherUnder(f) {
     const W = canvas.width, H = canvas.height, t = f.t;
     const fade = t > 160 ? Math.max(0, 1 - (t - 160) / 20) : 1, fin = Math.min(1, t / 20);
     ctx.save();
-    // bầu trời tối dần ngả ngọc bích
-    ctx.globalAlpha = 0.62 * fade * fin;
+    ctx.globalAlpha = 0.7 * fade * fin;
     const g = ctx.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, '#022c22'); g.addColorStop(0.5, '#031b17'); g.addColorStop(1, '#020617');
-    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    g.addColorStop(0, '#022c22'); g.addColorStop(0.5, '#04261f'); g.addColorStop(1, '#020617');
+    ctx.fillStyle = g; ctx.fillRect(-W, -H, W * 3, H * 3);
     ctx.restore();
 }
 function dtpDrawFinisherOver(f) {
-    const W = canvas.width, H = canvas.height, t = f.t, T = dtpNow();
-    const fade = t > 160 ? Math.max(0, 1 - (t - 160) / 20) : 1;
-    const toC = f.y < H / 2 ? 1 : -1, topY = f.y - 70, lift = Math.min(1, Math.max(0, (t - 20) / 70)), ease = lift * lift * (3 - 2 * lift);
-    const vy = f.y + (topY - f.y) * ease;   // mục tiêu bị cuốn bổng lên chín tầng mây
+    const t = f.t, E = (a, b) => dtpFE(t, a, b);
+    const fade = t > 162 ? Math.max(0, 1 - (t - 162) / 18) : 1;
+    const toK = f.oy > f.y ? 1 : -1;                         // phía Diệp Thanh Phong
+    const cx = f.x, top = f.y - 110;                         // tâm cửu trùng vân (phía "trời" của mục tiêu, khớp vụ nổ ở logic)
+    const lift = E(30, 104), le = lift * lift * (3 - 2 * lift);
+    const vy = f.y + (top - f.y) * le, vx = f.x + Math.sin(t * 0.22) * 26 * Math.sin(Math.PI * Math.min(1, lift * 1.1));
+    const boom = E(132, 170), gone = t >= 132;
     ctx.save(); ctx.globalAlpha = fade;
-    // 1) mây tầng trên
+    // tia sáng toả từ đỉnh mây
+    if (typeof fcRays === 'function') fcRays(cx, top, 12, 260 * E(20, 60), DTP_LEAF, 0.22 * E(20, 60) * (1 - boom), t * 0.006, 0.06);
+    // 2) cửu trùng vân: 9 tầng vòng mây xếp chồng từ mục tiêu lên đỉnh
     for (let i = 0; i < 9; i++) {
-        const cx = ((i * 71 + T * 18 * (i % 2 ? 1 : -1)) % (W + 120) + W + 120) % (W + 120) - 60, cy = f.y - 92 + (i % 3) * 14;
-        const cg = ctx.createRadialGradient(cx, cy, 2, cx, cy, 46);
-        cg.addColorStop(0, 'rgba(209,250,229,0.4)'); cg.addColorStop(1, 'rgba(209,250,229,0)');
-        ctx.fillStyle = cg; ctx.beginPath(); ctx.ellipse(cx, cy, 52, 18, 0, 0, Math.PI * 2); ctx.fill();
+        const k = E(14 + i * 4, 30 + i * 4) * (1 - E(132, 160));
+        if (k <= 0) continue;
+        const yy = f.y + 10 - i * 15, rx = (52 + i * 13) * (0.6 + 0.4 * k) * (1 + boom * 0.8), ry = rx * 0.26, rot = t * 0.05 * (i % 2 ? 1 : -1);
+        ctx.save(); ctx.translate(cx, yy - boom * 30 * i / 8);
+        ctx.strokeStyle = dtpRgba(i % 3 === 2 ? DTP_TEAL : '#d1fae5', 0.13 * k); ctx.lineWidth = 11;
+        ctx.beginPath(); ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2); ctx.stroke();
+        ctx.strokeStyle = dtpRgba(i % 2 ? DTP_JADE : DTP_LEAF, 0.75 * k); ctx.lineWidth = 1.6; ctx.shadowBlur = 8; ctx.shadowColor = DTP_JADE;
+        ctx.setLineDash([16, 9]); ctx.lineDashOffset = rot * 40;
+        ctx.beginPath(); ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+        ctx.restore();
     }
-    // 2) cột cuồng phong ngọc bích từ mặt đất lên mây
-    const colW = 26 + 34 * Math.min(1, t / 30);
-    if (t < 150) {
-        const yb = f.y + 34, yt = f.y - 130;
-        for (let i = 0; i < 14; i++) {
-            const k = i / 13, yy = yb + (yt - yb) * k, rw = colW * (0.55 + 0.9 * k);
-            ctx.strokeStyle = dtpRgba(i % 2 ? DTP_JADE : DTP_LEAF, 0.55 - k * 0.25); ctx.lineWidth = 2;
-            ctx.shadowBlur = 10; ctx.shadowColor = DTP_JADE;
-            const a = T * 9 + i * 0.6;
-            ctx.beginPath(); ctx.ellipse(f.x + Math.sin(a * 0.3) * 6, yy, rw, rw * 0.22, 0, a % (Math.PI * 2), a % (Math.PI * 2) + Math.PI * 1.3); ctx.stroke();
+    // lá ngọc xoáy quanh cột lốc
+    if (t >= 18 && t < 140) {
+        const a = E(18, 34) * (1 - E(128, 140));
+        for (let i = 0; i < 16; i++) {
+            const h = dtpFHash(f.seed, i), ph = (t * 0.012 + h) % 1, an = t * 0.12 + i * 2.4;
+            const r = 30 + ph * 70, y = f.y + 20 - ph * 150;
+            dtpLeaf(cx + Math.cos(an) * r, y + Math.sin(an) * r * 0.25, 6 + h * 4, an + Math.PI / 2, i % 3 ? DTP_LEAF : DTP_JADE, a * (1 - ph * 0.6));
         }
-        ctx.shadowBlur = 0;
     }
-    // 3) mục tiêu xoay tít trong lốc
-    if (t < 132) {
-        ctx.save(); ctx.translate(f.x + Math.sin(T * 7) * 8 * ease, vy); ctx.rotate(T * 10 * ease);
-        ctx.fillStyle = '#334155'; ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1;
-        const s = 1 - 0.35 * ease;
+    // 3) mục tiêu xoay tít bay lên
+    if (!gone && t >= 0) {
+        const s = 1 - 0.35 * le;
+        ctx.save(); ctx.translate(vx, vy); ctx.rotate(t * 0.18 * le);
+        ctx.fillStyle = '#334155'; ctx.strokeStyle = '#a7f3d0'; ctx.lineWidth = 1.5; ctx.shadowBlur = 12; ctx.shadowColor = DTP_JADE; ctx.globalAlpha *= 0.95 * E(26, 34);
         ctx.fillRect(-f.vw / 2 * s, -f.vh / 2 * s, f.vw * s, f.vh * s); ctx.strokeRect(-f.vw / 2 * s, -f.vh / 2 * s, f.vw * s, f.vh * s);
         ctx.restore();
     }
-    // 4) hàng ngàn lưỡi đao gió cắt ngang dọc
-    if (t >= 60 && t < 136) {
-        const n = Math.min(40, Math.floor((t - 60) * 0.8));
-        for (let i = 0; i < n; i++) {
-            const seed = (f.seed + i * 97) % 1000, a = (seed / 1000) * Math.PI * 2, len = 70 + (seed % 60);
-            const ph = ((t - 60) * 0.12 + seed / 333) % 1;
-            const cx = f.x + Math.cos(a) * 80 * (1 - ph), cy = vy + Math.sin(a) * 60 * (1 - ph);
-            const ox = Math.cos(a + Math.PI / 2) * len / 2, oy = Math.sin(a + Math.PI / 2) * len / 2;
-            ctx.globalAlpha = fade * (1 - ph) * 0.9;
-            ctx.strokeStyle = i % 3 ? '#ecfdf5' : DTP_LEAF; ctx.lineWidth = 1.4; ctx.shadowBlur = 8; ctx.shadowColor = DTP_JADE;
-            ctx.beginPath(); ctx.moveTo(cx - ox, cy - oy); ctx.quadraticCurveTo(cx + Math.cos(a) * 8, cy + Math.sin(a) * 8, cx + ox, cy + oy); ctx.stroke();
+    // 4) vạn đạo phong nhận: 3 đợt cắt chéo
+    if (t >= 58 && t < 132) {
+        ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
+        for (let w = 0; w < 3; w++) {
+            const w0 = 58 + w * 22;
+            for (let i = 0; i < 20; i++) {
+                const t0 = w0 + i * 0.7, k = (t - t0) / 14;
+                if (k <= 0 || k >= 1) continue;
+                const h = dtpFHash(f.seed + w, i), an = (w % 2 ? 0.5 : -0.5) + (h - 0.5) * 1.2 + (i % 2 ? Math.PI : 0);
+                const L = 150, ox = Math.cos(an), oy = Math.sin(an), off = (h - 0.5) * 50;
+                const px = vx - ox * L + ox * 2 * L * k - oy * off, py = vy - oy * L + oy * 2 * L * k + ox * off;
+                const len = 44 + h * 40, a = Math.sin(Math.PI * k);
+                ctx.strokeStyle = dtpRgba(i % 3 ? '#ecfdf5' : DTP_LEAF, 0.9 * a); ctx.lineWidth = 2.2 + h * 2.2; ctx.shadowBlur = 10; ctx.shadowColor = DTP_JADE;
+                ctx.beginPath(); ctx.moveTo(px - ox * len, py - oy * len); ctx.quadraticCurveTo(px - oy * 6, py + ox * 6, px, py); ctx.stroke();
+            }
+            // chớp sáng mỗi đợt chém
+            const fk = E(w0 + 10, w0 + 18);
+            if (fk > 0 && fk < 1) { ctx.strokeStyle = dtpRgba('#d1fae5', 1 - fk); ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(vx, vy, 18 + fk * 50, 0, Math.PI * 2); ctx.stroke(); }
         }
-        ctx.globalAlpha = fade; ctx.shadowBlur = 0;
-    }
-    // 5) Diệp Thanh Phong khép quạt -> quạt mở ra thổi tan thành cát bụi
-    const fx = f.x, fy = f.y + toC * 70, open = t < 110 ? 0.25 : Math.min(3.0, 0.25 + (t - 110) / 14 * 2.75);
-    const toV = Math.atan2(vy - fy, f.x - fx) + Math.PI / 2;
-    dtpFan(fx, fy, 30 + (t >= 110 ? 20 * Math.min(1, (t - 110) / 14) : 0), toV, open, DTP_JADE, 0.95);
-    if (t >= 120 && t < 160) {
-        const k = (t - 120) / 40;
-        ctx.globalAlpha = fade * (1 - k);
-        for (let i = 0; i < 60; i++) {
-            const seed = (f.seed * 7 + i * 131) % 1000, a = -Math.PI / 2 + (seed / 1000 - 0.5) * 2.4;
-            const d = k * (80 + seed % 120);
-            ctx.fillStyle = i % 2 ? '#d6d3d1' : '#a8a29e';
-            ctx.fillRect(f.x + Math.cos(a) * d, vy + Math.sin(a) * d * 0.7 - k * 30, 2, 2);
-        }
-        ctx.globalAlpha = fade;
-    }
-    if (t >= 132 && t < 140) { ctx.globalAlpha = (140 - t) / 8 * 0.6; ctx.fillStyle = '#d1fae5'; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = fade; }
-    // 6) chữ kết
-    if (t >= 96) {
-        const k = Math.min(1, (t - 96) / 12), sc = 1.5 - 0.5 * k, cy = f.y + toC * 125;
-        ctx.save(); ctx.translate(W / 2, cy); ctx.scale(sc, sc); ctx.globalAlpha = fade * k;
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.shadowBlur = 18; ctx.shadowColor = DTP_JADE;
-        ctx.fillStyle = '#d1fae5'; ctx.font = "900 26px 'Orbitron', Arial"; ctx.fillText('PHONG THẦN', 0, -14);
-        ctx.fillStyle = DTP_LEAF; ctx.font = "900 20px 'Orbitron', Arial"; ctx.fillText('TUYỆT TỨC', 0, 14);
         ctx.restore();
     }
+    // 1) & 5) Quạt: khép lại lúc mở màn, bung mở hết cỡ lúc kết
+    const fx = f.x - 46, fy = f.y + toK * 64;
+    const ang = Math.atan2((gone ? top : vy) - fy, cx - fx) + Math.PI / 2;
+    let open, R = 40, fa = 1;
+    if (t < 26) { open = 2.6 - 2.35 * dtpFE(t, 2, 22); fa = E(0, 6); }
+    else if (t < 112) open = 0.25;
+    else { const k = E(112, 132); open = 0.25 + 2.85 * k * k; R = 40 + 34 * k; }
+    if (t > 150) fa = 1 - E(150, 170);
+    if (t >= 112 && t < 132) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; const k = E(112, 132), gg = ctx.createRadialGradient(fx, fy, 0, fx, fy, 30 + 40 * k); gg.addColorStop(0, dtpRgba('#ecfdf5', 0.7 * k)); gg.addColorStop(1, dtpRgba(DTP_JADE, 0)); ctx.fillStyle = gg; ctx.beginPath(); ctx.arc(fx, fy, 30 + 40 * k, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+    dtpFan(fx, fy, R, ang, open, DTP_JADE, 0.95 * fa);
+    // vệt gió từ quạt bắn lên mục tiêu
+    if (t >= 128 && t < 140) {
+        const k = E(128, 140);
+        ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.strokeStyle = dtpRgba('#ecfdf5', 1 - k); ctx.lineWidth = 10 * (1 - k) + 1; ctx.shadowBlur = 16; ctx.shadowColor = DTP_JADE;
+        ctx.beginPath(); ctx.moveTo(fx, fy); ctx.lineTo(cx, top); ctx.stroke(); ctx.restore();
+    }
+    // 5) sóng xung kích ngọc bích + bụi tan
+    if (gone) {
+        ctx.save(); ctx.globalCompositeOperation = 'lighter';
+        if (typeof fcRays === 'function') fcRays(cx, top, 16, 320 * Math.min(1, boom * 4), DTP_JADE, 0.75 * (1 - boom), f.seed, 0.06);
+        for (let j = 0; j < 3; j++) {
+            const k = E(132 + j * 5, 166 + j * 5); if (k <= 0 || k >= 1) continue;
+            ctx.strokeStyle = dtpRgba(j === 1 ? '#ecfdf5' : DTP_JADE, 1 - k); ctx.lineWidth = 7 * (1 - k) + 1; ctx.shadowBlur = 18; ctx.shadowColor = DTP_JADE;
+            ctx.beginPath(); ctx.ellipse(cx, top, 20 + k * 230, (20 + k * 230) * 0.55, 0, 0, Math.PI * 2); ctx.stroke();
+        }
+        ctx.restore();
+        for (let i = 0; i < 44; i++) {
+            const h = dtpFHash(f.seed, i + 50), h2 = dtpFHash(f.seed, i + 99), an = h * Math.PI * 2;
+            const d = (20 + h2 * 150) * (1 - Math.pow(1 - boom, 3)), x = cx + Math.cos(an) * d, y = top + Math.sin(an) * d * 0.7 - boom * 40;
+            const a = 1 - boom;
+            if (i % 3 === 0) dtpLeaf(x, y, 3 + h2 * 3, an + boom * 6, i % 2 ? DTP_LEAF : DTP_JADE, a);
+            else { ctx.globalAlpha = fade * a; ctx.fillStyle = i % 2 ? '#d6d3d1' : '#a7f3d0'; ctx.fillRect(x, y, 2, 2); ctx.globalAlpha = fade; }
+        }
+    }
+    if (t >= 132 && t < 142) {
+        ctx.save(); if (typeof fcScreen === 'function') fcScreen(); ctx.globalAlpha = (142 - t) / 10 * 0.55; ctx.fillStyle = '#d1fae5'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.restore();
+    }
     ctx.restore();
+    // 6) khung điện ảnh + COLLAB + tiêu đề
+    if (typeof fcLetterbox === 'function') {
+        fcVignette(0.5 * fcBarK(t, 16, 160, 180), '#011a14');
+        const bh = fcLetterbox(fcBarK(t, 12, 164, 180), DTP_JADE);
+        fcBadge(E(6, 22) * (1 - E(162, 176)), 'DIỆP THANH PHONG', DTP_JADE, bh);
+        fcTitle('PHONG THẦN TUYỆT TỨC', 'CỬU TRÙNG VÂN · PHONG NHẬN', E(136, 148), { c: DTP_JADE, c2: '#d1fae5', alpha: 1 - E(164, 178), sw: E(140, 168) * 1.2 - 0.1, size: 26 });
+    }
 }
 function dtpFxOver() {
     if (typeof bodyEffects === 'undefined') return;
