@@ -23,7 +23,7 @@ let gameState = {
     lastObstacleSpawn: 0,
     roundStartTime: 0,
     currentMap: 'classic',
-    selectedMapMode: 'classic'
+    selectedMapMode: 'random'
 };
 
 const inputs = {

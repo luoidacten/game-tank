@@ -52,7 +52,9 @@ function startRound() {
     if (!isOnlineGuest && gameState.mapPreselected) {
         gameState.mapPreselected = false; // host online đã chọn map trước khi gửi START_ROUND
     } else if (!isOnlineGuest) {
-        if (!gameState.selectedMapMode || gameState.selectedMapMode === 'random') {
+        // Map ngẫu nhiên mặc định; chỉ Phòng Tập (bot) & PvE được cố định map
+        const mapFixed = (typeof botAI !== 'undefined' && botAI.enabled) || (typeof PVE !== 'undefined' && PVE.active);
+        if (!mapFixed || !gameState.selectedMapMode || gameState.selectedMapMode === 'random') {
             const mapList = ['classic', 'bastion', 'artillery', 'overdrive', 'fast_shrink', 'rush_hour', 'supply_drop'];
             gameState.currentMap = mapList[Math.floor(Math.random() * mapList.length)];
         } else {
