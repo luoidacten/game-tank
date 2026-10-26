@@ -691,3 +691,17 @@ function botShopBuy(playerId) {
         return f.call(this, bot, enemy, aligned, inp);
     };
 })();
+
+// Idol: nhấp kỹ năng Phong Cách / Sóng Âm, giữ đổi Phong Cách, giữ 1s rồi nhấp mở Sân Khấu (idolBotPlan)
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon === 'idol' && typeof idolBotPlan === 'function') {
+            if (this.idQ && this.idQ.length) { inp.s = this.idQ.shift(); return; }
+            const q = idolBotPlan(bot, enemy, aligned);
+            if (q && q.length) { this.idQ = q.slice(1); inp.s = q[0]; return; }
+            inp.s = false; return;
+        }
+        return f.call(this, bot, enemy, aligned, inp);
+    };
+})();

@@ -489,6 +489,14 @@ const MODULES = {
             size: { w: 28, h: 28 },
             stats: { hp: 5.0, dmg: 1.1, ammo: 4, speedMult: 1.0571 }
         },
+        {
+            id: 'idol',
+            name: 'Idol',
+            desc: '"Ánh đèn sân khấu đã bật... Đêm nay, mọi ánh nhìn đều thuộc về ta!" HP:4.5 | Dame:0.9 | Đạn: 100 Náo Nhiệt (+6/s, +12 khi trúng) | Tốc:3.9. NHẤP: kỹ năng Phong Cách (đang CD -> Đạn Sóng Âm 0.8). GIỮ 0.5s NHẢ: đổi Phong Cách 1 VŨ ĐẠO (20, lướt lên trước nổ Vòng Sóng Âm 1.2 + đẩy, chậm 35%, choáng 0.5s rồi bật về) -> 2 TÂM ĐIỂM (30, Spotlight cảnh báo 0.7s rồi Lazer xuyên vật cản 2.4) -> 3 QUYẾN RŨ (35, Trái Tim 0.8: MÊ HOẶC 1.75s — địch không bắn được & tự chạy thẳng hàng với Idol). GIỮ 1.0s: 3 Sân Khấu xoay vòng, NHẤP mở Buổi Trình Diễn 15s (CD 30s): 🔥 Rock (st +20%, Náo Nhiệt x2 khi trúng, địch Suy Yếu) | 💎 Pop (tốc +25%, CD -20%, đạn địch chậm 20%) | 💜 Ballad (giảm st 20%, hồi máu mỗi kỹ năng, địch chậm 20%). FAN: giữ ≥80 Náo Nhiệt 4s / kỹ năng trúng / thắng hiệp +Fan; không trúng 6s hoặc thua mất Fan. Cuối hiệp mỗi Fan = 2💗 mua ở CỬA HÀNG YÊU THÍCH. Evo cần mốc Fan (6/12/18).',
+            type: 'body', role: ['Kiểm Soát', 'Cơ Động'],
+            size: { w: 26, h: 26 },
+            stats: { hp: 4.5, dmg: 0.9, ammo: 100, speedMult: 1.1143 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 35 },

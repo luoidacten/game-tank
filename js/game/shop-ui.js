@@ -467,8 +467,10 @@ function renderShop(playerId, keepItems = false) {
             const priceLabel = price === 0 ? 'MIỄN PHÍ' : ('$' + price);
             card.innerHTML = `<h4>${item.name}${lvlTxt}</h4><p>${item.desc}${extra}</p><p style="color:#f1c40f; font-weight:bold">${priceLabel}</p>`;
             card.dataset.icon = SHOP_ICON[item.id] || (item.type === 'evo' ? '🧬' : '');
-
-            card.onclick = () => {
+            // Điều kiện mua Evo riêng của body (vd. Idol cần đủ Fan): trả về chữ -> khoá thẻ
+            const evoLock = item.type === 'evo' ? CharHooks.call(player, 'evoLock', item) : null;
+            if (evoLock) { card.className = 'card sold'; card.innerHTML += `<p style="color:#f472b6;font-weight:bold">🔒 ${evoLock}</p>`; }
+            else card.onclick = () => {
                 const currentCoin = (playerId === 'p1') ? gameState.p1Coins : gameState.p2Coins;
                 if (currentCoin >= price) {
                     const wasFreeFoot = (item.type === 'feet' && price === 0 && player._gearFreeFootAvailable);
