@@ -644,3 +644,20 @@ function botShopBuy(playerId) {
         return f.call(this, bot, enemy, aligned, inp);
     };
 })();
+
+// Diệp Thanh Phong: nhấp chiêu theo Thế Quạt, giữ 0.5s đổi Thế, giữ 1s Đổi Khí Áp, trên không giữ 0.5s để lại vòng (dtpBotAction)
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon === 'diep_thanh_phong' && typeof dtpBotAction === 'function') {
+            // Đang bay: lái Vòng Cảnh Báo về phía địch
+            if (bot.dtpMode === 'sky' && enemy) { const dx = enemy.x + enemy.w / 2 - bot.dtpSkyX; inp.l = dx < -3; inp.r = dx > 3; }
+            if (this.dtpB > 0) { this.dtpB--; inp.s = this.dtpB > 3; return; }
+            const a = dtpBotAction(bot, enemy, aligned);
+            const n = a === 'tap' ? 2 : a === 'switch' ? dtpSwitchN(bot) + 4 : a === 'zone' ? DTP_ZONE_HOLD + 2 : a === 'leave' ? DTP_SKY_HOLD + 2 : 0;
+            if (n) { this.dtpB = n + 3; inp.s = true; return; }
+            inp.s = false; return;
+        }
+        return f.call(this, bot, enemy, aligned, inp);
+    };
+})();

@@ -465,6 +465,14 @@ const MODULES = {
             size: { w: 24, h: 24 },
             stats: { hp: 3, dmg: 0.8, ammo: 6, speedMult: 1.2571 }
         },
+        {
+            id: 'diep_thanh_phong',
+            name: 'Diệp Thanh Phong',
+            desc: '"Cơn gió nhẹ thoảng qua... nhưng đủ sức cuốn phăng vạn vật!" (Collab) HP:4 | Dame:1 | Đạn: 100 Gió (hồi 8/s) | Tốc: 3.9. KHÍ ÁP 0-100 (khởi đầu 50): THUẬN PHONG (0-33) +20% tốc, +35% hồi Gió, đòn trúng hoàn 35% Gió | BÃO HÒA (34-66) -25% Gió tiêu hao, +12% dame, +10% tốc, Khí Áp nhạy x1.5, LOẠN PHONG mỗi 10s gạt đạn & +1 Khiên Gió | NGHỊCH PHONG (67-100) +25% dame; ở đủ 8s (hoặc chạm 100: ngay 4s) TOÀN PHONG: địch -20% tốc, +15% st nhận, trúng đòn bị GIÓ CẮT 0.25 HP/s 2.5s. KHIÊN GIÓ: khiên xanh vỡ -> lốc xung kích 110px (Bão Hòa 165px) xoá đạn thường, đẩy lùi, +25% tốc 1.5s. Nhấp: chiêu theo Thế Quạt; giữ 0.5s rồi nhả: đổi Thế (Thuận <-> Nghịch Vũ); giữ tới 1s (hồi 8s): ĐỔI KHÍ ÁP sang vùng kế tiếp, +20 Gió. THUẬN PHONG VŨ (-10 Khí Áp, Chuỗi 3 Nhịp): Lốc Xoáy 0.8 (+20% tốc) / Nhịp 3 Đại Cuồng Phong nuốt đạn địch lớn dần, nổ Bão Lớn 2.5s | Khai Phong lưỡi gió 1.0 + lướt / Nhịp 3 Tam Liên Phong Nhận | Phong Vũ lướt lên, Vòng Cảnh Báo 1.2s rồi xoay quạt 1.2 (vật thể văng về phía địch nổ 1.0; địch bị đẩy lùi + chậm 40%) / Nhịp 3 BÃO QUẠT TUYỆT VŨ hóa lốc phản đạn lao tới, Múa Quạt 3s bất tử (hút, 0.4/0.3s) rồi nhát chém 2.0. NGHỊCH PHONG VŨ (+20 Khí Áp, nhấp mở nuôi / nhấp lại phóng): Phong Tụ Cầu (10 + 8/s, 4s) xuyên vật cản 1.0-2.5, nổ Vùng Cuồng Phong chậm 45% | Nuôi Lốc Hộ Thể (12 + 6/s, 5s) Giáp Gió -25% st & +20% tốc, lốc ngoằn ngoèo hất tung choáng 1.5-3s, 1.5-2.8 dame | CỬU THIÊN PHONG VŨ (15 + 10/s, 5s): bay lên trời (bất tử) lái Vòng Cảnh Báo; nhấp đáp: <2s quét 1.4, 2-4s múa quạt 2s, >4s THIÊN PHONG BÃO VŨ 6s hút cực mạnh, giây thứ 3 bản thể về nhà để Ảo Ảnh Gió múa tiếp; giữ 0.5s trên không: để lại Vòng Cảnh Báo tự nuôi 4s (Ảo Ảnh tự đáp 65%) & dịch chuyển về nhà. Hạ gục -> PHONG THẦN TUYỆT TỨC.',
+            type: 'body', role: ['Kiểm Soát', 'Cơ Động'],
+            size: { w: 26, h: 26 },
+            stats: { hp: 4.0, dmg: 1.0, ammo: 100, speedMult: 1.1143 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 35 },

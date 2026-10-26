@@ -53,6 +53,7 @@ const NET_CLASSES = {
     WdFinisher,
     AdFinisher,
     TnZone, TnFinisher,
+    DtpOrb, DtpGrowTornado, DtpBigTornado, DtpStorm, DtpSkyZone, DtpFinisher,
 };
 
 // Biến toàn cục cần đồng bộ: [tên, getter, setter]
