@@ -830,5 +830,15 @@ const BODY_GUIDES = {
         passive: ['Đạn rơi từ trời: không bị chặn/bắt', 'Hồng Tâm (lệch ≤18px): +0.4 Dame, phá 1 Khiên'],
         evo: { e1: 'Rơi 0.55s, +1 đạn, nạp nhanh', e2: 'Hố lửa 2.5s, Rải Thảm hồi 5.5s', full: 'Phát thứ 3: Đại Pháo Cối + 2 đạn chùm' },
         tips: ['Đứng đón đầu hướng chạy của địch rồi mới bắn']
+    },
+    fire_cannon: {
+        tag: 'Đạn lửa thiêu đốt, rải vùng lửa', diff: 1,
+        controls: [
+            { input: 'TAP', name: 'Đạn Lửa', what: 'Trúng địch là Đốt 1.5s' },
+            { input: 'AUTO', name: 'Hỏa Cầu', what: 'Phát thứ 3: để lại Vùng Lửa trên làn địch' }
+        ],
+        passive: ['Đứng trong Vùng Lửa luôn bị Đốt', '3 chấm cạnh xe: đủ 2 chấm -> phát tới là Hỏa Cầu'],
+        evo: { e1: '+1 Máu, vùng to hơn, cứ 2 vùng có 1 Đại Hỏa', e2: 'x1.4 dame lên địch cháy, Đốt 3 tầng, kích nổ', full: 'Tường Lửa + Hỏa Ngục mỗi 7s' },
+        tips: ['Rải Hỏa Cầu cạnh nhau để dồn địch vào góc', 'Đốt địch trước rồi mới tung Hỏa Cầu']
     }
 };

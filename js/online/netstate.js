@@ -61,6 +61,7 @@ const NET_CLASSES = {
     ThFinisher, MainFinisher,
     TgFinisher,
     MrShell, MrCrater, MrFinisher,
+    FcZone, FcFinisher,
 };
 
 // Biến toàn cục cần đồng bộ: [tên, getter, setter]

@@ -770,3 +770,18 @@ function botShopBuy(playerId) {
         return f.call(this, bot, enemy, aligned, inp);
     };
 })();
+
+// Pháo Lửa: nhấp khi thẳng hàng; đầy đạn thì xả bớt đạn thường để Hỏa Cầu (phát thứ 3) dành cho lúc thẳng hàng
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon === 'fire_cannon') {
+            if (this.fcB > 0) { this.fcB--; inp.s = this.fcB > 2; return; }
+            const nextBig = (bot.fcShots || 0) % 3 === 2;
+            const full = bot.ammo >= (bot.maxAmmo || 5);
+            if (bot.ammo > 0 && (aligned || (full && !nextBig))) { this.fcB = 5; inp.s = true; return; }
+            inp.s = false; return;
+        }
+        return f.call(this, bot, enemy, aligned, inp);
+    };
+})();
