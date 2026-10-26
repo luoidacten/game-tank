@@ -249,7 +249,7 @@ class ThunderZone {
         if (!enemy || enemy.hp <= 0) return;
         const inside = Math.abs(enemy.x + enemy.w / 2 - this.x) < this.r * ZONE_AX + enemy.w / 2 && Math.abs(enemy.y + enemy.h / 2 - this.y) < this.r * ZONE_AY + enemy.h / 2;
         if (!inside) return;
-        addStatusSlow(enemy, 0.8);
+        addStatusSlow(enemy, 0.88);
         if (this.life % 30 === 0) {
             enemy.takeDamage(this.dmg, this.owner, { isEnvironmental: true });
             spawnSparkParticles(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, '#80deea', 4);

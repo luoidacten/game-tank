@@ -107,6 +107,7 @@ class SmartBot {
             const half = Math.sqrt(Math.max(0, r * r - Math.max(0, dy - bot.h / 2) ** 2)) + bot.w / 2;
             out.push({ t: Math.max(1, tLeft), x, half, w });
         };
+        if (enemy.dtpMode === 'skylock' && typeof dtpSkyR === 'function') zoneAt(enemy.dtpSkyX, enemy.dtpSkyY, dtpSkyR(enemy.dtpSkyT), DTP_SKY_LOCK - enemy.dtpModeT, 3);
         if (enemy.thunderSky) zoneAt(enemy.thunderSky.x, enemy.thunderSky.y, enemy.thunderSky.r, enemy.thunderSky.lock > 0 ? enemy.thunderSky.lock : 60, 3);
         mortars.forEach(m => { if (m.active && m.owner !== bot) zoneAt(m.x, m.y, m.maxR || 55, (m.detonateTime - (now - m.spawnTime)) / 16.7, 2, m); });
         artilleryHazards.forEach(h => { if (h.active) zoneAt(h.x, h.y, h.maxR || 60, (h.detonateTime - (now - h.spawnTime)) / 16.7, 2, h); });

@@ -17,7 +17,8 @@ const DTP_ZONE_C = ['#86efac', '#2dd4bf', '#8b5cf6'];
 const DTP_ZONE_N = ['THUẬN PHONG', 'BÃO HÒA', 'NGHỊCH PHONG'];
 const DTP_ZONE_HOLD = 60;   // giữ 1.0s: Đổi Khí Áp
 const DTP_SKY_HOLD = 30;    // trên không: giữ 0.5s để lại Vòng Cảnh Báo
-const DTP_IMMUNE_MODES = ['sky', 'cyc_go', 'cyc_dance', 'cyc_back'];
+const DTP_SKY_LOCK = 40;    // Luật 11: vòng KHÓA 0.67s trước khi giáng
+const DTP_IMMUNE_MODES = ['sky', 'skylock', 'cyc_go', 'cyc_dance', 'cyc_back'];
 
 function dtpE1(p) { return !!p && p.hasUpgrade('evo_dtp_1'); }
 function dtpE2(p) { return !!p && p.hasUpgrade('evo_dtp_2'); }
@@ -34,9 +35,9 @@ function dtpSfx(n) { if (typeof soundSystem !== 'undefined' && soundSystem && !s
 function dtpTxt(o, s, c, sz, dy) { addFloatingText(o.x + o.w / 2, o.y + (o.id === 1 ? -18 - (dy || 0) : o.h + 22 + (dy || 0)), s, c, sz || 12); }
 function dtpSwitchN(p) { return dtpE1(p) ? 15 : 30; }
 function dtpBeatN(p) { return dtpFull(p) ? 2 : 3; }
-function dtpZoneCdMax(p) { return dtpE1(p) ? 300 : 480; }
+function dtpZoneCdMax(p) { return dtpE1(p) ? 420 : 540; }
 function dtpTpNeed(p) { return dtpE2(p) ? 270 : 480; }
-function dtpSkyR(T) { return Math.min(95, 42 + 11 * T / 60); }
+function dtpSkyR(T) { return Math.min(80, 38 + 9 * T / 60); }
 function dtpImmune(p) { return DTP_IMMUNE_MODES.includes(p.dtpMode); }
 function dtpCC(e) { return dtpAlive(e) && e.weapon !== 'juggernaut'; }
 function dtpZone(p) { const v = p.dtpP || 0; return v < 33.5 ? 0 : (v < 66.5 ? 1 : 2); }
@@ -47,7 +48,7 @@ function dtpW(p) {
     if (p.dtpCarryT > 0) w[p.dtpCarryZ || 0] = 1;
     return w;
 }
-function dtpDmgMul(p) { const w = dtpW(p); return (1 + 0.12 * w[1] + 0.25 * w[2]) * dtpHpMul(p); }
+function dtpDmgMul(p) { const w = dtpW(p); return (1 + 0.08 * w[1] + 0.18 * w[2]) * dtpHpMul(p); }
 function dtpCostMul(p) { return dtpW(p)[1] >= 1 ? 0.75 : 1; }
 function dtpTP(p) { return dtpIs(p) && ((p.dtpNgT || 0) >= dtpTpNeed(p) || p.dtpTpT > 0); }
 function dtpInR(x, y, r, o) {
@@ -169,7 +170,7 @@ function dtpNearZone(p, e) {
 const DTP_HP_WIN = 150;
 function dtpHpMul(p) {
     const rep = Math.max(0, (p.dtpHpRep || 0) - 2);
-    return (1 + 0.1 * (p.dtpHpS || 0)) * Math.max(0.7, 1 - 0.15 * rep) * (p.dtpHpPow > 1 ? 1.2 : 1);
+    return (1 + 0.07 * (p.dtpHpS || 0)) * Math.max(0.7, 1 - 0.15 * rep) * (p.dtpHpPow > 1 ? 1.2 : 1);
 }
 function dtpCombo(p, st) {
     p.dtpHpPow = p.dtpHpEmp ? 1.25 : 1;
@@ -289,17 +290,17 @@ function dtpStrike(p) {
             dtpTxt(p, 'ĐẠI CUỒNG PHONG!', DTP_LEAF, 13, 14);
             triggerScreenShake(3, 6);
         } else {
-            spawnBullet(p, { x: cx - 7, y: dtpMuzzle(p, 16), w: 14, h: 16, vy: dir * 7.5, dmg: 0.8 * mul, hook: 'dtp', dtpK: 'tor', dtpCost: cost });
+            spawnBullet(p, { x: cx - 7, y: dtpMuzzle(p, 16), w: 14, h: 16, vy: dir * 7.5, dmg: 0.6 * mul, hook: 'dtp', dtpK: 'tor', dtpCost: cost });
             dtpBuff(p, 60, 1.2);
         }
         dtpSfx('playShoot');
     } else if (z === 1) {
         if (emp) {
-            spawnBullet(p, { x: cx - 4, y: dtpMuzzle(p, 20), w: 8, h: 20, vy: dir * 11, dmg: 1.2 * mul, hook: 'dtp', dtpK: 'blade', dtpBig: true, dtpCost: cost });
-            for (const s of [-1, 1]) spawnBullet(p, { x: cx - 3, y: dtpMuzzle(p, 16), w: 6, h: 16, vx: s * 3.4, vy: dir * 9.5, dmg: 0.7 * mul, hook: 'dtp', dtpK: 'blade', dtpBounce: 1, dtpCost: cost / 3 });
+            spawnBullet(p, { x: cx - 4, y: dtpMuzzle(p, 20), w: 8, h: 20, vy: dir * 11, dmg: 0.95 * mul, hook: 'dtp', dtpK: 'blade', dtpBig: true, dtpCost: cost });
+            for (const s of [-1, 1]) spawnBullet(p, { x: cx - 3, y: dtpMuzzle(p, 16), w: 6, h: 16, vx: s * 3.4, vy: dir * 9.5, dmg: 0.55 * mul, hook: 'dtp', dtpK: 'blade', dtpBounce: 1, dtpCost: cost / 3 });
             dtpTxt(p, 'TAM LIÊN PHONG NHẬN!', DTP_TEAL, 12, 14);
         } else {
-            spawnBullet(p, { x: cx - 3, y: dtpMuzzle(p, 18), w: 6, h: 18, vy: dir * 11.5, dmg: 1.0 * mul, hook: 'dtp', dtpK: 'blade', dtpCost: cost });
+            spawnBullet(p, { x: cx - 3, y: dtpMuzzle(p, 18), w: 6, h: 18, vy: dir * 11.5, dmg: 0.8 * mul, hook: 'dtp', dtpK: 'blade', dtpCost: cost });
         }
         if (!isGrounded(p)) { p.dtpDashT = emp ? 14 : 8; p.dtpDashDir = p.dtpLastDir || (cx < canvas.width / 2 ? 1 : -1); }
         dtpSfx('playShoot');
@@ -366,14 +367,14 @@ function dtpSpawnLanding(o, x, y, T, scale, auto) {
     const Ts = T / 60, big = Ts >= (dtpE2(o) ? 2.8 : 4), R = dtpSkyR(T) * scale;
     let cfg, stay, name;
     if (big) {
-        cfg = { kind: 'tempest', r: R * 1.15, dur: 360, dot: 0.15 * scale, dotI: 24, pull: 1.6 * scale, sweeps: [[60, 0.8 * scale, 7], [180, 0.8 * scale, 7], [300, 0.8 * scale, 7]] };
+        cfg = { kind: 'tempest', r: R * 1.1, dur: 360, dot: 0.1 * scale, dotI: 30, pull: 0.7 * scale, sweeps: [[60, 0.55 * scale, 6], [180, 0.55 * scale, 6], [300, 0.55 * scale, 6]] };
         if (!auto) { cfg.phantomAt = 180; cfg.pScale = dtpE2(o) ? 1 : 0.6; }
         stay = 180; name = 'THIÊN PHONG BÃO VŨ!';
     } else if (Ts >= 2) {
-        cfg = { kind: 'dance', r: R, dur: 132, dot: 0.22 * scale, dotI: 12, pull: 0.6 * scale, sweeps: [[126, 1.0 * scale, 8]] };
+        cfg = { kind: 'dance', r: R, dur: 132, dot: 0.12 * scale, dotI: 15, pull: 0.3 * scale, sweeps: [[126, 0.8 * scale, 7]] };
         stay = 134; name = 'MÚA QUẠT LIÊN HOÀN!';
     } else {
-        cfg = { kind: 'sweep', r: R, dur: 26, sweeps: [[6, 1.4 * scale, 9]] };
+        cfg = { kind: 'sweep', r: R, dur: 26, sweeps: [[6, 1.05 * scale, 8]] };
         stay = 22; name = 'QUÉT QUẠT!';
     }
     cfg.x = x; cfg.y = y; cfg.phantom = !!auto; cfg.body = !auto;
@@ -392,6 +393,12 @@ function dtpSkyLand(p) {
     p.x = Math.max(0, Math.min(canvas.width - p.w, p.dtpSkyX - p.w / 2));
     p.y = Math.max(0, Math.min(canvas.height - p.h, p.dtpSkyY - p.h / 2));
     p.dtpMode = 'land'; p.dtpModeT = 0;
+}
+function dtpSkyLock(p) {
+    if (p.dtpMode !== 'sky') return;
+    p.dtpMode = 'skylock'; p.dtpModeT = 0;
+    addFloatingText(p.dtpSkyX, p.dtpSkyY - dtpSkyR(p.dtpSkyT) - 12, 'KHÓA!', '#f87171', 12);
+    dtpSfx('playPowerup');
 }
 function dtpLeaveSky(p) {
     if (groundedBlock(p)) return;
@@ -421,16 +428,17 @@ function dtpModeStep(p) {
     if (m === 'sky') {
         p.dtpSkyT++;
         const drain = 10 * dtpCostMul(p) / 60;
-        if (p.ammo < drain || p.dtpSkyT >= 300) { dtpSkyLand(p); return; }
+        if (p.ammo < drain || p.dtpSkyT >= 300) { dtpSkyLock(p); return; }
         p.ammo -= drain;
         const ty = e ? dtpLaneY(e) + e.h / 2 : (dir < 0 ? 33 : canvas.height - 33);
         p.dtpSkyY = dir < 0 ? Math.max(ty, p.dtpSkyY - 4) : Math.min(ty, p.dtpSkyY + 4);
-        if (I && !(p.freezeTimer > 0)) { if (I.l) p.dtpSkyX -= 3.4; if (I.r) p.dtpSkyX += 3.4; }
+        if (I && !(p.freezeTimer > 0)) { if (I.l) p.dtpSkyX -= 2.5; if (I.r) p.dtpSkyX += 2.5; }
         const R = dtpSkyR(p.dtpSkyT);
         p.dtpSkyX = Math.max(R * 0.4, Math.min(canvas.width - R * 0.4, p.dtpSkyX));
-        if (p.dtpSkyT >= 120 && dtpAlive(e) && dtpInR(p.dtpSkyX, p.dtpSkyY, R, e)) dtpPull(e, p.dtpSkyX, 0.55);
+        if (p.dtpSkyT >= 120 && dtpAlive(e) && dtpInR(p.dtpSkyX, p.dtpSkyY, R, e)) dtpPull(e, p.dtpSkyX, 0.3);
         return;
     }
+    if (m === 'skylock') { if (T >= DTP_SKY_LOCK) dtpSkyLand(p); return; }
     if (m === 'land') {
         if (T >= p.dtpStay) {
             if (p.dtpBigLand && isGrounded(p) && T < 360) return;    // Sa Lầy: không hóa gió về được
@@ -454,16 +462,16 @@ function dtpModeStep(p) {
                 if (dir < 0) p.y = Math.max(p.y, e.y + e.h + 2);
                 if (dir > 0) p.y = Math.min(p.y, e.y - p.h - 2);
             }
-            p.dtpMode = 'warn'; p.dtpModeT = 0; p.dtpWarnN = dtpE1(p) ? 45 : 72;
+            p.dtpMode = 'warn'; p.dtpModeT = 0; p.dtpWarnN = dtpE1(p) ? 60 : 84;
         }
         return;
     }
     if (m === 'warn') {
         if (T >= p.dtpWarnN) {
-            const cx = dtpCx(p), cy = dtpCy(p), R = 60 * (p.dtpHpPow > 1 ? 1.25 : 1);
+            const cx = dtpCx(p), cy = dtpCy(p), R = 50 * (p.dtpHpPow > 1 ? 1.2 : 1);
             p.dtpWarnR = R;
             if (dtpAlive(e) && dtpInR(cx, cy, R, e)) {
-                dtpHit(p, e, 1.2, {}, 12 * dtpCostMul(p));
+                dtpHit(p, e, 0.95, {}, 12 * dtpCostMul(p));
                 // Hợp Phong: quạt địch văng về phía Vòng Cảnh Báo / vùng gió đang mở (đáp vào -> thêm dame)
                 const z = dtpNearZone(p, e);
                 if (dtpCC(e)) { e.kbX = (z ? (z.x >= dtpCx(e) ? 1 : -1) * 12 : (dtpCx(e) >= cx ? 1 : -1) * 9); e.dtpSlowT = 90; }
@@ -495,13 +503,13 @@ function dtpModeStep(p) {
         if (I && !(p.freezeTimer > 0)) { if (I.l) p.x -= 2.4; if (I.r) p.x += 2.4; p.x = Math.max(0, Math.min(canvas.width - p.w, p.x)); }
         const cx = dtpCx(p), cy = dtpCy(p);
         dtpReflect(p, cx, cy, 40);
-        if (dtpAlive(e) && Math.abs(dtpCx(e) - cx) < 110) dtpPull(e, cx, 1.0);
-        if (T % 18 === 0 && dtpAlive(e) && dtpInR(cx, cy, 62, e)) { dtpHit(p, e, 0.4, {}, 0); spawnSparkParticles(dtpCx(e), dtpCy(e), DTP_JADE, 5); }
-        if (T >= 180) {
-            if (dtpAlive(e) && Math.abs(dtpCx(e) - cx) < 90 && Math.abs(dtpCy(e) - cy) < 70) dtpHit(p, e, 2.0, {}, 0);
+        if (dtpAlive(e) && Math.abs(dtpCx(e) - cx) < 85) dtpPull(e, cx, 0.45);
+        if (T % 24 === 0 && dtpAlive(e) && dtpInR(cx, cy, 50, e)) { dtpHit(p, e, 0.22, {}, 0); spawnSparkParticles(dtpCx(e), dtpCy(e), DTP_JADE, 5); }
+        if (T >= 150) {
+            if (dtpAlive(e) && Math.abs(dtpCx(e) - cx) < 66 && Math.abs(dtpCy(e) - cy) < 56) dtpHit(p, e, 1.2, {}, 0);
             p.dtpSlashFx = 26; p.dtpSlashX = cx; p.dtpSlashY = cy;
             dtpHitObjects(p, cx, cy, 70, 1.0);
-            explosions.push(new Explosion(cx, cy, 90, 'rgba(52, 211, 153,', 0, null));
+            explosions.push(new Explosion(cx, cy, 66, 'rgba(52, 211, 153,', 0, null));
             triggerScreenShake(9, 14);
             dtpSfx('playExplosion');
             dtpGoHome(p, 'cyc_back');
@@ -527,7 +535,7 @@ function dtpTick(p) {
     for (const k of ['dtpCastFx', 'dtpSwFx', 'dtpZoneFx', 'dtpLpFx', 'dtpBurstFx', 'dtpSpinFx', 'dtpSlashFx', 'dtpArriveFx', 'dtpNoWindT', 'dtpImmTxt', 'dtpHpFx', 'dtpRepFx'])
         if (p[k] > 0) p[k]--;
     p.groundLunge = p.dtpMode === 'lunge';
-    if (p.hp <= 0 && p.dtpMode && p.dtpMode !== 'idle' && p.dtpMode !== 'sky') dtpResetMode(p);   // chết giữa đường -> về làn
+    if (p.hp <= 0 && p.dtpMode && p.dtpMode !== 'idle' && p.dtpMode !== 'sky' && p.dtpMode !== 'skylock') dtpResetMode(p);   // chết giữa đường -> về làn
     if (p.hp <= 0 || gameState.phase !== 'playing') return;
     // bị Phản Chấn (Siêu Năng / Railgun) giữa cú lướt -> huỷ, ghim về làn
     if ((p.psyPinT > 0 || p.rgPinT > 0) && (p.dtpMode === 'lunge' || p.dtpMode === 'warn')) { dtpResetMode(p); p.groundLunge = false; }
@@ -537,7 +545,7 @@ function dtpTick(p) {
         p.dtpKbT--;
         const ee = dtpEnemy(p);
         if (dtpAlive(ee) && dtpInR(p.dtpKbX, p.dtpKbY, p.dtpKbR, ee)) {
-            p.dtpKbT = 0; dtpHit(p, ee, 0.8, {}, 0);
+            p.dtpKbT = 0; dtpHit(p, ee, 0.6, {}, 0);
             explosions.push(new Explosion(dtpCx(ee), dtpCy(ee), 46, 'rgba(52, 211, 153,', 0, null));
             dtpTxt(ee, 'HỢP PHONG: CUỐN VÀO VÒNG!', DTP_JADE, 12);
         }
@@ -548,10 +556,10 @@ function dtpTick(p) {
     if (p.dtpBuffs && p.dtpBuffs.length) { for (const b of p.dtpBuffs) b[0]--; p.dtpBuffs = p.dtpBuffs.filter(b => b[0] > 0); }
     p.lastReload = Date.now();   // Gió tự hồi theo luật riêng (chặn hồi đạn chung)
     // Gió
-    const busy = !!p.dtpCh || p.dtpMode === 'sky';
+    const busy = !!p.dtpCh || p.dtpMode === 'sky' || p.dtpMode === 'skylock';
     if (!busy) {
         const w = dtpW(p);
-        p.ammo += 8 / 60 * (dtpE1(p) ? 1.3 : 1) * (1 + 0.35 * w[0]);
+        p.ammo += 7 / 60 * (dtpE1(p) ? 1.3 : 1) * (1 + 0.35 * w[0]);
     }
     if (p.ammo > p.maxAmmo) p.ammo = p.maxAmmo;
     if (p.ammo < 0) p.ammo = 0;
@@ -566,7 +574,7 @@ function dtpTick(p) {
     const wasTP = dtpTP(p);
     if (w[2] > 0) p.dtpNgT = (p.dtpNgT || 0) + w[2]; else p.dtpNgT = 0;
     if (!wasTP && dtpTP(p)) { dtpTxt(p, '⛈ TOÀN PHONG SÂN ĐẤU!', DTP_STORM, 14, 14); triggerScreenShake(4, 8); }
-    if (w[1] > 0) { p.dtpLpT = (p.dtpLpT || 0) + w[1]; if (p.dtpLpT >= (dtpE2(p) ? 390 : 600)) { p.dtpLpT = 0; dtpLoanPhong(p); } }
+    if (w[1] > 0) { p.dtpLpT = (p.dtpLpT || 0) + w[1]; if (p.dtpLpT >= (dtpE2(p) ? 480 : 720)) { p.dtpLpT = 0; dtpLoanPhong(p); } }
     const e = dtpEnemy(p);
     if (dtpAlive(e)) {
         if (dtpTP(p)) { addStatusSlow(e, 0.8); addStatusVuln(e, 0.15); }
@@ -576,7 +584,7 @@ function dtpTick(p) {
         if (e.dtpCutT > 0) {
             if (dtpE2(p) && typeof e.dtpPrevHp === 'number' && e.hp > e.dtpPrevHp && e.dtpPrevHp > 0) e.hp -= (e.hp - e.dtpPrevHp) * 0.4;
             e.dtpCutT--;
-            if (e.dtpCutT % 30 === 0) e.takeDamage(0.125 * (e.dtpCutS || 1), p, { unavoidable: true, bypassShield: true, dtpDot: true });
+            if (e.dtpCutT % 30 === 0) e.takeDamage(0.09 * (e.dtpCutS || 1), p, { unavoidable: true, bypassShield: true, dtpDot: true });
         }
         e.dtpPrevHp = e.hp;
     }
@@ -663,7 +671,7 @@ CharHooks.register('diep_thanh_phong', {
             }
         } else if (released && this.dtpValid) {
             if (!this.dtpUsed) {
-                if (m === 'sky') { if (this.dtpSkyT > 6) dtpSkyLand(this); }
+                if (m === 'sky') { if (this.dtpSkyT > 6) dtpSkyLock(this); }
                 else if (this.dtpHold >= dtpSwitchN(this)) dtpStanceSwitch(this);
                 else dtpTap(this);
             }
@@ -689,10 +697,10 @@ CharHooks.register('diep_thanh_phong', {
     const origTD = Player.prototype.takeDamage;
     Player.prototype.takeDamage = function (amount, attacker, options) {
         if (dtpIs(this) && this.hp > 0 && dtpImmune(this)) {
-            if (!(this.dtpImmTxt > 0) && this.dtpMode !== 'sky') { addFloatingText(this.x + this.w / 2, this.y - 10, 'MIỄN NHIỄM', DTP_JADE, 12); this.dtpImmTxt = 30; }
+            if (!(this.dtpImmTxt > 0) && this.dtpMode !== 'sky' && this.dtpMode !== 'skylock') { addFloatingText(this.x + this.w / 2, this.y - 10, 'MIỄN NHIỄM', DTP_JADE, 12); this.dtpImmTxt = 30; }
             return 0;
         }
-        if (dtpIs(this) && this.dtpCh === 'tor' && typeof amount === 'number' && attacker !== this) amount *= 0.75;
+        if (dtpIs(this) && this.dtpCh === 'tor' && typeof amount === 'number' && attacker !== this) amount *= 0.85;
         const before = this.hp;
         const r = origTD.call(this, amount, attacker, options, ...Array.prototype.slice.call(arguments, 3));
         if (before > 0 && this.hp <= 0 && attacker && attacker !== this && dtpIs(attacker)) dtpSpawnFinisher(attacker, this);

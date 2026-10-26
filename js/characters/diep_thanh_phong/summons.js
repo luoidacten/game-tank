@@ -46,14 +46,14 @@ class DtpOrb {
         if (this.reso) { dtpClearBullets(o, this.x, this.y, this.r * 1.5, true); if (dtpAlive(e) && dtpInR(this.x, this.y, this.r * 1.6, e)) dtpPull(e, this.x, (this.resoM || 1.5) >= 1.5 ? 1.0 : 0.7); }
         if (!this.hit && dtpAlive(e) && dtpInR(this.x, this.y, this.r, e)) {
             this.hit = true;
-            dtpHit(o, e, 1.0 + 1.5 * this.k, {}, 0);
+            dtpHit(o, e, 0.8 + 1.1 * this.k, {}, 0);
             spawnSparkParticles(dtpCx(e), dtpCy(e), DTP_LEAF, 12);
         }
         if (this.y < 10 || this.y > canvas.height - 10) {
             const k = this.k;
             bodyEffects.push(new DtpStorm(this.team, {
                 kind: 'gale', x: this.x, y: dtpEnemyLaneCy(o), r: Math.round((52 + 26 * k) * (this.reso ? (this.resoM || 1.5) : 1)),
-                dur: Math.round(150 + 150 * k), dot: 0.35, dotI: 30, slow: 0.55, pull: this.reso ? ((this.resoM || 1.5) >= 1.5 ? 0.8 : 0.55) : 0,
+                dur: Math.round(150 + 150 * k), dot: 0.25, dotI: 30, slow: 0.45, pull: this.reso ? ((this.resoM || 1.5) >= 1.5 ? 0.8 : 0.55) : 0,
             }));
             explosions.push(new Explosion(this.x, dtpEnemyLaneCy(o), 50 + 20 * k, 'rgba(134, 239, 172,', 0, null));
             triggerScreenShake(4, 8);
@@ -100,9 +100,9 @@ class DtpGrowTornado {
         if (!this.hit && dtpAlive(e) && dtpInR(this.x, this.y, this.r, e)) {
             this.hit = true;
             const k = this.k;
-            dtpStun(e, Math.round(90 + 90 * k));
-            e.dtpLiftT = Math.round(90 + 90 * k);
-            dtpHit(o, e, 1.5 + 1.3 * k, {}, 0);
+            dtpStun(e, Math.round(66 + 66 * k));
+            e.dtpLiftT = Math.round(66 + 66 * k);
+            dtpHit(o, e, 1.1 + 0.9 * k, {}, 0);
             dtpTxt(e, 'HẤT TUNG!', DTP_TEAL, 13);
             explosions.push(new Explosion(dtpCx(e), dtpCy(e), 40 + 20 * k, 'rgba(45, 212, 191,', 0, null));
             triggerScreenShake(6, 10);
@@ -116,7 +116,7 @@ class DtpGrowTornado {
 // ---------- Cơn Lốc Lớn (Đại Cuồng Phong — Nhịp 3 Thuận Phong) ----------
 class DtpBigTornado {
     constructor(team, x, y, vy) {
-        this.team = team; this.x = x; this.y = y; this.vy = vy; this.r = 15; this.dmg = 1.2; this.n = 0;
+        this.team = team; this.x = x; this.y = y; this.vy = vy; this.r = 15; this.dmg = 0.9; this.n = 0;
         this.hit = false; this.t = 0; this.active = true;
     }
     update() {
@@ -127,7 +127,7 @@ class DtpBigTornado {
         const e = dtpEnemy(o);
         // nuốt đạn thường của địch: +15% kích thước, +0.35 dame mỗi viên
         const n = dtpClearBullets(o, this.x, this.y, this.r + 4, true);
-        for (let i = 0; i < n; i++) { this.n++; this.r = Math.min(40, this.r * 1.15); this.dmg += 0.35; }
+        for (let i = 0; i < n; i++) { this.n++; this.r = Math.min(40, this.r * 1.15); this.dmg += 0.25; }
         // Cộng Hưởng Phong Bạo (Hợp Phong — gốc x1.25, Evo 1 x1.5) với cầu / lốc đang bay / Vòng Cảnh Báo của Nghịch Phong Vũ
         const rm = dtpE1(o) ? 1.5 : 1.25;
         for (const f of bodyEffects) {
@@ -150,7 +150,7 @@ class DtpBigTornado {
         }
         if (this.y < 12 || this.y > canvas.height - 12) {
             const cy = dtpEnemyLaneCy(o), sc = this.r / 15;
-            bodyEffects.push(new DtpStorm(this.team, { kind: 'bigstorm', x: this.x, y: cy, r: Math.round(48 + 14 * sc), dur: 150, dot: 0.4, dotI: 30, pull: 0.5 }));
+            bodyEffects.push(new DtpStorm(this.team, { kind: 'bigstorm', x: this.x, y: cy, r: Math.round(48 + 14 * sc), dur: 150, dot: 0.3, dotI: 30, pull: 0.3 }));
             explosions.push(new Explosion(this.x, cy, 50 + 10 * sc, 'rgba(134, 239, 172,', 0, null));
             // Evo 2: bắn trả toàn bộ đạn đã nuốt thành lưỡi gió tự ngắm
             if (dtpE2(o) && this.n > 0 && dtpAlive(e)) {
@@ -225,7 +225,7 @@ class DtpSkyZone {
         const T = this.air + this.g;
         this.r = dtpSkyR(T) * this.scale;
         const e = dtpEnemy(o);
-        if (T >= 120 && dtpAlive(e) && dtpInR(this.x, this.y, this.r, e)) dtpPull(e, this.x, 0.5 * this.scale);
+        if (T >= 120 && dtpAlive(e) && dtpInR(this.x, this.y, this.r, e)) dtpPull(e, this.x, 0.25 * this.scale);
         if (this.g >= this.grow) {
             dtpSpawnLanding(o, this.x, this.y, T, this.scale, true);
             this.active = false;

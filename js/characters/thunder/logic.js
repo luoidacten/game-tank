@@ -13,20 +13,20 @@
 //     5s hoặc nhấp Bắn để giáng; vòng KHÓA 0.5s rồi mới giáng (Luật 11).
 // ==========================================
 
-const THUNDER_DASH_WARN = 12;      // 0.2s hóa sét trước khi lao (cột cảnh báo)
+const THUNDER_DASH_WARN = 30;      // 0.5s hóa sét trước khi lao (cột cảnh báo)
 const THUNDER_DASH_SPEED = 20;     // px/tick khi lao đi
 const THUNDER_DASH_BACK = 24;      // px/tick khi lao về
-const THUNDER_DASH_CD = 24;        // hồi giữa 2 lần Lôi Độn (sau khi về)
+const THUNDER_DASH_CD = 40;        // hồi giữa 2 lần Lôi Độn (sau khi về)
 const THUNDER_SKY_MAX = 300;       // 5s trên trời
-const THUNDER_SKY_LOCK = 30;       // Luật 11: khóa vòng 0.5s trước khi giáng
+const THUNDER_SKY_LOCK = 45;       // Luật 11: khóa vòng 0.75s trước khi giáng
 const THUNDER_SKY_TRIGGER = 45;    // còn 0.75s Thiên Kiếp -> tự bay lên trời
 const THUNDER_REGEN = 300;         // 5s phạt khi mất hết thương
-const THUNDER_SLASH_R = 80;        // bán kính nhát Lôi Trảm chính (rộng hơn bản cũ 60)
-const THUNDER_SUB_WARN = 20;       // cảnh báo nhát chém phụ (Evo 2)
+const THUNDER_SLASH_R = 62;        // bán kính nhát Lôi Trảm chính
+const THUNDER_SUB_WARN = 40;       // cảnh báo nhát chém phụ (Evo 2)
 const THUNDER_SKYSPEAR_WARN = 180; // 3s cảnh báo thương rơi từ trời
 const THUNDER_BUFF_TICKS = 150;    // 2.5s buff sau Lôi Trảm
 const THUNDER_BUFF_SPD = 1.2;
-const THUNDER_BUFF_DMG = 1.15;
+const THUNDER_BUFF_DMG = 1.1;
 
 // Số thương tối đa: 3 / có Evo: 5 / Full Evo: 9
 function thunderSpearCap(p) {
@@ -41,11 +41,11 @@ function thunderMyPlanted(p) { return (typeof thunderPlantedSpears !== 'undefine
 // Thương chạm mép sân: nổ AoE + cắm lại (gọi từ bullets.js)
 function thunderSpearPlant(owner, b) {
     const enemy = (owner.id === 1) ? p2 : p1;
-    explosions.push(new Explosion(b.x, b.y, 45, 'rgba(255, 255, 0,', 0, owner)); // chỉ hình ảnh (sát thương tính 1 lần bên dưới)
-    if (enemy && enemy.hp > 0 && Math.hypot((enemy.x + enemy.w / 2) - b.x, (enemy.y + enemy.h / 2) - b.y) <= 45) {
-        const dealt = enemy.takeDamage(thunderDmg(owner, 0.9), owner);
+    explosions.push(new Explosion(b.x, b.y, 38, 'rgba(255, 255, 0,', 0, owner)); // chỉ hình ảnh (sát thương tính 1 lần bên dưới)
+    if (enemy && enemy.hp > 0 && Math.hypot((enemy.x + enemy.w / 2) - b.x, (enemy.y + enemy.h / 2) - b.y) <= 38) {
+        const dealt = enemy.takeDamage(thunderDmg(owner, 0.8), owner);
         if (owner.hasUpgrade && owner.hasUpgrade('evo_thun_1')) {
-            enemy.freezeTimer = Math.max(enemy.freezeTimer || 0, 45);
+            enemy.freezeTimer = Math.max(enemy.freezeTimer || 0, 30);
             addFloatingText(enemy.x + enemy.w / 2, enemy.y - 12, "TÊ LIỆT! ⚡", "#ffff00", 14);
         }
         if (dealt > 0 && !b.thLm) { b.thLm = true; owner.thunderGainLoiMinh(); }
@@ -97,7 +97,7 @@ Object.assign(Player.prototype, {
                     w: 8, h: 18,
                     vx: 0,
                     vy: dirY * bSpeed,
-                    dmg: thunderDmg(this, 0.9),
+                    dmg: thunderDmg(this, 0.8),
                     owner: this,
                     hook: 'thunder_spear',
                     isThunderSpear: true,
@@ -140,7 +140,7 @@ Object.assign(Player.prototype, {
         if (soundSystem && !soundSystem.muted) soundSystem.playLaser();
         this.thunderRecallHits = 0; // sát thương giảm dần nếu nhiều tia trúng cùng lúc
         mySpears.forEach(s => {
-            bodyEffects.push(new ThunderReturnBolt(s.x, s.y, this, speed, thunderDmg(this, 0.7)));
+            bodyEffects.push(new ThunderReturnBolt(s.x, s.y, this, speed, thunderDmg(this, 0.55)));
             explosions.push(new Explosion(s.x, s.y, 28, 'rgba(255, 255, 0,', 0, this));
             spawnSparkParticles(s.x, s.y, '#ffff00', 6);
         });
@@ -196,9 +196,9 @@ Object.assign(Player.prototype, {
         this.y = Math.max(0, Math.min(canvas.height - this.h, sp.y - this.h / 2));
         const toX = this.x + this.w / 2, toY = this.y + this.h / 2;
         // Evo 1: càng gom nhiều thương, nhát chém chính càng to & mạnh
-        const R = e1 ? Math.min(130, THUNDER_SLASH_R + 8 * (k - 1)) : THUNDER_SLASH_R;
-        const mult = e1 ? Math.min(1.6, 1 + 0.12 * (k - 1)) : 1;
-        const dmg = thunderDmg(this, 1.3) * mult;
+        const R = e1 ? Math.min(92, THUNDER_SLASH_R + 6 * (k - 1)) : THUNDER_SLASH_R;
+        const mult = e1 ? Math.min(1.3, 1 + 0.08 * (k - 1)) : 1;
+        const dmg = thunderDmg(this, 1.05) * mult;
         // [HÌNH ẢNH] tia sét nối điểm cũ -> mới, bóng mờ, 2 nhát quét rộng
         fxBolt(fromX, fromY, toX, toY, '#fff176', 14, 3.5, 18);
         const ang = Math.atan2(toY - fromY, toX - fromX);
@@ -214,7 +214,7 @@ Object.assign(Player.prototype, {
             fxSlashHit(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, '#fff176', 26);
             if (e1 && !this.thunderSlashStun) {
                 this.thunderSlashStun = true; // choáng 1 lần mỗi chuỗi
-                enemy.freezeTimer = Math.max(enemy.freezeTimer || 0, 45);
+                enemy.freezeTimer = Math.max(enemy.freezeTimer || 0, 30);
                 addFloatingText(enemy.x + enemy.w / 2, enemy.y - 12, "TÊ LIỆT! ⚡", "#ffff00", 14);
             }
         }
@@ -223,7 +223,7 @@ Object.assign(Player.prototype, {
             this.thunderSlashWave = (this.thunderSlashWave || 0) + 1;
             for (let j = this.thunderSlashIndex; j < this.thunderSlashQueue.length; j++) {
                 const o = this.thunderSlashQueue[j];
-                bodyEffects.push(new ThunderStrike(o.x, o.y, this, dmg * (full ? 1 : 0.5), full ? R * 0.8 : R * 0.55, THUNDER_SUB_WARN, 'sub', this.thunderSlashWave));
+                bodyEffects.push(new ThunderStrike(o.x, o.y, this, dmg * (full ? 0.7 : 0.4), full ? R * 0.65 : R * 0.5, THUNDER_SUB_WARN, 'sub', this.thunderSlashWave));
             }
         }
         if (soundSystem && !soundSystem.muted) soundSystem.playHit();
@@ -255,7 +255,7 @@ Object.assign(Player.prototype, {
             for (let i = 0; i < cnt; i++) {
                 const off = cnt === 1 ? 0 : (i - (cnt - 1) / 2) * 62;
                 const x = Math.max(20, Math.min(canvas.width - 20, ex + off + (Math.random() * 2 - 1) * 18));
-                bodyEffects.push(new ThunderStrike(x, ey, this, thunderDmg(this, 0.6), 30, THUNDER_SKYSPEAR_WARN + i * 10, 'sky'));
+                bodyEffects.push(new ThunderStrike(x, ey, this, thunderDmg(this, 0.45), 26, THUNDER_SKYSPEAR_WARN + i * 10, 'sky'));
             }
         }
         this.thunderGainLoiMinh();
@@ -305,12 +305,12 @@ Object.assign(Player.prototype, {
         fxSweep(cx, this.y + this.h / 2, 48, base + 1.4, base - 1.4, '#80deea', 14, 7);
         fxBolt(cx - 55, sy, cx + 55, sy, '#ffffff', 10, 2.5, 10);
         triggerScreenShake(5, 7);
-        if (typeof gmTwinAlso === 'function') gmTwinAlso(enemy, t => Math.abs(t.x + t.w / 2 - cx) < this.w / 2 + t.w / 2 + 26 && Math.abs(t.y + t.h / 2 - sy) < 50, thunderDmg(this, 0.9), this); // Gemini: Bản Sao AI
-        if (enemy && enemy.hp > 0 && Math.abs(enemy.x + enemy.w / 2 - cx) < this.w / 2 + enemy.w / 2 + 26 && Math.abs(enemy.y + enemy.h / 2 - sy) < 50) {
-            enemy.takeDamage(thunderDmg(this, 0.9), this);
+        if (typeof gmTwinAlso === 'function') gmTwinAlso(enemy, t => Math.abs(t.x + t.w / 2 - cx) < this.w / 2 + t.w / 2 + 14 && Math.abs(t.y + t.h / 2 - sy) < 44, thunderDmg(this, 0.75), this); // Gemini: Bản Sao AI
+        if (enemy && enemy.hp > 0 && Math.abs(enemy.x + enemy.w / 2 - cx) < this.w / 2 + enemy.w / 2 + 14 && Math.abs(enemy.y + enemy.h / 2 - sy) < 44) {
+            enemy.takeDamage(thunderDmg(this, 0.75), this);
             fxSlashHit(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, '#fff176', 28);
             addFloatingText(enemy.x + enemy.w / 2, enemy.y - 14, "LÔI TRẢM! ⚡", "#ffd700", 15);
-            if (this.hasUpgrade('evo_thun_1')) enemy.freezeTimer = Math.max(enemy.freezeTimer || 0, 30);
+            if (this.hasUpgrade('evo_thun_1')) enemy.freezeTimer = Math.max(enemy.freezeTimer || 0, 20);
             if (soundSystem && !soundSystem.muted) soundSystem.playHit();
         }
     },
@@ -327,8 +327,8 @@ Object.assign(Player.prototype, {
             const cx = this.x + this.w / 2;
             if (enemy && enemy.hp > 0) {
                 const dx = cx - (enemy.x + enemy.w / 2);
-                if (Math.abs(dx) < 170) {
-                    const pull = 2.6;
+                if (Math.abs(dx) < 120) {
+                    const pull = 1.1;
                     enemy.x += Math.max(-pull, Math.min(pull, dx));
                     enemy.x = Math.max(0, Math.min(canvas.width - enemy.w, enemy.x));
                 }
@@ -368,7 +368,7 @@ Object.assign(Player.prototype, {
         this.thunderSkyHomeY = this.y;
         this.thunderSky = {
             x: this.x + this.w / 2, y: thunderLaneY(enemy) + enemy.h / 2,
-            r: 46, t: 0, max: THUNDER_SKY_MAX, lock: 0,
+            r: 38, t: 0, max: THUNDER_SKY_MAX, lock: 0,
         };
         fxBolt(this.x + this.w / 2, this.y + this.h / 2, this.x + this.w / 2, this.id === 1 ? -20 : canvas.height + 20, '#fff176', 16, 4, 20);
         explosions.push(new Explosion(this.x + this.w / 2, this.y + this.h / 2, 34, 'rgba(255, 241, 118,', 0, this));
@@ -396,11 +396,11 @@ Object.assign(Player.prototype, {
         c.t++;
         const enemy = (this.id === 1) ? p2 : p1;
         const isBot = this.id === 2 && typeof botAI !== 'undefined' && botAI.enabled;
-        const lat = 3.4;
+        const lat = 2.5;
         if (isBot && enemy) {
             const dx = enemy.x + enemy.w / 2 - c.x;
             c.x += Math.max(-lat, Math.min(lat, dx));
-            if (Math.abs(dx) < 10 && c.t > 40) this.thunderSkyLock();
+            if (Math.abs(dx) < 10 && c.t > 60) this.thunderSkyLock();
         } else {
             if (inp && inp.l) c.x -= lat;
             if (inp && inp.r) c.x += lat;
@@ -408,7 +408,7 @@ Object.assign(Player.prototype, {
         c.x = Math.max(c.r * 0.5, Math.min(canvas.width - c.r * 0.5, c.x));
         if (enemy) c.y = thunderLaneY(enemy) + enemy.h / 2;
         // Vòng cảnh báo: làm chậm nhẹ
-        if (enemy && enemy.hp > 0 && Math.hypot(enemy.x + enemy.w / 2 - c.x, enemy.y + enemy.h / 2 - c.y) < c.r + enemy.w / 2) addStatusSlow(enemy, 0.8);
+        if (enemy && enemy.hp > 0 && Math.hypot(enemy.x + enemy.w / 2 - c.x, enemy.y + enemy.h / 2 - c.y) < c.r + enemy.w / 2) addStatusSlow(enemy, 0.9);
         if (c.t >= c.max) this.thunderSkyLock();
     },
 
@@ -426,8 +426,8 @@ Object.assign(Player.prototype, {
         triggerScreenShake(9, 14);
         if (soundSystem && !soundSystem.muted) soundSystem.playExplosion ? soundSystem.playExplosion() : soundSystem.playHit();
         if (enemy && enemy.hp > 0 && Math.hypot(enemy.x + enemy.w / 2 - c.x, enemy.y + enemy.h / 2 - c.y) < c.r + enemy.w / 2) {
-            enemy.takeDamage(thunderDmg(this, 2.2), this);
-            enemy.freezeTimer = Math.max(enemy.freezeTimer || 0, 90);
+            enemy.takeDamage(thunderDmg(this, 1.5), this);
+            enemy.freezeTimer = Math.max(enemy.freezeTimer || 0, 54);
             addFloatingText(enemy.x + enemy.w / 2, enemy.y - 16, "THIÊN LÔI! CHOÁNG ⚡", "#ffd700", 16);
         }
         // Phá hòm trong vùng giáng
@@ -440,7 +440,7 @@ Object.assign(Player.prototype, {
         });
         // Full Evo: để lại Lôi Vực
         if (this.hasUpgrade('evo_thun_1') && this.hasUpgrade('evo_thun_2')) {
-            bodyEffects.push(new ThunderZone(c.x, c.y, 44, this, 240, 0.2));
+            bodyEffects.push(new ThunderZone(c.x, c.y, 38, this, 240, 0.12));
         }
         // Lộn về làn của mình (tại hoành độ cú giáng)
         this.thunderSky = null;
@@ -562,19 +562,19 @@ Object.assign(Player.prototype, {
             if (this.hasUpgrade('evo_thun_1') && this.hasUpgrade('evo_thun_2')) {
                 this.thunderStormTimer = (this.thunderStormTimer || 0) - 1;
                 if (this.thunderStormTimer <= 0) {
-                    this.thunderStormTimer = 240 + Math.floor(Math.random() * 120);
+                    this.thunderStormTimer = 330 + Math.floor(Math.random() * 150);
                     const enemy = (this.id === 1) ? p2 : p1;
                     let x, y;
                     if (Math.random() < 0.65) {
                         // Rơi đúng làn đối thủ, lệch ngang ngẫu nhiên
-                        x = Math.max(20, Math.min(canvas.width - 20, enemy.x + enemy.w / 2 + (Math.random() * 2 - 1) * 100));
+                        x = Math.max(20, Math.min(canvas.width - 20, enemy.x + enemy.w / 2 + (Math.random() * 2 - 1) * 110));
                         y = thunderLaneY(enemy) + enemy.h / 2;
                     } else {
                         x = 20 + Math.random() * (canvas.width - 40);
                         const mid = canvas.height / 2;
                         y = (this.id === 1) ? 30 + Math.random() * (mid - 60) : mid + 30 + Math.random() * (mid - 60);
                     }
-                    bodyEffects.push(new ThunderStrike(x, y, this, thunderDmg(this, 0.8), 40, 60));
+                    bodyEffects.push(new ThunderStrike(x, y, this, thunderDmg(this, 0.55), 32, 90));
                 }
             }
         }

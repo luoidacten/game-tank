@@ -26,7 +26,7 @@ function jlSfx(n) { if (typeof soundSystem !== 'undefined' && soundSystem && !so
 function jlTxt(o, s, c, sz, dy) { addFloatingText(o.x + o.w / 2, o.y + (o.id === 1 ? -18 - (dy || 0) : o.h + 22 + (dy || 0)), s, c, sz || 12); }
 function jlLuckDur(p) { return jlE1(p) ? 960 : 720; }
 function jlFlipEvery(p) { return jlFull(p) ? 120 : 180; }
-function jlPullGap(p) { return jlFull(p) ? 30 : 60; }
+function jlPullGap(p) { return jlFull(p) ? 26 : 45; }
 function jlCrit(p) { return p.jlLuck > 0 ? 0.5 : 0.25; }
 function jlSpeedMult(p) {
     if (p.jlLuck > 0) return jlE1(p) ? 1.3 : 1.2;
@@ -64,23 +64,23 @@ function jlFlip(p) {
 // Mọi phát bay THẲNG, chỉ lệch rất nhỏ. Dame bảng nhân theo hệ số Dame của Jack (p.damage / 1.0).
 // sp = hệ số tốc đạn, w = trọng số gốc, bad = nhóm phản chủ / xịt (Luck giảm, Nợ tăng tỉ lệ), crit = được tính Chí Mạng
 const JL_AMMO = [null,
-    { k: 'gold', n: 'Hoàng Kim', ic: '🌟', c: '#fcd34d', dmg: 2.4, sp: 2.0, w: 0.7, crit: 1 },
-    { k: 'blast', n: 'Bộc Phá', ic: '🔥', c: '#fb923c', dmg: 1.8, sp: 1.25, w: 0.9, crit: 1 },
-    { k: 'pierce', n: 'Xuyên Phá', ic: '⚡', c: '#22d3ee', dmg: 1.6, sp: 2.0, w: 0.9, crit: 1 },
-    { k: 'ice', n: 'Băng Hàn', ic: '❄️', c: '#93c5fd', dmg: 1.1, sp: 1.25, w: 1, crit: 1 },
-    { k: 'poison', n: 'Độc Rỉa', ic: '🧪', c: '#84cc16', dmg: 0.9, sp: 1.25, w: 1, crit: 1 },
-    { k: 'shock', n: 'Điện Giật', ic: '💫', c: '#facc15', dmg: 1.0, sp: 1.3, w: 0.9, crit: 1 },
-    { k: 'blood', n: 'Huyết Tệ', ic: '💚', c: '#34d399', dmg: 1.2, sp: 1.25, w: 1, crit: 1 },
-    { k: 'hype', n: 'Hưng Phấn', ic: '🛡️', c: '#f8fafc', dmg: 1.0, sp: 1.25, w: 1, crit: 1 },
-    { k: 'smoke', n: 'Khói Mù', ic: '💨', c: '#94a3b8', dmg: 0.4, sp: 1.1, w: 1, crit: 1 },
-    { k: 'toy', n: 'Nhựa Đồ Chơi', ic: '🤡', c: '#f472b6', dmg: 0.2, sp: 0.5, w: 1, bad: 1 },
-    { k: 'back', n: 'Nổ Ngược Nòng', ic: '💥', c: '#ef4444', dmg: 0, sp: 0, w: 0.8, bad: 1 },
-    { k: 'curse', n: 'Nguyền Phản Phệ', ic: '💀', c: '#6b7280', dmg: 0.3, sp: 0.9, w: 0.8, bad: 1 },
+    { k: 'gold', n: 'Hoàng Kim', ic: '🌟', c: '#fcd34d', dmg: 1.35, sp: 2.0, w: 0.6, crit: 1 },
+    { k: 'blast', n: 'Bộc Phá', ic: '🔥', c: '#fb923c', dmg: 1.05, sp: 1.25, w: 0.8, crit: 1 },
+    { k: 'pierce', n: 'Xuyên Phá', ic: '⚡', c: '#22d3ee', dmg: 0.95, sp: 2.0, w: 0.8, crit: 1 },
+    { k: 'ice', n: 'Băng Hàn', ic: '❄️', c: '#93c5fd', dmg: 0.7, sp: 1.25, w: 1, crit: 1 },
+    { k: 'poison', n: 'Độc Rỉa', ic: '🧪', c: '#84cc16', dmg: 0.6, sp: 1.25, w: 1, crit: 1 },
+    { k: 'shock', n: 'Điện Giật', ic: '💫', c: '#facc15', dmg: 0.6, sp: 1.3, w: 0.8, crit: 1 },
+    { k: 'blood', n: 'Huyết Tệ', ic: '💚', c: '#34d399', dmg: 0.7, sp: 1.25, w: 1, crit: 1 },
+    { k: 'hype', n: 'Hưng Phấn', ic: '🛡️', c: '#f8fafc', dmg: 0.6, sp: 1.25, w: 1, crit: 1 },
+    { k: 'smoke', n: 'Khói Mù', ic: '💨', c: '#94a3b8', dmg: 0.3, sp: 1.1, w: 1, crit: 1 },
+    { k: 'toy', n: 'Nhựa Đồ Chơi', ic: '🤡', c: '#f472b6', dmg: 0.2, sp: 0.5, w: 1.25, bad: 1 },
+    { k: 'back', n: 'Nổ Ngược Nòng', ic: '💥', c: '#ef4444', dmg: 0, sp: 0, w: 1.05, bad: 1 },
+    { k: 'curse', n: 'Nguyền Phản Phệ', ic: '💀', c: '#6b7280', dmg: 0.3, sp: 0.9, w: 1.05, bad: 1 },
 ];
 // Đạn Điện Giật ngắt mọi kỹ năng đang tụ lực của địch
 const JL_CHARGE_FIELDS = ['sukunaChargeTimer', 'gojoChargeTimer', 'bowChargeTimer', 'lazerCharge', 'overloadCharge', 'mirrorCharge',
     'energyChargeTimer', 'sniperChargeTimer', 'stormChargeTimer', 'swordChargeTimer', 'sniperCharge', 'magicianCharge', 'cuCharge', 'wdCharge'];
-function jlReloadTicks(p) { return jlFull(p) ? 54 : 84; }
+function jlReloadTicks(p) { return jlFull(p) ? 90 : 132; }
 function jlRollAmmo(p) {
     const luck = p.jlLuck > 0, debt = p.jlDebt || 0;
     const w = JL_AMMO.map((a, i) => !a ? 0 : a.w * (a.bad ? (luck ? 0.35 : 1 + 0.15 * Math.min(6, debt)) : (luck && i <= 3 ? 1.5 : 1)));
@@ -97,7 +97,7 @@ function jlReloadDone(p) {
 }
 function jlHander(p, now) {
     if (p.jlReload > 0 || p.jlBurst > 0 || !(p.ammo > 0)) return;
-    p.jlBurst = Math.min(p.ammo, 1 + Math.floor(Math.random() * 4)); p.jlBurstT = 0;
+    p.jlBurst = Math.min(p.ammo, 1 + Math.floor(Math.random() * 2)); p.jlBurstT = 0;
     p.lastShot = now; p.jlIdle = 0;
 }
 // Bắn viên kế tiếp trong ổ (gọi từ jlTick theo nhịp loạt)
@@ -162,7 +162,7 @@ function jlApplyAmmo(o, v, t) {
         }
         spawnSparkParticles(cx, cy, '#fde047', 10);
     } else if (A.k === 'blood') {
-        if (jlAlive(o)) { const h = Math.min(0.5, Math.max(0, o.maxHp - o.hp)); o.hp += h; jlTxt(o, '💚 +' + h.toFixed(2) + ' HP', JL_GREEN, 11, 12); }
+        if (jlAlive(o)) { const h = Math.min(0.3, Math.max(0, o.maxHp - o.hp)); o.hp += h; jlTxt(o, '💚 +' + h.toFixed(2) + ' HP', JL_GREEN, 11, 12); }
     } else if (A.k === 'smoke') {
         if (!imm) { v.blindTimer = Math.max(v.blindTimer || 0, 72); v.jlBlindT = 72; jlVTxt(v, '💨 MÙ HUD!', '#cbd5e1'); }
     } else if (A.k === 'toy') jlVTxt(v, 'BỤP! 🎈', '#f472b6', 12);
@@ -224,31 +224,39 @@ function jlDraw(p) {
 }
 function jlMults(p, ch) {
     const e1 = jlE1(p), e2 = jlE2(p), d = p.jlDebt || 0;
-    // Bản làm lại: mặt 1–5 mạnh hơn ~40%
-    if (ch === 1) return (e1 ? 11 : 8.5) + (e2 ? 2 + d : 0);
-    if (ch <= 3) return (e1 ? 4.2 : 2.8) + (e2 ? d / 2 : 0);
-    return e1 ? 2.8 : 2.1;
+    // Hệ số MỖI VIÊN trong loạt 6 viên tự ngắm (tổng loạt = x6)
+    if (ch === 1) return (e1 ? 0.6 : 0.5) + (e2 ? (1 + d) / 6 : 0);
+    if (ch <= 3) return (e1 ? 0.42 : 0.34) + (e2 ? d / 12 : 0);
+    return e1 ? 0.3 : 0.24;
 }
 function jlBoyFire(p, ch) {
     const e = jlEnemy(p), dir = jlDir(p), cx = p.x + p.w / 2, sy = dir < 0 ? p.y - 14 : p.y + p.h + 4;
     const debt = p.jlDebt || 0;
     const jackpot = ch === 1 && jlE2(p) && debt >= jlJackpotNeed(p);
     const mult = jackpot ? 100 : jlMults(p, ch);
-    const sz = jackpot ? 18 : (ch === 1 ? 14 : (ch <= 3 ? 9 : 7));
-    const sp = C.bulletSpeed * (jackpot ? 2.2 : (ch === 1 ? 2.2 : 1.6)), dev = (Math.random() - 0.5) * 0.04;
-    // bay THẲNG (chỉ lệch rất nhỏ); Phát 1 phá 1 lớp Khiên
-    const b = spawnBullet(p, {
-        x: cx - sz / 2, y: sy - (dir < 0 ? sz : 0), w: sz, h: sz, vx: Math.sin(dev) * sp, vy: dir * sp * Math.cos(dev),
-        dmg: p.damage * mult, hook: 'jl_boy', jlCh: ch, jlMult: mult, jlBig: jlE1(p), jlBreak: ch === 1 ? 1 : 0,
-    });
-    if (jackpot) { b.unstoppable = true; b.isPiercing = true; b.jlJackpot = true; b.isHoming = false; }
-    p.jlRecoil = 14; p.jlShotFx = 24;
     if (jackpot) {
+        // Độc Đắc: 1 siêu đạn khóa chết mục tiêu
+        const sz = 18, sp = C.bulletSpeed * 2.2;
+        const b = spawnBullet(p, { x: cx - sz / 2, y: sy - (dir < 0 ? sz : 0), w: sz, h: sz, vx: 0, vy: dir * sp, dmg: p.damage * mult, hook: 'jl_boy', jlCh: 1, jlMult: mult, jlBig: jlE1(p), jlBreak: 1 });
+        b.unstoppable = true; b.isPiercing = true; b.jlJackpot = true; b.isHoming = false;
         jlTxt(p, 'ĐỘC ĐẮC x100!!!', JL_GOLD, 18);
         triggerScreenShake(10, 20);
-    } else if (ch === 1) { jlTxt(p, 'BANG! x' + (Math.round(mult * 10) / 10), JL_GOLD, 15); triggerScreenShake(5, 10); }
-    else if (ch <= 3) jlTxt(p, 'BANG! x' + (Math.round(mult * 10) / 10), '#fb923c', 13);
-    else jlTxt(p, 'Nah, chán!', '#94a3b8', 12);
+    } else {
+        // LỤC LIÊN PHÁT: loạt 6 viên xòe quạt, MỌI viên tự ngắm bám theo mục tiêu; Phát 1: viên đầu phá 1 Khiên
+        const sz = ch === 1 ? 10 : (ch <= 3 ? 8 : 7), sp = C.bulletSpeed * (ch === 1 ? 1.7 : 1.5);
+        for (let i = 0; i < 6; i++) {
+            const a = (i - 2.5) * 0.19;
+            spawnBullet(p, {
+                x: cx - sz / 2 + (i - 2.5) * 3, y: sy - (dir < 0 ? sz : 0), w: sz, h: sz, vx: Math.sin(a) * sp, vy: dir * sp * Math.cos(a),
+                dmg: p.damage * mult, hook: 'jl_boy', jlCh: ch, jlMult: mult, jlBig: jlE1(p), jlBreak: ch === 1 && i === 0 ? 1 : 0, jlHome: 1, jlHomeT: 0,
+            });
+        }
+        const tot = Math.round(mult * 60) / 10;
+        if (ch === 1) { jlTxt(p, 'BANG! 6 x' + (Math.round(mult * 100) / 100) + ' (x' + tot + ')', JL_GOLD, 15); triggerScreenShake(5, 10); }
+        else if (ch <= 3) jlTxt(p, 'BANG! 6 x' + (Math.round(mult * 100) / 100), '#fb923c', 13);
+        else jlTxt(p, 'Nah, chán! 6 x' + (Math.round(mult * 100) / 100), '#94a3b8', 12);
+    }
+    p.jlRecoil = 14; p.jlShotFx = 24;
     // Evo 2: ra đạn khi đang Nợ -> xóa Nợ; nổ Phát 1 -> Luck 12s x Nợ
     if (jlE2(p) && debt > 0) {
         if (ch === 1) jlStartLuck(p, Math.min(5400, 720 * debt), 'ĐỔI ĐỜI! LUCK ' + (12 * debt) + 's');
@@ -296,14 +304,14 @@ BulletHooks.register('jl_boy', {
     hit(b, o, v) {
         if (!v) return;
         const cx = v.x + v.w / 2, cy = v.y + v.h / 2;
-        if (b.jlCh === 1) { explosions.push(new Explosion(cx, cy, b.jlBig ? 100 : 80, 'rgba(252, 211, 77,', 0, o)); triggerScreenShake(7, 12); }
+        if (b.jlCh === 1) { explosions.push(new Explosion(cx, cy, b.jlJackpot ? 100 : (b.jlBig ? 40 : 32), 'rgba(252, 211, 77,', 0, o)); triggerScreenShake(b.jlJackpot ? 7 : 3, 8); }
         else if (b.jlCh <= 3) {
-            explosions.push(new Explosion(cx, cy, 48, 'rgba(251, 146, 60,', 0, o));
+            explosions.push(new Explosion(cx, cy, 26, 'rgba(251, 146, 60,', 0, o));
             if (!jlCCImmune(v)) v.jlBoySlowT = Math.max(v.jlBoySlowT || 0, 90); // chậm 30% 1.5s
         } else spawnSparkParticles(cx, cy, '#cbd5e1', 6);
         if (v.hp <= 0) jlSpawnFinisher(o, v);
     },
-    edge(b, o) { if (b.jlCh <= 3) explosions.push(new Explosion(b.x + b.w / 2, b.y + b.h / 2, b.jlCh === 1 ? 40 : 22, 'rgba(252, 211, 77,', 0, o)); },
+    edge(b, o) { if (b.jlCh <= 3) explosions.push(new Explosion(b.x + b.w / 2, b.y + b.h / 2, b.jlCh === 1 ? 24 : 16, 'rgba(252, 211, 77,', 0, o)); },
     draw(b) { if (typeof jlDrawBoyBullet === 'function') jlDrawBoyBullet(b); },
 });
 
@@ -443,6 +451,18 @@ CharHooks.register('jack_6_lo', {
                             e.shield--; jlVTxt(e, 'VỠ KHIÊN!', JL_GOLD, 12);
                             spawnSparkParticles(e.x + e.w / 2, e.y + e.h / 2, '#e0f2fe', 12);
                         }
+                    }
+                }
+                // Lục Liên Phát (The BOY): mỗi viên tự ngắm, bẻ lái tới khi còn ~50px (né sát nút được)
+                if (b && b.jlHome && jlAlive(e)) {
+                    b.jlHomeT = (b.jlHomeT || 0) + 1;
+                    const tx = e.x + e.w / 2, ty = e.y + e.h / 2, bx = b.x + b.w / 2, by = b.y + b.h / 2;
+                    if (Math.hypot(tx - bx, ty - by) > 50 && b.jlHomeT > 4) {
+                        const sp = Math.hypot(b.vx, b.vy), cur = Math.atan2(b.vy, b.vx);
+                        let d = Math.atan2(ty - by, tx - bx) - cur;
+                        while (d > Math.PI) d -= Math.PI * 2; while (d < -Math.PI) d += Math.PI * 2;
+                        const na = cur + Math.sign(d) * Math.min(Math.abs(d), 0.06);
+                        b.vx = Math.cos(na) * sp; b.vy = Math.sin(na) * sp;
                     }
                 }
                 if (!b || !b.jlJackpot) continue;

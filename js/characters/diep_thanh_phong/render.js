@@ -232,9 +232,23 @@ function dtpDrawSkyRing(x, y, R, T, ownerC, ghost) {
     ctx.fillText((T / 60).toFixed(1) + 's', x, y + R + 9);
     ctx.restore();
 }
+// Luật 11: vòng KHÓA — đỏ đặc + vòng co dần về tâm (k: 0 -> 1)
+function dtpDrawLockRing(x, y, R, k) {
+    const t = dtpNow();
+    ctx.save();
+    ctx.fillStyle = 'rgba(239, 68, 68, ' + (0.18 + 0.2 * k + 0.08 * Math.sin(t * 30)) + ')';
+    ctx.beginPath(); ctx.arc(x, y, R, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 3; ctx.shadowBlur = 16; ctx.shadowColor = '#ef4444';
+    ctx.beginPath(); ctx.arc(x, y, R, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = '#fecaca'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(x, y, Math.max(2, R * (1 - Math.min(1, k))), 0, Math.PI * 2); ctx.stroke();
+    ctx.shadowBlur = 0; ctx.fillStyle = '#fee2e2'; ctx.font = "800 10px 'Orbitron', Arial"; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('KHÓA', x, y + R + 10);
+    ctx.restore();
+}
 function dtpDrawSkyZone(o) {
     const T = o.air + o.g, left = o.grow - o.g;
-    dtpDrawSkyRing(o.x, o.y, o.r, T, '#a7f3d0', true);
+    if (left <= 40) dtpDrawLockRing(o.x, o.y, o.r, 1 - left / 40); else dtpDrawSkyRing(o.x, o.y, o.r, T, '#a7f3d0', true);
     // Ảo Ảnh Gió đang giáng xuống
     if (left < 30) {
         const k = 1 - left / 30;
@@ -251,6 +265,7 @@ CharHooks.register('diep_thanh_phong', Object.assign(CharHooks.registry.diep_tha
         if (p.hp <= 0) return;
         const t = dtpNow(), cx = dtpCx(p), cy = dtpCy(p), m = p.dtpMode;
         // Vòng cảnh báo khi đang bay
+        if (m === 'skylock') { dtpDrawLockRing(p.dtpSkyX, p.dtpSkyY, dtpSkyR(p.dtpSkyT), p.dtpModeT / DTP_SKY_LOCK); return; }
         if (m === 'sky') { dtpDrawSkyRing(p.dtpSkyX, p.dtpSkyY, dtpSkyR(p.dtpSkyT), p.dtpSkyT, p.dtpSkyT >= 240 ? '#f0abfc' : DTP_JADE, false); return; }
         ctx.save();
         // Khiên Gió
@@ -283,7 +298,7 @@ CharHooks.register('diep_thanh_phong', Object.assign(CharHooks.registry.diep_tha
         if (p.dtpSpinFx > 0) { const k = 1 - p.dtpSpinFx / 20; ctx.globalAlpha = 1 - k; dtpFan(cx, cy, 60, k * Math.PI * 2.5, 3.0, '#c4b5fd', 0.85); ctx.globalAlpha = 1; }
         // Bão Quạt: hóa lốc
         if (m === 'cyc_go' || m === 'cyc_dance' || m === 'cyc_back') {
-            const R = m === 'cyc_dance' ? 62 : 26;
+            const R = m === 'cyc_dance' ? 50 : 26;
             dtpVortex(cx, cy, R, t, m === 'cyc_dance' ? DTP_STORM : '#c4b5fd', 0.85, 4, 9);
             if (m === 'cyc_dance') { dtpDrawDancer(cx, cy, t, 1.2, 0.8, '#ddd6fe'); ctx.strokeStyle = 'rgba(196,181,253,0.6)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(cx, cy, 110, 0, Math.PI * 2); ctx.stroke(); }
         }
@@ -338,7 +353,7 @@ CharHooks.register('diep_thanh_phong', Object.assign(CharHooks.registry.diep_tha
         hudFill(F, bx + BW * (p.dtpP || 0) / 100 - 1, d - 1.5, 2, hh + 3);
         ctx.restore();
         // Biểu tượng Thế Quạt + 3 chấm Nhịp (trước mũi xe)
-        if (p.dtpMode === 'sky') return;
+        if (p.dtpMode === 'sky' || p.dtpMode === 'skylock') return;
         const Fn = hudFrame(p), dIcon = hudNearD(p, 3, 9);
         ctx.save();
         const nghich = p.dtpStance === 1, c = nghich ? '#c4b5fd' : DTP_LEAF;
