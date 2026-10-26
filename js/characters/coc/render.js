@@ -282,3 +282,48 @@ function cocRegisterHUD() {
     });
 }
 if (typeof window !== 'undefined') window.addEventListener('load', cocRegisterHUD);
+
+// ---------- Đoản Đao: Ảnh Đao (mờ dần / ẩn + vạch cảnh báo sau lưng địch / vệt lao) ----------
+function cocDrawLungeWarn(p) {
+    const t = cocNow(), H = canvas.height, cx = (p.cocLX || p.x) + p.w / 2, e = cocEnemy(p);
+    const k = Math.min(1, (p.cocLT || 0) / COC_WARN_T), dir = cocDir(p);
+    const edge = p.id === 1 ? 0 : H;
+    const ey = e ? (e.id === 1 ? H - e.h - 22 : 20) : (p.id === 1 ? 20 : H - 60);
+    const far = e ? (p.id === 1 ? ey + e.h + 34 : ey - 34) : H / 2;
+    ctx.save();
+    // cột cảnh báo xuyên qua làn địch
+    ctx.globalAlpha = 0.16 + 0.22 * k;
+    ctx.fillStyle = '#ef4444';
+    ctx.fillRect(cx - p.w / 2, Math.min(edge, far), p.w, Math.abs(far - edge));
+    ctx.globalAlpha = 1;
+    // vạch đỏ sau lưng địch (mép sân)
+    const by = p.id === 1 ? 4 : H - 4;
+    ctx.strokeStyle = '#ff2d55'; ctx.lineWidth = 3; ctx.shadowBlur = 14; ctx.shadowColor = '#ff2d55';
+    ctx.beginPath(); ctx.moveTo(cx - p.w * 0.9, by); ctx.lineTo(cx + p.w * 0.9, by); ctx.stroke();
+    // mũi tên chỉ hướng lao (về phía làn COC)
+    const ay = by - dir * (8 + 4 * Math.sin(t * 20));
+    ctx.fillStyle = '#ff2d55';
+    ctx.beginPath(); ctx.moveTo(cx - 8, ay); ctx.lineTo(cx + 8, ay); ctx.lineTo(cx, ay - dir * 10); ctx.closePath(); ctx.fill();
+    ctx.lineWidth = 1.5; ctx.setLineDash([5, 4]); ctx.lineDashOffset = -t * 40 * dir;
+    ctx.beginPath(); ctx.moveTo(cx, by); ctx.lineTo(cx, far); ctx.stroke(); ctx.setLineDash([]);
+    ctx.restore();
+}
+(function () {
+    const origD = Player.prototype.draw;
+    Player.prototype.draw = function () {
+        if (cocIs(this) && this.cocLunge > 0 && this.hp > 0) {
+            const m = this.cocLM;
+            if (m === 'warn') { cocDrawLungeWarn(this); return; }
+            if (m === 'fade') {
+                ctx.save(); ctx.globalAlpha = Math.max(0, 1 - (this.cocLT || 0) / COC_FADE_T);
+                const r = origD.apply(this, arguments); ctx.restore(); return r;
+            }
+            if (m === 'dash' || m === 'go') {
+                ctx.save(); const back = m === 'dash' ? cocDir(this) : -cocDir(this);
+                for (let i = 1; i <= 4; i++) { ctx.globalAlpha = 0.3 - i * 0.06; ctx.fillStyle = '#f43f5e'; ctx.fillRect(this.x + 4, this.y + back * i * 14, this.w - 8, this.h); }
+                ctx.restore();
+            }
+        }
+        return origD.apply(this, arguments);
+    };
+})();

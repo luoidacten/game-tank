@@ -331,7 +331,7 @@ function psyHomeY(e) { return e.id === 1 ? canvas.height - e.h - 22 : 20; }
 function psyIsSky(e) { return !!(e.thunderSky || e.tzFly || e.fsMode === 'thien' || e.fsHidden); }
 function psyDashFlag(e) {
     return e.dashState === 1 || e.isDashing || e.isShortgunDashing || e.stormDashState === 1 || e.isPolarDashing
-        || e.kazMode === 'dash' || e.tatMode === 'dash' || e.tsPhase > 0 || e.isCharging;
+        || e.kazMode === 'dash' || e.tatMode === 'dash' || e.tsPhase > 0 || e.isCharging || e.groundLunge;
 }
 function psyMeleeCounter(p, e, cx, cy, R) {
     if (!e || !(e.hp > 0) || psyIsSky(e) || e.psyPinT > 0) { if (e) e.psyPY = e.y; return; }

@@ -221,7 +221,7 @@ function rgHomeY(e) { return e.id === 1 ? canvas.height - e.h - 22 : 20; }
 function rgIsSky(e) { return !!(e.thunderSky || e.tzFly || e.fsMode === 'thien' || e.fsHidden); }
 function rgDashFlag(e) {
     return e.dashState === 1 || e.isDashing || e.isShortgunDashing || e.stormDashState === 1 || e.isPolarDashing
-        || e.kazMode === 'dash' || e.tatMode === 'dash' || e.tsPhase > 0 || e.isCharging;
+        || e.kazMode === 'dash' || e.tatMode === 'dash' || e.tsPhase > 0 || e.isCharging || e.groundLunge;
 }
 function rgMeleeCounter(p, e, R) {
     if (!e || !(e.hp > 0) || rgIsSky(e) || e.rgPinT > 0) { if (e) e.rgPY = e.y; return; }

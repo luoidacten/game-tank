@@ -270,11 +270,16 @@ CharHooks.register('diep_thanh_phong', Object.assign(CharHooks.registry.diep_tha
         if (m === 'warn') {
             const k = Math.min(1, p.dtpModeT / (p.dtpWarnN || 72));
             ctx.strokeStyle = '#c4b5fd'; ctx.lineWidth = 1.5; ctx.shadowBlur = 10; ctx.shadowColor = '#8b5cf6'; ctx.setLineDash([6, 4]);
-            ctx.beginPath(); ctx.arc(cx, cy, 60, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
-            ctx.fillStyle = 'rgba(139,92,246,0.18)'; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, 60, -Math.PI / 2, -Math.PI / 2 + k * Math.PI * 2); ctx.closePath(); ctx.fill();
+            const WR = 60 * (p.dtpHpPow > 1 ? 1.25 : 1);
+            if (p.dtpHpPow > 1) { ctx.strokeStyle = '#fde047'; ctx.shadowColor = '#fde047'; }
+            ctx.beginPath(); ctx.arc(cx, cy, WR, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+            ctx.fillStyle = 'rgba(139,92,246,0.18)'; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, WR, -Math.PI / 2, -Math.PI / 2 + k * Math.PI * 2); ctx.closePath(); ctx.fill();
             ctx.shadowBlur = 0;
             dtpFan(cx, cy, 16, t * 2, 1.8, '#c4b5fd', 0.7);
         }
+        // Hợp Phong: vòng xoáy vàng-ngọc khi lên tầng / bộc phát
+        if (p.dtpHpFx > 0) { const k = 1 - p.dtpHpFx / 30; ctx.globalAlpha = 1 - k; dtpVortex(cx, cy, p.w * (0.6 + k * 1.2), t, p.dtpHpEmp || p.dtpHpPow > 1 ? '#fde047' : DTP_JADE, 0.9, 3, 6); ctx.globalAlpha = 1; }
+        if (p.dtpHpEmp) { ctx.globalAlpha = 0.45 + 0.25 * Math.sin(t * 6); dtpFan(cx, cy, p.w * 0.85, t * 1.5, 2.6, '#fde047', 0.55); ctx.globalAlpha = 1; }
         if (p.dtpSpinFx > 0) { const k = 1 - p.dtpSpinFx / 20; ctx.globalAlpha = 1 - k; dtpFan(cx, cy, 60, k * Math.PI * 2.5, 3.0, '#c4b5fd', 0.85); ctx.globalAlpha = 1; }
         // Bão Quạt: hóa lốc
         if (m === 'cyc_go' || m === 'cyc_dance' || m === 'cyc_back') {
@@ -343,6 +348,13 @@ CharHooks.register('diep_thanh_phong', Object.assign(CharHooks.registry.diep_tha
         dtpFan(ix, iy + 3.5, 6, nghich ? Math.PI : 0, 2.0, c, 1);
         ctx.fillStyle = c; ctx.font = "800 7px 'Orbitron', Arial";
         hudText(Fn, nghich ? 'NGHỊCH' : 'THUẬN', 4, dIcon + 4.8, 'center');
+        // Hợp Phong: 3 quạt nhỏ (tầng) + cảnh báo LẶP THẾ
+        const hs = p.dtpHpS || 0;
+        for (let i = 0; i < 3; i++) {
+            const on = i < hs;
+            dtpFan(Fn.X(28 + i * 8), iy + 3.5, 4, Math.PI / 2 * (i - 1) * 0.3, 1.9, on ? (p.dtpHpEmp ? '#fde047' : DTP_JADE) : '#475569', on ? 1 : 0.5);
+        }
+        if (p.dtpRepFx > 0) { ctx.globalAlpha = Math.min(1, p.dtpRepFx / 15); ctx.fillStyle = '#f87171'; ctx.font = "800 7px 'Orbitron', Arial"; hudText(Fn, 'LẶP THẾ', -38, dIcon + 4.8, 'center'); ctx.globalAlpha = 1; }
         ctx.restore();
         const n = dtpBeatN(p), lit = Math.min(n, p.dtpBeats || 0), ready = lit >= n - 1;
         hudExtraPips(p, 0, 3, n === 2 ? lit + 1 : lit, ready ? '#fde047' : DTP_LEAF, { d: dIcon - 5, pw: 4, gap: 2, h: 3 });

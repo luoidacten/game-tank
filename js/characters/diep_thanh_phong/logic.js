@@ -47,7 +47,7 @@ function dtpW(p) {
     if (p.dtpCarryT > 0) w[p.dtpCarryZ || 0] = 1;
     return w;
 }
-function dtpDmgMul(p) { const w = dtpW(p); return 1 + 0.12 * w[1] + 0.25 * w[2]; }
+function dtpDmgMul(p) { const w = dtpW(p); return (1 + 0.12 * w[1] + 0.25 * w[2]) * dtpHpMul(p); }
 function dtpCostMul(p) { return dtpW(p)[1] >= 1 ? 0.75 : 1; }
 function dtpTP(p) { return dtpIs(p) && ((p.dtpNgT || 0) >= dtpTpNeed(p) || p.dtpTpT > 0); }
 function dtpInR(x, y, r, o) {
@@ -140,6 +140,53 @@ function dtpHitObjects(p, x, y, r, dmg) {
     return n;
 }
 
+// Lướt chạm vật thể? (thùng, xe tiền, chướng ngại, tường, triệu hồi địch, khối đá)
+function dtpTouchObj(p, x, y, r) {
+    const e = dtpEnemy(p), hit = o => !!o && o.active !== false && dtpInR(x, y, r, { x: o.x, y: o.y, w: o.w || 20, h: o.h || 20 });
+    if (typeof crates !== 'undefined' && crates.some(c => c.active && hit(c))) return true;
+    if (typeof moneyTrucks !== 'undefined' && moneyTrucks.some(t => t.active && hit(t))) return true;
+    if (typeof movingObstacle !== 'undefined' && movingObstacle && movingObstacle.active && hit(movingObstacle)) return true;
+    if (typeof sniperWalls !== 'undefined' && sniperWalls.some(w => !dtpOwnedBy(w, p) && hit(w))) return true;
+    if (typeof bodyEffects !== 'undefined' && bodyEffects.some(f => f.isStone && f.active && hit(f))) return true;
+    if (e) for (const g of DTP_SUMMON_ROOTS) { const a = g(); if (a && a.some(o => dtpOwnedBy(o, e) && hit(o))) return true; }
+    return false;
+}
+// Vòng Cảnh Báo (sky zone) / vùng gió (gale / storm) gần địch nhất của DTP
+function dtpNearZone(p, e) {
+    let best = null, bd = 1e9;
+    for (const f of bodyEffects) {
+        if (!f.active || f.team !== p.id) continue;
+        if (!(f instanceof DtpSkyZone || (f instanceof DtpStorm && f.r > 0))) continue;
+        const d = Math.abs(f.x - dtpCx(e));
+        if (Math.abs(f.y - dtpCy(e)) < f.r + 40 && d < 170 && d < bd) { bd = d; best = f; }
+    }
+    return best ? { x: best.x, y: best.y, r: best.r } : null;
+}
+
+// ---------- HỢP PHONG: phối hợp 2 Thế Quạt ----------
+// Đổi Thế xen kẽ (trong 2.5s) -> +1 tầng (tối đa 3): +10% dame & +10% hoàn Gió mỗi tầng; đủ 3 tầng -> chiêu kế tiếp cường hóa.
+// Lặp cùng Thế >= 3 lần liên tiếp -> mất 1 tầng + LẶP THẾ (-15% dame mỗi lần lặp, sàn 70%).
+const DTP_HP_WIN = 150;
+function dtpHpMul(p) {
+    const rep = Math.max(0, (p.dtpHpRep || 0) - 2);
+    return (1 + 0.1 * (p.dtpHpS || 0)) * Math.max(0.7, 1 - 0.15 * rep) * (p.dtpHpPow > 1 ? 1.2 : 1);
+}
+function dtpCombo(p, st) {
+    p.dtpHpPow = p.dtpHpEmp ? 1.25 : 1;
+    if (p.dtpHpEmp) { p.dtpHpEmp = false; p.dtpHpFx = 30; dtpTxt(p, '✦ HỢP PHONG BỘC PHÁT!', '#fde047', 13, 28); }
+    const last = p.dtpHpLast === 0 || p.dtpHpLast === 1 ? p.dtpHpLast : -1;
+    if (last >= 0 && last !== st && p.dtpHpT > 0) {
+        p.dtpHpS = Math.min(3, (p.dtpHpS || 0) + 1); p.dtpHpRep = 1; p.dtpHpFx = 24;
+        if (p.dtpHpS >= 3) p.dtpHpEmp = true;
+        dtpTxt(p, 'HỢP PHONG! x' + p.dtpHpS, DTP_JADE, 12, 40);
+        p.ammo = Math.min(p.maxAmmo, p.ammo + 2 * p.dtpHpS);
+    } else if (last === st) {
+        p.dtpHpRep = (p.dtpHpRep || 1) + 1;
+        if (p.dtpHpRep >= 3) { p.dtpHpS = Math.max(0, (p.dtpHpS || 0) - 1); p.dtpHpEmp = false; p.dtpRepFx = 40; dtpTxt(p, 'LẶP THẾ -' + Math.round(100 - 100 * Math.max(0.7, 1 - 0.15 * (p.dtpHpRep - 2))) + '%', '#f87171', 11, 40); }
+    } else p.dtpHpRep = 1;
+    p.dtpHpLast = st; p.dtpHpT = DTP_HP_WIN;
+}
+
 // ---------- Sát thương & hiệu ứng khi trúng ----------
 function dtpHit(p, e, amt, opt, cost) {
     if (!dtpAlive(e) || !dtpPlaying()) return 0;
@@ -156,7 +203,7 @@ function dtpOnHit(p, e, cost) {
         e.dtpCutT = 150; e.dtpCutBy = p.id;
     }
     const w0 = dtpW(p)[0];
-    if (cost > 0 && w0 > 0) p.ammo = Math.min(p.maxAmmo, p.ammo + cost * 0.35 * w0);
+    if (cost > 0 && w0 > 0) p.ammo = Math.min(p.maxAmmo, p.ammo + cost * 0.35 * w0 * (1 + 0.1 * (p.dtpHpS || 0)));
 }
 function dtpAddP(p, d) {
     if (dtpZone(p) === 1) d *= 1.5;
@@ -234,6 +281,7 @@ function dtpStrike(p) {
     const cost = [10, 8, 12][z] * dtpCostMul(p);
     if (z === 2 && groundedBlock(p)) return;
     if (!dtpSpend(p, cost)) return;
+    dtpCombo(p, 0);
     const dir = dtpDir(p), cx = dtpCx(p), mul = dtpDmgMul(p) * p.damage;
     if (z === 0) {
         if (emp) {
@@ -285,6 +333,7 @@ function dtpSustain(p) {
     const z = dtpZone(p), cost = [10, 12, 15][z] * dtpCostMul(p);
     if (z === 2 && groundedBlock(p)) return;
     if (!dtpSpend(p, cost)) return;
+    dtpCombo(p, 1);
     const cx = dtpCx(p), dir = dtpDir(p);
     if (z === 0) {
         const uid = DTP_UID++;
@@ -391,27 +440,35 @@ function dtpModeStep(p) {
         return;
     }
     if (m === 'lunge') {
-        p.y += dir * 13;
-        let stop = T > 22 || p.y < 0 || p.y > canvas.height - p.h;
-        if (dtpAlive(e) && Math.abs(dtpCy(p) - dtpCy(e)) < (e.h + p.h) / 2 + 6) stop = true;
-        const cx = dtpCx(p), cy = dtpCy(p);
-        if (typeof crates !== 'undefined' && crates.some(c => c.active && dtpInR(cx, cy, p.w / 2, c))) stop = true;
-        if (typeof moneyTrucks !== 'undefined' && moneyTrucks.some(t => t.active && dtpInR(cx, cy, p.w / 2, t))) stop = true;
+        // lướt thẳng sang phía địch tới khi chạm vật thể / thân địch / tới rìa làn địch (Sa Lầy -> dừng tại chỗ)
+        let stop = T > 90 || isGrounded(p);
+        if (!stop) p.y += dir * 13;
+        if (p.y < 0 || p.y > canvas.height - p.h) stop = true;
+        const lim = e ? (dir < 0 ? dtpLaneY(e) + e.h + 2 : dtpLaneY(e) - p.h - 2) : (dir < 0 ? 40 : canvas.height - p.h - 40);
+        if ((dir < 0 && p.y <= lim) || (dir > 0 && p.y >= lim)) { p.y = lim; stop = true; }
+        if (dtpAlive(e) && Math.abs(dtpCy(p) - dtpCy(e)) < (e.h + p.h) / 2 + 6 && Math.abs(dtpCx(p) - dtpCx(e)) < (e.w + p.w) / 2 + 6) stop = true;
+        if (dtpTouchObj(p, dtpCx(p), dtpCy(p), p.w / 2 + 2)) stop = true;
         if (stop) {
             p.y = Math.max(0, Math.min(canvas.height - p.h, p.y));
-            if (dtpAlive(e) && dir < 0) p.y = Math.max(p.y, e.y + e.h + 2);
-            if (dtpAlive(e) && dir > 0) p.y = Math.min(p.y, e.y - p.h - 2);
+            if (dtpAlive(e) && Math.abs(dtpCx(p) - dtpCx(e)) < (e.w + p.w) / 2 + 6) {
+                if (dir < 0) p.y = Math.max(p.y, e.y + e.h + 2);
+                if (dir > 0) p.y = Math.min(p.y, e.y - p.h - 2);
+            }
             p.dtpMode = 'warn'; p.dtpModeT = 0; p.dtpWarnN = dtpE1(p) ? 45 : 72;
         }
         return;
     }
     if (m === 'warn') {
         if (T >= p.dtpWarnN) {
-            const cx = dtpCx(p), cy = dtpCy(p), R = 60;
+            const cx = dtpCx(p), cy = dtpCy(p), R = 60 * (p.dtpHpPow > 1 ? 1.25 : 1);
+            p.dtpWarnR = R;
             if (dtpAlive(e) && dtpInR(cx, cy, R, e)) {
                 dtpHit(p, e, 1.2, {}, 12 * dtpCostMul(p));
-                if (dtpCC(e)) { e.kbX = (dtpCx(e) >= cx ? 1 : -1) * 9; e.dtpSlowT = 90; }
-                dtpTxt(e, 'ĐẨY LÙI + CHẬM', '#c4b5fd', 11);
+                // Hợp Phong: quạt địch văng về phía Vòng Cảnh Báo / vùng gió đang mở (đáp vào -> thêm dame)
+                const z = dtpNearZone(p, e);
+                if (dtpCC(e)) { e.kbX = (z ? (z.x >= dtpCx(e) ? 1 : -1) * 12 : (dtpCx(e) >= cx ? 1 : -1) * 9); e.dtpSlowT = 90; }
+                if (z) { p.dtpKbT = 45; p.dtpKbX = z.x; p.dtpKbY = z.y; p.dtpKbR = z.r; dtpTxt(e, 'QUẠT VÀO VÒNG GIÓ!', DTP_JADE, 11); }
+                else dtpTxt(e, 'ĐẨY LÙI + CHẬM', '#c4b5fd', 11);
             }
             const n = dtpHitObjects(p, cx, cy, R, 1.2);
             if (n) addFloatingText(cx, cy - 26, 'QUẠT VĂNG!', '#c4b5fd', 12);
@@ -467,9 +524,24 @@ function dtpModeStep(p) {
 
 // ---------- Tick chính (chạy cả khi bị choáng) ----------
 function dtpTick(p) {
-    for (const k of ['dtpCastFx', 'dtpSwFx', 'dtpZoneFx', 'dtpLpFx', 'dtpBurstFx', 'dtpSpinFx', 'dtpSlashFx', 'dtpArriveFx', 'dtpNoWindT', 'dtpImmTxt'])
+    for (const k of ['dtpCastFx', 'dtpSwFx', 'dtpZoneFx', 'dtpLpFx', 'dtpBurstFx', 'dtpSpinFx', 'dtpSlashFx', 'dtpArriveFx', 'dtpNoWindT', 'dtpImmTxt', 'dtpHpFx', 'dtpRepFx'])
         if (p[k] > 0) p[k]--;
+    p.groundLunge = p.dtpMode === 'lunge';
+    if (p.hp <= 0 && p.dtpMode && p.dtpMode !== 'idle' && p.dtpMode !== 'sky') dtpResetMode(p);   // chết giữa đường -> về làn
     if (p.hp <= 0 || gameState.phase !== 'playing') return;
+    // bị Phản Chấn (Siêu Năng / Railgun) giữa cú lướt -> huỷ, ghim về làn
+    if ((p.psyPinT > 0 || p.rgPinT > 0) && (p.dtpMode === 'lunge' || p.dtpMode === 'warn')) { dtpResetMode(p); p.groundLunge = false; }
+    // Hợp Phong: cửa sổ xen kẽ (đóng băng khi đang nuôi chiêu / đang bay / lướt)
+    if (p.dtpHpT > 0 && p.dtpMode === 'idle' && !p.dtpCh) { if (--p.dtpHpT <= 0 && p.dtpHpS > 0) { p.dtpHpS--; p.dtpHpEmp = false; if (p.dtpHpS > 0) p.dtpHpT = DTP_HP_WIN; } }
+    if (p.dtpKbT > 0) {
+        p.dtpKbT--;
+        const ee = dtpEnemy(p);
+        if (dtpAlive(ee) && dtpInR(p.dtpKbX, p.dtpKbY, p.dtpKbR, ee)) {
+            p.dtpKbT = 0; dtpHit(p, ee, 0.8, {}, 0);
+            explosions.push(new Explosion(dtpCx(ee), dtpCy(ee), 46, 'rgba(52, 211, 153,', 0, null));
+            dtpTxt(ee, 'HỢP PHONG: CUỐN VÀO VÒNG!', DTP_JADE, 12);
+        }
+    }
     if (p.dtpZoneCd > 0) p.dtpZoneCd--;
     if (p.dtpCarryT > 0) p.dtpCarryT--;
     if (p.dtpTpT > 0) p.dtpTpT--;
@@ -558,7 +630,8 @@ CharHooks.register('diep_thanh_phong', {
         this.dtpBuffs = []; this.dtpMode = 'idle'; this.dtpModeT = 0; this.dtpHomeX = this.x; this.dtpCh = ''; this.dtpChUid = 0; this.dtpChT = 0;
         this.dtpSkyX = 0; this.dtpSkyY = 0; this.dtpSkyT = 0; this.dtpStay = 0; this.dtpBigLand = false; this.dtpWarnN = 72;
         this.dtpDashT = 0; this.dtpDashDir = 1; this.dtpLastDir = 0; this.dtpBurstR = 110;
-        for (const k of ['dtpCastFx', 'dtpSwFx', 'dtpZoneFx', 'dtpLpFx', 'dtpBurstFx', 'dtpSpinFx', 'dtpSlashFx', 'dtpArriveFx', 'dtpNoWindT', 'dtpImmTxt']) this[k] = 0;
+        this.dtpHpS = 0; this.dtpHpT = 0; this.dtpHpLast = -1; this.dtpHpRep = 0; this.dtpHpEmp = false; this.dtpHpPow = 1; this.dtpKbT = 0; this.groundLunge = false;
+        for (const k of ['dtpCastFx', 'dtpSwFx', 'dtpZoneFx', 'dtpLpFx', 'dtpBurstFx', 'dtpSpinFx', 'dtpSlashFx', 'dtpArriveFx', 'dtpNoWindT', 'dtpImmTxt', 'dtpHpFx', 'dtpRepFx']) this[k] = 0;
         const e = dtpEnemy(this);
         if (e) { e.dtpCutT = 0; e.dtpCutS = 0; e.dtpSlowT = 0; e.dtpLiftT = 0; e.dtpPrevHp = e.hp; }
     },
@@ -599,7 +672,7 @@ CharHooks.register('diep_thanh_phong', {
         return true;
     },
     shieldBreak() { dtpWindBurst(this); },
-    roundEnd() { dtpResetMode(this); },
+    roundEnd() { dtpResetMode(this); this.groundLunge = false; this.dtpKbT = 0; },
 });
 
 // ---------- Bọc update: tick luôn chạy (kể cả khi bị choáng) ----------
@@ -647,6 +720,8 @@ function dtpBotAction(p, e, aligned) {
         return null;
     }
     if (p.dtpZoneCd <= 0 && Math.random() < (p.ammo < 25 ? 0.03 : 0.006)) return 'zone';
+    // Hợp Phong: thỉnh thoảng đổi Thế sau khi vừa ra chiêu để xen kẽ
+    if (p.dtpHpT > 60 && p.dtpHpLast === p.dtpStance && (p.dtpHpRep || 0) >= 2 && p.ammo > 25 && Math.random() < 0.08) return 'switch';
     if (p.dtpStance === 0) {
         if (z === 2 && (p.dtpNgT || 0) > 120 && Math.random() < 0.01) return 'switch';
         if (aligned && p.ammo >= 14 && Math.random() < 0.12) return 'tap';

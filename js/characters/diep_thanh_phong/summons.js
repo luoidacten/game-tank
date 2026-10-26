@@ -43,7 +43,7 @@ class DtpOrb {
         if (this.reso) this.r = Math.min(54, this.r + 0.6);
         this.y += this.vy;
         const e = dtpEnemy(o);
-        if (this.reso) { dtpClearBullets(o, this.x, this.y, this.r * 1.5, true); if (dtpAlive(e) && dtpInR(this.x, this.y, this.r * 1.6, e)) dtpPull(e, this.x, 1.0); }
+        if (this.reso) { dtpClearBullets(o, this.x, this.y, this.r * 1.5, true); if (dtpAlive(e) && dtpInR(this.x, this.y, this.r * 1.6, e)) dtpPull(e, this.x, (this.resoM || 1.5) >= 1.5 ? 1.0 : 0.7); }
         if (!this.hit && dtpAlive(e) && dtpInR(this.x, this.y, this.r, e)) {
             this.hit = true;
             dtpHit(o, e, 1.0 + 1.5 * this.k, {}, 0);
@@ -52,8 +52,8 @@ class DtpOrb {
         if (this.y < 10 || this.y > canvas.height - 10) {
             const k = this.k;
             bodyEffects.push(new DtpStorm(this.team, {
-                kind: 'gale', x: this.x, y: dtpEnemyLaneCy(o), r: Math.round((52 + 26 * k) * (this.reso ? 1.5 : 1)),
-                dur: Math.round(150 + 150 * k), dot: 0.35, dotI: 30, slow: 0.55, pull: this.reso ? 0.8 : 0,
+                kind: 'gale', x: this.x, y: dtpEnemyLaneCy(o), r: Math.round((52 + 26 * k) * (this.reso ? (this.resoM || 1.5) : 1)),
+                dur: Math.round(150 + 150 * k), dot: 0.35, dotI: 30, slow: 0.55, pull: this.reso ? ((this.resoM || 1.5) >= 1.5 ? 0.8 : 0.55) : 0,
             }));
             explosions.push(new Explosion(this.x, dtpEnemyLaneCy(o), 50 + 20 * k, 'rgba(134, 239, 172,', 0, null));
             triggerScreenShake(4, 8);
@@ -87,15 +87,15 @@ class DtpGrowTornado {
             this.gt++;
             if (dtpE2(o)) { const n = dtpClearBullets(o, this.x, this.y, this.r + 18, true); if (n) this.gt += 30 * n; }
             this.k = Math.min(1, this.gt / 300);
-            this.r = (12 + 22 * this.k) * (this.reso ? 1.5 : 1);
+            this.r = (12 + 22 * this.k) * (this.reso ? (this.resoM || 1.5) : 1);
             return;
         }
-        this.r = (12 + 22 * this.k) * (this.reso ? 1.5 : 1);
+        this.r = (12 + 22 * this.k) * (this.reso ? (this.resoM || 1.5) : 1);
         const tx = dtpAlive(e) ? dtpCx(e) : canvas.width / 2;
         this.vx = Math.sin(this.t * 0.13 + this.ph) * 3.2 + Math.max(-2.2, Math.min(2.2, (tx - this.x) * 0.03));
         this.x = Math.max(this.r * 0.5, Math.min(canvas.width - this.r * 0.5, this.x + this.vx));
         this.y += dtpDir(o) * 4.2;
-        if (this.reso) { dtpClearBullets(o, this.x, this.y, this.r * 1.5, true); if (dtpAlive(e) && dtpInR(this.x, this.y, this.r * 1.6, e)) dtpPull(e, this.x, 1.0); }
+        if (this.reso) { dtpClearBullets(o, this.x, this.y, this.r * 1.5, true); if (dtpAlive(e) && dtpInR(this.x, this.y, this.r * 1.6, e)) dtpPull(e, this.x, (this.resoM || 1.5) >= 1.5 ? 1.0 : 0.7); }
         dtpBreakCrates(o, this.x, this.y, this.r);
         if (!this.hit && dtpAlive(e) && dtpInR(this.x, this.y, this.r, e)) {
             this.hit = true;
@@ -128,17 +128,19 @@ class DtpBigTornado {
         // nuốt đạn thường của địch: +15% kích thước, +0.35 dame mỗi viên
         const n = dtpClearBullets(o, this.x, this.y, this.r + 4, true);
         for (let i = 0; i < n; i++) { this.n++; this.r = Math.min(40, this.r * 1.15); this.dmg += 0.35; }
-        // Evo 1: Cộng Hưởng Phong Bạo với cầu / lốc đang bay
-        if (dtpE1(o)) {
-            for (const f of bodyEffects) {
-                if (!f.active || f.team !== this.team || f.reso) continue;
-                if (!((f instanceof DtpOrb && f.st === 'fly') || (f instanceof DtpGrowTornado && f.st === 'fly'))) continue;
-                if (Math.hypot(f.x - this.x, f.y - this.y) < f.r + this.r) {
-                    f.reso = true; if (f instanceof DtpOrb) f.r *= 1.5;
-                    addFloatingText(f.x, f.y - 16, 'CỘNG HƯỞNG PHONG BẠO!', DTP_JADE, 13);
-                    explosions.push(new Explosion(f.x, f.y, f.r * 1.5, 'rgba(52, 211, 153,', 0, null));
-                    triggerScreenShake(5, 8);
-                }
+        // Cộng Hưởng Phong Bạo (Hợp Phong — gốc x1.25, Evo 1 x1.5) với cầu / lốc đang bay / Vòng Cảnh Báo của Nghịch Phong Vũ
+        const rm = dtpE1(o) ? 1.5 : 1.25;
+        for (const f of bodyEffects) {
+            if (!f.active || f.team !== this.team || f.reso) continue;
+            const sky = f instanceof DtpSkyZone;
+            if (!(sky || (f instanceof DtpOrb && f.st === 'fly') || (f instanceof DtpGrowTornado && f.st === 'fly'))) continue;
+            if (Math.hypot(f.x - this.x, f.y - this.y) < f.r + this.r) {
+                f.reso = true; f.resoM = rm;
+                if (f instanceof DtpOrb) f.r *= rm;
+                if (sky) { f.scale *= rm; f.r = dtpSkyR(f.air + f.g) * f.scale; if (dtpAlive(e) && dtpInR(f.x, f.y, f.r * 1.3, e)) dtpPull(e, f.x, 4); }
+                addFloatingText(f.x, f.y - 16, 'CỘNG HƯỞNG PHONG BẠO!', DTP_JADE, 13);
+                explosions.push(new Explosion(f.x, f.y, f.r * 1.5, 'rgba(52, 211, 153,', 0, null));
+                triggerScreenShake(5, 8);
             }
         }
         if (!this.hit && dtpAlive(e) && dtpInR(this.x, this.y, this.r, e)) {

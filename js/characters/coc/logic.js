@@ -174,14 +174,96 @@ function cocFireGold(p) {
     triggerScreenShake(3, 6);
     cocUseAmmo(p, cocE2(p) ? 108 : 150); cocSfx('playLaser');
 }
-// Đoản Đao: lao lên chém vòng tròn rồi bật về
+// Đoản Đao: lao thẳng sang phía địch tới khi chạm vật thể -> chém vòng tròn rồi bật về.
+// Qua vạch giữa sân mà không chạm gì -> biến mất, hiện vạch đỏ cảnh báo 0.25s SAU LƯNG địch,
+// rồi lao ngược từ sau lưng địch xuyên qua làn địch về làn mình (chém trúng nếu đi qua người địch).
+// p.cocLunge > 0 = đang lao; p.cocLM: 'go' | 'back' | 'fade' | 'warn' | 'dash'.
+const COC_FADE_T = 10, COC_WARN_T = 15;
 function cocStartLunge(p) {
     if (typeof isGrounded === 'function' && isGrounded(p)) { groundedBlock(p); return; }
-    p.cocLunge = 1; p.cocLungeMax = cocE2(p) ? 26 : 22; p.cocLungeDist = cocE2(p) ? 165 : 115;
+    p.cocLunge = 1; p.cocLM = 'go'; p.cocLT = 0; p.cocLX = p.x; p.groundLunge = true;
     p.cocKnifeCd = Math.round(36 * cocRL(p)); p.cocSlashed = false;
     cocSfx('playDash');
 }
-function cocEndLunge(p) { p.cocLunge = 0; p.y = cocHomeY(p); }
+function cocEndLunge(p) { p.cocLunge = 0; p.cocLM = ''; p.cocLT = 0; p.groundLunge = false; p.y = cocHomeY(p); }
+function cocLungePhase(p, m) { p.cocLM = m; p.cocLT = 0; p.groundLunge = m === 'go' || m === 'dash'; }
+const COC_SUMMON_ROOTS = [
+    () => typeof turrets !== 'undefined' ? turrets : null, () => typeof creatorTurrets !== 'undefined' ? creatorTurrets : null,
+    () => typeof creatorRobots !== 'undefined' ? creatorRobots : null, () => typeof creatorDrones !== 'undefined' ? creatorDrones : null,
+    () => typeof necroMinions !== 'undefined' ? necroMinions : null, () => typeof ghostDecoys !== 'undefined' ? ghostDecoys : null,
+    () => typeof bastions !== 'undefined' ? bastions : null,
+];
+function cocOwned(o, e) { return !!o && (o.owner === e || (o.team !== undefined && o.team === e.id) || (o.ownerId !== undefined && o.ownerId === e.id)); }
+function cocRectHit(p, o, pad) { return !!o && o.active !== false && rectIntersect(p.x - pad, p.y - pad, p.w + pad * 2, p.h + pad * 2, o.x, o.y, o.w || 20, o.h || 20); }
+// Chạm vật thể (thân địch, thùng, xe tiền, chướng ngại, tường, triệu hồi địch, khối đá)?
+function cocTouchObj(p) {
+    const e = cocEnemy(p), H = o => cocRectHit(p, o, 2);
+    if (cocAlive(e) && H(e)) return true;
+    if (typeof crates !== 'undefined' && crates.some(c => c.active && H(c))) return true;
+    if (typeof moneyTrucks !== 'undefined' && moneyTrucks.some(t => t.active && H(t))) return true;
+    if (typeof movingObstacle !== 'undefined' && movingObstacle && movingObstacle.active && H(movingObstacle)) return true;
+    if (typeof sniperWalls !== 'undefined' && sniperWalls.some(w => !cocOwned(w, p) && H(w))) return true;
+    if (typeof bodyEffects !== 'undefined' && bodyEffects.some(f => f.isStone && f.active && H(f))) return true;
+    if (e) for (const n of COC_SUMMON_ROOTS) { const a = n(); if (Array.isArray(a) && a.some(o => cocOwned(o, e) && H(o))) return true; }
+    return false;
+}
+// Điểm xuất phát lao ngược: ngay sau lưng làn địch (ngoài mép sân)
+function cocBehindY(p) { return p.id === 1 ? -p.h - 6 : canvas.height + 6; }
+function cocLungeTick(p) {
+    const dir = cocDir(p), e = cocEnemy(p), T = ++p.cocLT, home = cocHomeY(p);
+    p.cocLunge++;
+    if (p.psyPinT > 0 || p.rgPinT > 0) { cocEndLunge(p); return; }   // bị Phản Chấn
+    if (isGrounded(p) && p.cocLM !== 'back') { if (p.cocLM === 'go') cocLungePhase(p, 'back'); else { cocEndLunge(p); return; } }
+    const m = p.cocLM;
+    if (m === 'go') {
+        p.y += dir * (cocE2(p) ? 15 : 13);
+        if (cocTouchObj(p)) { cocKnifeSlash(p); cocLungePhase(p, 'back'); return; }
+        const mid = canvas.height / 2, cy = p.y + p.h / 2;
+        if ((dir < 0 && cy <= mid) || (dir > 0 && cy >= mid) || T > 60) {
+            cocLungePhase(p, 'fade'); p.cocLX = p.x;
+            spawnSparkParticles(p.x + p.w / 2, cy, '#f43f5e', 12);
+            cocTxt(p, 'ẢNH ĐAO!', '#f43f5e', 11);
+        }
+        return;
+    }
+    if (m === 'back') {
+        const dy = home - p.y;
+        if (Math.abs(dy) <= 16 || T > 60) { cocEndLunge(p); return; }
+        p.y += Math.sign(dy) * 16;
+        return;
+    }
+    if (m === 'fade' || m === 'warn') p.invincibleTimer = Math.max(p.invincibleTimer || 0, 2);   // đang ẩn: không thể bị nhắm
+    if (m === 'fade') {
+        if (T >= COC_FADE_T) {
+            cocLungePhase(p, 'warn'); p.y = cocBehindY(p); p.psyPY = p.y; p.rgPY = p.y;
+            cocSfx('playClick');
+        }
+        return;
+    }
+    if (m === 'warn') {
+        p.x = p.cocLX; p.psyPY = p.y; p.rgPY = p.y;   // dịch chuyển ra sau lưng địch không tính là lao (Phản Chấn chỉ bắt cú lao ngược)
+        if (T >= COC_WARN_T) { cocLungePhase(p, 'dash'); p.cocDashHit = false; if (p.invincibleTimer <= 2) p.invincibleTimer = 0; cocSfx('playDash'); triggerScreenShake(2, 4); }
+        return;
+    }
+    if (m === 'dash') {
+        p.x = p.cocLX;
+        p.y -= dir * 20;
+        if (!p.cocDashHit && cocAlive(e) && cocRectHit(p, e, 3)) {
+            p.cocDashHit = true;
+            const crit = Math.random() < (cocE2(p) ? 0.5 : 0.35), dmg = p.damage * (crit ? 3 : 1);
+            cocDeal(p, e, dmg, 4);
+            if (crit && cocE2(p)) cocHeal(p, 0.25);
+            bodyEffects.push(new CocSlash(p, e.x + e.w / 2, e.y + e.h / 2, cocE2(p) ? 54 : 46, crit));
+            spawnSparkParticles(e.x + e.w / 2, e.y + e.h / 2, '#f43f5e', 14);
+            if (crit) cocTxt(p, 'CHÍ MẠNG x3!', '#f43f5e', 11, 12);
+            triggerScreenShake(4, 6);
+        }
+        if (typeof crates !== 'undefined') for (const c of crates) if (c.active && cocRectHit(p, c, 0)) { c.active = false; crateOnBreak(c, p); grantCrateLoot(c, p); }
+        if ((dir < 0 && p.y >= home) || (dir > 0 && p.y <= home) || T > 80) cocEndLunge(p);
+        return;
+    }
+    cocEndLunge(p);
+}
 function cocKnifeSlash(p) {
     const cx = p.x + p.w / 2, cy = p.y + p.h / 2, r = cocE2(p) ? 54 : 46, e = cocEnemy(p);
     const critC = cocE2(p) ? 0.5 : 0.35, crit = Math.random() < critC;
@@ -198,9 +280,13 @@ function cocKnifeSlash(p) {
         cocDeal(p, e, dmg, 4);
         if (crit && cocE2(p)) cocHeal(p, 0.25);
     }
-    // kiếm khí bay tiếp ~200px
-    const dir = cocDir(p);
-    spawnBullet(p, { x: cx - 13, y: cy + dir * 14 - 4, w: 26, h: 8, vx: 0, vy: dir * C.bulletSpeed * 1.25 * cocBS(p), dmg, hook: 'coc_b', cocK: 4, cocLife: 75, cocCrit: crit, isPiercing: true });
+    // chém vỡ thùng / xe tiền / triệu hồi địch trong vòng chém
+    if (typeof crates !== 'undefined') for (const c of crates) if (c.active && Math.hypot(c.x + c.w / 2 - cx, c.y + c.h / 2 - cy) < r + c.w / 2) { c.active = false; crateOnBreak(c, p); grantCrateLoot(c, p); }
+    if (typeof moneyTrucks !== 'undefined') for (const t of moneyTrucks) if (t.active && Math.hypot(t.x + t.w / 2 - cx, t.y + t.h / 2 - cy) < r + t.w / 2) { t.hp -= dmg; if (t.hp <= 0) { t.active = false; cocCoins(p, 30); } }
+    if (e) for (const n of COC_SUMMON_ROOTS) {
+        const a = n(); if (!Array.isArray(a)) continue;
+        for (const o of a) if (o && o.active !== false && typeof o.hp === 'number' && cocOwned(o, e) && Math.hypot(o.x + (o.w || 20) / 2 - cx, o.y + (o.h || 20) / 2 - cy) < r + (o.w || 20) / 2) { o.hp -= dmg; if (o.hp <= 0) o.active = false; }
+    }
     if (crit) cocTxt(p, 'CHÍ MẠNG x3!', '#f43f5e', 11, 12);
     triggerScreenShake(2, 4);
 }
@@ -313,7 +399,7 @@ function cocTickVictim(v) {
 function cocTick(p, inp) {
     p.cocT = (p.cocT || 0) + 1;
     ['cocDiceFx', 'cocInnerFx', 'cocRecoil', 'cocHasteT', 'cocRerollCd', 'cocFireCd', 'cocKnifeCd', 'cocWaveFx', 'cocHitFx'].forEach(k => { if (p[k] > 0) p[k]--; });
-    if (gameState.phase !== 'playing' || p.hp <= 0) return;
+    if (gameState.phase !== 'playing' || p.hp <= 0) { if (p.cocLunge > 0) cocEndLunge(p); return; }   // không kẹt giữa sân
     if (!p.cocW) cocRoll(p);
     if (--p.cocWT <= 0) cocRoll(p, '12s');
     // Giáp Gai: miễn Làm Chậm
@@ -341,12 +427,7 @@ function cocTick(p, inp) {
     // Đoản Đao: lao lên / bật về
     if (p.cocLunge > 0) {
         if (p.freezeTimer > 0) cocEndLunge(p);
-        else {
-            const k = p.cocLunge / p.cocLungeMax;
-            p.y = cocHomeY(p) + cocDir(p) * p.cocLungeDist * Math.sin(Math.PI * k);
-            if (!p.cocSlashed && k >= 0.5) { p.cocSlashed = true; cocKnifeSlash(p); }
-            if (++p.cocLunge > p.cocLungeMax) cocEndLunge(p);
-        }
+        else cocLungeTick(p);
     }
     // Hỏa Ngục: vệt lửa khi di chuyển / lướt
     if (cocHasP(p, 4) && (Math.abs(p._vx || 0) > 0.8 || p.cocLunge > 0) && p.cocT % 7 === 0) {
@@ -447,7 +528,7 @@ CharHooks.register('coc', {
         this.cocW = 0; this.cocWT = 0; this.cocP = []; this.cocPrevP = []; this.cocSh = null;
         this.cocT = 0; this.cocPrevS = false; this.cocHold = 0; this.cocHoldUsed = false; this.cocRerollCd = 0;
         this.cocReload = 0; this.cocFireCd = 0; this.cocKnifeCd = 0; this.cocLcd = 0; this.cocRcd = 0; this.cocRBurst = 0; this.cocRBT = 0;
-        this.cocSmgHits = 0; this.cocSmgPend = 0; this.cocPistolN = 0; this.cocDashT = 0; this.cocDashDir = 0; this.cocLunge = 0;
+        this.cocSmgHits = 0; this.cocSmgPend = 0; this.cocPistolN = 0; this.cocDashT = 0; this.cocDashDir = 0; this.cocLunge = 0; this.cocLM = ''; this.cocLT = 0; this.groundLunge = false;
         this.cocHasteT = 0; this.cocRecoil = 0; this.cocDiceFx = 0; this.cocInnerFx = 0;
         this.cocSlowT = 0; this.cocSlow2T = 0; this.cocBurnT = 0; this.cocBurnS = 0; this.cocShredT = 0;
         cocRoll(this);
@@ -457,7 +538,7 @@ CharHooks.register('coc', {
         let m = d.spd / 3.5;
         if (this.cocHasteT > 0) m *= 1 + 0.3 * cocPM(this);
         if (cocHasP(this, 4)) m *= 1 + 0.15 * cocPM(this);
-        if (this.cocLunge > 0) m *= 0.6;
+        if (this.cocLunge > 0) m *= (this.cocLM === 'go' || this.cocLM === 'back') ? 0.6 : 0;
         return v * m;
     },
     update(inp, eff, now) { this.lastShot = now; }, // tự quản nạp đạn
