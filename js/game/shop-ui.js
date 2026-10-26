@@ -243,6 +243,10 @@ function renderStandardCards(playerId, list) {
             </button>
         `;
 
+        // Nút "📖 HƯỚNG DẪN": mở bảng hướng dẫn trực quan (không chọn body)
+        if (typeof makeBodyGuideButton === 'function') {
+            div.insertBefore(makeBodyGuideButton(mod.id, playerId === 'p2' ? 2 : 1), div.querySelector('.gear-card-reroll-btn'));
+        }
         const rerollBtn = div.querySelector('.gear-card-reroll-btn');
         if (rerollBtn) {
             rerollBtn.onclick = (e) => {
