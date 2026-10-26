@@ -48,6 +48,7 @@ const NET_CLASSES = {
     KgSickle, KgPool, KgVortex, KgFinisher,
     BodyFinisher,
     TcFinisher,
+    DynBomb, DynLob, DynSmoke, DynNugget, DynFinisher,
     CocLaser, CocFireZone, CocBolt, CocSlash, CocFinisher,
     PrBeam, PrFinisher,
     WdFinisher,

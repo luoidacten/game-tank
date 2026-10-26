@@ -800,5 +800,15 @@ const BODY_GUIDES = {
         passive: ['Trúng chiêu & thắng hiệp: +Fan', 'Evo cần đủ mốc Fan (6/12/18)'],
         evo: { e1: 'Cần 6 Fan: Show hồi nhanh', e2: 'Cần 12 Fan: +dame theo Fan', full: 'Cần 18 Fan: Show trọn cả 3' },
         tips: ['Quyến Rũ (tim) khóa bắn địch 1.75s']
+    },
+    dynamite: {
+        tag: 'Gài bẫy thuốc nổ, nổ dây chuyền', diff: 2,
+        controls: [
+            { input: 'TAP', name: 'Ném Thẳng', what: 'Nổ khi chạm địch / vật cản / vòng bom (1.5)' },
+            { input: 'HOLD 0.5s', name: 'Ném Cao', what: 'Bay qua mọi vật cản, nằm lại làn địch hoặc DÍNH vào xe' }
+        ],
+        passive: ['Bom trong 140px nổ lan cả chuỗi', 'x3 sát thương lên công trình / vật triệu hồi', 'Phá thùng/xe tiền +$10, mỗi 3 lần trúng +$5'],
+        evo: { e1: '4 bó, bom sống 9s, tối đa 3, nổ lan xa hơn', e2: 'Kích nổ sớm 2.2 dame, bom dính bị kích -> choáng', full: '5 bó, 12s, x5 công trình, vàng + khói chậm' },
+        tips: ['Ném Cao rải bom trước, rồi Nhấp Bắn kích nổ cả chuỗi']
     }
 };

@@ -339,6 +339,10 @@ const EVOLUTIONS = {
         { id: 'evo_idol_1', name: 'Chuyến Lưu Diễn Toàn Cầu', desc: 'CẦN ≥ 6 FAN (tụt dưới 6 -> tạm khóa). CD Buổi Trình Diễn 30s -> 22s; giữ mở Sân Khấu 1.0s -> 0.6s. Giữ đổi Phong Cách 0.5s -> 0.25s, mỗi lần đổi giảm 1.0s CD của Phong Cách vừa chuyển tới. Thời gian trước khi mất Fan 6s -> 10s.', cost: 140, type: 'evo' },
         { id: 'evo_idol_2', name: 'Hiện Tượng Mạng', desc: 'CẦN ≥ 12 FAN (tụt dưới 12 -> tạm khóa). Cứ mỗi 2 Fan +2% Sát thương & +1.5% tốc chạy ngang (tối đa ở 20 Fan: +20% / +15%). Ba Phong Cách tách thành 3 CD riêng (combo Tim -> Lazer -> Vũ Đạo). FULL EVO (Huyền Thoại Sân Khấu, duy trì ≥ 18 Fan): Buổi Trình Diễn = 100% Sân Khấu đã chọn + 50% của 2 Sân Khấu còn lại; mỗi 5s khi Sân Khấu mở ném về làn Idol 1 Hộp Quà Fan (+0.4 HP & +20 Náo Nhiệt) và 1 Lightstick Phát Nổ xuống vị trí địch (cảnh báo 0.8s, 1.0 st + chậm 30%).', cost: 260, type: 'evo' },
     ],
+    dynamite: [
+        { id: 'evo_dyn_1', name: 'Kho Thuốc Nổ Mở Rộng', desc: '+1 bó (4 đạn). Ném Cao bay nhanh hơn 30%. Bó tồn tại 6s -> 9s, tối đa 2 -> 3 bó. Tầm Nổ Lan +40% (196px).', cost: 160, type: 'evo' },
+        { id: 'evo_dyn_2', name: 'Thuốc Nổ Nhiệt Nhôm', desc: 'Bó bị kích nổ sớm (Nhấp Bắn / Nổ Lan): bán kính nổ +35%, sát thương 2.2. Bó đang DÍNH trên xe địch bị Nhấp Bắn kích sớm -> Choáng 0.6s. FULL EVO (Vua Mỏ Vàng): bó tồn tại 12s, tối đa 5 bó, x5 sát thương lên công trình / vật triệu hồi; mỗi bó nổ rơi +$5 và để lại Khói Đen làm chậm 30% trong 2s.', cost: 290, type: 'evo' },
+    ],
 };
 
 // ==========================================

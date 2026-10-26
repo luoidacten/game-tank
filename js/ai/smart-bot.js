@@ -725,3 +725,18 @@ function botShopBuy(playerId) {
         return f.call(this, bot, enemy, aligned, inp);
     };
 })();
+
+// Dynamite: giữ 0.5s Ném Cao gài bom (đứng thẳng hàng để dính xe địch), nhấp Ném Thẳng kích nổ chuỗi (dynBotAction)
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon === 'dynamite' && typeof dynBotAction === 'function') {
+            if (this.dynB > 0) { this.dynB--; inp.s = this.dynB > 2; return; }
+            const a = dynBotAction(bot, enemy, aligned);
+            if (a === 'lob') { this.dynB = DYN_HOLD + 6; inp.s = true; return; }
+            if (a === 'tap') { this.dynB = 5; inp.s = true; return; }
+            inp.s = false; return;
+        }
+        return f.call(this, bot, enemy, aligned, inp);
+    };
+})();
