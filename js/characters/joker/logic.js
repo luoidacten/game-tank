@@ -620,7 +620,7 @@ function jkUpdateBullets(p) {
     const ey = e ? e.y + e.h / 2 : (p.id === 1 ? 40 : canvas.height - 40);
     for (let i = p.bullets.length - 1; i >= 0; i--) {
         const b = p.bullets[i];
-        if (b.hook !== 'joker') continue;
+        if (!b || b.hook !== 'joker') continue;   // jkClubBoom -> takeDamage có thể làm hook địch xoá/đổi p.bullets giữa vòng lặp
         b.jkT++;
         if (b.jkHome && jkAlive(e)) {
             const dx = e.x + e.w / 2 - (b.x + b.w / 2), acc = b.jkHome > 1 ? 0.6 : 0.14, cap = b.jkHome > 1 ? 7 : 2.4;
@@ -635,7 +635,7 @@ function jkUpdateBullets(p) {
             const past = p.id === 1 ? cy <= ey : cy >= ey;
             if (past) {
                 jkClubBoom(b, p, b.x + b.w / 2, ey, null);
-                if (b.jk === 'C') { p.bullets.splice(i, 1); continue; }
+                if (b.jk === 'C') { const k = p.bullets.indexOf(b); if (k >= 0) p.bullets.splice(k, 1); continue; }
             }
         }
     }
