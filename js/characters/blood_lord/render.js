@@ -26,6 +26,7 @@ function bdDrawBat(x, y, w, f, color, alpha = 1, rot = 0) {
 
 registerTankArt('blood_lord', (p, k) => {
     const t = k.t;
+    const FC = BD_COL[p.bdForm || 0];   // màu dạng hiện tại
     const frac = Math.min(1, (p.bdPool || 0) / bdPoolMax(p));
     // Dạng dơi bất tử khi lao (Huyết Phá)
     if (p.bdMode === 'dash') {
@@ -56,7 +57,7 @@ registerTankArt('blood_lord', (p, k) => {
         ctx.quadraticCurveTo(9.5, 3.5, 7.5, 8);
         ctx.lineTo(5, 7);
         ctx.closePath(); ctx.fill();
-        ctx.strokeStyle = BD_RED; ctx.lineWidth = 0.9; TA.glow(BD_RED, 5); ctx.stroke(); TA.noGlow();
+        ctx.strokeStyle = FC; ctx.lineWidth = 0.9; TA.glow(FC, 5); ctx.stroke(); TA.noGlow();
         // gân cánh
         ctx.strokeStyle = 'rgba(255,31,75,0.45)'; ctx.lineWidth = 0.6;
         ctx.beginPath(); ctx.moveTo(6, -5); ctx.lineTo(15, -10 - flap); ctx.moveTo(6, -1); ctx.lineTo(11.5, 5.5); ctx.stroke();
@@ -70,7 +71,7 @@ registerTankArt('blood_lord', (p, k) => {
     // Nòng: răng nanh đôi
     ctx.fillStyle = TA.metal(-2, 2, '#4c0519', '#fda4af');
     TA.rr(-1.6, -15, 3.2, 8, 1.2); ctx.fill();
-    ctx.fillStyle = BD_RED; TA.glow(BD_RED, 8); ctx.fillRect(-2, -15.5, 4, 1.6); TA.noGlow();
+    ctx.fillStyle = FC; TA.glow(FC, 8); ctx.fillRect(-2, -15.5, 4, 1.6); TA.noGlow();
     ctx.fillStyle = '#f8fafc';
     [-1, 1].forEach(sd => { ctx.beginPath(); ctx.moveTo(sd * 3, -9); ctx.lineTo(sd * 4.6, -9); ctx.lineTo(sd * 3.6, -13); ctx.fill(); });
     // Thân: khiên lục giác
@@ -97,10 +98,21 @@ registerTankArt('blood_lord', (p, k) => {
     for (let xx = -R; xx <= R; xx += 1) ctx.lineTo(xx, lvl + Math.sin(xx * 1.2 + t * 6) * 0.5);
     ctx.lineTo(R, 1 + R); ctx.lineTo(-R, 1 + R); ctx.closePath(); ctx.fill();
     ctx.restore();
-    ctx.strokeStyle = frac >= 0.5 ? '#ff8fa3' : BD_RED; ctx.lineWidth = 1;
-    TA.glow(BD_RED, 4 + frac * 10);
+    ctx.strokeStyle = FC; ctx.lineWidth = 1.3;
+    TA.glow(FC, 5 + frac * 10);
     ctx.beginPath(); ctx.arc(0, 1, R, 0, Math.PI * 2); ctx.stroke();
     TA.noGlow();
+    // Vừa đổi dạng: chớp màu dạng mới lên thân
+    if (p.bdSwitchFx > 0) {
+        const q = p.bdSwitchFx / 30;
+        ctx.save();
+        ctx.globalAlpha = q * 0.85; ctx.globalCompositeOperation = 'lighter';
+        ctx.fillStyle = FC; TA.glow(FC, 14);
+        ctx.beginPath();
+        ctx.moveTo(0, -10); ctx.lineTo(7.5, -6); ctx.lineTo(8, 6); ctx.lineTo(0, 12); ctx.lineTo(-8, 6); ctx.lineTo(-7.5, -6);
+        ctx.closePath(); ctx.fill();
+        TA.noGlow(); ctx.restore();
+    }
     // Mắt
     ctx.fillStyle = k.evo1 ? '#d8b4fe' : '#ffe4e6';
     TA.glow(k.evo1 ? BD_VIOLET : BD_RED, 6);
@@ -146,37 +158,107 @@ registerBulletArt('blood_lord', (b, color, owner, k) => {
 // Vùng Bầy Dơi / Đại Tiệc Máu
 function bdDrawBatZone(z) {
     const life = z.life / z.maxLife;
-    const fadeIn = Math.min(1, z.t / 8);
+    const fadeIn = Math.min(1, z.t / 10);
     const a = Math.min(1, life * 3) * fadeIn;
-    const R = z.r;
+    // Nở ra mượt lúc xuất hiện (ease-out)
+    const grow = 1 - Math.pow(1 - fadeIn, 3);
+    const R = z.r * (0.6 + 0.4 * grow);
+    const C1 = z.feast ? '#c084fc' : '#ff4d6d';            // viền chính
+    const C2 = z.feast ? 'rgba(177,77,255,' : 'rgba(255,31,75,';
+    const t = z.t;
+    const TAU = Math.PI * 2;
     ctx.save();
     ctx.globalAlpha = a;
-    const g = ctx.createRadialGradient(z.x, z.y, 2, z.x, z.y, R * 1.3);
-    g.addColorStop(0, z.feast ? 'rgba(177,77,255,0.32)' : 'rgba(255,31,75,0.28)');
-    g.addColorStop(1, 'rgba(60,0,18,0.35)');
+    // Quầng sáng ngoài
+    ctx.globalCompositeOperation = 'lighter';
+    const halo = ctx.createRadialGradient(z.x, z.y, R * 0.7, z.x, z.y, R * 1.25);
+    halo.addColorStop(0, C2 + '0)'); halo.addColorStop(0.75, C2 + '0.22)'); halo.addColorStop(1, C2 + '0)');
+    ctx.fillStyle = halo;
+    ctx.beginPath(); ctx.arc(z.x, z.y, R * 1.25, 0, TAU); ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+    // Đĩa máu (tâm tối, mép đỏ) — nhịp tim nhẹ
+    const beat = 1 + 0.03 * Math.sin(t * 0.25);
+    const g = ctx.createRadialGradient(z.x, z.y, 0, z.x, z.y, R * beat);
+    g.addColorStop(0, z.feast ? 'rgba(40,6,60,0.55)' : 'rgba(50,0,14,0.55)');
+    g.addColorStop(0.65, C2 + '0.22)');
+    g.addColorStop(1, C2 + '0.42)');
     ctx.fillStyle = g;
-    zoneRectPath(z.x, z.y, R); ctx.fill();
-    ctx.strokeStyle = z.feast ? '#d8b4fe' : BD_RED; ctx.lineWidth = 1.6;
-    ctx.shadowColor = BD_RED; ctx.shadowBlur = 10;
-    ctx.setLineDash([7, 5]); ctx.lineDashOffset = -z.t * 0.7;
-    zoneRectPath(z.x, z.y, R); ctx.stroke();
-    ctx.setLineDash([]); ctx.shadowBlur = 0;
-    // Thời gian còn lại (thanh mảnh trên mép)
-    const hw = R * ZONE_AX, hh = R * ZONE_AY;
-    ctx.fillStyle = 'rgba(255,208,218,0.8)';
-    ctx.fillRect(z.x - hw, z.y - hh - 3, hw * 2 * life, 1.6);
-    // Bầy dơi xoáy
-    const n = z.feast ? 12 : 8;
-    for (let i = 0; i < n; i++) {
-        const ang = z.t * (0.07 + (i % 3) * 0.02) * (i % 2 ? 1 : -1) + i * Math.PI * 2 / n;
-        const rr = 0.35 + 0.55 * ((i * 37) % 10) / 10;
-        const bx = z.x + Math.cos(ang) * hw * rr, by = z.y + Math.sin(ang) * hh * rr;
-        const f = 0.5 + 0.5 * Math.sin(z.t * 0.6 + i);
-        bdDrawBat(bx, by, 9 + (i % 3) * 2, f, i % 3 === 0 ? (z.feast ? '#c084fc' : '#ff4d6d') : '#1a0610', 0.95, Math.sin(ang) * 0.4);
+    ctx.beginPath(); ctx.arc(z.x, z.y, R * beat, 0, TAU); ctx.fill();
+    // Sóng hút vào tâm mỗi nhịp sát thương
+    const k = (t % z.every) / z.every;
+    ctx.strokeStyle = C2 + (0.65 * k).toFixed(3) + ')'; ctx.lineWidth = 1 + 2 * (1 - k);
+    ctx.beginPath(); ctx.arc(z.x, z.y, Math.max(1, R * (1 - 0.8 * k)), 0, TAU); ctx.stroke();
+    // Vòng ngoài sáng + vòng nét đứt xoay ngược nhau
+    ctx.shadowColor = C1; ctx.shadowBlur = 12;
+    ctx.strokeStyle = C1; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(z.x, z.y, R, 0, TAU); ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.lineWidth = 1.2; ctx.strokeStyle = z.feast ? 'rgba(233,213,255,0.7)' : 'rgba(255,208,218,0.7)';
+    ctx.setLineDash([R * 0.18, R * 0.1]); ctx.lineDashOffset = -t * 0.9;
+    ctx.beginPath(); ctx.arc(z.x, z.y, R * 0.82, 0, TAU); ctx.stroke();
+    ctx.setLineDash([3, 6]); ctx.lineDashOffset = t * 0.6;
+    ctx.beginPath(); ctx.arc(z.x, z.y, R * 0.55, 0, TAU); ctx.stroke();
+    ctx.setLineDash([]);
+    // Vạch rune quanh vòng ngoài
+    ctx.strokeStyle = C2 + '0.75)'; ctx.lineWidth = 1.4;
+    for (let i = 0; i < 12; i++) {
+        const an = i * TAU / 12 + t * 0.012;
+        ctx.beginPath();
+        ctx.moveTo(z.x + Math.cos(an) * R * 0.9, z.y + Math.sin(an) * R * 0.9);
+        ctx.lineTo(z.x + Math.cos(an) * R * 0.98, z.y + Math.sin(an) * R * 0.98);
+        ctx.stroke();
     }
+    // Vòng thời gian còn lại
+    ctx.strokeStyle = 'rgba(255,240,244,0.85)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(z.x, z.y, R + 4, -Math.PI / 2, -Math.PI / 2 + TAU * life); ctx.stroke();
+    // Giọt máu xoắn ốc chảy vào tâm (hút máu)
+    ctx.fillStyle = z.feast ? '#e9d5ff' : '#ff8fa3';
+    const n = z.feast ? 18 : 14;
+    for (let i = 0; i < n; i++) {
+        const ph = (t * 0.018 + i / n) % 1;
+        const rr = R * (1 - ph) * 0.95;
+        const an = i * 2.39996 + ph * 3.2;
+        ctx.globalAlpha = a * Math.min(1, ph * 4) * (1 - ph * 0.6);
+        ctx.beginPath(); ctx.arc(z.x + Math.cos(an) * rr, z.y + Math.sin(an) * rr, 1.1 + 1.2 * (1 - ph), 0, TAU); ctx.fill();
+    }
+    ctx.globalAlpha = a;
+    // Dòng máu từ mục tiêu bị hút về tâm
+    if (z.leechT > 0) {
+        const lk = z.leechT / 14;
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.strokeStyle = C2 + (0.7 * lk).toFixed(3) + ')'; ctx.lineWidth = 2.5 * lk + 0.5;
+        ctx.beginPath(); ctx.moveTo(z.leechX, z.leechY);
+        ctx.quadraticCurveTo((z.leechX + z.x) / 2 + 14, (z.leechY + z.y) / 2 - 10, z.x, z.y); ctx.stroke();
+        ctx.fillStyle = '#ffe4e6';
+        for (let i = 0; i < 4; i++) {
+            const q = ((1 - lk) + i / 4) % 1;
+            const mx = (z.leechX + z.x) / 2 + 14, my = (z.leechY + z.y) / 2 - 10;
+            const px = (1 - q) * (1 - q) * z.leechX + 2 * (1 - q) * q * mx + q * q * z.x;
+            const py = (1 - q) * (1 - q) * z.leechY + 2 * (1 - q) * q * my + q * q * z.y;
+            ctx.beginPath(); ctx.arc(px, py, 1.6, 0, TAU); ctx.fill();
+        }
+        ctx.globalCompositeOperation = 'source-over';
+    }
+    // Bầy dơi bay vòng tròn
+    const nb = z.feast ? 12 : 9;
+    for (let i = 0; i < nb; i++) {
+        const sp = (0.035 + (i % 3) * 0.012) * (i % 2 ? 1 : -1);
+        const an = t * sp + i * TAU / nb;
+        const rr = R * (0.38 + 0.5 * ((i * 37) % 10) / 10);
+        const bx = z.x + Math.cos(an) * rr, by = z.y + Math.sin(an) * rr;
+        const f = 0.5 + 0.5 * Math.sin(t * 0.6 + i);
+        bdDrawBat(bx, by, 9 + (i % 3) * 2.5, f, i % 3 === 0 ? C1 : '#1a0610', 0.95, an + (sp > 0 ? Math.PI / 2 : -Math.PI / 2));
+    }
+    // Lõi tâm
+    const cg = ctx.createRadialGradient(z.x, z.y, 0, z.x, z.y, R * 0.22);
+    cg.addColorStop(0, 'rgba(255,240,244,0.9)'); cg.addColorStop(1, C2 + '0)');
+    ctx.fillStyle = cg;
+    ctx.beginPath(); ctx.arc(z.x, z.y, R * 0.22, 0, TAU); ctx.fill();
     if (z.feast) {
-        ctx.fillStyle = 'rgba(255,208,218,0.85)'; ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'center';
-        ctx.fillText('ĐẠI TIỆC MÁU', z.x, z.y + 3);
+        ctx.fillStyle = 'rgba(255,240,250,0.95)'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
+        ctx.shadowColor = BD_VIOLET; ctx.shadowBlur = 6;
+        ctx.fillText('ĐẠI TIỆC MÁU', z.x, z.y - R * 0.3);
+        ctx.shadowBlur = 0;
     }
     ctx.restore();
 }
@@ -313,6 +395,18 @@ CharHooks.register('blood_lord', Object.assign(CharHooks.registry.blood_lord || 
             ctx.restore();
         }
         if (this.bdMode === 'sky') bdDrawSkyCircle(this);
+        // Đổi dạng: 2 vòng sóng màu dạng mới tỏa ra
+        if (this.bdMode === 'idle' && this.bdSwitchFx > 0) {
+            const q = 1 - this.bdSwitchFx / 30, cx = this.x + this.w / 2, cy = this.y + this.h / 2;
+            const col = BD_COL[this.bdForm || 0];
+            ctx.save();
+            ctx.strokeStyle = col; ctx.shadowColor = col; ctx.shadowBlur = 12;
+            ctx.globalAlpha = 1 - q; ctx.lineWidth = 3 * (1 - q) + 0.5;
+            ctx.beginPath(); ctx.arc(cx, cy, this.w * 0.6 + q * 34, 0, Math.PI * 2); ctx.stroke();
+            ctx.globalAlpha = (1 - q) * 0.6;
+            ctx.beginPath(); ctx.arc(cx, cy, this.w * 0.5 + q * 20, 0, Math.PI * 2); ctx.stroke();
+            ctx.restore();
+        }
     },
     drawUI() {
         if (this.bdMode !== 'idle' || typeof hudRowY !== 'function') return;
@@ -333,13 +427,59 @@ CharHooks.register('blood_lord', Object.assign(CharHooks.registry.blood_lord || 
         ctx.fillStyle = '#ffd0da';
         ctx.fillRect(x + w * 0.5 - 0.4, y - 0.6, 0.8, 3.8);
         ctx.restore();
+        bdDrawFormBadge(this);
     },
 }));
+
+// Huy hiệu dạng hiện tại cạnh xe: icon lớn + màu + tên; dạng kế tiếp (xem trước); vòng giữ để đổi; % hút máu
+function bdDrawFormBadge(p) {
+    const f = p.bdNight ? -1 : (p.bdForm || 0), nx = ((p.bdForm || 0) + 1) % 4;
+    const col = f < 0 ? BD_VIOLET : BD_COL[f];
+    const left = p.x > 42;
+    const bx = left ? p.x - 21 : p.x + p.w + 21, by = p.y + p.h / 2;
+    const pop = p.bdSwitchFx > 0 ? 1 + 0.35 * (p.bdSwitchFx / 30) : 1;
+    ctx.save();
+    ctx.translate(bx, by);
+    const flipT = typeof hudTextFlip === 'function' && hudTextFlip(p);
+    if (flipT) ctx.rotate(Math.PI);
+    ctx.scale(pop, pop);
+    // nền + viền màu dạng
+    ctx.fillStyle = 'rgba(14,2,8,0.92)';
+    ctx.beginPath(); ctx.arc(0, 0, 10, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.shadowColor = col; ctx.shadowBlur = 8;
+    ctx.stroke(); ctx.shadowBlur = 0;
+    // vòng tiến độ giữ nút để đổi dạng (màu dạng kế tiếp)
+    if (p.bdHoldValid && p.bdHold > 2) {
+        ctx.strokeStyle = BD_COL[nx]; ctx.lineWidth = 2.4;
+        ctx.beginPath(); ctx.arc(0, 0, 12.8, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.min(1, p.bdHold / BD_HOLD_TICKS)); ctx.stroke();
+    }
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = '12px sans-serif'; ctx.fillStyle = '#fff';
+    ctx.fillText(f < 0 ? '🦇' : BD_ICON[f], 0, 0.5);
+    // tên dạng
+    ctx.font = 'bold 7px sans-serif'; ctx.fillStyle = col;
+    ctx.shadowColor = '#000'; ctx.shadowBlur = 3;
+    ctx.fillText(f < 0 ? 'BÓNG MA' : BD_NAME[f], 0, -15.5);
+    // % hút máu (Huyết Tế)
+    ctx.font = 'bold 6.5px sans-serif'; ctx.fillStyle = '#ffb3c1';
+    ctx.fillText(`🩸${Math.round(bdLifesteal(p) * 100)}%`, 0, 16.5);
+    ctx.shadowBlur = 0;
+    // xem trước dạng kế tiếp
+    if (f >= 0) {
+        const px = (left ? -1 : 1) * (flipT ? -1 : 1) * 14, py = 0; // phía ngoài (xa xe)
+        ctx.fillStyle = 'rgba(14,2,8,0.95)';
+        ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = BD_COL[nx]; ctx.lineWidth = 1; ctx.stroke();
+        ctx.font = '6px sans-serif'; ctx.fillStyle = '#fff';
+        ctx.fillText(BD_ICON[nx], px, py + 0.3);
+    }
+    ctx.restore();
+}
 
 // HUD nút Bắn: dạng bắn hiện tại + vòng Bể Máu (HUD scripts nạp sau body -> đăng ký lúc load)
 function bdRegisterHUD() {
     if (typeof registerEmpowerHUD !== 'function') return;
-    const COL = [BD_RED, '#ff4d6d', '#ff8fa3', '#ff1f4b'];
+    const COL = BD_COL;
     registerEmpowerHUD('blood_lord', p => {
         const max = bdPoolMax(p), pool = p.bdPool || 0, pct = Math.min(1, pool / max);
         const pips = { pips: Math.max(0, Math.floor(p.ammo || 0)), pipMax: 6, pipColor: '#ffd0da' };
@@ -352,7 +492,7 @@ function bdRegisterHUD() {
         const noAmmo = (p.ammo || 0) < BD_AMMO[f];
         return Object.assign({
             pct, ready, color: noHp ? '#64748b' : COL[f], btnIcon: BD_ICON[f], dim: noHp || noAmmo,
-            label: noHp ? 'THIẾU MÁU' : `${BD_NAME[f]} · ${pool.toFixed(1)}/${max}`, idle: !ready,
+            label: noHp ? 'THIẾU MÁU' : (p.bdSwitched ? `${BD_NAME[f]} ✓ thả nút` : `${BD_NAME[f]} ▸${BD_ICON[(f + 1) % 4]} · 🩸${Math.round(bdLifesteal(p) * 100)}%`), idle: !ready,
         }, pips);
     });
 }

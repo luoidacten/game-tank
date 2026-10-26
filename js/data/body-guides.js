@@ -524,15 +524,15 @@ const BODY_GUIDES = {
         tips: ['Chỉ thua khi CẢ HAI cùng gục']
     },
     blood_lord: {
-        tag: 'Máu là sức mạnh — 4 dạng huyết', diff: 5,
+        tag: 'Máu là sức mạnh — hút máu, 4 dạng huyết', diff: 5,
         controls: [
-            { input: 'TAP', name: 'Ra Chiêu', what: 'Theo dạng đang chọn' },
-            { input: 'HOLD 0.25s', name: 'Đổi Dạng', what: 'Đạn Máu → Huyết Phá → Tiễn → Cầu' },
+            { input: 'TAP', name: 'Ra Chiêu', what: 'Theo dạng đang chọn (huy hiệu cạnh xe)' },
+            { input: 'HOLD 0.25s', name: 'Đổi Dạng', what: 'Đổi 1 dạng / lần giữ — thả nút mới đổi tiếp' },
             { input: '←/→', name: 'Bóng Ma', what: 'Cầu ≥50%: bay lên lái vòng, nhấp đáp' }
         ],
-        passive: ['Bể Máu tăng khi có ai mất máu', 'Chiêu tốn HP — còn ≥0.5 HP mới dùng được'],
-        evo: { e1: 'Bể Máu nhanh, chí tử hóa dơi né', e2: '+4 Max HP, chiêu mạnh, tốn ít máu', full: 'Hồi sinh 1 lần khi Bể Máu đầy' },
-        tips: ['Tích đầy Bể Máu rồi tung Huyết Cầu']
+        passive: ['Hút máu 10% mọi sát thương', 'Huyết Tế: +5% hút máu mỗi 2 Max HP thưởng', 'Bầy Dơi / Đại Tiệc Máu: vùng tròn lớn, hút máu thêm'],
+        evo: { e1: 'Bể Máu nhanh, chí tử hóa dơi né', e2: '+2 Max HP, chiêu tốn ít máu, vùng rộng', full: 'Hồi sinh 1 lần khi Bể Máu đầy' },
+        tips: ['Mua Giáp tăng Max HP -> hút máu nhiều hơn', 'Tích đầy Bể Máu rồi tung Huyết Cầu']
     },
     berserker: {
         tag: 'Càng mất máu càng mạnh', diff: 3,
