@@ -4,6 +4,8 @@
 // Nhấp: Tia Khúc Xạ 1.0 dame, bay cực nhanh, nảy tường 1 lần.
 // KÍNH LẤP LÁNH: mọi Khiên hóa Khiên Kính — bị đánh trúng thì bật Kính 1.2s (phản mọi đòn) rồi vỡ.
 //   Phản thường: 40% (Evo1 70%, Full 100%) dame, bị phạt 0.5 HP (Evo1 0.25, Full 0) mỗi đợt.
+//   Đạn chạm Kính (bắt ở checkHits): trả lại CHÍNH viên đạn (reflectBulletClone, js/core/reflect.js) bay ngược về kẻ bắn.
+//   Đòn không phải đạn (hitscan / cận chiến / nổ): bắn trả 1 tia hitscan dọc cột Kính (không khoá di chuyển).
 // Giữ 0.4s (hồi 9s / Evo1 7s): MỞ KÍNH 1.5s (Evo1 2.5s) — dùng lớp kính kỹ năng trước mọi khiên khác.
 //   0.25s đầu = CỬA SỔ VÀNG: miễn sát thương, phản 100% (Evo1 125%, Full 150%) + đạn phản tăng tốc.
 // Lazer Xuyên Phá vào kính: chỉ phản ngược được trong 0.125s đầu (Evo2 0.2s); ngoài ra bị khúc xạ
@@ -86,17 +88,37 @@ function prFire(p, now) {
     spawnSparkParticles(m.x, m.y, PR_CYAN, 3);
     prSfx('playShoot');
 }
-// Đạn phản xạ (từ dame tích lũy)
-function prEmitReflect(p, dmg, fast) {
-    const m = prMuzzle(p), full = prFull(p);
-    const sp = C.bulletSpeed * (fast ? (full ? 3.0 : 2.4) : 1.7);
-    spawnBullet(p, {
-        w: fast ? 7 : 5, h: fast ? 16 : 12, x: m.x - (fast ? 3.5 : 2.5), y: m.y - 6, vx: 0, vy: prDir(p) * sp,
-        dmg: Math.max(0.15, Math.round(dmg * 100) / 100), hook: 'prism', prKind: 'ref', prFast: !!fast,
-        prHome: prE1(p), prBounce: 1, isPiercing: !!fast,
-    });
+// Tia phản (đòn không phải đạn: hitscan / cận chiến / vụ nổ): bắn ngược 1 tia hitscan theo cột của Kính (không khoá di chuyển)
+function prEmitRay(p, dmg, fast) {
+    const e = prEnemy(p), m = prMuzzle(p), cx = m.x, top = p.id === 1;
+    const yEnd = e ? (top ? e.y + e.h : e.y) : (top ? 0 : canvas.height);
+    bodyEffects.push(new PrBeam(p, cx, m.y, yEnd, 'back', 1));
+    const d = Math.max(0.15, Math.round(dmg * 100) / 100);
+    if (e && e.hp > 0 && typeof e.takeDamage === 'function' && Math.abs((e.x + e.w / 2) - cx) < e.w / 2 + 10) {
+        e.takeDamage(d, p, { isPiercing: true });
+        spawnSparkParticles(e.x + e.w / 2, top ? e.y + e.h : e.y, fast ? PR_GOLD : PR_CYAN, 8);
+    }
     spawnSparkParticles(m.x, m.y, fast ? PR_GOLD : PR_WHITE, fast ? 10 : 5);
-    prTxt(p, (fast ? 'PHẢN TUYỆT ĐỐI ' : 'PHẢN ') + dmg.toFixed(2), fast ? PR_GOLD : PR_CYAN, fast ? 14 : 11);
+    prTxt(p, (fast ? 'PHẢN TIA TUYỆT ĐỐI ' : 'PHẢN TIA ') + d.toFixed(2), fast ? PR_GOLD : PR_CYAN, fast ? 14 : 11);
+    prSfx('playLaser');
+}
+// Đạn chạm Kính: trả lại CHÍNH viên đạn đó (bản sao giữ nguyên loại / hình / hiệu ứng — js/core/reflect.js)
+function prCatchBullets(att, p) {
+    if (!att || att === p || !att.bullets || !att.bullets.length || !(p.hp > 0) || gameState.phase !== 'playing') return;
+    if (!prGlassOn(p) && !(p.shield > 0)) return;
+    for (let i = att.bullets.length - 1; i >= 0; i--) {
+        const b = att.bullets[i];
+        if (!b || !rfCanReflect(b) || (b.hitIds && b.hitIds.includes(p))) continue;
+        if (!rectIntersect(b.x, b.y, b.w || 6, b.h || 6, p.x, p.y, p.w, p.h)) continue;
+        const r = prAbsorb(p, b.dmg || 0, att, {}, false);
+        if (!r) continue;
+        att.bullets.splice(i, 1);
+        const fast = r.fast;
+        const c = reflectBulletClone(b, p, { from: att, dmgMult: r.ratio, speedMult: fast ? (prFull(p) ? 1.8 : 1.5) : 1, target: att, tint: fast ? PR_GOLD : PR_CYAN });
+        c.prHome = prE1(p);
+        spawnSparkParticles(c.x + c.w / 2, c.y + c.h / 2, fast ? PR_GOLD : PR_WHITE, fast ? 10 : 5);
+        if (!(p.prTxtT > 0)) { prTxt(p, (fast ? 'PHẢN TUYỆT ĐỐI ' : 'PHẢN ') + c.dmg.toFixed(2), fast ? PR_GOLD : PR_CYAN, fast ? 14 : 11); p.prTxtT = 8; }
+    }
 }
 // Mảnh kính vỡ (Evo2)
 function prShatter(p) {
@@ -146,30 +168,37 @@ function prReflectLaser(p, amount, attacker) {
     triggerScreenShake(8, 12);
     prRawHit(p, 2.0, attacker, true);
 }
-// Trả về true nếu đòn đã được Kính xử lý
-function prIntercept(p, amount, attacker, options) {
+// Kính có xử lý đòn này không? -> { ratio, fast } | { laser } | null (bật Kính Lấp Lánh từ khiên, tính phạt)
+function prAbsorb(p, amount, attacker, options, laser) {
     options = options || {};
-    if (p.prRaw || !(p.hp > 0) || gameState.phase !== 'playing' || !(amount > 0)) return false;
-    if (!attacker || attacker === p || options.isEnvironmental) return false;
-    const laser = prIsLaser(attacker, amount);
-    if (!laser && options.ignoreInvincible && options.bypassShield) return false; // kết liễu tuyệt đối
+    if (p.prRaw || !(p.hp > 0) || gameState.phase !== 'playing' || !(amount > 0)) return null;
+    if (!attacker || attacker === p || options.isEnvironmental) return null;
+    if (!laser && options.ignoreInvincible && options.bypassShield) return null; // kết liễu tuyệt đối
     if (!prGlassOn(p)) {
-        if (!(p.shield > 0) || (options.bypassShield && !laser)) return false;
+        if (!(p.shield > 0) || (options.bypassShield && !laser)) return null;
         p.prGlass = PR_GLASS; p.prGlassFx = 14; // Khiên -> Kính Lấp Lánh 1.2s rồi vỡ
         prTxt(p, 'KÍNH LẤP LÁNH!', PR_CYAN, 13, 12);
     }
     p.prHitFx = 10;
-    if (laser) { prReflectLaser(p, amount, attacker); return true; }
+    if (laser) return { laser: true };
     if (prGolden(p)) {
-        p.prPend = (p.prPend || 0) + amount * prGoldRatio(p); p.prPendFast = true;
         spawnSparkParticles(p.x + p.w / 2, p.y + p.h / 2, PR_GOLD, 8);
         prSfx('playHit');
-        return true;
+        return { ratio: prGoldRatio(p), fast: true };
     }
-    p.prPend = (p.prPend || 0) + amount * prNormRatio(p);
     if (!(p.prPenCd > 0)) { p.prPenCd = 18; prRawHit(p, prPenalty(p), attacker, false); }
     spawnSparkParticles(p.x + p.w / 2, p.y + p.h / 2, PR_CYAN, 6);
     prSfx('playHit');
+    return { ratio: prNormRatio(p), fast: false };
+}
+// Đòn không phải đạn (đạn đã được bắt ở checkHits): Lazer -> luật Lazer; còn lại -> tích lại, bắn trả bằng tia
+function prIntercept(p, amount, attacker, options) {
+    const laser = prIsLaser(attacker, amount);
+    const r = prAbsorb(p, amount, attacker, options, laser);
+    if (!r) return false;
+    if (r.laser) { prReflectLaser(p, amount, attacker); return true; }
+    p.prPend = (p.prPend || 0) + amount * r.ratio;
+    if (r.fast) p.prPendFast = true;
     return true;
 }
 
@@ -192,7 +221,7 @@ BulletHooks.register('prism', {
 
 // ---------- Tick chính (chạy cả khi bị choáng) ----------
 function prTick(p) {
-    ['prRecoil', 'prHitFx', 'prGlassFx', 'prBreakFx', 'prPenCd', 'prRefCd', 'prOpenFx'].forEach(k => { if (p[k] > 0) p[k]--; });
+    ['prRecoil', 'prTxtT', 'prHitFx', 'prGlassFx', 'prBreakFx', 'prPenCd', 'prRefCd', 'prOpenFx'].forEach(k => { if (p[k] > 0) p[k]--; });
     if (p.hp <= 0 || gameState.phase !== 'playing') return;
     if (p.prOn > 0) {
         p.prAge = (p.prAge || 0) + 1;
@@ -202,13 +231,13 @@ function prTick(p) {
         if (--p.prGlass <= 0) { p.prGlass = 0; if (p.shield > 0) p.shield--; prShatter(p); }
     }
     if (p.prPend > 0 && !(p.prRefCd > 0)) {
-        prEmitReflect(p, p.prPend, !!p.prPendFast);
+        prEmitRay(p, p.prPend, !!p.prPendFast);
         p.prPend = 0; p.prPendFast = false; p.prRefCd = 5;
     }
     // Evo1: đạn phản bẻ góc nhẹ về phía địch
     const e = prEnemy(p);
     if (e && e.hp > 0) for (const b of p.bullets) {
-        if (!b.prHome || b.hook !== 'prism') continue;
+        if (!b.prHome || (b.hook !== 'prism' && b.hook !== 'reflect')) continue;
         const tx = e.x + e.w / 2, ty = e.y + e.h / 2, cx = b.x + b.w / 2;
         const k = typeof homingTurnScale === 'function' ? homingTurnScale(b, p.id, tx, ty) : 1;
         b.vx += Math.sign(tx - cx) * 0.12 * k;
@@ -264,6 +293,17 @@ CharHooks.register('prism', {
         if (before > 0 && this.hp <= 0 && attacker && attacker !== this && prIs(attacker)) prSpawnFinisher(attacker, this);
         return r;
     };
+    // Đạn địch chạm Kính -> bắt ngay trước khi tính trúng (không nổ / không hiệu ứng lên Phản Chiếu)
+    function prWrapCheckHits() {
+        if (typeof checkHits !== 'function' || checkHits.prWrapped) return;
+        const origCH = checkHits;
+        checkHits = function (attacker, victim) {
+            if (prIs(victim)) { try { prCatchBullets(attacker, victim); } catch (err) { console.error(err); } }
+            return origCH.apply(this, arguments);
+        };
+        checkHits.prWrapped = true;
+    }
+    if (typeof window !== 'undefined') window.addEventListener('load', prWrapCheckHits);
 })();
 
 // Bot: số tick cần giữ nút để Mở Kính đúng nhịp, hoặc 0

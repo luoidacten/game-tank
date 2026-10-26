@@ -14,6 +14,7 @@
 //   giữ 1.0s = KHOÁ MỤC TIÊU: 3 cầu (Evo2 4, chậm 30% 1.2s) nạp lâu nhất lần lượt cách 0.25s, mỗi viên chiếu hồng tâm 0.25s.
 // FULL: QUÁ TẢI (mốc 4.0s): trúng đích nổ xung +0.5 st AoE & TÊ LIỆT (khoá Giữ Bắn của địch 1s);
 //   HOÀN NĂNG LƯỢNG: mỗi 2 đạn địch bị bắt -> +0.25 HP & -1s hồi Vùng.
+//   BẮT TOÀN BỘ: bắt mọi đạn (kể cả loại trừ), cầu giữ bản sao đạn gốc (o.bd) -> phóng trả nguyên bản (js/core/reflect.js).
 // Mọi trạng thái là trường thuần trên player / bullet / entity trong bodyEffects (đồng bộ online).
 // ==========================================
 
@@ -102,9 +103,25 @@ function rgOverload(p, v, x, y) {
     }
 }
 // Phóng 1 cầu theo cột đứng của nó
+// FULL: cầu chứa đạn gốc bị bắt -> phóng trả CHÍNH viên đạn đó (giữ loại / hình / hook / hiệu ứng), mạnh hơn theo mức nạp
+function rgLaunchBd(p, o, q, lv, ax, ay) {
+    const c = o.bd; o.bd = null;
+    c.owner = p; c.hitIds = [];
+    c.dmg = (c.dmg || 0) * (1 + 0.25 * lv);
+    const sp = Math.max(6, Math.hypot(c.vx || 0, c.vy || 0)) * (1 + 0.1 * lv);
+    const vx = (ax || ay) ? ax * sp : 0, vy = (ax || ay) ? ay * sp : rgDir(p) * sp;
+    if (typeof rfSetVel === 'function') rfSetVel(c, vx, vy); else { c.vx = vx; c.vy = vy; }
+    c.x = Math.max(0, Math.min(canvas.width - (c.w || 6), q.x - (c.w || 6) / 2)); c.y = q.y - (c.h || 6) / 2;
+    if (typeof c.startX === 'number') c.startX = c.x;
+    if (typeof c.startY === 'number') c.startY = c.y;
+    c.rfTint = RG_LV_COL[lv];
+    p.bullets.push(c);
+    return c;
+}
 function rgLaunch(p, o, laserDelay) {
     const q = rgOrbPos(p, o), lv = rgLv(p, o.c);
-    if (lv >= 3) rgLaser(p, q.x, lv, laserDelay);
+    if (o.bd) rgLaunchBd(p, o, q, lv, 0, 0);
+    else if (lv >= 3) rgLaser(p, q.x, lv, laserDelay);
     else rgShot(p, q.x, q.y, lv, 0, rgDir(p) * RG_LV_SPD[lv]);
     spawnSparkParticles(q.x, q.y, RG_LV_COL[lv], 5);
 }
@@ -150,7 +167,8 @@ function rgAimTick(p) {
         }
         if (--o.aim <= 0) {
             const lv = rgLv(p, o.c), sp = lv >= 3 ? 16 : RG_LV_SPD[lv] * 1.1;
-            rgShot(p, q.x, q.y, Math.max(lv, 0), o.ax * sp, o.ay * sp, { rgSlow: rgE2(p) ? 1 : 0, rgAimed: 1, isPiercing: true });
+            if (o.bd) rgLaunchBd(p, o, q, lv, o.ax, o.ay);
+            else rgShot(p, q.x, q.y, Math.max(lv, 0), o.ax * sp, o.ay * sp, { rgSlow: rgE2(p) ? 1 : 0, rgAimed: 1, isPiercing: true });
             spawnSparkParticles(q.x, q.y, RG_LV_COL[lv], 6);
             rgSfx('playShoot');
             p.rgOrbs.splice(i, 1);
@@ -161,18 +179,21 @@ function rgAimTick(p) {
 // ---------- Vùng Điện Tích: bắt đạn / chặn tia / phản chấn ----------
 const RG_NO_TYPES = ['purple', 'gojo_blue'];
 function rgLaserLike(b) { return !!(b && (b.isLazer || b.isRaycast || b.isBeam || b.isHitscan)); }
-function rgCanCatch(b) {
-    if (!b || typeof b.vx !== 'number' || typeof b.vy !== 'number') return false;
+function rgCanCatch(b, p) {
+    if (!b || typeof b.vx !== 'number' || typeof b.vy !== 'number' || !rfCanReflect(b)) return false;
+    if (p && rgFull(p)) return Math.hypot(b.vx, b.vy) >= 0.3; // FULL: bắt MỌI đạn (kể cả siêu đạn, Fuga, chém Sukuna, Tím/Lam Gojo, Hư Ảnh, quyền phong)
     if (b.isUltimate || b.isSukunaSlash || b.isStormPhantom || b.hook === 'one_punch') return false;
     if (b.type && RG_NO_TYPES.includes(b.type)) return false;
     return Math.hypot(b.vx, b.vy) >= 1;
 }
 function rgInZone(R, x, y) { return x >= R.x0 && x <= R.x1 && y >= R.y0 && y <= R.y1; }
-function rgCatch(p, R, bx, by) {
+function rgCatch(p, R, bx, by, b, from) {
     const n = rgOrbsIn(p).length;
     if (n < RG_CAP) {
         const dp = Math.max(14, Math.min(RG_ZD - 8, (by - rgFront(p)) * rgDir(p)));
-        rgAddOrb(p, 1, Math.max(-RG_ZW + 8, Math.min(RG_ZW - 8, bx - R.zx)), dp, 0);
+        const o = rgAddOrb(p, 1, Math.max(-RG_ZW + 8, Math.min(RG_ZW - 8, bx - R.zx)), dp, 0);
+        // FULL: giữ nguyên viên đạn gốc trong cầu (bản sao dữ liệu thuần, đổi chủ) để phóng trả đúng hình / hiệu ứng
+        if (b && rgFull(p) && typeof reflectBulletClone === 'function') { o.bd = reflectBulletClone(b, p, { from, noPush: true }); delete o.bd.owner; }
     }
     spawnSparkParticles(bx, by, RG_CYAN, 4);
     if (rgFull(p) && ++p.rgCapN % 2 === 0) {
@@ -230,9 +251,9 @@ function rgZoneTick(p) {
         const bx = b.x + (b.w || 6) / 2, by = b.y + (b.h || 6) / 2;
         if (!rgInZone(R, bx, by)) continue;
         if (rgLaserLike(b)) { e.bullets.splice(i, 1); rgHsBlock(p, b.dmg || 1, bx); if (!(p.rgZone > 0)) return; continue; }
-        if (!rgCanCatch(b)) continue;
+        if (!rgCanCatch(b, p)) continue;
         e.bullets.splice(i, 1);
-        rgCatch(p, R, bx, by);
+        rgCatch(p, R, bx, by, b, e);
     }
     if (rgE2(p)) rgMeleeCounter(p, e, R);
     if (--p.rgZone <= 0) rgZoneClose(p);

@@ -144,7 +144,11 @@ Object.assign(Player.prototype, {
         CharHooks.call(this, 'draw');
         this.drawUI();
 
-        this.bullets.forEach(b => {
+        this.bullets.forEach(b => this.drawBullet(b));
+    },
+
+    // Vẽ 1 viên đạn (tách riêng để đạn phản / bắt giữ vẽ lại theo hình gốc — js/core/reflect.js)
+    drawBullet(b) {
             if (b.hook && BulletHooks.registry[b.hook] && BulletHooks.registry[b.hook].draw) { BulletHooks.call(b, 'draw'); return; }
             // Đòn đặc biệt Sukuna / Gojo (js/render/tank-art/curse.js)
             if (typeof curseBulletDraw === 'function' && curseBulletDraw(b, this)) return;
@@ -341,7 +345,6 @@ Object.assign(Player.prototype, {
             // Hình ảnh đạn theo loại (sao chổi, laser, mũi xuyên, cầu nổ, tinh thể băng, tên lửa...) - js/render/bullet-art.js
             drawBulletArt(b, bulletColor, this);
             ctx.globalAlpha = 1.0;
-        });
     },
 
     drawUI() {

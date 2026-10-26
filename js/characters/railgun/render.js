@@ -153,6 +153,12 @@ CharHooks.register('railgun', Object.assign(CharHooks.registry.railgun || {}, {
                 ctx.restore();
             }
             rgDrawOrb(q.x, q.y, o.c, p, t, o.sp || 0);
+            if (o.bd && typeof rfDrawAs === 'function') { // FULL: đạn gốc bị bắt nằm trong cầu (giữ nguyên hình)
+                const b = o.bd, sx = b.x, sy = b.y, so = b.owner;
+                b.x = q.x - (b.w || 6) / 2; b.y = q.y - (b.h || 6) / 2; b.owner = p;
+                ctx.save(); ctx.globalAlpha = 0.85; rfDrawAs(b, b.rfOH, b.rfW, b.rfId); ctx.restore();
+                b.x = sx; b.y = sy; b.owner = so;
+            }
             if (!o.z) { ctx.strokeStyle = RG_LV_COL[rgLv(p, o.c)]; ctx.globalAlpha = 0.6; ctx.lineWidth = 0.8; rgArc(cx - 4, rgFront(p), q.x, q.y, Math.floor(t * 18), 2, 3); rgArc(cx + 4, rgFront(p), q.x, q.y, Math.floor(t * 18) + 5, 2, 3); ctx.globalAlpha = 1; }
         }
         // giữ nút: vòng nạp (0.5s mở / đóng vùng, 1.0s khoá mục tiêu)

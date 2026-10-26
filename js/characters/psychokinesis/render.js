@@ -113,6 +113,8 @@ function psyDrawCap(b) {
             ctx.save(); ctx.fillStyle = '#334155'; ctx.strokeStyle = PSY_CYAN; ctx.lineWidth = 1.5;
             ctx.beginPath(); ctx.arc(cx, cy, 6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
             ctx.fillStyle = '#fb923c'; ctx.beginPath(); ctx.arc(cx + 3, cy - 4, 1.6, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+        } else if (b.psyEnv === 'ent' && b.psyEntK && typeof rfEntDraw === 'function' && rfEntDraw(b, b.psyEntK, b.psyEnt)) {
+            // thực thể bị bắt: vẽ lại đúng hình gốc (boomerang, liềm, cánh hoa, huyết cầu, sao...)
         } else if (b.psyHs || b.psyEnv === 'ent') {
             // Đạn Năng Lượng (tia bị chặn) / đạn thực thể bị bắt: lõi sáng + vòng xoáy
             const hs = !!b.psyHs, r = hs ? 4 + Math.min(3, b.dmg || 1) * 1.6 : Math.max(4, (b.w || 8) / 2), t = Date.now() / 1000;
@@ -131,9 +133,8 @@ function psyDrawCap(b) {
             ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
             ctx.fillStyle = '#fff3c4'; ctx.beginPath(); ctx.arc(cx, cy, r * 0.45, 0, Math.PI * 2); ctx.fill(); ctx.restore();
         } else {
-            const h = b.psyOH && BulletHooks.registry[b.psyOH];
-            if (h && h.draw) { const hk = b.hook; b.hook = b.psyOH; try { h.draw(b); } finally { b.hook = hk; } }
-            else if (typeof drawBulletArt === 'function' && oo) drawBulletArt(b, oo.id === 1 ? '#3498db' : '#e74c3c', oo);
+            // giữ nguyên hình gốc (hook gốc / pipeline vẽ đạn của chủ cũ) — js/core/reflect.js
+            if (typeof rfDrawAs === 'function') rfDrawAs(b, b.psyOH, b.rfW || (oo && oo.weapon), b.rfId || b.psyOId);
             else { ctx.fillStyle = '#e0fdff'; ctx.fillRect(b.x, b.y, b.w || 6, b.h || 6); }
         }
     } catch (err) { }
