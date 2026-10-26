@@ -66,7 +66,7 @@ function triggerGearVipShop(player, playerId, item) {
 // Huy hiệu vai trò của body (vai trò chính đứng đầu, nổi bật hơn)
 const ROLE_ICON = { 'Đối Đầu': '⚔️', 'Kiểm Soát': '🕸️', 'Cơ Động': '⚡', 'Sinh Tồn': '🛡️' };
 // Tướng Collab (rất mạnh): huy hiệu riêng ở phần chọn tướng; chọn tướng Collab -> đối thủ được bù tiền đầu game
-const COLLAB_BONUS = { kazuki: 180, joker: 180, raven_oca: 150, chrononeo: 180, tsukiyo: 180 };
+const COLLAB_BONUS = { kazuki: 180, joker: 180, raven_oca: 150, chrononeo: 180, tsukiyo: 180, diep_thanh_phong: 180 };
 function collabBonusOf(id) { return COLLAB_BONUS[id] || 0; }
 function collabBadge(mod) {
     const b = mod && collabBonusOf(mod.id);
