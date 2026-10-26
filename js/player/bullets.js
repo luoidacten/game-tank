@@ -7,6 +7,7 @@ Object.assign(Player.prototype, {
         for (let i = this.bullets.length - 1; i >= 0; i--) {
             // FIX: Phải gọi viên đạn b ra TRƯỚC CÙNG rồi mới làm gì thì làm
             let b = this.bullets[i];
+            if (!b) continue; // mảng đạn có thể bị hook khác xoá nhiều viên giữa vòng lặp
             let hitWall = false;
 
             // Motion blur / trailHistory cho đạn nhanh
