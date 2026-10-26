@@ -281,7 +281,7 @@ const EVOLUTIONS = {
     ],
     arachnid: [
         { id: 'evo_spider_1', name: 'Tơ Trói Thần Kinh', desc: 'Chỉ cần 3 tầng Tơ Quấn là Hóa Kén. Tầng Tơ duy trì 8s. Địch đứng trên Vùng Tơ Nhện quá 2s liên tục -> +1 tầng. Phá Kén bằng Cú Vồ: địch bị Câm Lặng thêm 1.5s và nhiễm Kịch Độc (0.3 HP/s trong 3s).', cost: 140, type: 'evo' },
-        { id: 'evo_spider_2', name: 'Ổ Nhện Phục Kích', desc: 'Băng đạn 4 viên. Mỗi Vùng Tơ Nhện xuất hiện hoặc khi địch bị Hóa Kén -> nở 2 Nhện Con (HP 0.8, bò tới cắn 0.3 st & làm mới thời gian tầng Tơ; tối đa 4 con). FULL EVO (Nữ Hoàng Nhện Độc): đầu hiệp rải sẵn 2 Vùng Tơ lớn bên sân địch; đứng trên tơ giảm 25% st nhận; Hóa Kén kéo dài 2.25s & xoá sạch Khiên; ngưỡng Xử Tử của Cú Vồ tăng lên 25% Max HP; địch chưa trong kén nhưng có >= 2 tầng Tơ -> Cú Vồ bẻ lái tìm mục tiêu và đóng kén ngay khi chạm.', cost: 260, type: 'evo' },
+        { id: 'evo_spider_2', name: 'Ổ Nhện Phục Kích', desc: 'Băng đạn 4 viên. Mỗi Vùng Tơ Nhện xuất hiện hoặc khi địch bị Hóa Kén -> nở 2 Nhện Con (HP 0.5, bò chậm, bẻ lái ngang kém nên dễ né; cắn 0.2 st & làm mới thời gian tầng Tơ; tối đa 3 con). FULL EVO (Nữ Hoàng Nhện Độc): đầu hiệp rải sẵn 2 Vùng Tơ lớn bên sân địch; đứng trên tơ giảm 25% st nhận; Hóa Kén kéo dài 2.25s & xoá sạch Khiên; ngưỡng Xử Tử của Cú Vồ tăng lên 25% Max HP; địch chưa trong kén nhưng có >= 2 tầng Tơ -> Cú Vồ bẻ lái tìm mục tiêu và đóng kén ngay khi chạm.', cost: 260, type: 'evo' },
     ],
     psychokinesis: [
         { id: 'evo_psy_1', name: 'Tâm Ý Tương Thông', desc: 'Đạn Niệm Lực chỉ lơ lửng 0.3s, trong lúc lơ lửng tự khoá góc nhắm thẳng vào địch và +0.25 st. Bật Vùng Niệm Lực -> gọi sẵn 3 viên Đạn Niệm Lực của bản thân vào đám đạn bắt giữ. Khoá Tâm Tất Sát chỉ cần giữ 0.5s.', cost: 170, type: 'evo' },

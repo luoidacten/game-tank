@@ -8,7 +8,7 @@
 // Giữ 0.5s (hồi 9s): CÚ VỒ ĐOẠT MỆNH — thường: lao thẳng lên cắn 1.5 st, +2 tầng, hồi 0.5 HP, bật về làn.
 //   Địch trong kén: khoá mục tiêu 100% (bất tử khi lao), xé kén 2.5x dame gốc + 15% máu đã mất, hút 1.25 HP,
 //   hoàn 50% hồi chiêu; máu địch < 15% (Full 25%) Max HP -> XỬ TỬ (xuyên Khiên).
-// Evo 2: nở Nhện Con (HP 0.8, cắn 0.3, làm mới tầng Tơ; tối đa 4). Full: 2 vùng tơ lớn đầu hiệp bên sân địch,
+// Evo 2: nở Nhện Con (HP 0.5, cắn 0.2, chậm & bẻ lái ngang kém, làm mới tầng Tơ; tối đa 3). Full: 2 vùng tơ lớn đầu hiệp bên sân địch,
 //   đứng trên tơ giảm 25% st nhận, kén xoá Khiên, Cú Vồ bẻ lái khi địch >= 2 tầng & chạm là đóng kén.
 // Trạng thái là trường thuần trên player / entity trong bodyEffects (đồng bộ online).
 // ==========================================
@@ -49,15 +49,16 @@ class ArWeb {
 // ---------- Entity: Nhện Con (Evo 2) ----------
 class ArSpiderling {
     constructor(team, x, y) {
-        this.team = team; this.x = x; this.y = y; this.w = 12; this.h = 12; this.hp = 0.8;
-        this.t = 0; this.life = 360; this.active = true; this.seed = Math.round(Math.random() * 600) / 100;
+        this.team = team; this.x = x; this.y = y; this.w = 12; this.h = 12; this.hp = 0.5; // [NERF] 0.8 -> 0.5
+        this.t = 0; this.life = 300; // [NERF] 6s -> 5s this.active = true; this.seed = Math.round(Math.random() * 600) / 100;
     }
     update() {
         const own = arTeam(this.team), e = own ? arEnemy(own) : null;
         if (!own || !arAlive(e) || ++this.t > this.life || gameState.phase !== 'playing') { this.active = false; return; }
         const tx = e.x + e.w / 2, ty = e.y + e.h / 2, cx = this.x + this.w / 2, cy = this.y + this.h / 2;
-        const dx = tx - cx, dy = ty - cy, L = Math.hypot(dx, dy) || 1, sp = 2.6;
-        this.x += dx / L * Math.min(sp, L); this.y += dy / L * Math.min(sp, L);
+        const dx = tx - cx, dy = ty - cy, L = Math.hypot(dx, dy) || 1, sp = 1.8; // [NERF] 2.6 -> 1.8
+        // [NERF] bẻ lái ngang chậm (tối đa 0.9px/tick) -> dễ né bằng cách chạy ngang
+        this.x += Math.max(-0.9, Math.min(0.9, dx / L * Math.min(sp, L))); this.y += dy / L * Math.min(sp, L);
         // trúng đạn địch
         if (e.bullets) for (let j = e.bullets.length - 1; j >= 0; j--) {
             const b = e.bullets[j];
@@ -67,7 +68,7 @@ class ArSpiderling {
             }
         }
         if (Math.abs(dx) < e.w / 2 + 5 && Math.abs(dy) < e.h / 2 + 5) {
-            e.takeDamage(0.3 * arScale(own), own);
+            e.takeDamage(0.2 * arScale(own), own); // [NERF] 0.3 -> 0.2
             if (e.arVStk > 0) e.arVStkT = arStackDur(own);
             spawnSparkParticles(tx, ty, AR_LIME, 6);
             this.active = false;
@@ -101,7 +102,7 @@ function arAddZone(p, x, y, big) {
 }
 function arSpawnLings(p, x, y) {
     const n = bodyEffects.filter(s => s instanceof ArSpiderling && s.active && s.team === p.id).length;
-    for (let i = 0; i < Math.min(2, 4 - n); i++) bodyEffects.push(new ArSpiderling(p.id, x - 6 + (i ? 10 : -10), y - 6));
+    for (let i = 0; i < Math.min(2, 3 - n); i++) bodyEffects.push(new ArSpiderling(p.id, x - 6 + (i ? 10 : -10), y - 6));
 }
 function arAddStacks(p, e, n) {
     if (!arAlive(e) || e.arVCoc > 0) return;
