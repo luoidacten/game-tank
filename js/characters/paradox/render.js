@@ -24,7 +24,7 @@ class PdxRift {
             const dirY = o.id === 1 ? -1 : 1;
             o.bullets.push({
                 type: 'normal', x: this.x - 2.5, y: this.y + dirY * 18 - 2.5, w: 5, h: 5,
-                vx: 0, vy: dirY * C.bulletSpeed, dmg: o.damage * (full ? 0.5 : 0.25),
+                vx: 0, vy: dirY * C.bulletSpeed, dmg: o.damage * (full ? 0.6 : 0.35),
                 owner: o, bounceCount: 0, hitIds: [], isPiercing: false, pdxRift: true
             });
             this.flash = 12;

@@ -27,7 +27,9 @@ const GM_SW_CD = 180, GM_SW_CD_E1 = 72;
 const GM_RES_BASE = 120;         // 2s
 const GM_RES_R = 34;             // nửa bề rộng vòng cứu (px)
 const GM_REBOOT = 90;            // Full Evo: tự khởi động lại 1.5s
-const GM_FIRE_CD = 30;           // 0.5s giữa 2 phát (như đạn thường)
+const GM_FIRE_CD = 26;           // ~0.43s giữa 2 phát
+const GM_RES_WIN = 75;           // SONG HƯỞNG: 2 xe lần lượt bắn trúng trong 1.25s
+const GM_RES_BONUS = 0.5;        // -> phát thứ 2 nổ cộng hưởng thêm 50% dame
 
 function gmE1(p) { return !!(p && p.hasUpgrade && p.hasUpgrade('evo_gem_1')); }
 function gmE2(p) { return !!(p && p.hasUpgrade && p.hasUpgrade('evo_gem_2')); }
@@ -285,7 +287,7 @@ function gmBrain(p) {
 
 // Bản Sao "giống người": Mệt (t.gmFat 0..100) tăng khi né liên tục, hồi dần khi được nghỉ.
 // Mệt -> chạy chậm hơn, phản xạ chậm hơn, hay bỏ sót đạn. Đòn tia / hitscan: phản xạ chậm hơn hẳn và đôi khi không né.
-const GM_FAT_GAIN = 1.1, GM_FAT_REC = 0.35, GM_FAT_GRACE = 30;
+const GM_FAT_GAIN = 0.85, GM_FAT_REC = 0.45, GM_FAT_GRACE = 30;
 function gmFatK(t) { return Math.max(0, Math.min(1, (t.gmFat || 0) / 100)); }
 function gmTwinTune(brain, t, p) {
     const f = gmFatK(t), B = BOT_LEVELS[brain.levelIdx];
@@ -438,6 +440,24 @@ class GeminiTwin {
     draw() { if (typeof gmDrawTwin === 'function') gmDrawTwin(this); }
 }
 
+// SONG HƯỞNG: đạn của Alpha & Beta lần lượt trúng địch trong 1.25s -> phát sau nổ cộng hưởng +50% dame
+BulletHooks.register('gemini', {
+    hit(b, o, v, dealt) {
+        if (!o || !v || v === o || !(dealt > 0) || o.weapon !== 'gemini' || !b.gmSrc) return;
+        const t = o.gmTick || 0;
+        if (o.gmHitTag && o.gmHitTag !== b.gmSrc && t - (o.gmHitT || -999) <= GM_RES_WIN && v.hp > 0) {
+            o.gmHitTag = ''; o.gmHitT = -999; o.gmResFx = 24;
+            const cx = v.x + v.w / 2, cy = v.y + v.h / 2;
+            v.takeDamage(b.dmg * GM_RES_BONUS, o, { isPiercing: true });
+            explosions.push(new Explosion(cx, cy, 34, 'rgba(253,230,138,', 0, o));
+            spawnSparkParticles(cx, cy, GM_GOLD, 12);
+            addFloatingText(cx, cy - gmDir(o) * 26, '✦ SONG HƯỞNG', GM_GOLD, 13);
+            return;
+        }
+        o.gmHitTag = b.gmSrc; o.gmHitT = t;
+    },
+});
+
 // ==========================================
 // Hook
 // ==========================================
@@ -452,7 +472,7 @@ CharHooks.register('gemini', {
         this.gmDown = false; this.gmRes = 0; this.gmResOut = 0; this.gmReboot = 0; this.gmRebootUsed = false;
         this.gmHold = 0; this.gmPrevS = false; this.gmSwCd = 0; this.gmCd = 0;
         this.gmBurst = 0; this.gmAim = 0; this.gmRamp = 0; this.gmRescues = 0; this.gmSwapFx = 0;
-        this.gmNeedTwin = true;
+        this.gmNeedTwin = true; this.gmTick = 0; this.gmHitTag = ''; this.gmHitT = -999; this.gmQ = 0; this.gmResFx = 0;
         delete GM_BRAIN[this.id];
     },
     update() {
@@ -468,6 +488,8 @@ CharHooks.register('gemini', {
         if (this.gmBurst > 0) this.gmBurst--;
         if (this.gmAim > 0) this.gmAim--;
         if (this.gmSwapFx > 0) this.gmSwapFx--;
+        if (this.gmResFx > 0) this.gmResFx--;
+        this.gmTick = (this.gmTick || 0) + 1;
         if (gmE2(this)) this.gmRamp = (this.gmRamp || 0) + 1;
         if (this.gmDown) { this.hp = 0; this.kbX = 0; this.freezeTimer = 0; }
         if (gmFull(this)) gmSteer(this);
@@ -480,7 +502,19 @@ CharHooks.register('gemini', {
         const s = !!inp.s;
         // Bot luyện tập điều khiển P2: gục mà Bản Sao còn đứng -> tự chuyển giao
         const botCtl = this.id === 2 && typeof botAI !== 'undefined' && botAI.enabled;
-        if (botCtl && this.gmDown && this.gmSwCd <= 0 && gmStanding(gmTwinOf(this))) { gmSwap(this); this.gmPrevS = s; this.gmHold = 0; return true; }
+        if (botCtl && this.gmSwCd <= 0) { // gục, hoặc máu thấp mà Bản Sao khoẻ hơn hẳn -> chuyển giao
+            const tw = gmTwinOf(this);
+            if (gmStanding(tw) && (this.gmDown || (this.hp < this.maxHp * 0.35 && tw.hp > this.hp + this.maxHp * 0.3))) { gmSwap(this); this.gmPrevS = s; this.gmHold = 0; return true; }
+        }
+        // Bộ đệm nhấp: nhả khi chưa hết nhịp bắn (<0.2s) -> tự bắn ngay khi hết nhịp
+        if (this.gmQ > 0) {
+            this.gmQ--;
+            if (!s && this.gmCd <= 0 && !this.gmDown && this.ammo > 0) {
+                this.gmQ = 0;
+                gmFire(this, this.x + this.w / 2, this.gmTag);
+                this.ammo--; this.lastShot = now; this.gmCd = GM_FIRE_CD / gmRateMult(this);
+            }
+        }
         if (s) {
             this.gmHold = (this.gmHold || 0) + 1;
             if (this.gmHold === GM_HOLD) {
@@ -491,7 +525,7 @@ CharHooks.register('gemini', {
             if (this.gmPrevS && this.gmHold < GM_HOLD && !this.gmDown && this.ammo > 0 && this.gmCd <= 0) {
                 gmFire(this, this.x + this.w / 2, this.gmTag);
                 this.ammo--; this.lastShot = now; this.gmCd = GM_FIRE_CD / gmRateMult(this);
-            }
+            } else if (this.gmPrevS && this.gmHold < GM_HOLD && !this.gmDown && this.ammo > 0 && this.gmCd <= 12) this.gmQ = 12;
             this.gmHold = 0;
         }
         this.gmPrevS = s;

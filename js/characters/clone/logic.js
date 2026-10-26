@@ -2,22 +2,22 @@
 // Nhân Bản (clone) — Logic: "1 thành 2, sau đó 3 và 4..."
 // ------------------------------------------
 // Nhấp Bắn: đạn cơ bản (100% dame). Giữ Bắn 1.0s: tạo 1 CLONE THƯỜNG cạnh xe (giữ tiếp -> mỗi 1s thêm 1).
-//   Clone Thường 24×24, hưởng 25% chỉ số (Evo 2: 50% | Full: 80%): Máu = %MaxHP, Dame = %dame, Đạn 4.
+//   Clone Thường 24×24: Máu 30% MaxHP (Evo 2: 50% | Full: 60%), Đạn 4, đạn tự ngắm (xem clShotK). AI: clCloneAI.
 //   Tự di chuyển trên làn của mình, bắn kẻ địch; là khối isStone -> chặn & bị đạn địch bắn hạ.
 //   Giới hạn kỹ thuật: tối đa CL_CAP clone thường cùng lúc (hiệu năng + online).
 // Nội tại GÁNH CHỊU: clone thường bị bắn hạ -> bản thể nhận 50% Max HP của clone đó (xuyên khiên).
 //   Evo 2: miễn 2 lần đầu mỗi hiệp (Full: 4). Còn Clone Hoàn Hảo -> nó gánh thay phản phệ.
 // Evo 1: đầu hiệp có 1 CLONE HOÀN HẢO (30×30, 100% chỉ số). Khi bản thể nhận đòn chí mạng -> HỒI SINH
 //   vào vị trí Clone Hoàn Hảo (máu = máu clone, tối đa Max HP), clone đó biến mất.
-// Full Evo: 2 Clone Hoàn Hảo, mỗi con 200% Max HP.
+// Full Evo: 2 Clone Hoàn Hảo (100% Max HP).
 // Mọi state là trường thuần trên player / entity ClClone trong bodyEffects -> đồng bộ online.
 // ==========================================
 
 const CL_CYAN = '#22d3ee', CL_VIO = '#a78bfa', CL_GOLD = '#fde68a', CL_PINK = '#f472b6';
 const CL_HOLD = 60;          // 1.0s giữ -> 1 clone
-const CL_CAP = 8;            // giới hạn kỹ thuật số clone thường cùng lúc
+const CL_CAP = 6;            // giới hạn kỹ thuật số clone thường cùng lúc
 const CL_GCD = 10;
-const CL_BUL_V = 7.5;
+const CL_BUL_V = 8.2;
 
 function clE1(p) { return p.hasUpgrade('evo_clone_1'); }
 function clE2(p) { return p.hasUpgrade('evo_clone_2'); }
@@ -26,7 +26,9 @@ function clIs(p) { return p && p.weapon === 'clone'; }
 function clEnemy(p) { return p === p1 ? p2 : p1; }
 function clDir(p) { return p.id === 1 ? -1 : 1; }
 function clSfx(n) { if (typeof soundSystem !== 'undefined' && soundSystem && !soundSystem.muted && soundSystem[n]) soundSystem[n](); }
-function clRatio(p) { return clFull(p) ? 0.8 : (clE2(p) ? 0.5 : 0.25); }
+function clRatio(p) { return clFull(p) ? 0.6 : (clE2(p) ? 0.5 : 0.3); }
+// Dame mỗi viên của clone (đạn tự ngắm đón đầu): Thường 15% (Evo 2+: 20%), Hoàn Hảo 50% (Full: 35%)
+function clShotK(p, kind) { return kind ? (clFull(p) ? 0.35 : 0.5) : (clE2(p) ? 0.2 : 0.15); }
 function clFreeMax(p) { return clFull(p) ? 4 : (clE2(p) ? 2 : 0); }
 function clPerfectN(p) { return clFull(p) ? 2 : (clE1(p) ? 1 : 0); }
 function clClones(p, kind) {
@@ -42,13 +44,14 @@ class ClClone {
         this.w = kind ? owner.w : 24; this.h = kind ? owner.h : 24;
         const k = kind ? 1 : clRatio(owner);
         this.k = k;
-        this.maxHp = Math.max(0.5, Math.round(owner.maxHp * (kind ? (full ? 2 : 1) : k) * 4) / 4);
+        this.maxHp = Math.max(0.5, Math.round(owner.maxHp * (kind ? 1 : k) * 4) / 4);
         this.hp = this.maxHp;
         this.side = side || 1;
         const cx = owner.x + owner.w / 2 + this.side * (owner.w / 2 + this.w / 2 + 4);
         this.x = Math.max(0, Math.min(canvas.width - this.w, cx - this.w / 2));
         this.y = owner.y + (owner.h - this.h) / 2;
-        this.ammo = 4; this.maxAmmo = 4; this.reloadT = 0;
+        this.ammo = 4; this.maxAmmo = 4; this.reloadT = 0; this.id = owner.id;
+        this.slot = 0; this.mx = null; this.retreat = false; this.dodgeFx = 0;
         this.fireT = 30 + Math.floor(Math.random() * 40);
         this.off = Math.round((Math.random() * 2 - 1) * 110);     // lệch mục tiêu riêng -> tản ra trên làn
         this.seed = Math.round(Math.random() * 628) / 100;
@@ -71,37 +74,93 @@ class ClClone {
         if (!o || o.hp <= 0) return;
         this.y = o.y + (o.h - this.h) / 2;
         if (o.freezeTimer > 0) return;
-        // di chuyển: bám theo kẻ địch + độ lệch riêng + dao động nhẹ
         const e = clEnemy(o);
-        const ex = e ? e.x + e.w / 2 : canvas.width / 2;
-        const wob = Math.sin(this.t * 0.03 + this.seed) * 26;
-        const tx = Math.max(this.w / 2, Math.min(canvas.width - this.w / 2, ex + this.off + wob));
-        const cx = this.x + this.w / 2, spd = this.kind ? 2.2 : 1.8;
-        const dx = tx - cx;
-        this.x += Math.max(-spd, Math.min(spd, dx));
-        // tách nhau: không chồng lên bản thể / clone khác cùng phe
-        const others = [o];
-        for (const q of bodyEffects) if (q !== this && q instanceof ClClone && q.owner === o && q.active) others.push(q);
-        for (const q of others) {
-            const d = (this.x + this.w / 2) - (q.x + q.w / 2), min = (this.w + q.w) / 2 + 3;
-            if (Math.abs(d) < min) this.x += (d >= 0 ? 1 : -1) * Math.min(1.5, (min - Math.abs(d)) * 0.5) + (d === 0 ? (this.seed > 3 ? 1 : -1) : 0);
-        }
-        this.x = Math.max(0, Math.min(canvas.width - this.w, this.x));
-        // nạp đạn & bắn
-        if (this.ammo < this.maxAmmo && ++this.reloadT >= (this.kind ? 70 : 90)) { this.reloadT = 0; this.ammo++; }
-        if (this.fireT > 0) { this.fireT--; return; }
-        if (this.ammo > 0 && e && e.hp > 0 && Math.abs(ex - (this.x + this.w / 2)) < 46) {
-            this.ammo--; this.recoil = 8;
-            this.fireT = (this.kind ? 55 : 80) + Math.floor(Math.random() * 20);
-            const dir = clDir(o), bx = this.x + this.w / 2, bw = this.kind ? 8 : 6;
-            spawnBullet(o, {
-                x: bx - bw / 2, y: dir < 0 ? this.y - 10 : this.y + this.h + 2, w: bw, h: bw + 4,
-                vx: 0, vy: dir * CL_BUL_V, dmg: o.damage * this.k,
-                hook: 'clone', clK: this.kind ? 2 : 1,
-            });
-        }
+        clCloneAI(this, o, e);
     }
     draw() { if (typeof clDrawClone === 'function') clDrawClone(this); }
+}
+
+
+// ---------- AI Clone (chỉ host chạy update) ----------
+// Dùng bộ dò mối nguy của SmartBot (đạn, cột cảnh báo hitscan, vòng rơi từ trời, pháo, tia...) rồi tự chọn vị trí:
+//  - né đạn / đòn báo trước trên cột của mình, - tản đều theo "khe" quanh địch (không chồng nhau),
+//  - máu thấp -> lùi xa trục bắn của địch, - ngắm đón đầu, - bắn dồn cùng lúc bản thể khai hoả.
+const CL_BRAIN = {};
+function clBrain(o) {
+    const lvl = clFull(o) ? 5 : (clE2(o) ? 4 : 3);
+    let b = CL_BRAIN[o.id];
+    if (!b || typeof SmartBot === 'undefined') { if (typeof SmartBot === 'undefined') return null; b = CL_BRAIN[o.id] = new SmartBot(lvl); }
+    if (b.levelIdx !== lvl) b.setLevel(lvl);
+    return b;
+}
+function clCloneAI(c, o, e) {
+    const W = canvas.width, cx = c.x + c.w / 2;
+    const mates = clClones(o);
+    c.slot = Math.max(0, mates.indexOf(c));
+    const n = mates.length;
+    const ex = e ? e.x + e.w / 2 : W / 2;
+    c.retreat = c.hp < c.maxHp * 0.4;
+    // khe đứng: rải đều quanh địch (±150px), con máu thấp lùi ra xa trục bắn của địch & về sau bản thể
+    const spread = Math.min(100, 30 + n * 12);
+    let goal = ex + (n > 1 ? (c.slot / (n - 1) * 2 - 1) * spread : (c.side || 1) * 40);
+    if (c.retreat) {
+        const ox = o.x + o.w / 2;
+        goal = ox + (ox < ex ? -1 : 1) * 70 + (c.slot % 2 ? 26 : -26);
+        if (Math.abs(goal - ex) < 110) goal = ex + (goal < ex ? -110 : 110);
+    }
+    goal = Math.max(c.w / 2, Math.min(W - c.w / 2, goal));
+    // lập kế hoạch: mỗi 3 tick (lệch theo khe), gấp hơn khi có đòn sắp trúng
+    const brain = clBrain(o);
+    if (brain && e && e.hp > 0 && (c.mx === null || (c.t + c.slot) % 3 === 0)) {
+        const threats = brain.collectThreats(c, e);
+        const spd = (c.kind ? 2.6 : 2.3);
+        let best = cx, bestCost = Infinity;
+        for (let X = c.w / 2; X <= W - c.w / 2 + 0.1; X += 5) {
+            let cost = Math.abs(X - goal) * 0.006;
+            const edge = Math.min(X, W - X);
+            if (edge < 30) cost += (30 - edge) / 30 * 0.3;
+            for (const q of mates) { // tản ra: phạt đứng sát đồng đội
+                if (q === c) continue;
+                const d = Math.abs(X - (q.mx !== null && q.mx !== undefined ? q.mx : q.x + q.w / 2));
+                if (d < 30) cost += (30 - d) / 30 * 0.25;
+            }
+            const dOwner = Math.abs(X - (o.x + o.w / 2));
+            if (dOwner < 34) cost += (34 - dOwner) / 34 * 0.2;
+            const dir = Math.sign(X - cx), dist = Math.abs(X - cx);
+            for (const th of threats) {
+                const pos = cx + dir * Math.min(dist, spd * th.t);
+                const d = Math.abs(pos - th.x), half = th.half + 3;
+                if (d < half) cost += th.w * (1 + (half - d) / half) * (th.t < 30 ? 2.5 : 1) * (c.retreat ? 1.5 : 1);
+            }
+            if (cost < bestCost) { bestCost = cost; best = X; }
+        }
+        if (Math.abs(best - goal) > 20 && threats.some(th => th.t < 35 && Math.abs(th.x - cx) < th.half)) c.dodgeFx = 12;
+        c.mx = best;
+    }
+    if (c.dodgeFx > 0) c.dodgeFx--;
+    const tx = c.mx === null ? goal : c.mx;
+    const spd = (c.kind ? 2.6 : 2.3) * (c.dodgeFx > 0 ? 1.2 : 1);
+    c.x += Math.max(-spd, Math.min(spd, tx - cx));
+    c.x = Math.max(0, Math.min(W - c.w, c.x));
+    // nạp đạn & bắn
+    if (c.ammo < c.maxAmmo && ++c.reloadT >= (c.kind ? 70 : 90)) { c.reloadT = 0; c.ammo++; }
+    if (c.fireT > 0) c.fireT--;
+    if (!(c.ammo > 0) || !e || e.hp <= 0 || c.retreat && c.dodgeFx > 0) return;
+    const bx = c.x + c.w / 2, dx = Math.abs(ex - bx);
+    if (dx > 50) return; // chỉ bắn khi gần thẳng hàng (đạn ngắm chỉnh góc nhẹ để đón đầu)
+    // bắn dồn: bản thể vừa khai hoả -> clone bắn theo (so le 2 tick/khe) nếu hồi bắn đã gần xong
+    const volley = o.clVolley > 0 && o.clVolley <= 14 - (c.slot % 5) * 2 && c.fireT <= 30;
+    if (c.fireT > 0 && !volley) return;
+    c.ammo--; c.recoil = 8;
+    c.fireT = (c.kind ? 55 : 80) + Math.floor(Math.random() * 20);
+    const dir = clDir(o), bw = c.kind ? 8 : 6;
+    const sy = dir < 0 ? c.y - 10 : c.y + c.h + 2;
+    const v = aimVelocity(bx, sy, e, CL_BUL_V, true);
+    spawnBullet(o, {
+        x: bx - bw / 2, y: sy, w: bw, h: bw + 4,
+        vx: v.vx, vy: v.vy, dmg: o.damage * clShotK(o, c.kind), // đạn ngắm đón đầu -> dame/viên thấp hơn
+        hook: 'clone', clK: c.kind ? 2 : 1,
+    });
 }
 
 // ---------- Entity: kết liễu VÔ HẠN (mọi bản sao hội tụ + gương vỡ) ----------
@@ -177,7 +236,7 @@ function clCloneDied(p, c) {
 
 function clFire(p, now) {
     if (!(p.ammo > 0)) { addFloatingText(p.x + p.w / 2, p.y + (p.id === 1 ? -18 : p.h + 22), 'HẾT ĐẠN', '#94a3b8', 10); return; }
-    p.ammo--; p.lastShot = now; p.clGCD = CL_GCD; p.clRecoil = 8;
+    p.ammo--; p.lastShot = now; p.clGCD = CL_GCD; p.clRecoil = 8; p.clVolley = 14; // clone bắn dồn theo bản thể
     const dir = clDir(p), cx = p.x + p.w / 2;
     spawnBullet(p, {
         x: cx - 4, y: dir < 0 ? p.y - 12 : p.y + p.h + 2, w: 8, h: 12,
@@ -203,6 +262,7 @@ CharHooks.register('clone', {
     setup() {
         this.clHold = 0; this.clPrevS = false; this.clHoldUsed = false; this.clGCD = 0; this.clRecoil = 0;
         this.clFree = clFreeMax(this); this.clPending = clPerfectN(this); this.clMade = 0;
+        this.clVolley = 0; delete CL_BRAIN[this.id];
         this.clSpawnFx = 0; this.clLinkFx = 0; this.clReviveFx = 0; this.clSide = 1; this.clLashFrom = null;
     },
     update() {
@@ -211,6 +271,8 @@ CharHooks.register('clone', {
         if (this.clSpawnFx > 0) this.clSpawnFx--;
         if (this.clLinkFx > 0) this.clLinkFx--;
         if (this.clReviveFx > 0) this.clReviveFx--;
+        if (this.clVolley > 0) this.clVolley--;
+        if (this.hp > 0 && clClones(this).length) { const b = clBrain(this); if (b) b.t++; }
         if (this.clPending > 0 && this.hp > 0) { // Clone Hoàn Hảo đầu hiệp (sau khi xe đã đặt vị trí)
             const n = this.clPending; this.clPending = 0;
             for (let i = 0; i < n; i++) clSpawnPerfect(this, i % 2 ? -1 : 1);

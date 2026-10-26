@@ -125,7 +125,7 @@ const EVOLUTIONS = {
     ],
     paradox: [
         { id: 'evo_paradox_1', name: 'Dấu Ấn Thời Gian', type: 'evo', desc: 'Bắn trúng địch tích ấn (Max 3). Đủ ấn tạo Bóng Đứng Yên + Choáng. Kích hoạt tua ngược kéo địch về Bóng Đứng.', cost: 185 },
-        { id: 'evo_paradox_2', name: 'Nghịch Đảo', type: 'evo', desc: 'Hồi chiêu Tua Ngược còn 10s. Kéo địch về gây Làm Chậm. Đủ 2 Evo: Kéo địch về Bóng 5s (Choáng 0.5s) hoặc Bóng Đứng (Choáng 1.5s, 2 hit tạo bóng). Đủ 2 Evo: Vết Nứt Thời Gian bắn 50% dame (gốc 25%).', cost: 340 }
+        { id: 'evo_paradox_2', name: 'Nghịch Đảo', type: 'evo', desc: 'Hồi chiêu Tua Ngược còn 5.5s; bóng 3s tái hiện phát bắn 60% dame; Dư Âm 50% dame. Kéo địch về gây Làm Chậm. Đủ 2 Evo: Kéo địch về Bóng 5s (Choáng 0.5s) hoặc Bóng Đứng (Choáng 1.5s, 2 hit tạo bóng). Đủ 2 Evo: Vết Nứt Thời Gian bắn 60% dame (gốc 35%), bóng tái hiện 100% dame, Dư Âm 60% dame.', cost: 340 }
     ],
     magician: [
         { id: 'evo_mag_1', name: 'Hoán Đổi Chủ Động', type: 'evo', desc: 'Bản thể & phân ảnh phóng 3 lá bài nối đuôi theo trục dọc (mỗi lá 50% dame). Giữ bắn 1s: Tàng hình & Đổi vị trí với Phân ảnh (+1 Khiên, dùng chung hồi chiêu 10s với Phân Ảnh). Đổi với bóng Đứng: Bóng tự đi. Đổi bóng Đi: Cả hai tăng tốc. Đủ 2 Evo: Thoát Chết 2 lần/hiệp.', cost: 185 },
@@ -260,8 +260,8 @@ const EVOLUTIONS = {
         { id: 'evo_frag_2', name: 'Phân Chia', desc: 'Phân Mảnh vỡ thành 5 mảnh, Dễ Vỡ phóng 12 mảnh. Mọi mảnh con nảy tường 2 lần. FULL EVO (Bão Mảnh Hủy Diệt): Phân Mảnh vỡ 8 mảnh, Dễ Vỡ nổ tung 360° phóng 36 mảnh càn quét khắp sân; mảnh con bay cực nhanh & nảy tường 4 lần.', cost: 340, type: 'evo' },
     ],
     clone: [
-        { id: 'evo_clone_1', name: 'Nhân Bản Song Song', desc: 'CLONE HOÀN HẢO: đầu mỗi hiệp tự tạo 1 Clone Hoàn Hảo cùng kích thước & 100% chỉ số của bạn (HP 6 | Dame 1 | Đạn 4), tự di chuyển & bắn. Khi bạn nhận đòn chí mạng -> HỒI SINH vào vị trí Clone Hoàn Hảo (máu = máu còn lại của clone), clone đó biến mất. Còn Clone Hoàn Hảo -> nó gánh thay phản phệ Gánh Chịu của clone thường.', cost: 185, type: 'evo' },
-        { id: 'evo_clone_2', name: 'Khuếch Đại Bản Sao', desc: 'Clone Thường hưởng 50% chỉ số của bạn (bắn đau & trâu gấp đôi). Miễn trừ phản phệ: 2 lần đầu có Clone bị tiêu diệt mỗi hiệp không gây sát thương Gánh Chịu. FULL EVO (Quân Đoàn Bất Tử): miễn 4 lần Gánh Chịu mỗi hiệp; 2 Clone Hoàn Hảo cùng lúc (hồi sinh tới 2 lần), mỗi con 200% Max HP; Clone Thường hưởng 80% chỉ số.', cost: 350, type: 'evo' },
+        { id: 'evo_clone_1', name: 'Nhân Bản Song Song', desc: 'CLONE HOÀN HẢO: đầu mỗi hiệp tự tạo 1 Clone Hoàn Hảo cùng kích thước, 100% Máu của bạn, Đạn 4, mỗi viên 50% dame; dùng chung AI né/tản/ngắm/bắn dồn của clone. Khi bạn nhận đòn chí mạng -> HỒI SINH vào vị trí Clone Hoàn Hảo (máu = máu còn lại của clone), clone đó biến mất. Còn Clone Hoàn Hảo -> nó gánh thay phản phệ Gánh Chịu của clone thường.', cost: 185, type: 'evo' },
+        { id: 'evo_clone_2', name: 'Khuếch Đại Bản Sao', desc: 'Clone Thường có 50% Máu của bạn, mỗi viên 20% dame; AI clone lên cấp Cao Thủ. Miễn trừ phản phệ: 2 lần đầu có Clone bị tiêu diệt mỗi hiệp không gây sát thương Gánh Chịu. FULL EVO (Quân Đoàn Bất Tử): miễn 4 lần Gánh Chịu mỗi hiệp; 2 Clone Hoàn Hảo cùng lúc (hồi sinh tới 2 lần, mỗi viên 35% dame); Clone Thường có 60% Máu của bạn; AI clone phản xạ cấp Huyền Thoại.', cost: 350, type: 'evo' },
     ],
     jet_pilot: [
         { id: 'evo_pilot_1', name: 'Phi Đội Ánh Sao', desc: 'CƯỜNG HÓA TOÀN DIỆN: mọi hỏa lực của Hợp Nhất, Chân & Phi Ảnh +15% sát thương, AI bắn/pháo cối dày hơn, sóng Cất Cánh rộng hơn. VỆT LỬA THIÊU ĐỐT: bom của Phi Ảnh (oanh tạc định kỳ lẫn khi Hợp Nhất) để lại Vệt Lửa đốt máu theo thời gian.', cost: 195, type: 'evo' },

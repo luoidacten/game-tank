@@ -60,10 +60,10 @@ const MODULES = {
         {
             id: 'paradox',
             name: 'Paradox',
-            desc: 'HP:6 | Dame:1.2 | Đạn:5. Có bóng đi sau 3s. Giữ 0.2s tua ngược & tự xả đạn lặp lại (CD: 12s/7s). Giữ tới mốc trống cuối: đặt Neo Thời Không (10s, CD 20s) - lần tua tới về neo (vị trí, máu, đạn). Mỗi lần tua ngược/về neo để lại 1 Vết Nứt Thời Gian (10s, tối đa 3): khi đặt neo, tua ngược hoặc bóng 3s tái hiện phát bắn, mọi vết nứt cùng khai hoả (tụ sáng 0.2s, 25% dame; Full Evo 50%).',
+            desc: 'HP:7 | Dame:1.35 | Đạn:5 | Nhịp bắn 0.4s. DƯ ÂM: mỗi phát bắn được thời gian lặp lại 1 lần sau 0.33s từ đúng chỗ đã bắn (40% dame; Evo 2: 50%; Full: 60%). Có bóng đi sau 3s. Giữ 0.2s tua ngược & tự xả đạn lặp lại (CD: 9s/5.5s); tua ngược / về neo = NGOÀI DÒNG THỜI GIAN: giải mọi hiệu ứng xấu + miễn nhiễm 0.6s. Giữ tới mốc trống cuối: đặt Neo Thời Không (10s, CD 20s) - lần tua tới về neo (vị trí, máu, đạn). Mỗi lần tua ngược/về neo để lại 1 Vết Nứt Thời Gian (10s, tối đa 3): khi đặt neo, tua ngược hoặc bóng 3s tái hiện phát bắn, mọi vết nứt cùng khai hoả (tụ sáng 0.2s, 35% dame; Full Evo 60%).',
             type: 'body', role: ['Sinh Tồn', 'Cơ Động', 'Kiểm Soát'],
             size: { w: 30, h: 30 },
-            stats: { hp: 6, dmg: 1.2, ammo: 5 }
+            stats: { hp: 7, dmg: 1.35, ammo: 5 }
         },
         {
             id: 'magician',
@@ -276,10 +276,10 @@ const MODULES = {
         {
             id: 'gemini',
             name: 'Gemini',
-            desc: '"Hai cá thể, một ý thức!" HP:3.5 x2 xe | Dame:0.75 | Đạn:4 | Tốc: 3.6. Làn của bạn có thêm Bản Sao AI (chỉ số 100% như bạn, kể cả module chân) tự né đạn (nhưng biết MỆT: né liên tục sẽ chậm & phản xạ kém dần, hồi khi nghỉ; né tia/hitscan kém hơn), phá thùng/xe tiền & bắn địch. Về 0 HP -> GỤC: đồng đội đứng trong Vòng Cứu 2s để hồi sinh 50% HP (rời vòng >1s thanh tụt; mỗi lần cứu thời gian x2). Chỉ thua khi CẢ HAI cùng gục. Giữ Bắn 0.4s: Chuyển Giao Ý Thức — đổi quyền điều khiển sang xe kia (hồi 3s).',
+            desc: '"Hai cá thể, một ý thức!" HP:3.8 x2 xe | Dame:0.85 | Đạn:4 | Tốc: 3.6 | Nhịp bắn 0.43s. SONG HƯỞNG: đạn của Alpha & Beta lần lượt trúng địch trong 1.25s -> phát sau nổ cộng hưởng thêm 50% dame (xuyên khiên). Làn của bạn có thêm Bản Sao AI (chỉ số 100% như bạn, kể cả module chân) tự né đạn (nhưng biết MỆT: né liên tục sẽ chậm & phản xạ kém dần, hồi khi nghỉ; né tia/hitscan kém hơn), phá thùng/xe tiền & bắn địch. Về 0 HP -> GỤC: đồng đội đứng trong Vòng Cứu 2s để hồi sinh 50% HP (rời vòng >1s thanh tụt; mỗi lần cứu thời gian x2). Chỉ thua khi CẢ HAI cùng gục. Giữ Bắn 0.4s: Chuyển Giao Ý Thức — đổi quyền điều khiển sang xe kia (hồi 3s).',
             type: 'body', role: ['Sinh Tồn', 'Kiểm Soát', 'Đối Đầu'],
             size: { w: 26, h: 26 },
-            stats: { hp: 3.5, dmg: 0.75, ammo: 4, speedMult: 1.029 }
+            stats: { hp: 3.8, dmg: 0.85, ammo: 4, speedMult: 1.029 }
         },
         {
             id: 'blood_lord',
@@ -340,7 +340,7 @@ const MODULES = {
         {
             id: 'clone',
             name: 'Nhân Bản',
-            desc: '"1 thành 2, sau đó 3 và 4..." HP:6 | Dame:1 | Đạn:4 | Tốc: 3.5. Nhấp: bắn đạn 1 dame. Giữ Bắn 1s: tạo 1 CLONE THƯỜNG cạnh xe (giữ tiếp -> mỗi 1s thêm 1, tối đa 8 cùng lúc): 24×24, 25% chỉ số của bạn (HP 1.5 | Dame 0.25 | Đạn 4), tự di chuyển & bắn địch, chặn và bị đạn địch bắn hạ. GÁNH CHỊU: mỗi Clone Thường bị hạ -> bạn nhận phản phệ = 50% Máu tối đa của clone đó (xuyên khiên). Hạ gục địch -> kết liễu VÔ HẠN.',
+            desc: '"1 thành 2, sau đó 3 và 4..." HP:6 | Dame:1 | Đạn:4 | Tốc: 3.5. Nhấp: bắn đạn 1 dame (clone bắn dồn theo). Giữ Bắn 1s: tạo 1 CLONE THƯỜNG cạnh xe (giữ tiếp -> mỗi 1s thêm 1, tối đa 6 cùng lúc): 24×24, Máu 30% của bạn (1.8), Đạn 4, mỗi viên 15% dame. AI CLONE (cấp Tinh Anh): tự né đạn & đòn báo trước (cột cảnh báo tia, vòng rơi từ trời, pháo), tản đều quanh địch không chồng nhau, ngắm chỉnh góc đón đầu, BẮN DỒN ngay khi bạn khai hoả, máu thấp thì lùi khỏi trục bắn; chặn và bị đạn địch bắn hạ. GÁNH CHỊU: mỗi Clone Thường bị hạ -> bạn nhận phản phệ = 50% Máu tối đa của clone đó (xuyên khiên). Hạ gục địch -> kết liễu VÔ HẠN.',
             type: 'body', role: ['Kiểm Soát', 'Đối Đầu', 'Sinh Tồn'],
             size: { w: 30, h: 30 },
             stats: { hp: 6, dmg: 1, ammo: 4, speedMult: 1 }
