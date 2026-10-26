@@ -451,7 +451,7 @@ Object.assign(Player.prototype, {
 
                     let color = this.hasUpgrade('evo_rocket_1') ? 'rgba(0, 255, 0,' : 'rgba(255, 100, 0,';
                     let dmg = this.hasUpgrade('evo_rocket_2') ? 2 : 1;
-                    explosions.push(new Explosion(b.x, b.y, range, color, dmg, this));
+                    if (Number.isFinite(b.x) && Number.isFinite(b.y)) explosions.push(new Explosion(b.x, b.y, range, color, dmg, this)); // chống NaN
 
                     if (this.hasUpgrade('evo_rocket_1')) radiationZones.push(new RadiationZone(b.x, b.y));
                 }
