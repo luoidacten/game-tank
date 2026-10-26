@@ -11,10 +11,10 @@ const GENIUS_BLACK_MARKET = [
     { id: 'gen_energy', name: 'Pin Lượng Tử', desc: '+15 Năng Lượng Tối Đa' },
     { id: 'gen_speed', name: 'Động Cơ Turbo', desc: '+15% Tốc Độ Di Chuyển Robot' },
     { id: 'gen_regen', name: 'Tụ Điện Phục Hồi', desc: '+1 Năng Lượng Hồi Phục/s' },
-    { id: 'gen_slow', name: 'Đạn Hàn Băng', desc: 'Đạn làm chậm đối thủ 40% trong 2s' },
-    { id: 'gen_fire', name: 'Đạn Nhiệt Hạch', desc: 'Đạn gây thiêu đốt trong 3s' },
-    { id: 'gen_explosive', name: 'Ngòi Nổ Phá Khối', desc: 'Tăng 50% bán kính nổ đạn' },
-    { id: 'gen_shield', name: 'Lá Chắn Khởi Đầu', desc: 'Bắt đầu trận có 1 lớp khiên chặn 1 đòn' }
+    { id: 'gen_slow', name: 'Đạn Hàn Băng', desc: 'Đạn làm chậm đối thủ 40% trong 2s', maxLvl: 1 },
+    { id: 'gen_fire', name: 'Đạn Nhiệt Hạch', desc: 'Đạn gây thiêu đốt trong 3s', maxLvl: 1 },
+    { id: 'gen_explosive', name: 'Ngòi Nổ Phá Khối', desc: 'Tăng 50% bán kính nổ đạn', maxLvl: 1 },
+    { id: 'gen_shield', name: 'Lá Chắn Khởi Đầu', desc: 'Bắt đầu trận có 1 lớp khiên chặn 1 đòn', maxLvl: 1 }
 ];
 
 // --- DATA SHOP ĐỘC QUYỀN CHO INVENTOR ---

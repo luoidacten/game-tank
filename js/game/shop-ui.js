@@ -724,6 +724,15 @@ function renderInventorShop(playerId, keepItems = false) {
     container.appendChild(readyBtn);
 }
 
+function geniusItemMaxed(player, item) {
+    return !!item.maxLvl && ((player.geniusUpgrades && player.geniusUpgrades[item.id]) || 0) >= item.maxLvl;
+}
+function geniusItemCost(player, item, discountMult = 1) {
+    const lvl = (player.geniusUpgrades && player.geniusUpgrades[item.id]) || 0;
+    const mult = item.maxLvl === 1 ? 1 : Math.pow(2, lvl);
+    return Math.max(1, Math.floor(3 * mult * discountMult));
+}
+
 function renderGeniusBlackMarket(playerId, keepItems = false) {
     const container = document.getElementById(`${playerId}-upgrades`);
     if (!container) return;
@@ -737,7 +746,6 @@ function renderGeniusBlackMarket(playerId, keepItems = false) {
     if (player.geniusPurchaseCount === undefined) player.geniusPurchaseCount = 0;
 
     const genDiscountMult = (player && typeof player.hasGear === 'function' && player.hasGear('gear_discount_g')) ? 0.70 : 1;
-    let cost = Math.max(1, Math.floor(3 * Math.pow(2, player.geniusPurchaseCount) * genDiscountMult));
 
     // 1. Nút QUAY LẠI Cửa Hàng Thường
     const backBtn = document.createElement('div');
@@ -779,7 +787,7 @@ function renderGeniusBlackMarket(playerId, keepItems = false) {
 
     // 3. Chọn 3 nâng cấp ngẫu nhiên từ GENIUS_BLACK_MARKET
     if (!keepItems || !player.currentGeniusShopItems) {
-        let pool = [...GENIUS_BLACK_MARKET];
+        let pool = GENIUS_BLACK_MARKET.filter(it => !geniusItemMaxed(player, it));
         pool.sort(() => 0.5 - Math.random());
         player.currentGeniusShopItems = pool.slice(0, 3);
     }
@@ -791,6 +799,14 @@ function renderGeniusBlackMarket(playerId, keepItems = false) {
         card.style.background = '#1a0926';
 
         let currentLvl = player.geniusUpgrades[item.id] || 0;
+        // Giá theo TỪNG món: chỉ món nhiều cấp mới x2 theo cấp của chính nó; món 1 cấp giá cố định
+        let cost = geniusItemCost(player, item, genDiscountMult);
+        if (geniusItemMaxed(player, item)) {
+            card.classList.add('sold');
+            card.innerHTML = `<span style="font-size:9px; color:#ba68c8;">ROBOT MODULE</span><h4 style="color:#e1bee7; font-size:11px;">${item.name}</h4><p style="font-size:9px; color:#d1c4e9;">${item.desc}</p><p style="color:#00e676; font-weight:bold; font-size:12px;">ĐÃ SỞ HỮU</p>`;
+            container.appendChild(card);
+            return;
+        }
         let lvlBadge = currentLvl > 0 ? `<span style="color:#00e676; font-size:10px;"> (Cấp ${currentLvl})</span>` : '';
         let canAfford = (player.gears || 0) >= cost;
 
