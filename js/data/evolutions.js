@@ -347,6 +347,10 @@ const EVOLUTIONS = {
         { id: 'evo_twin_1', name: 'Nòng Xoay Liên Thanh', desc: '+2 đạn (thành 8 phát) và tốc độ nạp đạn nhanh hơn 30%.', cost: 160, type: 'evo' },
         { id: 'evo_twin_2', name: 'Đạn Từ Tính', desc: 'Nếu chỉ trúng 1 trong 2 viên: viên trúng đẩy lệch nhẹ kẻ địch sang ngang về phía đường bay của viên còn lại. FULL EVO: mỗi phát bắn thứ 3 bắn kèm viên đạn thứ 3 ở chính giữa (xuyên vật cản).', cost: 290, type: 'evo' },
     ],
+    mortar: [
+        { id: 'evo_mortar_1', name: 'Thuốc Phóng Áp Suất Cao', desc: 'Thời gian đạn rơi (vòng cảnh báo) 0.75s -> 0.55s. +1 đạn (thành 4 quả) và tốc độ nạp đạn nhanh hơn 25%.', cost: 160, type: 'evo' },
+        { id: 'evo_mortar_2', name: 'Đạn Cối Nhiệt Nhôm', desc: 'Mỗi quả bắn thường nổ xong để lại Hố Đạn Nóng Đỏ (65px) trên làn địch 2.5s: đốt 0.3 HP/s & làm chậm 25%. Hồi chiêu Mưa Pháo Rải Thảm 8.0s -> 5.5s. FULL EVO (Pháo Đài Bầu Trời): mỗi phát bắn thường thứ 3 là Đại Pháo Cối (vòng 90px, 2.2 Dame), chạm đất nảy 2 Đạn Chùm sang Trái/Phải ±70px (nổ sau 0.35s, 0.8 Dame/quả). Mỗi lần Hồng Tâm: +0.3 Giáp Trắng & giảm 1.0s hồi chiêu Rải Thảm.', cost: 290, type: 'evo' },
+    ],
 };
 
 // ==========================================

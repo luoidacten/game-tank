@@ -755,3 +755,18 @@ function botShopBuy(playerId) {
         return f.call(this, bot, enemy, aligned, inp);
     };
 })();
+
+// Mortar: nhấp khi đứng đón đầu điểm rơi của địch, giữ 0.5s Mưa Pháo Rải Thảm khi hết hồi (mrBotAction)
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon === 'mortar' && typeof mrBotAction === 'function') {
+            if (this.mrB > 0) { this.mrB--; inp.s = this.mrB > 2; return; }
+            const a = mrBotAction(bot, enemy);
+            if (a === 'tap') { this.mrB = 5; inp.s = true; return; }
+            if (a === 'barrage') { this.mrB = MR_HOLD + 5; inp.s = true; return; }
+            inp.s = false; return;
+        }
+        return f.call(this, bot, enemy, aligned, inp);
+    };
+})();

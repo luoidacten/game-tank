@@ -820,5 +820,15 @@ const BODY_GUIDES = {
         passive: ['Trúng cả 2 viên: phát kế +25% tốc đạn, +0.3 Dame'],
         evo: { e1: '+2 đạn, nạp nhanh 30%', e2: 'Trúng 1 viên: hút địch về làn viên kia', full: 'Mỗi phát thứ 3: +1 viên giữa xuyên vật cản' },
         tips: ['Nòng Rộng khi địch lách ngang, Nòng Hẹp khi địch đứng yên']
+    },
+    mortar: {
+        tag: 'Pháo kích từ trời, vượt mọi vật cản', diff: 1,
+        controls: [
+            { input: 'TAP', name: 'Pháo Kích', what: 'Rơi xuống làn địch tại X của bạn' },
+            { input: 'HOLD 0.5s', name: 'Rải Thảm', what: '3 quả: X địch, ±85px (hồi 8s)' }
+        ],
+        passive: ['Đạn rơi từ trời: không bị chặn/bắt', 'Hồng Tâm (lệch ≤18px): +0.4 Dame, phá 1 Khiên'],
+        evo: { e1: 'Rơi 0.55s, +1 đạn, nạp nhanh', e2: 'Hố lửa 2.5s, Rải Thảm hồi 5.5s', full: 'Phát thứ 3: Đại Pháo Cối + 2 đạn chùm' },
+        tips: ['Đứng đón đầu hướng chạy của địch rồi mới bắn']
     }
 };

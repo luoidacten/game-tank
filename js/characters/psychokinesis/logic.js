@@ -380,7 +380,7 @@ function psyFieldTick(p) {
     // bắt đạn mới
     if (e && e.bullets) for (let i = e.bullets.length - 1; i >= 0; i--) {
         const b = e.bullets[i];
-        if (!b) continue;
+        if (!b || b.isAerialDrop) continue; // đạn rơi từ trời (Mortar...) bay trên đầu vùng
         const bx = b.x + (b.w || 6) / 2, by = b.y + (b.h || 6) / 2;
         if (Math.hypot(bx - cx, by - cy) > R) continue;
         if (psyLaserLike(b)) {

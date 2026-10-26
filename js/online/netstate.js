@@ -60,6 +60,7 @@ const NET_CLASSES = {
     IdolBeam, IdolTrail, IdolRing, IdolGift, IdolStick, IdolFinisher,
     ThFinisher, MainFinisher,
     TgFinisher,
+    MrShell, MrCrater, MrFinisher,
 };
 
 // Biến toàn cục cần đồng bộ: [tên, getter, setter]

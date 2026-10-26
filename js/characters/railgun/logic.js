@@ -247,7 +247,7 @@ function rgZoneTick(p) {
     const e = rgEnemy(p), R = rgZoneRect(p);
     if (e && e.bullets) for (let i = e.bullets.length - 1; i >= 0; i--) {
         const b = e.bullets[i];
-        if (!b) continue;
+        if (!b || b.isAerialDrop) continue; // đạn rơi từ trời (Mortar...) bay trên đầu vùng
         const bx = b.x + (b.w || 6) / 2, by = b.y + (b.h || 6) / 2;
         if (!rgInZone(R, bx, by)) continue;
         if (rgLaserLike(b)) { e.bullets.splice(i, 1); rgHsBlock(p, b.dmg || 1, bx); if (!(p.rgZone > 0)) return; continue; }
