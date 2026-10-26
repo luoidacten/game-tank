@@ -678,3 +678,16 @@ function botShopBuy(playerId) {
         return f.call(this, bot, enemy, aligned, inp);
     };
 })();
+
+// Skinwalker: thuần nhấp bắn theo Hình Thái (swBotFire)
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon === 'skinwalker' && typeof swBotFire === 'function') {
+            if (this.swB > 0) { this.swB--; inp.s = this.swB > 2; return; }
+            if (swBotFire(bot, enemy, aligned)) { this.swB = 4; inp.s = true; return; }
+            inp.s = false; return;
+        }
+        return f.call(this, bot, enemy, aligned, inp);
+    };
+})();

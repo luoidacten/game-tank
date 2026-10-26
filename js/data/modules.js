@@ -481,6 +481,14 @@ const MODULES = {
             size: { w: 28, h: 28 },
             stats: { hp: 4.5, dmg: 0.9, ammo: 4, speedMult: 1.0286 }
         },
+        {
+            id: 'skinwalker',
+            name: 'Skinwalker',
+            desc: '"Lớp da này... vừa vặn đấy!" HP:5 | Dame:1.1 | Đạn:4 | Tốc:3.7 (đổi theo Hình Thái). Thuần nhấp bắn. SĂN MỒI THÍCH ỨNG: đầu hiệp đánh hơi Vai Trò Chính của địch và biến hình. 🩸 PHÁ GIÁP THỂ (gặp Đối Đầu; 30×30, 6 HP, tốc 3.8): gai xương 1.1 + 5% Máu tối đa địch, phá đạn thường bay ngược chiều; địch đứng đối diện (X±35px) -25% tốc bắn/nạp; địch trong 160px: -30% st nhận & phản 0.8 + chậm 35%. 👁 HƯ KHÔNG THỂ (gặp Kiểm Soát; 26×26, tốc 4.1, 5 đạn): tia cực nhanh xuyên tường/vật cản, x4 dame lên vật triệu hồi/công trình; kháng 50% Làm Chậm, miễn st Vũng mặt đất; phá vật triệu hồi +0.125 HP & +1 đạn. 🕸 TRÓC ẢNH THỂ (gặp Cơ Động; 26×26, tốc 4.4, 2 đạn): 2 nanh móc 0.55 lơ lửng 2s, địch di chuyển là khóa & truy kích gắt (đứng yên thì bay thẳng); Bắt Tốc +0.15 tốc/s khi địch nhanh hơn; trúng: Tê Liệt 2.5s (-30% tốc), địch Lướt/Dịch chuyển khi dính -> RÁCH CƠ 1.0 st chuẩn + Khóa Chân 0.75s. ☣ ĐỘC THỰC THỂ (gặp Sinh Tồn; 28×28, 5.5 HP, dame 1.2): dịch nhầy nổ, Hoại Tử 3s (0.25 + 1% Máu tối đa/s); Trọng Thương -60% hồi máu/Giáp Trắng, hấp thụ 25% lượng địch hồi; đạn vỡ Khiên xuyên thêm 1.0; địch vỡ 3 Khiên -> +1 Khiên. Hạ gục -> THÔN PHỆ ĐỒNG HÓA.',
+            type: 'body', role: ['Đối Đầu'],
+            size: { w: 28, h: 28 },
+            stats: { hp: 5.0, dmg: 1.1, ammo: 4, speedMult: 1.0571 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 35 },

@@ -264,6 +264,8 @@ function renderFrame() {
     if (typeof dtpFxOver === 'function') dtpFxOver();
     // Lớp phủ kết liễu Railgun (LEVEL 5: RAILGUN) - js/characters/railgun/render.js
     if (typeof rgFxOver === 'function') rgFxOver();
+    // Kết liễu Skinwalker (THÔN PHỆ ĐỒNG HÓA) - js/characters/skinwalker/render.js
+    if (typeof swFxOver === 'function') swFxOver();
 
     // Particles & Floating Numbers
     updateAndDrawParticles();
@@ -292,7 +294,7 @@ function renderFrame() {
 const VICTORY_BANNER_SPAN = 87;
 const VICTORY_FX_DELAY = 0;        // kết liễu diễn xong là hiện màn thắng ngay
 const VICTORY_TOTAL_CAP = 600;     // tối đa 10s cho cả màn kết hiệp (không bao giờ treo)
-const FINISHER_FX_CLASSES = ['FsFinisher', 'TsFinisher', 'JkFinisher', 'JgFinisher', 'CgFinisher', 'ClFinisher', 'JpFinisher', 'WsFinisher', 'StFinisher', 'TatFinisher', 'OpFinisher', 'BmFinisher', 'ArFinisher', 'PsyFinisher', 'TlFinisher', 'JlFinisher', 'KgFinisher', 'BodyFinisher', 'TcFinisher', 'CocFinisher', 'PrFinisher', 'AdFinisher', 'TnFinisher', 'WdFinisher', 'DtpFinisher', 'RgFinisher'];
+const FINISHER_FX_CLASSES = ['FsFinisher', 'TsFinisher', 'JkFinisher', 'JgFinisher', 'CgFinisher', 'ClFinisher', 'JpFinisher', 'WsFinisher', 'StFinisher', 'TatFinisher', 'OpFinisher', 'BmFinisher', 'ArFinisher', 'PsyFinisher', 'TlFinisher', 'JlFinisher', 'KgFinisher', 'BodyFinisher', 'TcFinisher', 'CocFinisher', 'PrFinisher', 'AdFinisher', 'TnFinisher', 'WdFinisher', 'DtpFinisher', 'RgFinisher', 'SwFinisher'];
 function finisherFxActive() {
     if (typeof bodyEffects === 'undefined') return false;
     for (const e of bodyEffects) {
