@@ -23,11 +23,17 @@ Object.assign(Player.prototype, {
             let isFullEvo = hasEvo1 && hasEvo2;
 
             // 1. Tự động sinh Ụ súng thường (2s nếu Full Evo, 5s nếu thường)
-            let normalInterval = isFullEvo ? 120 : 300;
+            let normalInterval = (isFullEvo ? 120 : 300) - (isFullEvo ? 12 : 36) * bodyShopLvl(this, 'eng_build'); // Lắp Ráp Siêu Tốc
             this.turretTimer = (this.turretTimer || 0) + 1;
             if (this.turretTimer >= normalInterval) {
                 turrets.push(new Turret(this, false));
                 this.turretTimer = 0;
+            }
+
+            // Cờ Lê Hiện Trường (Kho Phụ Tùng): hồi máu ụ gần Kỹ Sư
+            if (bodyShopLvl(this, 'eng_repair') > 0) {
+                const ocx = this.x + this.w / 2, ocy = this.y + this.h / 2;
+                turrets.forEach(t => { if (t.active && t.owner === this && Math.hypot(t.x + t.w / 2 - ocx, t.y + t.h / 2 - ocy) <= 70) t.hp = Math.min(t.maxHp, t.hp + 0.01); });
             }
 
             // 2. Cooldown quá tải
@@ -67,7 +73,7 @@ Object.assign(Player.prototype, {
                 if (this.smartTurretCharge === 60) {
                     // Đặt Ụ súng thông minh
                     let smartTurrets = turrets.filter(t => t.active && t.owner === this && t.isSmart);
-                    let maxSmart = isFullEvo ? 5 : (hasEvo1 ? 3 : 2);
+                    let maxSmart = (isFullEvo ? 5 : (hasEvo1 ? 3 : 2)) + bodyShopLvl(this, 'eng_smart');
                     if (smartTurrets.length >= maxSmart) {
                         let oldest = smartTurrets[0];
                         oldest.active = false;

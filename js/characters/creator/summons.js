@@ -19,12 +19,12 @@ class CreatorTurret {
         let isFullEvo = hasEvo1 && owner.hasUpgrade('evo_cr_2');
         let ratio = isFullEvo ? 2.0 : (hasEvo1 ? 1.0 : 0.5);
         
-        this.hp = Math.max(1, owner.maxHp * ratio);
+        this.hp = Math.max(1, owner.maxHp * ratio) * (1 + 0.5 * bodyShopLvl(owner, 'cr_turret_hp'));
         this.maxHp = this.hp;
-        this.dmg = owner.damage * ratio;
+        this.dmg = owner.damage * ratio * (1 + 0.25 * bodyShopLvl(owner, 'cr_turret_dmg'));
         this.active = true;
         this.lastShot = Date.now();
-        this.reloadTime = 1200;
+        this.reloadTime = Math.round(1200 * (1 - 0.15 * bodyShopLvl(owner, 'cr_turret_rate')));
         this.angle = (owner.id === 1) ? -Math.PI / 2 : Math.PI / 2;
     }
 
@@ -131,7 +131,7 @@ class CreatorShield {
         let isFullEvo = hasEvo1 && owner.hasUpgrade('evo_cr_2');
         let ratio = isFullEvo ? 4.0 : (hasEvo1 ? 2.0 : 1.0);
         
-        this.maxHp = 5 * ratio; // 5 HP gốc, 10 HP Evo 1, 20 HP Full Evo
+        this.maxHp = 5 * ratio + 3 * bodyShopLvl(owner, 'cr_shield'); // 5 HP gốc, 10 HP Evo 1, 20 HP Full Evo (+3/cấp Xưởng)
         this.hp = this.maxHp;
         this.durationTicks = 16 * 60; // 16s
         this.active = true;
@@ -149,7 +149,7 @@ class CreatorShield {
         if (this.hitFlash > 0) this.hitFlash--;
         if (this.durationTicks <= 0 || this.hp <= 0) {
             this.active = false;
-            this.owner.creatorShieldCooldown = 8 * 60; // Cooldown 8s sau khi vỡ/hết giờ
+            this.owner.creatorShieldCooldown = Math.round((8 - 1.5 * bodyShopLvl(this.owner, 'cr_shield')) * 60); // Cooldown 8s sau khi vỡ/hết giờ (-1.5s/cấp Xưởng)
             if (this.hp <= 0) {
                 explosions.push(new Explosion(this.owner.x + this.owner.w / 2, this.y, 40, '#00e5ff', 0, this.owner));
                 if (soundSystem && !soundSystem.muted) soundSystem.playShieldBreak();
@@ -245,18 +245,18 @@ class CreatorDrone {
 
     getMaxHp() {
         let isFullEvo = this.owner.hasUpgrade && this.owner.hasUpgrade('evo_cr_1') && this.owner.hasUpgrade('evo_cr_2');
-        return Math.max(1, this.owner.maxHp * (isFullEvo ? 2.0 : 1.0));
+        return Math.max(1, this.owner.maxHp * (isFullEvo ? 2.0 : 1.0)) + bodyShopLvl(this.owner, 'cr_drone');
     }
 
     getDamage() {
         let isFullEvo = this.owner.hasUpgrade && this.owner.hasUpgrade('evo_cr_1') && this.owner.hasUpgrade('evo_cr_2');
-        return this.owner.damage * (isFullEvo ? 2.0 : 1.0);
+        return this.owner.damage * (isFullEvo ? 2.0 : 1.0) * (1 + 0.25 * bodyShopLvl(this.owner, 'cr_drone'));
     }
 
     update() {
         if (!this.active) {
             // Hồi sinh sau 15s (15000ms)
-            if (Date.now() - this.deadTimer >= 15000) {
+            if (Date.now() - this.deadTimer >= 15000 - 3000 * bodyShopLvl(this.owner, 'cr_drone')) {
                 this.active = true;
                 this.hp = this.getMaxHp();
                 this.x = canvas.width / 2 - 13;
@@ -356,8 +356,8 @@ class CreatorRobot {
         this.h = 36;
         this.x = Math.max(5, Math.min(canvas.width - this.w - 5, owner.x + owner.w / 2 - this.w / 2));
         this.y = this.getHomeY();
-        this.maxHp = 10;
-        this.hp = 10;
+        this.maxHp = 10 + 4 * bodyShopLvl(owner, 'cr_robot');
+        this.hp = this.maxHp;
         this.dmg = 0.5;
         this.speed = 0.75; // [ĐỔI] đi chậm hơn (1.2 -> 0.75)
         this.energy = 100;
@@ -425,7 +425,7 @@ class CreatorRobot {
             this.dashTimer--;
             this.y += this.dashDirY * 9;
             if (enemy && enemy.hp > 0 && rectIntersect(this.x, this.y, this.w, this.h, enemy.x, enemy.y, enemy.w, enemy.h)) {
-                enemy.takeDamage(2.0, this.owner);
+                bodyShopCredit(this.owner, enemy.takeDamage(2.0, this.owner), enemy);
                 enemy.x += (this.x < enemy.x ? 1 : -1) * 35;
                 explosions.push(new Explosion(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, 45, '#ff5722', 0, this.owner));
                 triggerScreenShake(4, 6);
@@ -470,6 +470,7 @@ class CreatorRobot {
                         vy: a.vy,
                         dmg: 0.25,
                         owner: this.owner,
+                        isCreatorRobotBullet: true,
                         color: "#ffb74d",
                         hitIds: []
                     });
@@ -490,6 +491,7 @@ class CreatorRobot {
                 vy: dirY * 5.5,
                 dmg: 1.5,
                 isRocket: true,
+                isCreatorRobotBullet: true,
                 owner: this.owner,
                 color: "#f4511e",
                 hitIds: []
@@ -529,7 +531,7 @@ class CreatorRobot {
                             let hitY = this.aaaReticle.y + oy;
                             explosions.push(new Explosion(hitX, hitY, 60, '#ff1744', 1.2, this.owner));
                             if (enemy && enemy.hp > 0 && Math.hypot(enemy.x + enemy.w / 2 - hitX, enemy.y + enemy.h / 2 - hitY) <= 60) {
-                                enemy.takeDamage(1.2, this.owner);
+                                bodyShopCredit(this.owner, enemy.takeDamage(1.2, this.owner), enemy);
                             }
                             triggerScreenShake(4, 6);
                         }, step * 250);
@@ -555,7 +557,7 @@ class CreatorRobot {
                     let beamH = this.owner.id === 1 ? this.y : canvas.height - (this.y + this.h);
                     beams.push(new Beam(beamX - 10, beamY, 20, beamH, this.owner.id, true));
                     if (enemy && enemy.hp > 0 && Math.abs(enemy.x + enemy.w / 2 - beamX) <= 10 + enemy.w / 2) {
-                        enemy.takeDamage(3.0, this.owner);
+                        bodyShopCredit(this.owner, enemy.takeDamage(3.0, this.owner), enemy);
                     }
                     crates.forEach(c => {
                         if (c.active && Math.abs(c.x + c.w / 2 - beamX) <= 10 + c.w / 2 && (this.owner.id === 1 ? c.y < this.y : c.y > this.y)) {

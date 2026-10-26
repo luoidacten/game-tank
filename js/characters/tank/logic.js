@@ -142,8 +142,6 @@ Object.assign(Player.prototype, {
                             this.gears = (this.gears || 0) + 1;
                             addFloatingText(this.x + this.w / 2, this.y - 15, "+1 BÁNH RĂNG ⚙️", "#ff9800", 12);
                         }
-                        this.components = (this.components || 0) + 0.5;
-                        addFloatingText(this.x + this.w / 2, this.y - 27, "+0.5 LINH KIỆN 🔩", "#00e5ff", 11);
                     }
                     // Giáp hợp kim: Nhặt Crate nhận Giáp Ảo 5s
                     if (this.weapon === 'inventor' && this.invUpgrades && this.invUpgrades['inv_giap']) {

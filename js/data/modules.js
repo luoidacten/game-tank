@@ -22,7 +22,7 @@ const MODULES = {
         { id: 'wind_slash', name: 'Phong Trảm', desc: 'HP:4 | Tụ lực bắn Kiếm Khí (Phá đạn)', type: 'body', role: ['Đối Đầu', 'Kiểm Soát'], size: { w: 30, h: 30 }, stats: { hp: 4, dmg: 0.9, ammo: 1 } },
         { id: 'storm', name: 'Cuồng Phong', desc: 'HP:3.5 | Giữ tụ lực 3.5s, nhả -> Lao lên làn địch (phản đạn). <50%: Chém. 50%: Gió Lốc 2s. 100%: Lôi Bão 4s (ẩn, bất tử) rồi chém chẻ đôi lốc', type: 'body', role: ['Cơ Động', 'Đối Đầu'], size: { w: 30, h: 30 }, stats: { hp: 3.5, dmg: 2, ammo: 0 } },
         { id: 'acid', name: 'Axit Hóa', desc: 'HP:4 | Dame:0.5 | Đạn:1. Ăn mòn Max HP (Max HP<=1 nhận 4 Dame). Mỗi viên thứ 5 (đạn cường hóa) tạo VÙNG ĂN MÒN tím: rút cả HP lẫn Max HP & làm chậm. Mọi đạn/vùng Axit gây x10 dame + 50% Max HP lên vật cản, công trình, xe tiền/phương tiện & vật triệu hồi.', type: 'body', role: ['Kiểm Soát', 'Đối Đầu'], size: { w: 30, h: 30 }, stats: { hp: 4, dmg: 0.5, ammo: 1 } },
-        { id: 'engineer', name: 'Kỹ Sư', desc: 'HP:3 (+2 máu xe lớn) | Dame:0.5 | Đạn:2. Tự tạo Ụ Thường. Giữ 1s đặt Ụ Thông Minh. Ụ tồn tại quá 10s tự mất máu chậm.', type: 'body', role: ['Kiểm Soát', 'Sinh Tồn'], size: { w: 34, h: 34 }, stats: { hp: 3, dmg: 0.5, ammo: 2 } },
+        { id: 'engineer', name: 'Kỹ Sư', desc: 'HP:3 (+2 máu xe lớn) | Dame:0.5 | Đạn:2. Tự tạo Ụ Thường. Giữ 1s đặt Ụ Thông Minh. Ụ tồn tại quá 10s tự mất máu chậm. Ụ súng gây sát thương/hạ gục -> Phụ Tùng 🔩, mở Kho Phụ Tùng nâng cấp ụ (máu, dame, tốc bắn, Ụ Hàn Băng...).', type: 'body', role: ['Kiểm Soát', 'Sinh Tồn'], size: { w: 34, h: 34 }, stats: { hp: 3, dmg: 0.5, ammo: 2 } },
         { id: 'ghost', name: 'Ghost', desc: 'HP:2.5 | Tốc: Rất Nhanh | Đạn:4. Vô Ảnh 2s (CD 3s). Tàn Ảnh phân thân.', type: 'body', role: ['Cơ Động', 'Đối Đầu'], size: { w: 24, h: 24 }, stats: { hp: 2.5, dmg: 1.75, ammo: 4 } },
         { id: 'aaa', name: 'Pháo Cao Xạ', desc: 'HP:3.5 (+4 máu xe lớn) | Tốc: Chậm | Dame:1.15 Pháo Kích (1.5s nổ) + Xả nhanh khi có đạn. Tự bắn mỗi 4s (vòng đếm ngược quanh xe để canh thời điểm).', type: 'body', role: ['Kiểm Soát', 'Đối Đầu'], size: { w: 37, h: 37 }, stats: { hp: 3.5, dmg: 1.15, ammo: 1 } },
         { id: 'blade_god', name: 'Kiếm Tôn', desc: 'HP:5 | Dame:1.05 | Đạn:4. Luân phiên: Quang Kiếm (lơ lửng tại chỗ, ngắm 2s rồi tự phóng tia sáng 0.5×Dame+1.1) / Ám Kiếm (kiếm bay 0.85×Dame, nổ + câm lặng). Nhát thứ 10: Phá Thiên Kiếm.', type: 'body', role: ['Đối Đầu', 'Kiểm Soát'], size: { w: 30, h: 30 }, stats: { hp: 5, dmg: 1.05, ammo: 4 } },
@@ -132,7 +132,7 @@ const MODULES = {
         {
             id: 'creator',
             name: 'Kẻ Sáng Tạo',
-            desc: 'HP:3 | Dame:0.25 | Đạn:1 | Tốc: 1.0x. Bản Thiết Kế Toàn Năng: Ụ Súng Tự Ngắm (max 2), Khiên Thép Chắn Đạn (5 HP), Drone Không Kích.',
+            desc: 'HP:3 | Dame:0.25 | Đạn:1 | Tốc: 1.0x. Bản Thiết Kế Toàn Năng: Ụ Súng Tự Ngắm (max 2), Khiên Thép Chắn Đạn (5 HP), Drone Không Kích. Vật triệu hồi gây sát thương/hạ gục -> Tinh Hoa ✦, mở Xưởng Sáng Chế nâng cấp ụ súng, khiên, drone, robot.',
             type: 'body', role: ['Kiểm Soát', 'Sinh Tồn'],
             size: { w: 24, h: 24 },
             stats: { hp: 3, dmg: 0.25, ammo: 1, speedMult: 1.0 }
@@ -148,7 +148,7 @@ const MODULES = {
         {
             id: 'genius',
             name: 'Thiên Tài',
-            desc: 'HP:2.5 | Dame:1 | Đạn:1 | Tốc: 1.3x. Thu thập Bánh Răng & Linh Kiện. Mở Chợ Đen nâng cấp Robot. Đủ Bánh Răng nhấn giữ để trực tiếp Lái Mecha!',
+            desc: 'HP:2.5 | Dame:1 | Đạn:1 | Tốc: 1.3x. Thu thập Bánh Răng ⚙️ (hòm tiếp tế, +1 mỗi 10s, tối thiểu 6/hiệp). Tiêu Bánh Răng ở Chợ Đen Robot (mua/đổi hàng) để nâng cấp Mecha. Đủ Bánh Răng nhấn giữ để trực tiếp Lái Mecha!',
             type: 'body', role: ['Sinh Tồn', 'Kiểm Soát'],
             size: { w: 24, h: 24 },
             stats: { hp: 2.5, dmg: 1, ammo: 1, speedMult: 1.3 }

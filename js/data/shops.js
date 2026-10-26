@@ -43,3 +43,28 @@ const INVENTOR_SHOP = [
     // Nhóm 4: Tối thượng Full Evo
     { id: 'inv_full_evo', name: 'Nâng Cấp Cuối Cùng', desc: 'FULL EVO: 4 Drone (200% chỉ số), giảm 60% CD nòng phụ, xe chủ tích hợp toàn bộ vũ khí!', cost: 15, type: 'fullevo', maxLvl: 1 }
 ];
+
+// --- XƯỞNG SÁNG CHẾ CHO KẺ SÁNG TẠO (CREATOR) — tiền tệ: Tinh Hoa ✦ (kiếm từ sát thương/hạ gục của vật triệu hồi) ---
+// cost = giá cấp 1; giá tăng theo cấp của CHÍNH món đó (x1.6 mỗi cấp). pri = độ ưu tiên khi bot mua
+const CREATOR_WORKSHOP = [
+    { id: 'cr_turret_hp', icon: '🧱', name: 'Vỏ Ụ Gia Cố', desc: 'Ụ Súng +50% Máu mỗi cấp.', cost: 3, maxLvl: 3, pri: 3 },
+    { id: 'cr_turret_dmg', icon: '💥', name: 'Nòng Ụ Cường Lực', desc: 'Ụ Súng +25% Sát Thương mỗi cấp.', cost: 3, maxLvl: 3, pri: 4 },
+    { id: 'cr_turret_rate', icon: '⚡', name: 'Bộ Nạp Nhanh', desc: 'Ụ Súng bắn nhanh hơn 15% mỗi cấp.', cost: 3, maxLvl: 3, pri: 4 },
+    { id: 'cr_turret_cap', icon: '🛠️', name: 'Dây Chuyền Ụ Súng', desc: '+1 Ụ Súng tối đa & triển khai nhanh hơn 2s mỗi cấp.', cost: 5, maxLvl: 2, pri: 5 },
+    { id: 'cr_shield', icon: '🛡️', name: 'Thép Tôi Khiên', desc: 'Khiên Thép +3 Máu, hồi chiêu nhanh hơn 1.5s mỗi cấp.', cost: 3, maxLvl: 3, pri: 2 },
+    { id: 'cr_drone', icon: '🛸', name: 'Drone Nâng Cấp', desc: 'Drone +1 Máu, +25% Sát Thương, hồi sinh nhanh hơn 3s mỗi cấp.', cost: 3, maxLvl: 3, pri: 3 },
+    { id: 'cr_repair', icon: '🔧', name: 'Trạm Bảo Trì', desc: 'Ụ Súng, Drone & Robot tự sửa 0.3 Máu/s.', cost: 6, maxLvl: 1, pri: 3 },
+    { id: 'cr_robot', icon: '🤖', name: 'Khung Robot Titan', desc: '(Cần Evo 2) Robot xuất xưởng sớm hơn 3s & +4 Máu mỗi cấp.', cost: 4, maxLvl: 2, pri: 1, needEvo: 'evo_cr_2' }
+];
+
+// --- KHO PHỤ TÙNG CHO KỸ SƯ (ENGINEER) — tiền tệ: Phụ Tùng 🔩 (kiếm từ sát thương/hạ gục của ụ súng) ---
+const ENGINEER_DEPOT = [
+    { id: 'eng_hp', icon: '🧱', name: 'Giáp Ụ Súng', desc: 'Mọi Ụ Súng +25% Máu mỗi cấp.', cost: 3, maxLvl: 3, pri: 3 },
+    { id: 'eng_dmg', icon: '💥', name: 'Đạn Xuyên Giáp', desc: 'Mọi Ụ Súng +20% Sát Thương mỗi cấp.', cost: 3, maxLvl: 3, pri: 4 },
+    { id: 'eng_rate', icon: '⚡', name: 'Cơ Cấu Nạp Đạn', desc: 'Mọi Ụ Súng bắn nhanh hơn 12% mỗi cấp.', cost: 3, maxLvl: 3, pri: 4 },
+    { id: 'eng_build', icon: '🏗️', name: 'Lắp Ráp Siêu Tốc', desc: 'Ụ Thường tự dựng nhanh hơn 0.6s mỗi cấp.', cost: 4, maxLvl: 3, pri: 3 },
+    { id: 'eng_life', icon: '🔋', name: 'Pin Bền Bỉ', desc: 'Ụ Thường tồn tại +5s & tự hao máu chậm hơn 50% mỗi cấp.', cost: 3, maxLvl: 2, pri: 2 },
+    { id: 'eng_smart', icon: '🧠', name: 'Chip Điều Khiển', desc: '+1 Ụ Thông Minh tối đa mỗi cấp.', cost: 5, maxLvl: 2, pri: 4 },
+    { id: 'eng_repair', icon: '🔧', name: 'Cờ Lê Hiện Trường', desc: 'Ụ Súng trong bán kính 70 quanh Kỹ Sư hồi 0.6 Máu/s.', cost: 5, maxLvl: 1, pri: 2 },
+    { id: 'eng_ice', icon: '❄️', name: 'Ụ Hàn Băng', desc: 'Ụ Thường hoá Ụ Băng: cứ 2 phát có 1 phát đạn băng làm chậm địch.', cost: 6, maxLvl: 1, pri: 3 }
+];

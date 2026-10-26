@@ -400,8 +400,6 @@ function checkHits(attacker, victim) {
                             attacker.gears = (attacker.gears || 0) + 1;
                             addFloatingText(attacker.x + attacker.w / 2, attacker.y - 15, "+1 BÁNH RĂNG ⚙️", "#ff9800", 12);
                         }
-                        attacker.components = (attacker.components || 0) + 0.5;
-                        addFloatingText(attacker.x + attacker.w / 2, attacker.y - 27, "+0.5 LINH KIỆN 🔩", "#00e5ff", 11);
                     }
 
                     // Giáp Hợp Kim: Nhặt Crate nhận Giáp Ảo tồn tại 5s
@@ -707,6 +705,7 @@ function checkHits(attacker, victim) {
                 if (typeof onGearBulletHitPlayer === 'function') {
                     onGearBulletHitPlayer(attacker, victim, b, dealtDmg);
                 }
+                if (typeof onBodyShopBulletHit === 'function') onBodyShopBulletHit(attacker, victim, b, dealtDmg); // Tinh Hoa / Phụ Tùng
 
                 // --- SHADOW HUNTER BULLET HIT EFFECTS ---
                 if (attacker.weapon === 'shadow_hunter' || b.isShadowHunter) {

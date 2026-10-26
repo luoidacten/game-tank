@@ -126,8 +126,6 @@ class StormSlash {
                             this.owner.gears = (this.owner.gears || 0) + 1;
                             if (typeof addFloatingText === 'function') addFloatingText(this.owner.x + this.owner.w / 2, this.owner.y - 15, "+1 BÁNH RĂNG ⚙️", "#ff9800", 12);
                         }
-                        this.owner.components = (this.owner.components || 0) + 0.5;
-                        if (typeof addFloatingText === 'function') addFloatingText(this.owner.x + this.owner.w / 2, this.owner.y - 27, "+0.5 LINH KIỆN 🔩", "#00e5ff", 11);
                     }
 
                     // Hiệu ứng nổ thùng

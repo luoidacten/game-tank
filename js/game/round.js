@@ -170,6 +170,7 @@ function endRound(winnerId) {
         loserPlayer.components = (loserPlayer.components || 0) + lkLoss;
         if (typeof addFloatingText === 'function') addFloatingText(loserPlayer.x + loserPlayer.w / 2, loserPlayer.y - 15, `+${lkLoss} LK (AN ỦI)`, "#00ffcc", 14);
     }
+    if (typeof bodyShopRoundIncome === 'function') bodyShopRoundIncome(winnerId); // Tinh Hoa (Kẻ Sáng Tạo) / Phụ Tùng (Kỹ Sư)
     if (winnerId === 0) {
         [p1, p2].forEach(p => {
             if (p && p.weapon === 'inventor') {

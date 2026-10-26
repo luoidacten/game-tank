@@ -160,7 +160,6 @@ Object.assign(Player.prototype, {
         if (this.weapon === 'genius') {
             this.w = 24; this.h = 24;
             this.gears = Math.max(this.gears || 0, 6); // [CÂN BẰNG] mỗi hiệp có sẵn 6 bánh răng
-            this.components = this.components || 0;
             this.isPilotingMecha = false;
             this.mechaSummonMultiplier = this.mechaSummonMultiplier || 1;
             this.mechaSummonHold = 0;

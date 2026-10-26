@@ -25,10 +25,9 @@ Object.assign(Player.prototype, {
         if (this.weapon !== 'genius' || typeof hudExtraBar !== 'function') return;
         // Biểu tượng thay chữ: thanh mảnh ở hàng phụ sau HUD chung; chip/ô chế độ trước mũi xe (chế độ Mecha cũng hiện trên nút Bắn)
         if (!this.isPilotingMecha) {
-            // Bánh Răng / Linh Kiện: chip [biểu tượng + số]
+            // Bánh Răng: chip [biểu tượng + số]
             hudExtraChips(this, 0, [
                 { g: 'gear', c: '#ffb74d', l: String(this.gears || 0) },
-                { g: 'nut', c: '#00ffcc', l: String(this.components || 0) },
             ], { d: hudNearD(this, 4, 11) });
             // Giữ nút triệu hồi: vòng nạp cạnh xe (empower HUD) + thanh mảnh
             if (this.mechaSummonHold > 0) hudExtraBar(this, 0, Math.min(1, this.mechaSummonHold / 40), '#ff9800', { h: 2.5 });

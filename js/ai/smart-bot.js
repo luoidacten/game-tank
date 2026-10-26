@@ -382,7 +382,7 @@ function botShopBuy(playerId) {
     const isPayWin = (c) => /PAY TO WIN/.test(txt(c));
     const priceOf = (c) => { const m = (txt(c).match(/\$\s?(\d+)/g) || []).map(x => +x.replace(/\D/g, '')); return m.length ? m[m.length - 1] : null; };
     const sig = () => JSON.stringify([coins(), player.upgrades.length, player.upgradeLevel, player.components, player.gears,
-        player.invUpgrades, player.geniusUpgrades, player.geniusPurchaseCount, player.kkData && player.kkData.active.length, player.cuData]);
+        player.invUpgrades, player.geniusUpgrades, player.geniusPurchaseCount, player.crUpgrades, player.engUpgrades, player.crEssence, player.engParts, player.kkData && player.kkData.active.length, player.cuData]);
 
     const getRemainingEvos = () => {
         const list = (typeof EVOLUTIONS !== 'undefined' && EVOLUTIONS[player.weapon]) ? EVOLUTIONS[player.weapon] : [];
@@ -465,6 +465,7 @@ function botShopBuy(playerId) {
     };
 
     buyMain();
+    if (typeof bodyShopBotBuy === 'function') bodyShopBotBuy(player); // Xưởng Sáng Chế / Kho Phụ Tùng: mua theo ưu tiên/giá
     visitSpecialShops();
     // Đổi hàng thông minh: chỉ reroll khi miễn phí (0$), hoặc khi đã đủ tiền mua Evo mà chưa thấy Evo trên bàn,
     // hoặc khi đã Full Evo và còn dư nhiều tiền

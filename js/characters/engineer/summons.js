@@ -46,6 +46,7 @@ class Turret {
         let feetSpeedRatio = speedAboveBase / 0.5;
         let speedReductionSec = feetSpeedRatio * 0.125;
         this.baseReload = Math.max(500, Math.round((3.0 - speedReductionSec) * 1000));
+        this.baseReload = Math.max(400, Math.round(this.baseReload * (1 - 0.12 * bodyShopLvl(owner, 'eng_rate')))); // Kho Phụ Tùng
         this.reloadTime = this.baseReload;
 
         if (this.isSmart) {
@@ -75,9 +76,15 @@ class Turret {
                 this.baseDmg = 0.5 * owner.damage;
             }
             this.maxHp = this.hp;
-            this.lifeTime = (20 + feetArmorCount * 1) * 60; // 20s + số lượng Feet Armor (1s/feet)
+            this.lifeTime = (20 + feetArmorCount * 1 + 5 * bodyShopLvl(owner, 'eng_life')) * 60; // 20s + số lượng Feet Armor (1s/feet) + Pin Bền Bỉ
             this.isPiercing = false;
         }
+        // Kho Phụ Tùng: +25% máu / +20% dame mỗi cấp
+        this.hp *= 1 + 0.25 * bodyShopLvl(owner, 'eng_hp');
+        this.maxHp = this.hp;
+        this.baseDmg *= 1 + 0.2 * bodyShopLvl(owner, 'eng_dmg');
+        this.isIceTurret = !isSmart && bodyShopLvl(owner, 'eng_ice') > 0;
+        this.shotCount = 0;
 
         this.ammo = 999;
         this.lastShot = Date.now();
@@ -108,7 +115,7 @@ class Turret {
         // Ụ súng tồn tại quá 10s bắt đầu tự mất máu chậm (~1/40 máu tối đa mỗi giây)
         this.age = (this.age || 0) + 1;
         if (this.age > TURRET_DECAY_DELAY) {
-            this.hp -= this.maxHp / TURRET_DECAY_TICKS;
+            this.hp -= this.maxHp / (TURRET_DECAY_TICKS * (1 + 0.5 * bodyShopLvl(this.owner, 'eng_life')));
             if (this.hp <= 0) {
                 this.hp = 0; this.active = false;
                 explosions.push(new Explosion(this.x + this.w / 2, this.y + this.h / 2, 25, 'gray', 0, this.owner));
@@ -203,7 +210,7 @@ class Turret {
         soundSystem.playShoot();
 
         if (rectIntersect(startX, startY, beamW, beamH, enemy.x, enemy.y, enemy.w, enemy.h)) {
-            enemy.takeDamage(this.baseDmg * 1.5, this.owner, { isPiercing: true });
+            bodyShopCredit(this.owner, enemy.takeDamage(this.baseDmg * 1.5, this.owner, { isPiercing: true }), enemy);
         }
     }
 
@@ -211,6 +218,8 @@ class Turret {
         let speed = 4.8;
         let vx = Math.cos(this.currentAngle) * speed;
         let vy = Math.sin(this.currentAngle) * speed;
+        this.shotCount = (this.shotCount || 0) + 1;
+        const ice = !!this.isIceTurret && this.shotCount % 2 === 0; // Ụ Hàn Băng: cứ 2 phát 1 phát băng
 
         this.owner.bullets.push({
             x: this.x + this.w / 2 - 2.5,
@@ -224,6 +233,7 @@ class Turret {
             isPiercing: this.isPiercing,
             isTurretBullet: true,
             isSmartTurret: this.isSmart,
+            isIce: ice,
             hitIds: []
         });
 
@@ -283,10 +293,10 @@ class Turret {
             ctx.restore();
         }
 
-        // Thân ụ súng
-        ctx.fillStyle = this.isSmart ? "#1a365d" : "#4a5568";
+        // Thân ụ súng (Ụ Hàn Băng: thân xanh băng)
+        ctx.fillStyle = this.isSmart ? "#1a365d" : (this.isIceTurret ? "#0e4a5c" : "#4a5568");
         ctx.fillRect(this.x, this.y, this.w, this.h);
-        ctx.strokeStyle = this.isSmart ? "#00f0ff" : "rgba(255, 255, 255, 0.3)";
+        ctx.strokeStyle = this.isSmart ? "#00f0ff" : (this.isIceTurret ? "#7dd3fc" : "rgba(255, 255, 255, 0.3)");
         ctx.lineWidth = 1;
         ctx.strokeRect(this.x, this.y, this.w, this.h);
 

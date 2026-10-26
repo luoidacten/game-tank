@@ -24,11 +24,12 @@ Object.assign(Player.prototype, {
     updateCreator(inp) {
         if (this.weapon === 'creator') {
             // 1. Ụ Súng Tự Ngắm (Cứ mỗi 10s tự động triển khai 1 Ụ súng, tối đa 2 ụ cùng lúc)
+            const capLvl = bodyShopLvl(this, 'cr_turret_cap'); // Xưởng: +1 ụ tối đa, -2s mỗi cấp
             this.creatorTurretTimer = (this.creatorTurretTimer || 0) + 1;
-            if (this.creatorTurretTimer >= 600) {
+            if (this.creatorTurretTimer >= 600 - 120 * capLvl) {
                 this.creatorTurretTimer = 0;
                 let activeTurrets = creatorTurrets.filter(t => t.owner === this && t.active);
-                if (activeTurrets.length < 2) {
+                if (activeTurrets.length < 2 + capLvl) {
                     let sideY = (this.id === 1) ? this.y - 35 : this.y + this.h + 15;
                     // [FIX] Thử bên trái rồi bên phải xe; tránh đặt ụ mới chồng lên ụ cũ
                     let candidates = [this.x - 30, this.x + this.w + 10, this.x - 60, this.x + this.w + 40, this.x + this.w / 2 - 10];
@@ -73,10 +74,18 @@ Object.assign(Player.prototype, {
                 this.creatorDrone.update();
             }
 
-            // 4. Robot Tự Động (Evo 2: xuất xưởng sau 10s đầu trận)
+            // 5. Trạm Bảo Trì (Xưởng): ụ súng, drone, robot tự sửa 0.3 HP/s
+            if (bodyShopLvl(this, 'cr_repair') > 0) {
+                const heal = (o) => { if (o && o.active && o.hp > 0 && o.maxHp) o.hp = Math.min(o.maxHp, o.hp + 0.005); };
+                creatorTurrets.forEach(t => { if (t.owner === this) heal(t); });
+                if (this.creatorRobot) heal(this.creatorRobot);
+                if (this.creatorDrone && this.creatorDrone.active) this.creatorDrone.hp = Math.min(this.creatorDrone.getMaxHp(), this.creatorDrone.hp + 0.005);
+            }
+
+            // 4. Robot Tự Động (Evo 2: xuất xưởng sau 10s đầu trận, sớm hơn 3s mỗi cấp Khung Titan)
             if (this.hasUpgrade('evo_cr_2')) {
                 let timePlayed = Date.now() - gameState.roundStartTime;
-                if (timePlayed >= 10000 && !this.creatorRobot) {
+                if (timePlayed >= 10000 - 3000 * bodyShopLvl(this, 'cr_robot') && !this.creatorRobot) {
                     this.creatorRobot = new CreatorRobot(this);
                     creatorRobots.push(this.creatorRobot);
                 }

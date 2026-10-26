@@ -516,12 +516,15 @@ function renderShop(playerId, keepItems = false) {
         genBtn.className = 'card';
         genBtn.style.border = '2px solid #ab47bc';
         genBtn.style.background = '#2c1033';
-        genBtn.innerHTML = `<h4>🤖 CHỢ ĐEN ROBOT</h4><p>Nâng cấp Mecha</p><p style="color:#e040fb; font-weight:bold">BR: ${player.gears || 0} | LK: ${player.components || 0}</p>`;
+        genBtn.innerHTML = `<h4>🤖 CHỢ ĐEN ROBOT</h4><p>Nâng cấp Mecha</p><p style="color:#e040fb; font-weight:bold">Đang có: ${player.gears || 0} ⚙️ Bánh Răng</p>`;
         genBtn.onclick = () => {
             renderGeniusBlackMarket(playerId, false);
         };
         container.appendChild(genBtn);
     }
+
+    // Nút độc quyền cho Kẻ Sáng Tạo (Xưởng Sáng Chế) / Kỹ Sư (Kho Phụ Tùng) — js/game/summon-shops.js
+    if (typeof bodyShopButton === 'function') bodyShopButton(player, container, playerId);
 
     const readyBtn = document.createElement('div');
     readyBtn.id = `ready-btn-${playerId}`;
@@ -743,7 +746,7 @@ function renderGeniusBlackMarket(playerId, keepItems = false) {
     const player = (playerId === 'p1') ? p1 : p2;
 
     const roundTitle = document.getElementById('roundTitleText');
-    if (roundTitle) roundTitle.innerText = `CHỢ ĐEN ROBOT (Bánh Răng: ${player.gears || 0} | LK: ${player.components || 0})`;
+    if (roundTitle) roundTitle.innerText = `CHỢ ĐEN ROBOT (Bánh Răng: ${player.gears || 0} ⚙️)`;
 
     if (!player.geniusUpgrades) player.geniusUpgrades = {};
     if (player.geniusPurchaseCount === undefined) player.geniusPurchaseCount = 0;
@@ -766,24 +769,25 @@ function renderGeniusBlackMarket(playerId, keepItems = false) {
     };
     container.appendChild(backBtn);
 
-    // 2. Nút REROLL CHỢ ĐEN (1 Linh Kiện)
+    // 2. Nút REROLL CHỢ ĐEN (1 Bánh Răng — Thiên Tài chỉ dùng một loại tiền: Bánh Răng ⚙️)
     const rerollBtn = document.createElement('div');
     rerollBtn.className = 'card';
     rerollBtn.style.background = '#3e2723';
     rerollBtn.style.border = '2px solid #d7ccc8';
-    let canReroll = (player.components || 0) >= 1;
+    let canReroll = (player.gears || 0) >= 1;
     rerollBtn.innerHTML = `
         <h4 style="color:#ffcc80; font-size:12px;">REROLL CHỢ ĐEN</h4>
         <p style="font-size:9px; color:#ffe0b2;">Đổi 3 nâng cấp mới</p>
-        <p style="color:${canReroll ? '#00e5ff' : '#ef4444'}; font-size:11px; font-weight:bold; margin-top:2px;">-1 LINH KIỆN</p>
+        <p style="color:${canReroll ? '#00e5ff' : '#ef4444'}; font-size:11px; font-weight:bold; margin-top:2px;">-1 BÁNH RĂNG</p>
     `;
     rerollBtn.onclick = () => {
-        if ((player.components || 0) >= 1) {
-            player.components -= 1;
+        if ((player.gears || 0) >= 1) {
+            player.gears -= 1;
             if (soundSystem && !soundSystem.muted) soundSystem.playCoin();
             renderGeniusBlackMarket(playerId, false);
+            if (typeof onlineManager !== 'undefined' && onlineManager.isOnline) onlineManager.sendLoadout(playerId);
         } else {
-            if (typeof addFloatingText === 'function') addFloatingText(player.x + player.w / 2, player.y - 15, "CẦN 1 LINH KIỆN! 🔩", "#ff5722", 13);
+            if (typeof addFloatingText === 'function') addFloatingText(player.x + player.w / 2, player.y - 15, "CẦN 1 BÁNH RĂNG! ⚙️", "#ff5722", 13);
         }
     };
     container.appendChild(rerollBtn);
@@ -991,13 +995,15 @@ function handlePlayerReady(pid, fromRemote = false) {
 // ==========================================
 const SHOP_ICON = { speed: '⚡', armor: '🛡️', damage: '⛓️', interest: '💹' };
 const SHOP_LEAD_EMOJI = /^\s*((?:\p{Extended_Pictographic}|\p{Regional_Indicator})(?:️|‍\p{Extended_Pictographic})*)\s*/u;
-const SHOP_PRICE_RE = /\$\s?(\d+)|(-?\d+)\s*(LK|LINH KIỆN|Bánh Răng|CP)\b|^\s*(\d+)\s*(LK|CP)\s*$/i;
+const SHOP_PRICE_RE = /\$\s?(\d+)|(-?\d+)\s*(LK|LINH KIỆN|Bánh Răng|Tinh Hoa|Phụ Tùng|CP)\b|^\s*(\d+)\s*(LK|CP)\s*$/i;
 
 function shopWallet(player, playerId, unit) {
     unit = (unit || '$').toUpperCase();
     if (unit === '$') return playerId === 'p1' ? gameState.p1Coins : gameState.p2Coins;
     if (unit === 'LK' || unit === 'LINH KIỆN') return player.components || 0;
     if (unit === 'BÁNH RĂNG') return player.gears || 0;
+    if (unit === 'TINH HOA') return player.crEssence || 0;
+    if (unit === 'PHỤ TÙNG') return player.engParts || 0;
     if (unit === 'CP') return player.cuData ? (player.cuData.cp || 0) : 0;
     return null;
 }
@@ -1040,7 +1046,7 @@ function polishShopContainer(container) {
             if (m) { if (!icon) icon = m[1]; h4.innerHTML = h4.innerHTML.slice(m[0].length); }
         }
         const tag = card.querySelector(':scope > span');
-        if (!icon && tag) icon = ({ 'DRONE': '🛸', 'BẢN THÂN': '🔧', 'EVO 2': '🧬', 'TỐI THƯỢNG': '⭐', 'ROBOT MODULE': '🤖' })[tag.textContent.replace(/[\[\]]/g, '').trim()] || '';
+        if (!icon && tag) icon = ({ 'DRONE': '🛸', 'BẢN THÂN': '🔧', 'EVO 2': '🧬', 'TỐI THƯỢNG': '⭐', 'ROBOT MODULE': '🤖', 'SÁNG CHẾ': '✦', 'PHỤ TÙNG': '🔩' })[tag.textContent.replace(/[\[\]]/g, '').trim()] || '';
         if (!icon) icon = ({ ready: '✔', back: '↩', reroll: '🔄' })[kind] || (card.classList.contains('evo-card') ? '🧬' : '');
         if (icon) {
             const ico = document.createElement('div');
