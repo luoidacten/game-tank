@@ -219,10 +219,11 @@ function rgDrawFinisherOver(f) {
     }
     if (t < 60) {
         // Khung cận cảnh (cut-in) giữa xe và mục tiêu: 2 thanh ray + đồng xu bạc xoay tít tung lên rồi rơi về ngang nòng
-        const s = f.vy < H / 2 ? -1 : 1;                 // hướng từ khung tới mục tiêu
-        const px = Math.max(150, Math.min(W - 150, f.vx)), py = f.vy - s * 150;
+        // khung đặt ngay trước nòng xe Railgun (camera đang cận cảnh xe 1.6x)
+        const s = f.fd;                                   // hướng từ khung tới mục tiêu
+        const px = Math.max(110, Math.min(W - 110, f.ox)), py = f.oy + s * 88;
         const inK = Math.min(1, t / 8), outK = t > 52 ? (60 - t) / 8 : 1, A = inK * outK;
-        const PW = 270 * inK, PH = 118;
+        const PW = 200 * inK, PH = 118;
         ctx.save(); ctx.translate(px, py); ctx.transform(1, 0, -0.18, 1, 0, 0);
         ctx.globalAlpha = A * 0.92; ctx.fillStyle = '#020617'; ctx.fillRect(-PW / 2, -PH / 2, PW, PH);
         ctx.globalAlpha = A; ctx.strokeStyle = RG_BLUE; ctx.lineWidth = 2; ctx.shadowBlur = 12; ctx.shadowColor = RG_BLUE; ctx.strokeRect(-PW / 2, -PH / 2, PW, PH);
@@ -250,7 +251,11 @@ function rgDrawFinisherOver(f) {
     }
     // 56-110: búng từ trường — luồng lazer cam vàng quấn vòng xoắn xanh xuyên bản đồ
     if (t >= 56 && t < 125) {
-        const E = rgFinBeamEnd(f), k = (t - 56) / 69, grow = Math.min(1, (t - 56) / 6), a = t > 105 ? (125 - t) / 20 : 1;
+        // đầu tia chạy cùng nhịp camera: tới mục tiêu đúng RG_FIN_HIT rồi xuyên tới mép sân
+        const E = rgFinBeamEnd(f), k = (t - 56) / 69, a = t > 105 ? (125 - t) / 20 : 1;
+        const Lv = Math.hypot(f.vx - f.ox, f.vy - f.oy), u = (t - 56) / (RG_FIN_HIT - 56);
+        const reach = u <= 1 ? Lv * (typeof fcamEase === 'function' ? fcamEase(u) : u) : Lv + (E.L - Lv) * Math.min(1, (u - 1) * 2);
+        const grow = Math.min(1, reach / Math.max(1, E.L));
         const ex = f.ox + (E.x - f.ox) * grow, ey = f.oy + (E.y - f.oy) * grow, w = 22 * (1 - k * 0.5);
         if (t < 64) { ctx.globalAlpha = (64 - t) / 8; ctx.fillStyle = '#fffbe6'; ctx.fillRect(-W, -H, W * 3, H * 3); }
         ctx.globalAlpha = a * 0.55; ctx.strokeStyle = RG_ORANGE; ctx.shadowBlur = 30; ctx.shadowColor = RG_ORANGE; ctx.lineWidth = w * 2;
@@ -277,8 +282,8 @@ function rgDrawFinisherOver(f) {
         ctx.beginPath(); ctx.arc(f.ox, f.oy, 10 + k * 70, 0, Math.PI * 2); ctx.stroke();
     }
     // mục tiêu bốc hơi
-    if (t >= 56 && t < 120) {
-        const k = (t - 56) / 64;
+    if (t >= RG_FIN_HIT && t < 125) {
+        const k = (t - RG_FIN_HIT) / (125 - RG_FIN_HIT);
         ctx.globalAlpha = 1 - k; ctx.fillStyle = RG_GOLD; ctx.shadowColor = RG_ORANGE; ctx.shadowBlur = 20;
         for (let i = 0; i < 14; i++) {
             const a = rgRand(f.seed + i) * Math.PI * 2, r = k * (30 + rgRand(f.seed + i * 5) * 50);
@@ -286,9 +291,9 @@ function rgDrawFinisherOver(f) {
         }
     }
     // chữ LEVEL 5 — RAILGUN
-    if (t > 66) {
-        const a = Math.min(1, (t - 66) / 10) * fade, sc = 1 + Math.max(0, 1 - (t - 66) / 8) * 0.6;
-        const ty = f.vy < H / 2 ? f.vy + 120 : f.vy - 110, tx = Math.max(130, Math.min(W - 130, f.vx)), BW = 250;
+    if (t > 70) {
+        const a = Math.min(1, (t - 70) / 10) * fade, sc = 1 + Math.max(0, 1 - (t - 70) / 8) * 0.6;
+        const ty = f.vy < H / 2 ? f.vy + 105 : f.vy - 95, tx = Math.max(130, Math.min(W - 130, f.vx)), BW = 250;
         ctx.globalAlpha = a; ctx.textAlign = 'center';
         ctx.save(); ctx.translate(tx, ty); ctx.scale(sc, sc);
         ctx.fillStyle = 'rgba(2, 6, 23, 0.7)'; ctx.fillRect(-BW / 2, -34, BW, 58);

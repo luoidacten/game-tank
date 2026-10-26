@@ -175,6 +175,20 @@ function prDrawFinisherOver(f) {
     const dim = t < 120 ? Math.min(0.45, t / 40) : Math.max(0, 0.45 - (t - 120) / 40);
     ctx.fillStyle = `rgba(2,6,23,${dim})`; ctx.fillRect(0, 0, canvas.width, canvas.height);
     const grow = Math.min(1, t / 30);
+    // tia cầu vồng phóng từ nòng tới mục tiêu (0-34), camera bám đầu tia
+    if (f.ox !== undefined && t < 40) {
+        const u = typeof fcamEase === 'function' ? fcamEase((t - 10) / 20) : Math.max(0, Math.min(1, (t - 10) / 20));
+        const bx = f.ox + (f.x - f.ox) * u, by = f.oy + (f.y - f.oy) * u, fa = t > 30 ? (40 - t) / 10 : Math.min(1, t / 4);
+        ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round'; ctx.globalAlpha = fa;
+        for (let i = 0; i < 3; i++) {
+            ctx.strokeStyle = PR_RAINBOW[(i * 2 + Math.floor(t / 3)) % 7]; ctx.lineWidth = 7 - i * 2; ctx.shadowBlur = 16; ctx.shadowColor = ctx.strokeStyle;
+            ctx.beginPath(); ctx.moveTo(f.ox + (i - 1) * 2, f.oy); ctx.lineTo(bx + (i - 1) * 2, by); ctx.stroke();
+        }
+        ctx.fillStyle = '#ffffff'; ctx.shadowColor = PR_CYAN; ctx.shadowBlur = 20;
+        ctx.beginPath(); ctx.arc(bx, by, 7, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(f.ox, f.oy, 6 + 3 * Math.sin(t * 0.7), 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+    }
     const ms = [];
     for (let i = 0; i < PR_FIN_N; i++) ms.push(prFinMirror(f, i));
     if (t < 124) {

@@ -342,3 +342,10 @@ BulletHooks.register('jjk_black_flash', {
         ctx.restore();
     }
 });
+
+// Vụ nổ Hư Thức: Tử (chỉ hình ảnh; sát thương do Explosion ở js/player/bullets.js) — vẽ ở js/render/tank-art/curse.js
+class GjPurpleBlast {
+    constructor(x, y, r) { this.x = x; this.y = y; this.r = r; this.t = 0; this.dur = 70; this.active = true; }
+    update() { if (++this.t >= this.dur) this.active = false; }
+    draw() { if (typeof drawGojoPurpleBlast === 'function') drawGojoPurpleBlast(this); }
+}

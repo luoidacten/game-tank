@@ -19,6 +19,48 @@ function drawRain() {
 
 let worldViewTransform = null;
 
+// ==========================================
+// CAMERA KẾT LIỄU dùng chung: finisherCam = {x, y, zoom} (dữ liệu thuần, tính lại mỗi khung hình
+// từ tick của thực thể kết liễu -> guest online thấy y hệt host). Kết liễu nào muốn lia camera thì có
+// phương thức camPath() trả về {x, y, zoom} (toạ độ thế giới); fcamKeys() giúp nội suy theo các mốc.
+// Chỉ áp cho lớp thế giới (không áp HUD / băng rôn); kẹp để không bao giờ lộ ra ngoài sân.
+// ==========================================
+let finisherCam = null;
+function fcamEase(k) { k = Math.max(0, Math.min(1, k)); return k * k * (3 - 2 * k); }
+// keys: [[t, x, y, zoom], ...] theo t tăng dần; giữa 2 mốc nội suy êm (ease in/out)
+function fcamKeys(t, keys) {
+    let a = keys[0];
+    if (t <= a[0]) return { x: a[1], y: a[2], zoom: a[3] };
+    for (let i = 1; i < keys.length; i++) {
+        const b = keys[i];
+        if (t <= b[0]) {
+            const e = fcamEase((t - a[0]) / Math.max(1, b[0] - a[0]));
+            return { x: a[1] + (b[1] - a[1]) * e, y: a[2] + (b[2] - a[2]) * e, zoom: a[3] + (b[3] - a[3]) * e };
+        }
+        a = b;
+    }
+    return { x: a[1], y: a[2], zoom: a[3] };
+}
+function fcamClamp(c) {
+    const W = canvas.width, H = canvas.height, z = Math.max(1, c.zoom || 1);
+    const hw = W / (2 * z), hh = H / (2 * z);
+    return { x: Math.max(hw, Math.min(W - hw, c.x)), y: Math.max(hh, Math.min(H - hh, c.y)), zoom: z };
+}
+function computeFinisherCam() {
+    if (!fatalCinematic.active) return null;
+    if (typeof bodyEffects !== 'undefined') {
+        for (const e of bodyEffects) {
+            if (!e || !e.active || typeof e.camPath !== 'function') continue;
+            const c = e.camPath();
+            if (c) return fcamClamp(c);
+        }
+    }
+    // mặc định (như cũ): zoom nhẹ dần vào nạn nhân khi băng rôn hiện
+    const progress = 1 - (fatalCinematic.timer / fatalCinematic.maxTimer);
+    const zoom = 1 + 0.20 * Math.sin(Math.min(progress * 2.5, 1) * Math.PI / 2);
+    return fcamClamp({ x: fatalCinematic.victimX, y: fatalCinematic.victimY, zoom });
+}
+
 function renderFrame() {
     if (gameState.phase !== 'playing' && !fatalCinematic.active) return;
 
@@ -31,15 +73,12 @@ function renderFrame() {
         ctx.translate(canvas.width, canvas.height);
         ctx.rotate(Math.PI);
     }
-    if (fatalCinematic.active) {
-        let progress = 1 - (fatalCinematic.timer / fatalCinematic.maxTimer);
-        let zoom = 1 + 0.20 * Math.sin(Math.min(progress * 2.5, 1) * Math.PI / 2);
-        let targetX = fatalCinematic.victimX;
-        let targetY = fatalCinematic.victimY;
-
+    // Camera kết liễu: kết liễu có camPath() (lia theo đòn) hoặc zoom nhẹ vào nạn nhân như cũ; luôn kẹp trong sân
+    finisherCam = computeFinisherCam();
+    if (finisherCam) {
         ctx.translate(canvas.width / 2, canvas.height / 2);
-        ctx.scale(zoom, zoom);
-        ctx.translate(-targetX, -targetY);
+        ctx.scale(finisherCam.zoom, finisherCam.zoom);
+        ctx.translate(-finisherCam.x, -finisherCam.y);
     }
     if (screenShake.duration > 0) {
         let sMag = screenShake.intensity * (screenShake.duration / 10);

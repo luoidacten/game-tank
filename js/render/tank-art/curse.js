@@ -637,6 +637,7 @@ function drawGojoPurple(b) {
     const charge = Math.max(0, b.chargeTimer || 0) / (b.maxCharge || 30);      // 1 -> 0 khi tụ lực xong
     const low = F.low();
     ctx.save();
+    if (charge > 0) drawGojoPurpleStance(b, cx, cy, R, charge, t);
     // Cột cảnh báo đường bay lúc đang tụ lực
     if (charge > 0) {
         const up = (b.vy || 0) < 0;
@@ -672,7 +673,7 @@ function drawGojoPurple(b) {
         ctx.restore();
     }
     // Quầng tím lớn + vòng méo không gian (thấu kính)
-    const pulse = 1 + Math.sin(t * 7) * 0.05;
+    const pulse = 1.2 + Math.sin(t * 7) * 0.06;
     const halo = ctx.createRadialGradient(0, 0, R * 0.4, 0, 0, R * 2.8 * pulse);
     halo.addColorStop(0, 'rgba(192,132,252,0.6)'); halo.addColorStop(0.5, 'rgba(126,34,206,0.28)'); halo.addColorStop(1, 'rgba(46,16,101,0)');
     ctx.fillStyle = halo; ctx.beginPath(); ctx.arc(0, 0, R * 2.8 * pulse, 0, Math.PI * 2); ctx.fill();
@@ -755,6 +756,109 @@ function drawGojoPurple(b) {
         const a = F.hash(i + 9) * Math.PI * 2 - t;
         ctx.globalAlpha = ph;
         ctx.fillRect(Math.cos(a) * rr - 1, Math.sin(a) * rr - 1, 2, 2);
+    }
+    ctx.restore();
+}
+
+// Thế niệm Tím (Gojo đứng kết ấn): cột sáng, vòng ấn dưới chân, Xanh & Đỏ quay quanh xe, hào quang kết ấn
+function drawGojoPurpleStance(b, bx, by, R, charge, t) {
+    const o = b.owner && typeof b.owner.x === 'number' ? b.owner : null;
+    const up = (b.vy || 0) < 0;
+    const ox = o ? o.x + o.w / 2 : bx, oy = o ? o.y + o.h / 2 : by + (up ? 44 : -44);
+    const k = 1 - charge, a0 = Math.min(1, k * 4); // 0 -> 1 khi tụ đủ
+    ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
+    // cột sáng thẳng đứng
+    const PW = 26 + 14 * k;
+    const pg = ctx.createLinearGradient(ox - PW, 0, ox + PW, 0);
+    pg.addColorStop(0, 'rgba(168,85,247,0)'); pg.addColorStop(0.5, `rgba(233,213,255,${0.35 + 0.35 * k})`); pg.addColorStop(1, 'rgba(168,85,247,0)');
+    ctx.globalAlpha = a0; ctx.fillStyle = pg; ctx.fillRect(ox - PW, oy - 230, PW * 2, 460);
+    ctx.fillStyle = `rgba(255,255,255,${0.25 + 0.4 * k})`; ctx.fillRect(ox - 2, oy - 230, 4, 460);
+    // vòng ấn dưới chân (2 vòng xoay ngược + vạch ấn)
+    ctx.shadowBlur = 12; ctx.shadowColor = '#c084fc';
+    const r1 = 38 + 4 * Math.sin(t * 5);
+    ctx.strokeStyle = 'rgba(233,213,255,0.85)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(ox, oy, r1, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = 'rgba(168,85,247,0.9)'; ctx.lineWidth = 1.5; ctx.setLineDash([5, 6]); ctx.lineDashOffset = t * 40;
+    ctx.beginPath(); ctx.arc(ox, oy, r1 + 9, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+    for (let i = 0; i < 8; i++) {
+        const a = i * Math.PI / 4 - t * 1.5;
+        ctx.beginPath(); ctx.moveTo(ox + Math.cos(a) * (r1 - 6), oy + Math.sin(a) * (r1 - 6)); ctx.lineTo(ox + Math.cos(a) * (r1 + 13), oy + Math.sin(a) * (r1 + 13)); ctx.stroke();
+    }
+    // hào quang kết ấn: các cánh năng lượng toả quanh xe
+    for (let i = 0; i < 10; i++) {
+        const a = i * Math.PI / 5 + t * 0.8, L = 18 + 10 * Math.sin(t * 6 + i) + 10 * k;
+        ctx.strokeStyle = i % 2 ? 'rgba(96,165,250,0.6)' : 'rgba(248,113,113,0.6)'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(ox + Math.cos(a) * 16, oy + Math.sin(a) * 16);
+        ctx.quadraticCurveTo(ox + Math.cos(a + 0.3) * (16 + L * 0.6), oy + Math.sin(a + 0.3) * (16 + L * 0.6), ox + Math.cos(a) * (16 + L), oy + Math.sin(a) * (16 + L)); ctx.stroke();
+    }
+    // ấn tay (2 ngón dựng) phía sau xe
+    const sy = oy + (up ? 30 : -30), dir = up ? -1 : 1;
+    ctx.fillStyle = 'rgba(245,243,255,0.9)'; ctx.shadowColor = '#e9d5ff'; ctx.shadowBlur = 16;
+    ctx.beginPath(); ctx.arc(ox, sy, 5.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillRect(ox - 4, sy + dir * 15 - (dir < 0 ? 0 : 15), 3, 15); ctx.fillRect(ox + 1, sy + dir * 17 - (dir < 0 ? 0 : 17), 3, 17);
+    // Xanh & Đỏ quay quanh xe, kéo vệt, dần ép vào điểm tụ trước nòng
+    const d = 34 * (1 - k * 0.5), sp = t * (4 + k * 6);
+    [[0, '#3b82f6', '#dbeafe'], [Math.PI, '#ef4444', '#fee2e2']].forEach(([off, c, c2]) => {
+        const a = sp + off, px = ox + Math.cos(a) * d, py = oy + Math.sin(a) * d * 0.75;
+        ctx.strokeStyle = c; ctx.globalAlpha = 0.7; ctx.lineWidth = 4; ctx.shadowColor = c; ctx.shadowBlur = 14;
+        ctx.beginPath(); ctx.ellipse(ox, oy, d, d * 0.75, 0, a - 1.2, a); ctx.stroke();
+        ctx.globalAlpha = 1;
+        const g = ctx.createRadialGradient(px, py, 0, px, py, 11);
+        g.addColorStop(0, '#ffffff'); g.addColorStop(0.35, c2); g.addColorStop(0.7, c); g.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px, py, 11, 0, Math.PI * 2); ctx.fill();
+        // dải năng lượng nối vào cầu Tím
+        ctx.globalAlpha = 0.5; ctx.strokeStyle = c; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(px, py); ctx.quadraticCurveTo((px + bx) / 2 + Math.cos(a) * 10, (py + by) / 2, bx, by); ctx.stroke();
+    });
+    ctx.restore();
+}
+
+// Vụ nổ Hư Thức: Tử — khoảng không bị xóa (lõi đen viền tím), méo không gian, sóng xung kích lan khắp màn hình
+function drawGojoPurpleBlast(e) {
+    const t = e.t, k = t / e.dur, W = canvas.width, H = canvas.height, r = e.r;
+    const ease = 1 - Math.pow(1 - Math.min(1, t / 14), 3), fade = t > e.dur - 24 ? (e.dur - t) / 24 : 1;
+    ctx.save();
+    if (t < 8) { // chớp tím toàn màn hình
+        ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.fillStyle = `rgba(216,180,254,${0.4 * (1 - t / 8)})`; ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        ctx.restore();
+    }
+    ctx.globalCompositeOperation = 'lighter';
+    // quầng tím lớn
+    const RR = r * (1.1 + 0.5 * ease);
+    const g = ctx.createRadialGradient(e.x, e.y, 0, e.x, e.y, RR * 1.5);
+    g.addColorStop(0, `rgba(250,245,255,${0.9 * fade})`); g.addColorStop(0.4, `rgba(168,85,247,${0.6 * fade})`); g.addColorStop(1, 'rgba(46,16,101,0)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(e.x, e.y, RR * 1.5, 0, Math.PI * 2); ctx.fill();
+    // sóng xung kích khắp màn hình (đỏ / xanh / tím)
+    const cols = ['#ef4444', '#60a5fa', '#c084fc', '#f5d0fe'];
+    for (let i = 0; i < 4; i++) {
+        const q = Math.max(0, Math.min(1, (t - i * 5) / 40)); if (q <= 0 || q >= 1) continue;
+        ctx.strokeStyle = cols[i]; ctx.globalAlpha = 0.85 * (1 - q); ctx.lineWidth = 7 * (1 - q) + 1; ctx.shadowBlur = 18; ctx.shadowColor = cols[i];
+        ctx.beginPath(); ctx.arc(e.x, e.y, r * 0.5 + q * Math.max(W, H) * 1.2, 0, Math.PI * 2); ctx.stroke();
+    }
+    ctx.shadowBlur = 0;
+    // méo không gian: các elip thấu kính xoay
+    for (let i = 0; i < 4; i++) {
+        const rr = r * (0.8 + i * 0.35) * (0.6 + 0.4 * ease);
+        ctx.globalAlpha = 0.5 * fade; ctx.strokeStyle = i % 2 ? '#e9d5ff' : '#a855f7'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.ellipse(e.x, e.y, rr * (1 + 0.15 * Math.sin(t * 0.3 + i)), rr * (1 - 0.15 * Math.sin(t * 0.3 + i)), t * 0.04 * (i % 2 ? 1 : -1) + i, 0, Math.PI * 2); ctx.stroke();
+    }
+    // mảnh vụn bị cuốn
+    ctx.fillStyle = '#f5d0fe';
+    for (let i = 0; i < 26; i++) {
+        const a = CURSE_FX.hash(i * 7 + 3) * Math.PI * 2, d = r * (0.3 + 1.8 * ease * (0.5 + CURSE_FX.hash(i * 3) * 0.8));
+        ctx.globalAlpha = (1 - k) * 0.9; ctx.fillRect(e.x + Math.cos(a + k) * d - 1.5, e.y + Math.sin(a + k) * d - 1.5, 3, 3);
+    }
+    // lõi: khoảng không bị xóa (đen) viền tím chói
+    ctx.globalCompositeOperation = 'source-over';
+    const core = r * 0.55 * ease * (t > e.dur - 24 ? fade : 1);
+    if (core > 1) {
+        ctx.globalAlpha = 0.9;
+        const cg = ctx.createRadialGradient(e.x, e.y, 0, e.x, e.y, core);
+        cg.addColorStop(0, '#000000'); cg.addColorStop(0.75, '#0b0118'); cg.addColorStop(1, 'rgba(88,28,135,0.2)');
+        ctx.fillStyle = cg; ctx.beginPath(); ctx.arc(e.x, e.y, core, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = 1; ctx.strokeStyle = '#f0abfc'; ctx.lineWidth = 2.5; ctx.shadowBlur = 16; ctx.shadowColor = '#c084fc';
+        ctx.beginPath(); ctx.arc(e.x, e.y, core, 0, Math.PI * 2); ctx.stroke();
     }
     ctx.restore();
 }

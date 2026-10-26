@@ -335,18 +335,27 @@ class RgFinisher {
     update() {
         this.t++;
         if (this.t === 4) rgSfx('playCoin');
-        if (this.t === 56) {
+        if (this.t === 56) rgSfx('playLaser');
+        if (this.t === RG_FIN_HIT) { // đầu tia chạm mục tiêu (camera lia tới đúng lúc này)
             triggerScreenShake(16, 22);
             explosions.push(new Explosion(this.vx, this.vy, 90, 'rgba(251, 146, 60,', 0, this.team === 1 ? p1 : p2));
             spawnSparkParticles(this.vx, this.vy, RG_GOLD, 40);
             spawnSparkParticles(this.vx, this.vy, RG_BLUE, 30);
-            rgSfx('playLaser'); rgSfx('playExplosion');
+            rgSfx('playExplosion');
         }
         if (this.t >= this.dur) this.active = false;
     }
     draw() { if (typeof rgDrawFinisherUnder === 'function') rgDrawFinisherUnder(this); }
     drawOver() { if (typeof rgDrawFinisherOver === 'function') rgDrawFinisherOver(this); }
+    // Camera: cận cảnh Railgun tung xu (0-54) -> lia theo đầu tia (56-66) -> dừng ở mục tiêu -> lùi về 1x trước băng rôn
+    camPath() {
+        if (typeof fcamKeys !== 'function') return null;
+        const wx = this.ox, wy = this.oy + this.fd * 60, hy = this.vy - this.fd * 20;
+        return fcamKeys(this.t, [[0, wx, wy, 1], [10, wx, wy, 1.6], [54, wx, wy, 1.6], [RG_FIN_HIT, this.vx, hy, 1.35],
+            [128, this.vx, hy, 1.3], [168, this.vx, hy, 1]]);
+    }
 }
+const RG_FIN_HIT = 66; // tick đầu tia chạm mục tiêu
 
 // ---------- Bullet hook ----------
 BulletHooks.register('railgun', {

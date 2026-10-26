@@ -309,6 +309,11 @@ class BmFinisher {
     }
     draw() { }
     drawOver() { if (typeof bmDrawFinisherOver === 'function') bmDrawFinisherOver(this); }
+    // Camera: cận cảnh lúc ném -> bám 2 boomerang bay tới -> giữ ở mục tiêu lúc xẻ -> lùi về 1x
+    camPath() {
+        if (typeof fcamKeys !== 'function') return null;
+        return fcamKeys(this.t, [[0, this.ox, this.oy, 1.6], [40, this.x, this.y, 1.4], [96, this.x, this.y, 1.35], [126, this.x, this.y, 1]]);
+    }
 }
 
 // Wind blades (Full Evo) — đạn thường có hook

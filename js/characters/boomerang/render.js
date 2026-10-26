@@ -261,9 +261,10 @@ function bmDrawFinisherOver(f) {
         const sd = i ? 1 : -1;
         let x, y, s = 22, ang;
         if (t < 40) {
-            const k = t / 40, a = 1 - k;
-            const sx = f.x + sd * 260, sy = f.y + (f.team === 1 ? 1 : -1) * 120 * sd;
-            const qx = f.x - sd * 140, qy = f.y - sd * 160;
+            // ném từ tay người thắng, 2 chiếc vòng cung hai bên rồi khoá vào mục tiêu (camera bám theo)
+            const k = typeof fcamEase === 'function' ? fcamEase(t / 40) : t / 40, a = 1 - k;
+            const sx = f.ox + sd * 14, sy = f.oy;
+            const qx = (f.ox + f.x) / 2 + sd * 150, qy = (f.oy + f.y) / 2;
             x = a * a * sx + 2 * a * k * qx + k * k * (f.x + sd * 34); y = a * a * sy + 2 * a * k * qy + k * k * f.y;
             ang = t * 0.5 * sd;
         } else if (t < 96) {

@@ -103,7 +103,7 @@ const EVOLUTIONS = {
         { id: 'evo_six_2', name: 'Quá Nhiệt', desc: 'Nhiệt >50% đã gây Đốt. Hạ nhiệt cực nhanh khi <50%. Lâu quá tải hơn. Nhược điểm: Quá tải trừ 5 Max HP.', cost: 290, type: 'evo' }
     ],
     the_strongest: [
-        { id: 'evo_strongest_1', name: 'Hư Thức: Tử (Tím)', type: 'evo', desc: 'Đã dùng cả Xanh & Đỏ: lần ra chiêu kế tiếp còn >= 60% Chú Lực tung HƯ THỨC: TỬ (tụ 0.75s có cột cảnh báo + thông báo, xuyên thấu 2.9 dame, nổ tường 3.9). Giữ 5s: Bành Trướng Lãnh Địa Vô Lượng Không Xứ (75% CL) — 5s địch câm lặng & chậm 50% (choáng 1s đầu); bạn đứng yên niệm 4s, 1s cuối mới di chuyển / ra chiêu.', cost: 480 },
+        { id: 'evo_strongest_1', name: 'Hư Thức: Tử (Tím)', type: 'evo', desc: 'Đã dùng cả Xanh & Đỏ: lần ra chiêu kế tiếp còn >= 60% Chú Lực tung HƯ THỨC: TỬ (tụ 0.75s có cột cảnh báo + thông báo, xuyên thấu 2.9 dame, nổ tường 3.9 bán kính lớn). Giữ 5s: Bành Trướng Lãnh Địa Vô Lượng Không Xứ (75% CL) — 5s địch câm lặng & chậm 50% (choáng 1s đầu); bạn đứng yên niệm 4s, 1s cuối mới di chuyển / ra chiêu.', cost: 480 },
         { id: 'evo_strongest_2', name: 'Lục Nhãn (Mắt Xanh)', type: 'evo', desc: 'Tăng max & hồi Chú lực. Nhấp: Đạn Xanh hút địch. Giữ: Tia Đỏ choáng.', cost: 240 }
     ],
     // THÊM TIẾN HÓA SNIPER VÀO ĐÂY:

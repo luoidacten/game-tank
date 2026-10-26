@@ -88,8 +88,10 @@ Object.assign(Player.prototype, {
                     if (b.y > canvas.height - b.h) b.y = canvas.height - b.h;
 
                     // Bùmmmm! (Nerfed: Bán kính nổ giảm 50% tránh bao phủ toàn map)
-                    let radius = b.isEvo2 ? 70 : 55;
+                    let radius = b.isEvo2 ? 95 : 74; // +35% bán kính nổ (55/70 -> 74/95)
                     explosions.push(new Explosion(b.x + b.w / 2, b.y + b.h / 2, radius, 'purple', 3.9, this)); // [BUFF] 3.0 -> 3.9 (+30%)
+                    if (typeof GjPurpleBlast !== 'undefined' && typeof bodyEffects !== 'undefined') bodyEffects.push(new GjPurpleBlast(b.x + b.w / 2, b.y + b.h / 2, radius));
+                    triggerScreenShake(16, 26);
 
                     this.bullets.splice(i, 1);
                     continue;

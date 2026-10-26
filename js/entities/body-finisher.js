@@ -102,7 +102,18 @@ class BodyFinisher {
     }
     draw() { }
     drawOver() { const cfg = BODY_FINISHERS[this.body]; if (cfg) bfDraw(this, cfg); }
+    // Camera lia theo đòn (chỉ các thân có đường đạn bay qua sân, xem BF_CAMS)
+    camPath() {
+        const c = BF_CAMS[this.body];
+        if (!c || typeof fcamKeys !== 'function') return null;
+        const wy = this.oy + bfAwayY(this) * 40;
+        return fcamKeys(this.t, [[0, this.ox, wy, 1], [8, this.ox, wy, 1.6], [c, this.ox, wy, 1.6],
+            [BF_HIT, this.x, this.y, 1.35], [88, this.x, this.y, 1.3], [112, this.x, this.y, 1]]);
+    }
 }
+// tick bắt đầu lia camera khỏi người ra đòn (đạn rời nòng)
+const BF_CAMS = { the_strongest: 44, sniper: 44, cung: 14 };
+function bfAwayY(f) { return f.team === 1 ? -1 : 1; }
 
 function bfSpawn(owner, victim) {
     if (typeof bodyEffects === 'undefined' || !owner || !BODY_FINISHERS[owner.weapon]) return;

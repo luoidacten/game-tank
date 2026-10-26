@@ -553,30 +553,86 @@ const BF_MOTIFS = {
         for (let i = 0; i < 14; i++) { const t0 = 30 + i * 3, kk = bfE(t, t0, t0 + 24); if (kk <= 0 || kk >= 1) continue; const sa = oa + Math.PI / 2 + (bfR(f.seed, i) - 0.5) * 0.8; ctx.save(); ctx.translate(gx + Math.cos(sa) * kk * 70, gy + Math.sin(sa) * kk * 70 + kk * kk * 20); ctx.rotate(kk * 10 + i); ctx.globalAlpha *= 1 - kk; ctx.fillStyle = '#d97706'; ctx.fillRect(-1.5, -4, 3, 8); ctx.restore(); }
         if (post > 0) { ctx.globalCompositeOperation = 'lighter'; bfShards(f, 14, 110, c.c, c.c2, post, 4); bfRing(f.x, f.y, 14 + post * 80, bfA(c.c, 1 - post), 3); }
     },
-    // Kẻ Mạnh Nhất: Xanh (hút) + Đỏ (đẩy) hợp nhất thành Tím – Hư Thức xóa sổ cả một đường
-    the_strongest(f, c, t) {
-        const A = bfAway(f), k = bfE(t, 8, 46), merge = bfE(t, 44, BF_HIT), post = bfE(t, BF_HIT, BF_HIT + 45);
+    // Kẻ Mạnh Nhất: Gojo niệm Xanh + Đỏ ngay trước nòng (camera cận cảnh) -> hợp thành Tím -> Tím lao qua sân
+    // (camera bám theo) -> nổ xóa sổ không gian tại mục tiêu, sóng xung kích lan khắp màn hình
+    the_strongest(f, c, t, W, H) {
+        const A = bfAway(f), px = f.ox, py = f.oy + A * 34;
+        const k = bfE(t, 4, 36), merge = bfE(t, 30, 44), post = bfE(t, BF_HIT, BF_HIT + 50);
+        const fly = typeof fcamEase === 'function' ? fcamEase(bfE(t, 44, BF_HIT)) : bfE(t, 44, BF_HIT);
         ctx.globalCompositeOperation = 'lighter';
-        if (t < BF_HIT) {
-            const d = 130 * (1 - k * k) + 4 * (1 - merge);
-            const red = [f.x - d, f.y + 10 * Math.sin(t * 0.2)], blue = [f.x + d, f.y - 10 * Math.sin(t * 0.2)];
-            bfGlow('#ef4444', 24); bfDisc(red[0], red[1], 18 + 6 * Math.sin(t * 0.5), '#ef4444', '#ef4444', 0.95);
-            bfGlow('#3b82f6', 24); bfDisc(blue[0], blue[1], 18 + 6 * Math.cos(t * 0.5), '#3b82f6', '#3b82f6', 0.95);
-            for (let i = 0; i < 10; i++) { const a = i / 10 * BF_TAU + t * 0.2, r = 40 - (t * 1.5 + i * 4) % 34; ctx.fillStyle = bfA('#93c5fd', 0.8); ctx.beginPath(); ctx.arc(blue[0] + Math.cos(a) * r, blue[1] + Math.sin(a) * r, 1.6, 0, BF_TAU); ctx.fill(); ctx.fillStyle = bfA('#fca5a5', 0.8); ctx.beginPath(); ctx.arc(red[0] + Math.cos(a) * (40 - r), red[1] + Math.sin(a) * (40 - r), 1.6, 0, BF_TAU); ctx.fill(); }
-            if (merge > 0) { bfGlow(c.c, 40); bfDisc(f.x, f.y, 10 + merge * 40, c.c, c.c, merge); }
+        if (t < 44) {
+            // cột sáng + vòng ấn dưới chân người niệm
+            const a0 = Math.min(1, t / 8);
+            ctx.save(); ctx.globalAlpha *= a0;
+            const pg = ctx.createLinearGradient(f.ox - 22, 0, f.ox + 22, 0);
+            pg.addColorStop(0, 'rgba(168,85,247,0)'); pg.addColorStop(0.5, 'rgba(233,213,255,0.55)'); pg.addColorStop(1, 'rgba(168,85,247,0)');
+            ctx.fillStyle = pg; ctx.fillRect(f.ox - 22, f.oy - 260, 44, 520);
+            bfGlow(c.c, 14); ctx.setLineDash([6, 5]); ctx.lineDashOffset = -t * 2;
+            bfRing(f.ox, f.oy, 40 - k * 6, bfA('#e9d5ff', 0.8), 2); ctx.setLineDash([]);
+            bfRing(f.ox, f.oy, 28 + 4 * Math.sin(t * 0.4), bfA(c.c, 0.6), 1.5);
+            ctx.restore();
+            // Xanh & Đỏ xoay quanh rồi hợp vào điểm trước nòng
+            const d = 46 * (1 - k * k) + 6, sp = t * (0.18 + k * 0.25);
+            [[0, '#3b82f6', '#dbeafe'], [Math.PI, '#ef4444', '#fee2e2']].forEach(([off, col, hi]) => {
+                const ox = px + Math.cos(sp + off) * d, oy = py + Math.sin(sp + off) * d * 0.7;
+                bfGlow(col, 26); bfDisc(ox, oy, 15 + 4 * Math.sin(t * 0.5 + off), hi, col, 0.95);
+                ctx.strokeStyle = bfA(col, 0.55); ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(px, py, d, sp + off - 1.1, sp + off); ctx.stroke();
+            });
+            if (merge > 0) { bfGlow(c.c, 40); bfDisc(px, py, 8 + merge * 26, '#f5f3ff', c.c, merge); }
         } else {
-            // khối Tím phóng đi xóa sổ (vệt không gian bị xóa)
-            const py = f.y + A * post * 500, R = 50 + post * 20;
-            ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = `rgba(0,0,0,${0.75 * (1 - bfE(t, BF_HIT + 30, BF_DUR))})`;
-            ctx.fillRect(f.x - R, Math.min(f.y, py), R * 2, Math.abs(py - f.y));
-            ctx.globalCompositeOperation = 'lighter'; bfGlow(c.c, 40); bfDisc(f.x, py, R * 1.5, c.c, '#3b82f6', 1);
-            ctx.strokeStyle = bfA('#ef4444', 0.8); ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(f.x, py, R * 0.9, t * 0.3, t * 0.3 + 2.5); ctx.stroke();
-            ctx.strokeStyle = bfA('#60a5fa', 0.8); ctx.beginPath(); ctx.arc(f.x, py, R * 0.9, t * 0.3 + Math.PI, t * 0.3 + Math.PI + 2.5); ctx.stroke();
-            ctx.strokeStyle = bfA(c.c, 0.8); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(f.x - R, f.y); ctx.lineTo(f.x - R, py); ctx.moveTo(f.x + R, f.y); ctx.lineTo(f.x + R, py); ctx.stroke();
+            // vị trí khối Tím: trước mốc chạm bám đúng nhịp camera, sau đó xuyên tiếp tới mép sân
+            const after = bfE(t, BF_HIT, BF_HIT + 26);
+            const ex = bfLerp(f.x, f.x + (f.x - px) * 0.6, after), ey = bfLerp(f.y, A < 0 ? -80 : H + 80, after);
+            const cx = t < BF_HIT ? bfLerp(px, f.x, fly) : ex, cy = t < BF_HIT ? bfLerp(py, f.y, fly) : ey;
+            const R = 34 + fly * 10, fade = 1 - bfE(t, BF_HIT + 30, BF_DUR - 10);
+            // vệt không gian bị xóa
+            ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = `rgba(0,0,0,${0.8 * fade})`;
+            ctx.save(); ctx.translate(px, py); ctx.rotate(Math.atan2(cy - py, cx - px));
+            const L = Math.hypot(cx - px, cy - py); ctx.fillRect(0, -R, L, R * 2);
+            ctx.globalCompositeOperation = 'lighter'; ctx.strokeStyle = bfA(c.c, 0.8 * fade); ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(0, -R); ctx.lineTo(L, -R); ctx.moveTo(0, R); ctx.lineTo(L, R); ctx.stroke();
+            ctx.restore();
+            if (fade > 0.05) {
+                ctx.globalAlpha *= fade;
+                bfGlow(c.c, 40); bfDisc(cx, cy, R * 1.6, '#f5f3ff', c.c, 1);
+                ctx.strokeStyle = bfA('#ef4444', 0.85); ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(cx, cy, R, t * 0.3, t * 0.3 + 2.5); ctx.stroke();
+                ctx.strokeStyle = bfA('#60a5fa', 0.85); ctx.beginPath(); ctx.arc(cx, cy, R, t * 0.3 + Math.PI, t * 0.3 + Math.PI + 2.5); ctx.stroke();
+            }
+            if (post > 0) {
+                // nổ xóa sổ: quả cầu tím phình to + vòng méo không gian + sóng xung kích khắp màn hình
+                ctx.globalAlpha = 1;
+                bfGlow(c.c, 50); bfDisc(f.x, f.y, 40 + post * 150, '#faf5ff', c.c, 1 - post);
+                for (let i = 0; i < 4; i++) {
+                    const q = bfE(t, BF_HIT + i * 6, BF_HIT + i * 6 + 40); if (q <= 0 || q >= 1) continue;
+                    bfRing(f.x, f.y, 20 + q * Math.max(W, H) * 1.1, bfA(i % 2 ? '#60a5fa' : '#ef4444', 0.8 * (1 - q)), 6 * (1 - q) + 1);
+                }
+                for (let i = 0; i < 3; i++) {
+                    const q = bfE(t, BF_HIT + 4 + i * 8, BF_HIT + 40 + i * 8); if (q <= 0 || q >= 1) continue;
+                    ctx.strokeStyle = bfA('#e9d5ff', 0.5 * (1 - q)); ctx.lineWidth = 2;
+                    ctx.beginPath(); ctx.ellipse(f.x, f.y, 30 + q * 140, (30 + q * 140) * 0.55, t * 0.05 + i, 0, BF_TAU); ctx.stroke();
+                }
+                bfShards(f, 18, 160, c.c, '#93c5fd', post, 4);
+            }
         }
     },
     // Sniper: ống ngắm khóa mục tiêu (kiểu gốc) + chữ HEADSHOT
     sniper(f, c, t, W, H) {
+        // tia laser ngắm từ nòng (camera cận cảnh xạ thủ) + viên đạn vạch đường bay qua sân (camera bám theo)
+        if (t < BF_HIT) {
+            ctx.save(); ctx.globalCompositeOperation = 'lighter'; bfGlow('#f43f5e', 8);
+            ctx.strokeStyle = bfA('#f43f5e', (0.35 + 0.3 * Math.sin(t * 0.6)) * Math.min(1, t / 8)); ctx.lineWidth = 1.2;
+            ctx.beginPath(); ctx.moveTo(f.ox, f.oy); ctx.lineTo(f.x, f.y); ctx.stroke();
+            bfGlow(c.c, 16); bfDisc(f.ox, f.oy + bfAway(f) * 16, 6 + 3 * Math.sin(t * 0.8), '#fff', c.c, 0.9);
+            if (t >= 44) {
+                const u = typeof fcamEase === 'function' ? fcamEase(bfE(t, 44, BF_HIT)) : bfE(t, 44, BF_HIT);
+                const bx = bfLerp(f.ox, f.x, u), by = bfLerp(f.oy, f.y, u), tx = bfLerp(f.ox, f.x, Math.max(0, u - 0.25)), ty = bfLerp(f.oy, f.y, Math.max(0, u - 0.25));
+                ctx.strokeStyle = bfA(c.c, 0.8); ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(bx, by); ctx.stroke();
+                ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(bfLerp(tx, bx, 0.5), bfLerp(ty, by, 0.5)); ctx.lineTo(bx, by); ctx.stroke();
+                bfDisc(bx, by, 7, '#fff', c.c, 1);
+                if (t < 48) bfRing(f.ox, f.oy, 10 + (t - 44) * 8, bfA('#fff', 1 - (t - 44) / 4), 2);
+            }
+            ctx.restore();
+        }
         BF_STYLES.scope(f, c, t, W, H);
         if (t >= BF_HIT + 2 && t < BF_HIT + 50) bfText('HEADSHOT', f.x, f.y + bfAway(f) * 50, 18 * (1.4 - 0.4 * bfE(t, BF_HIT + 2, BF_HIT + 10)), c.c2, '#fff');
     },

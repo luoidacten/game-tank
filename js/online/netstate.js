@@ -54,7 +54,7 @@ const NET_CLASSES = {
     AdFinisher,
     TnZone, TnFinisher,
     DtpOrb, DtpGrowTornado, DtpBigTornado, DtpStorm, DtpSkyZone, DtpFinisher,
-    RgBeam, RgFinisher,
+    RgBeam, RgFinisher, GjPurpleBlast,
     SwFinisher,
 };
 

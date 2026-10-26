@@ -54,34 +54,117 @@ function wdDrawBullet(b) {
     const origD = Player.prototype.draw;
     Player.prototype.draw = function () {
         if (!wdIs(this) || !(this.wdForm > 0) || this.hp <= 0) return origD.apply(this, arguments);
-        ctx.save(); ctx.globalAlpha = 0.22;
+        wdDrawFormUnder(this);
+        ctx.save(); ctx.globalAlpha = 0.38;
         try { origD.apply(this, arguments); } finally { ctx.restore(); }
         wdDrawForm(this);
     };
 })();
-function wdDrawForm(p) {
-    const cx = p.x + p.w / 2, cy = p.y + p.h / 2, t = wdNow(), age = p.wdFormAge || 0;
-    const k = p.wdForm / wdFormMax(p);
+function wdLeaf(x, y, s, a, col) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(a); ctx.fillStyle = col;
+    ctx.beginPath(); ctx.moveTo(-s, 0); ctx.quadraticCurveTo(0, -s * 0.7, s, 0); ctx.quadraticCurveTo(0, s * 0.7, -s, 0); ctx.fill();
+    ctx.restore();
+}
+// Hóa Gió (lớp dưới): bóng mờ lưu ảnh phía sau + dải gió dài kéo theo hướng chạy
+function wdDrawFormUnder(p) {
+    const cx = p.x + p.w / 2, cy = p.y + p.h / 2, t = wdNow();
+    const vx = p._vx || 0, mv = Math.min(1, Math.abs(vx) / 3), dir = vx > 0.2 ? -1 : (vx < -0.2 ? 1 : 0);
     ctx.save(); ctx.lineCap = 'round';
-    // dải gió cuộn kéo dài theo hướng chạy
-    const dir = (p._vx || 0) >= 0 ? -1 : 1;
-    for (let i = 0; i < 5; i++) {
-        const ph = t * 6 + i * 1.3, oy = (i - 2) * 4.5;
-        ctx.strokeStyle = i % 2 ? WD_MINT : WD_CYAN; ctx.globalAlpha = 0.35 + 0.35 * Math.sin(ph);
-        ctx.lineWidth = 1.6 - Math.abs(i - 2) * 0.3; ctx.shadowBlur = 8; ctx.shadowColor = WD_MINT;
-        ctx.beginPath();
-        ctx.moveTo(cx - dir * 10, cy + oy);
-        ctx.bezierCurveTo(cx + dir * 12, cy + oy - 6 * Math.sin(ph), cx + dir * 24, cy + oy + 6 * Math.cos(ph), cx + dir * (34 + 6 * Math.sin(ph * 0.7)), cy + oy);
+    // lưu ảnh (afterimage)
+    for (let i = 3; i >= 1; i--) {
+        const off = dir * i * (7 + 5 * mv);
+        if (!dir) break;
+        ctx.globalAlpha = 0.22 * (1 - i / 4) + 0.08;
+        const g = ctx.createRadialGradient(cx + off, cy, 2, cx + off, cy, p.w * 0.62);
+        g.addColorStop(0, 'rgba(240,249,255,0.9)'); g.addColorStop(0.6, 'rgba(125,211,252,0.5)'); g.addColorStop(1, 'rgba(125,211,252,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(cx + off, cy, p.w * 0.62, p.h * 0.58, 0, 0, Math.PI * 2); ctx.fill();
+    }
+    // dải lụa gió (ribbon) kéo dài phía sau
+    const d = dir || (Math.sin(t * 2) > 0 ? 1 : -1), len = 30 + 34 * mv;
+    for (let i = 0; i < 4; i++) {
+        const ph = t * 7 + i * 1.7, oy = (i - 1.5) * 6;
+        const x0 = cx - d * p.w * 0.25, x1 = cx + d * len;
+        const grd = ctx.createLinearGradient(x0, 0, x1, 0);
+        grd.addColorStop(0, i % 2 ? 'rgba(153,246,228,0.85)' : 'rgba(226,232,240,0.85)'); grd.addColorStop(1, 'rgba(125,211,252,0)');
+        ctx.strokeStyle = grd; ctx.lineWidth = 3.2 - Math.abs(i - 1.5) * 0.9; ctx.shadowBlur = 10; ctx.shadowColor = WD_CYAN;
+        ctx.globalAlpha = 0.55 + 0.35 * mv;
+        ctx.beginPath(); ctx.moveTo(x0, cy + oy);
+        ctx.bezierCurveTo(cx + d * len * 0.35, cy + oy - 7 * Math.sin(ph), cx + d * len * 0.7, cy + oy + 7 * Math.cos(ph), x1, cy + oy + 4 * Math.sin(ph * 0.8));
         ctx.stroke();
     }
-    // vòng xoáy nhỏ
-    ctx.globalAlpha = 0.7; ctx.strokeStyle = WD_WHITE; ctx.lineWidth = 1.2;
-    for (let i = 0; i < 2; i++) { ctx.beginPath(); ctx.arc(cx, cy, 9 + i * 5, t * (8 - i * 3), t * (8 - i * 3) + Math.PI * 1.2); ctx.stroke(); }
+    ctx.restore();
+}
+// Hóa Gió (lớp trên): thân gió bạc-xanh trong suốt, viền sáng để vẫn thấy vị trí, xoáy + lá bay, vòng thời gian
+function wdDrawForm(p) {
+    const cx = p.x + p.w / 2, cy = p.y + p.h / 2, t = wdNow(), age = p.wdFormAge || 0;
+    const k = p.wdForm / wdFormMax(p), vx = p._vx || 0, dir = vx > 0.2 ? -1 : (vx < -0.2 ? 1 : 0);
+    ctx.save(); ctx.lineCap = 'round';
+    // thân gió trong suốt
+    const bw = p.w * 0.58, bh = p.h * 0.56;
+    const g = ctx.createRadialGradient(cx - bw * 0.25, cy - bh * 0.3, 1, cx, cy, bw * 1.1);
+    g.addColorStop(0, 'rgba(255,255,255,0.55)'); g.addColorStop(0.5, 'rgba(186,230,253,0.32)'); g.addColorStop(1, 'rgba(125,211,252,0.12)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(cx, cy, bw, bh, 0, 0, Math.PI * 2); ctx.fill();
+    // viền sáng nhấp nháy nhẹ (đánh dấu vị trí) + màu đội
+    ctx.shadowBlur = 14; ctx.shadowColor = WD_CYAN;
+    ctx.globalAlpha = 0.75 + 0.2 * Math.sin(t * 8); ctx.strokeStyle = WD_SILVER; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.ellipse(cx, cy, bw, bh, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.globalAlpha = 0.8; ctx.strokeStyle = p.id === 1 ? '#3b82f6' : '#ef4444'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.ellipse(cx, cy, bw + 3, bh + 3, 0, -Math.PI * 0.35, Math.PI * 0.35); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(cx, cy, bw + 3, bh + 3, 0, Math.PI * 0.65, Math.PI * 1.35); ctx.stroke();
+    // đường dòng gió bên trong thân (streamlines)
+    ctx.shadowBlur = 6; ctx.strokeStyle = WD_WHITE; ctx.lineWidth = 1;
+    for (let i = 0; i < 3; i++) {
+        const ph = ((t * 1.6 + i / 3) % 1), y = cy + (i - 1) * bh * 0.5, sd = dir || 1;
+        ctx.globalAlpha = 0.7 * Math.sin(ph * Math.PI);
+        const xa = cx + sd * bw * (0.8 - ph * 1.6);
+        ctx.beginPath(); ctx.moveTo(xa, y); ctx.quadraticCurveTo(xa + sd * 6, y - 3, xa + sd * 12, y); ctx.stroke();
+    }
+    // xoáy khí quanh xe
+    ctx.globalAlpha = 0.8; ctx.strokeStyle = WD_MINT; ctx.lineWidth = 1.4;
+    for (let i = 0; i < 2; i++) { const a = t * (7 - i * 3) * (i ? -1 : 1); ctx.beginPath(); ctx.ellipse(cx, cy, p.w * (0.75 + i * 0.18), p.h * (0.5 + i * 0.12), 0, a, a + Math.PI * 0.9); ctx.stroke(); }
+    // lá & hạt khí cuốn quanh rồi bay về sau
+    ctx.shadowBlur = 4;
+    for (let i = 0; i < 7; i++) {
+        const ph = ((t * 0.9 + i / 7) % 1), a = i * 2.4 + t * 5;
+        const rr = p.w * (0.55 + ph * 0.6), lx = cx + Math.cos(a) * rr + (dir || 0) * ph * 26, ly = cy + Math.sin(a) * rr * 0.55;
+        ctx.globalAlpha = Math.sin(ph * Math.PI) * 0.9;
+        if (i % 2) wdLeaf(lx, ly, 3.2, a * 1.3, i % 4 === 1 ? '#86efac' : WD_MINT);
+        else { ctx.fillStyle = WD_WHITE; ctx.beginPath(); ctx.arc(lx, ly, 1.2, 0, Math.PI * 2); ctx.fill(); }
+    }
+    ctx.shadowBlur = 8; ctx.shadowColor = WD_MINT;
     // vòng thời gian còn lại
     ctx.globalAlpha = 0.9; ctx.strokeStyle = (p.wdStill || 0) > 3 ? '#fca5a5' : WD_MINT; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(cx, cy, p.w * 0.95, -Math.PI / 2, -Math.PI / 2 + k * Math.PI * 2); ctx.stroke();
     if (p.wdAbsFx > 0) { ctx.globalAlpha = p.wdAbsFx / 10; ctx.fillStyle = WD_MINT; ctx.beginPath(); ctx.arc(cx, cy, 6 + (10 - p.wdAbsFx), 0, Math.PI * 2); ctx.fill(); }
     if (wdFull(p) && age >= 120) { ctx.globalAlpha = 0.5 + 0.3 * Math.sin(t * 10); ctx.strokeStyle = WD_GOLD; ctx.lineWidth = 1; ctx.setLineDash([2, 3]); ctx.beginPath(); ctx.arc(cx, cy, p.w * 1.15, 0, Math.PI * 2); ctx.stroke(); }
+    ctx.restore();
+}
+// Vụ bùng gió lúc nhập / thoát Hóa Gió
+function wdDrawBurst(p) {
+    const cx = p.x + p.w / 2, cy = p.y + p.h / 2;
+    ctx.save(); ctx.lineCap = 'round'; ctx.shadowBlur = 12; ctx.shadowColor = WD_MINT;
+    if (p.wdFx > 0) { // nhập: gió xoáy hút vào + lá bung
+        const q = 1 - p.wdFx / 18, R = p.w * (2.2 - q * 1.5);
+        for (let i = 0; i < 6; i++) {
+            const a = i * Math.PI / 3 + q * 4;
+            ctx.globalAlpha = 0.9 * (1 - q * 0.6); ctx.strokeStyle = i % 2 ? WD_MINT : WD_SILVER; ctx.lineWidth = 2.4 * (1 - q) + 0.8;
+            ctx.beginPath(); ctx.arc(cx, cy, R, a, a + 0.8); ctx.stroke();
+        }
+        for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4 + q * 2; ctx.globalAlpha = 1 - q; wdLeaf(cx + Math.cos(a) * (8 + q * 40), cy + Math.sin(a) * (8 + q * 40), 3.5, a, WD_MINT); }
+        ctx.globalAlpha = 0.5 * (1 - q); ctx.fillStyle = WD_WHITE; ctx.beginPath(); ctx.arc(cx, cy, p.w * 0.6 * (1 - q) + 2, 0, Math.PI * 2); ctx.fill();
+    }
+    if (p.wdExitFx > 0) { // thoát: luồng gió toả ra + vòng sóng
+        const q = 1 - p.wdExitFx / 20;
+        ctx.globalAlpha = 1 - q; ctx.strokeStyle = WD_WHITE; ctx.lineWidth = 3 * (1 - q) + 0.6;
+        ctx.beginPath(); ctx.arc(cx, cy, 10 + q * 40, 0, Math.PI * 2); ctx.stroke();
+        ctx.strokeStyle = WD_MINT; ctx.lineWidth = 1.6;
+        for (let i = 0; i < 10; i++) {
+            const a = i * Math.PI / 5 + 0.3, r0 = 12 + q * 26, r1 = r0 + 10 + q * 10;
+            ctx.beginPath(); ctx.moveTo(cx + Math.cos(a) * r0, cy + Math.sin(a) * r0);
+            ctx.quadraticCurveTo(cx + Math.cos(a + 0.25) * (r0 + r1) / 2, cy + Math.sin(a + 0.25) * (r0 + r1) / 2, cx + Math.cos(a + 0.4) * r1, cy + Math.sin(a + 0.4) * r1); ctx.stroke();
+        }
+        for (let i = 0; i < 6; i++) { const a = i * 1.05 + 0.5; ctx.globalAlpha = 1 - q; wdLeaf(cx + Math.cos(a) * (14 + q * 46), cy + Math.sin(a) * (14 + q * 46), 3, a + q * 6, i % 2 ? WD_MINT : '#86efac'); }
+    }
     ctx.restore();
 }
 
@@ -130,11 +213,8 @@ CharHooks.register('wind', Object.assign(CharHooks.registry.wind || {}, {
             const k = 1 - p.wdRingFx / 24;
             ctx.globalAlpha = 1 - k; ctx.strokeStyle = WD_MINT; ctx.lineWidth = 3 * (1 - k); ctx.shadowBlur = 12; ctx.shadowColor = WD_MINT;
             ctx.beginPath(); ctx.arc(cx, cy, 14 + k * 76, 0, Math.PI * 2); ctx.stroke();
-        } else if (p.wdExitFx > 0) {
-            const k = 1 - p.wdExitFx / 20;
-            ctx.globalAlpha = 1 - k; ctx.strokeStyle = WD_WHITE; ctx.lineWidth = 1.5;
-            ctx.beginPath(); ctx.arc(cx, cy, 10 + k * 26, 0, Math.PI * 2); ctx.stroke();
         }
+        if (p.wdFx > 0 || p.wdExitFx > 0) wdDrawBurst(p);
         if (p.wdShieldT > 0 && p.shield > 0) {
             ctx.globalAlpha = 0.6; ctx.strokeStyle = WD_MINT; ctx.lineWidth = 1.2; ctx.setLineDash([4, 3]);
             ctx.beginPath(); ctx.arc(cx, cy, p.w * 0.9, t * 2, t * 2 + Math.PI * 2); ctx.stroke();

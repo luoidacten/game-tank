@@ -50,6 +50,7 @@ class PrBeam {
 class PrFinisher {
     constructor(owner, victim) {
         this.team = owner.id; this.x = victim.x + victim.w / 2; this.y = victim.y + victim.h / 2;
+        this.ox = owner.x + owner.w / 2; this.oy = owner.id === 1 ? owner.y : owner.y + owner.h;
         this.t = 0; this.dur = 160; this.active = true; this.seed = Math.floor(Math.random() * 1000);
     }
     update() {
@@ -64,6 +65,12 @@ class PrFinisher {
     }
     draw() { if (typeof prDrawFinisherUnder === 'function') prDrawFinisherUnder(this); }
     drawOver() { if (typeof prDrawFinisherOver === 'function') prDrawFinisherOver(this); }
+    // Camera: cận cảnh lăng kính phát tia (0-10) -> bám đầu tia tới mục tiêu (10-30) -> giữ -> lùi về 1x trước băng rôn
+    camPath() {
+        if (typeof fcamKeys !== 'function' || this.ox === undefined) return null;
+        return fcamKeys(this.t, [[0, this.ox, this.oy, 1], [6, this.ox, this.oy, 1.6], [10, this.ox, this.oy, 1.6],
+            [30, this.x, this.y, 1.35], [124, this.x, this.y, 1.3], [150, this.x, this.y, 1]]);
+    }
 }
 function prSpawnFinisher(p, v) {
     if (typeof bodyEffects === 'undefined' || bodyEffects.some(e => e instanceof PrFinisher)) return;
