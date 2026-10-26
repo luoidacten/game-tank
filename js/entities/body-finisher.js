@@ -41,7 +41,6 @@ const BODY_FINISHERS = {
     inventor:     { t1: 'KHÔNG KÍCH', t2: 'DRONE', c: '#22d3ee', c2: '#facc15', g: '✈', s: 'rain', p: '▼', n: 14 },
     shadow_hunter:{ t1: 'ÁM SÁT', t2: 'BÓNG ĐÊM', c: '#8b5cf6', c2: '#ef4444', g: '☽', s: 'slash', n: 4 },
     shortgunATK:  { t1: 'BỘC PHÁ', t2: 'ÁP SÁT', c: '#f59e0b', c2: '#ef4444', g: '➤', s: 'blast' },
-    thunder:      { t1: 'LÔI THẦN', t2: 'GIÁNG THẾ', c: '#facc15', c2: '#60a5fa', g: 'ϟ', s: 'bolt', n: 5 },
     magnet:       { t1: 'TỪ TRƯỜNG', t2: 'NGHIỀN ÉP', c: '#ef4444', c2: '#3b82f6', g: '⊕', s: 'implode', pal: ['#ef4444', '#3b82f6'] },
     evolution:    { t1: 'ĐỘT BIẾN', t2: 'GEN TRỘI', c: '#4ade80', c2: '#facc15', g: '✧', s: 'blast', n: 2 },
     death_lock:   { t1: 'XIỀNG', t2: 'TỬ THẦN', c: '#a855f7', c2: '#94a3b8', g: '⛓', s: 'seal' },

@@ -804,29 +804,6 @@ const BF_MOTIFS = {
             for (let i = 0; i < 12; i++) { const a = ca + (bfR(f.seed, i) - 0.5) * 1.1, r0 = post * 60 + bfR(f.seed, i + 3) * 30, r1 = r0 + 26; ctx.strokeStyle = bfA(i % 2 ? c.c2 : '#fde68a', 1 - post); ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(nx + Math.cos(a) * r0, ny + Math.sin(a) * r0); ctx.lineTo(nx + Math.cos(a) * r1, ny + Math.sin(a) * r1); ctx.stroke(); }
         }
     },
-    // Sấm Chớp: mây giông tụ lại, búa sấm giáng xuống, vòng sét tỏa ra
-    thunder(f, c, t) {
-        const A = bfAway(f), cl = bfE(t, 4, 28), drop = bfE(t, 42, BF_HIT), post = bfE(t, BF_HIT, BF_HIT + 40);
-        const cy = f.y + A * 130;
-        ctx.save(); ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha *= cl * (1 - post * 0.6);
-        for (let i = 0; i < 9; i++) { const px = f.x + (i - 4) * 22 * cl + Math.sin(t * 0.03 + i) * 4, py = cy + Math.sin(i * 1.3) * 10; ctx.fillStyle = i % 2 ? '#334155' : '#475569'; ctx.beginPath(); ctx.arc(px, py, 22 + bfR(f.seed, i) * 10, 0, BF_TAU); ctx.fill(); }
-        ctx.restore();
-        ctx.globalCompositeOperation = 'lighter';
-        if (t > 14 && t < BF_HIT && t % 9 < 2) { bfGlow(c.c2, 16); const px = f.x + (bfR(f.seed, t) - 0.5) * 160; bfZap(px, cy, px + (bfR(f.seed, t + 1) - 0.5) * 40, cy + A * -30, 4, 12, f.seed + t, c.c2, 2); }
-        if (t >= 42 && t < BF_HIT + 2) { // búa sấm
-            const hy = bfLerp(cy, f.y, drop * drop);
-            bfGlow(c.c, 20); bfZap(f.x, cy, f.x, hy, 6, 18, f.seed + Math.floor(t / 2), c.c, 3);
-            ctx.save(); ctx.translate(f.x, hy); if (A > 0) ctx.rotate(Math.PI); ctx.globalCompositeOperation = 'source-over'; bfGlow(c.c, 16);
-            ctx.fillStyle = '#8b5a2b'; ctx.fillRect(-3, -30, 6, 26); ctx.fillStyle = '#9ca3af'; ctx.fillRect(-18, 0 - 4, 36, 20); ctx.fillStyle = '#e5e7eb'; ctx.fillRect(-18, -4, 36, 4);
-            ctx.strokeStyle = c.c; ctx.lineWidth = 1.5; ctx.strokeRect(-18, -4, 36, 20); ctx.restore();
-        }
-        if (post > 0) {
-            if (post < 0.35) { bfGlow(c.c, 30); bfZap(f.x, f.y + A * 600, f.x, f.y, 10, 30, f.seed + 3, c.c, 9 * (1 - post)); }
-            bfGlow(c.c2, 16);
-            for (let i = 0; i < 8; i++) { const a = i / 8 * BF_TAU + 0.2; if (post < 0.6) bfZap(f.x, f.y, f.x + Math.cos(a) * (30 + post * 140), f.y + Math.sin(a) * (30 + post * 140), 5, 16, f.seed + i + Math.floor(t / 3), i % 2 ? c.c : c.c2, 2.5); }
-            bfRing(f.x, f.y, 20 + post * 130, bfA(c.c, 1 - post), 5);
-        }
-    },
     // Nam Châm: 2 cực N/S khổng lồ ép từ 2 bên, đường sức từ, nạn nhân bị bóp dẹp
     magnet(f, c, t) {
         const k = bfE(t, 6, BF_HIT), post = bfE(t, BF_HIT, BF_HIT + 40), e = k * k;

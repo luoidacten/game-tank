@@ -57,6 +57,7 @@ const NET_CLASSES = {
     RgBeam, RgFinisher, GjPurpleBlast,
     SwFinisher,
     IdolBeam, IdolTrail, IdolRing, IdolGift, IdolStick, IdolFinisher,
+    ThFinisher, MainFinisher,
 };
 
 // Biến toàn cục cần đồng bộ: [tên, getter, setter]
