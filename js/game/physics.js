@@ -10,6 +10,7 @@ function tickPhysics() {
         onlineManager.guestTick();
         return;
     }
+    cancelOrphanFinishers();
     const now = Date.now();
 
     // 1. Giảm thời gian rung màn hình theo nhịp tick cố định
@@ -431,4 +432,16 @@ function fatalCinematicStep(fc) {
         return;
     }
     fc.timer--;
+}
+
+// Kết liễu mà không có màn kết hiệp đi kèm (vd nạn nhân hồi sinh: Gemini, Hồi Ức...) -> huỷ sau vài tick, không che màn hình khi trận vẫn tiếp tục
+function cancelOrphanFinishers() {
+    if (typeof bodyEffects === 'undefined' || typeof FINISHER_FX_CLASSES === 'undefined') return;
+    const live = gameState.phase === 'playing' && !(typeof fatalCinematic !== 'undefined' && fatalCinematic.active);
+    for (const e of bodyEffects) {
+        if (!e || !e.active || !e.constructor || !FINISHER_FX_CLASSES.includes(e.constructor.name)) continue;
+        if (!live) { e._fxOrphan = 0; continue; }
+        e._fxOrphan = (e._fxOrphan || 0) + 1;
+        if (e._fxOrphan > 6) e.active = false;
+    }
 }
