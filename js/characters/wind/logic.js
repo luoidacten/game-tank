@@ -70,10 +70,9 @@ function wdFire(p) {
     const dmg = Math.round(p.damage * (1 + ch) * 100) / 100;
     const sz = full ? 12 : 6 + Math.round(ch * 2.5);
     const sp = C.bulletSpeed * (full ? 2.1 : 1.25 + ch * 0.3);
-    const e = wdEnemy(p);
-    let vx = 0;
-    if (e && e.hp > 0) { const v = aimVelocity(m.x, m.y, e, sp, true); vx = Math.max(-sp * 0.3, Math.min(sp * 0.3, v.vx)); }
-    const vy = wdDir(p) * Math.sqrt(Math.max(1, sp * sp - vx * vx));
+    // Bắn thẳng theo nòng, không tự ngắm
+    const vx = 0;
+    const vy = wdDir(p) * sp;
     spawnBullet(p, {
         w: sz, h: sz + (full ? 6 : 2), x: m.x - sz / 2, y: m.y - sz / 2, vx, vy, dmg, hook: 'wind',
         wdCh: Math.round(ch / WD_MAXCH * 100) / 100, wdFull: full, wdKb: full, isPiercing: full && wdE1(p),
