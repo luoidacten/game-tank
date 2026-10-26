@@ -276,3 +276,102 @@ function makeBodyGuideButton(id, team) {
     };
     return b;
 }
+
+// ==========================================
+// CẨM NANG TƯỚNG — danh sách mọi Body (tìm kiếm + lọc vai trò), chạm 1 tướng -> mở hướng dẫn
+// Mở từ nút "📚 CẨM NANG TƯỚNG" ở sảnh chính
+// ==========================================
+function ensureCodexCss() {
+    if (document.getElementById('bodyCodexCss')) return;
+    const st = document.createElement('style');
+    st.id = 'bodyCodexCss';
+    st.textContent = `
+#bodyCodexModal{position:fixed;inset:0;z-index:99990;display:flex;align-items:center;justify-content:center;background:rgba(2,6,23,.82);backdrop-filter:blur(3px);padding:max(10px,env(safe-area-inset-top)) 10px max(10px,env(safe-area-inset-bottom));box-sizing:border-box;touch-action:manipulation}
+#bodyCodexModal .cx-box{position:relative;display:flex;flex-direction:column;width:100%;max-width:560px;height:92vh;height:calc(100dvh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom));background:linear-gradient(180deg,#0f172a,#111827 60%,#0b1020);border:1.5px solid #a855f7;border-radius:16px;box-shadow:0 0 24px rgba(168,85,247,.45),inset 0 0 18px rgba(56,189,248,.12);color:#e2e8f0;box-sizing:border-box;font-family:inherit;overflow:hidden}
+.cx-top{flex:0 0 auto;padding:10px 10px 6px;border-bottom:1px solid #1e293b}
+.cx-title{display:flex;align-items:center;gap:8px;font-size:17px;font-weight:900;color:#fff;text-shadow:0 0 8px rgba(168,85,247,.8)}
+.cx-title span{flex:1}
+.cx-x{flex:0 0 auto;width:44px;height:44px;border-radius:50%;border:1px solid #475569;background:#1e293b;color:#f8fafc;font-size:16px;cursor:pointer;padding:0;touch-action:manipulation}
+.cx-search{width:100%;box-sizing:border-box;margin:6px 0;padding:9px 11px;font-size:16px;border-radius:10px;border:1px solid #38bdf8;background:#0b1222;color:#fff;outline:none;font-family:inherit}
+.cx-search:focus{box-shadow:0 0 10px rgba(56,189,248,.5)}
+.cx-chips{display:flex;gap:5px;overflow-x:auto;-webkit-overflow-scrolling:touch;touch-action:pan-x;padding-bottom:2px;scrollbar-width:none}
+.cx-chips::-webkit-scrollbar{display:none}
+.cx-chip{flex:0 0 auto;padding:7px 11px;font-size:12px;font-weight:800;border-radius:999px;border:1px solid #475569;background:#1e293b;color:#cbd5e1;cursor:pointer;touch-action:manipulation;white-space:nowrap;font-family:inherit}
+.cx-chip.on{background:linear-gradient(90deg,rgba(14,165,233,.55),rgba(168,85,247,.55));border-color:#38bdf8;color:#fff;box-shadow:0 0 8px rgba(56,189,248,.45)}
+.cx-count{font-size:11px;color:#94a3b8;margin-top:4px}
+.cx-grid{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:7px;padding:8px 10px 14px;align-content:start}
+.cx-card{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 4px 7px;border-radius:12px;border:1px solid #334155;background:rgba(30,41,59,.7);cursor:pointer;color:#e2e8f0;font-family:inherit;touch-action:pan-y;text-align:center}
+.cx-card:active{transform:scale(.96);border-color:#38bdf8}
+.cx-card canvas{width:58px;height:58px;border-radius:10px;background:radial-gradient(circle at 50% 45%,rgba(56,189,248,.22),rgba(15,23,42,.9) 70%)}
+.cx-card b{font-size:11.5px;line-height:1.2;color:#fff;word-break:break-word}
+.cx-card small{font-size:9.5px;color:#7dd3fc}
+.cx-empty{grid-column:1/-1;text-align:center;color:#64748b;padding:30px 0;font-size:13px}
+`;
+    document.head.appendChild(st);
+}
+
+function closeBodyCodex() {
+    const m = document.getElementById('bodyCodexModal');
+    if (m) m.remove();
+    document.removeEventListener('keydown', codexEscKey);
+}
+function codexEscKey(e) { if (e.key === 'Escape' && !document.getElementById('bodyGuideModal')) closeBodyCodex(); }
+function codexNorm(s) { return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[đĐ]/g, 'd').toLowerCase(); }
+
+function openBodyCodex() {
+    ensureGuideCss(); ensureCodexCss(); closeBodyCodex();
+    const ROLES = ['Đối Đầu', 'Kiểm Soát', 'Cơ Động', 'Sinh Tồn'];
+    const icon = r => (typeof ROLE_ICON !== 'undefined' && ROLE_ICON[r]) || '';
+    const bodies = ((typeof MODULES !== 'undefined' && MODULES.BODY) || []).filter(m => m && m.id);
+    const wrap = document.createElement('div');
+    wrap.id = 'bodyCodexModal';
+    wrap.innerHTML = `<div class="cx-box" role="dialog" aria-label="Cẩm Nang Tướng">
+      <div class="cx-top"><div class="cx-title"><span>📚 CẨM NANG TƯỚNG</span><button type="button" class="cx-x" aria-label="Đóng">✕</button></div>
+      <input class="cx-search" type="search" placeholder="🔍 Tìm tướng..." autocomplete="off">
+      <div class="cx-chips"><button type="button" class="cx-chip on" data-role="">Tất cả</button>${ROLES.map(r => `<button type="button" class="cx-chip" data-role="${r}">${icon(r)} ${r}</button>`).join('')}</div>
+      <div class="cx-count"></div></div>
+      <div class="cx-grid"></div></div>`;
+    document.body.appendChild(wrap);
+    document.addEventListener('keydown', codexEscKey);
+    const grid = wrap.querySelector('.cx-grid'), search = wrap.querySelector('.cx-search'), count = wrap.querySelector('.cx-count');
+    let role = '', drawJob = 0;
+    const render = () => {
+        const q = codexNorm(search.value.trim());
+        const list = bodies.filter(m => (!role || (m.role || []).includes(role)) && (!q || codexNorm(m.name + ' ' + m.id).includes(q)));
+        count.textContent = list.length + ' / ' + bodies.length + ' tướng';
+        grid.innerHTML = list.length ? list.map(m => `<button type="button" class="cx-card" data-id="${guideEsc(m.id)}"><canvas width="88" height="88"></canvas><b>${guideEsc(m.name)}</b><small>${(m.role && m.role[0]) ? icon(m.role[0]) + ' ' + guideEsc(m.role[0]) : '&nbsp;'}</small></button>`).join('') : '<div class="cx-empty">Không tìm thấy tướng nào</div>';
+        grid.scrollTop = 0;
+        // Vẽ art theo từng đợt nhỏ để không giật máy
+        const cards = [...grid.querySelectorAll('.cx-card')];
+        const job = ++drawJob;
+        let i = 0;
+        const step = () => {
+            if (job !== drawJob || !document.getElementById('bodyCodexModal')) return;
+            const end = Math.min(cards.length, i + 8);
+            for (; i < end; i++) drawGuideArt(cards[i].querySelector('canvas'), cards[i].dataset.id, 0, 1);
+            if (i < cards.length) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+    };
+    // Chạm = mở; vuốt cuộn thì không mở nhầm
+    let downY = null;
+    grid.addEventListener('pointerdown', e => { downY = e.clientY; });
+    grid.addEventListener('click', e => {
+        const c = e.target.closest('.cx-card');
+        if (!c) return;
+        if (downY != null && Math.abs(e.clientY - downY) > 12) { downY = null; return; }
+        downY = null;
+        openBodyGuide(c.dataset.id, 1, false);
+    });
+    wrap.querySelector('.cx-chips').addEventListener('click', e => {
+        const b = e.target.closest('.cx-chip');
+        if (!b) return;
+        role = b.dataset.role;
+        wrap.querySelectorAll('.cx-chip').forEach(x => x.classList.toggle('on', x === b));
+        render();
+    });
+    search.addEventListener('input', render);
+    wrap.addEventListener('click', e => { if (e.target === wrap) closeBodyCodex(); });
+    wrap.querySelector('.cx-x').addEventListener('click', e => { e.stopPropagation(); closeBodyCodex(); });
+    render();
+}
