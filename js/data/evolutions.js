@@ -305,7 +305,7 @@ const EVOLUTIONS = {
     ],
     the_clock: [
         { id: 'evo_clock_1', name: 'Dây Cót Dư Trữ', desc: 'Băng đạn +1 (5 viên), nạp đạn thường nhanh hơn 25%. Kích hoạt Time Zone: hồi ngay +2 viên & +35% tốc chạy ngang trong lúc ngưng đọng.', cost: 140, type: 'evo' },
-        { id: 'evo_clock_2', name: 'Kim Giờ Gia Tốc', desc: 'Hồi Time Zone 9s -> 6.5s. Kim Giờ Cường Hóa bay nhanh hơn 45%, Làm Chậm 45%. NHẢY KIM: mỗi lần Choáng 3 nhịp mà địch đang bị chậm bởi Kim Giờ -> hồi +1 viên. FULL EVO (Chúa Tể Thời Không — Án Tử 12 Giờ): Dư Chấn mở từ 7 nhịp (khựng 0.6s), KẾT LIỄU chỉ cần 16 nhịp; chủ động tắt sớm Time Zone: mỗi 1s còn dư giảm 1.2s hồi chiêu.', cost: 260, type: 'evo' },
+        { id: 'evo_clock_2', name: 'Kim Giờ Gia Tốc', desc: 'Hồi Time Zone 14s -> 10s. Kim Giờ Cường Hóa bay nhanh hơn 45%, Làm Chậm 45%. NHẢY KIM: mỗi lần Choáng 3 nhịp mà địch đang bị chậm bởi Kim Giờ -> hồi +1 viên. FULL EVO (Chúa Tể Thời Không — Án Tử 12 Giờ): Dư Chấn mở từ 7 nhịp (khựng 0.6s), KẾT LIỄU chỉ cần 16 nhịp; chủ động tắt sớm Time Zone: mỗi 1s còn dư giảm 1.2s hồi chiêu.', cost: 260, type: 'evo' },
     ],
     prism: [
         { id: 'evo_prism_1', name: 'Lăng Kính Khuếch Đại', desc: 'Phản thường 40% -> 70% dame, phạt khi phản 0.5 -> 0.25 HP. Cửa Sổ Vàng phản 125%. Mở Kính kéo dài 2.5s, hồi chiêu 7s. Đạn bị phản (giữ nguyên bản gốc) tự bẻ góc nhẹ về phía địch.', cost: 155, type: 'evo' },

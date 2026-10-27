@@ -28,7 +28,7 @@ function tcDir(p) { return p.id === 1 ? -1 : 1; }
 function tcSfx(n) { if (typeof soundSystem !== 'undefined' && soundSystem && !soundSystem.muted && soundSystem[n]) soundSystem[n](); }
 function tcTxt(o, s, c, sz, dy) { addFloatingText(o.x + o.w / 2, o.y + (o.id === 1 ? -18 - (dy || 0) : o.h + 22 + (dy || 0)), s, c, sz || 12); }
 function tcImmune(e) { return e && e.weapon === 'juggernaut'; }
-function tcCdMax(p) { return tcE2(p) ? 390 : 540; }
+function tcCdMax(p) { return tcE2(p) ? 600 : 840; } // [NERF] 9s/6.5s -> 14s/10s
 function tcExecN(p) { return tcFull(p) ? 16 : 20; }
 function tcAfterN(p) { return tcFull(p) ? 7 : 9; }
 function tcStun(e, t) { if (tcAlive(e) && !tcImmune(e)) e.freezeTimer = Math.max(e.freezeTimer || 0, t); }

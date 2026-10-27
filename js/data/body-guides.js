@@ -703,10 +703,10 @@ const BODY_GUIDES = {
         tag: 'Đếm 20 nhịp là kết liễu', diff: 3,
         controls: [
             { input: 'TAP', name: 'Kim Giây', what: 'Trúng +1 nhịp, 3 nhịp choáng 1s' },
-            { input: 'HOLD 0.33s', name: 'Time Zone', what: 'Ngưng đọng toàn sân 5s (hồi 9s)' }
+            { input: 'HOLD 0.33s', name: 'Time Zone', what: 'Ngưng đọng toàn sân 5s (hồi 14s)' }
         ],
         passive: ['20 nhịp -> kết liễu tức thì', 'Hết Time Zone: đạn địch bị đảo chiều'],
-        evo: { e1: '5 đạn, Time Zone hồi +2 viên', e2: 'Time Zone hồi 6.5s, kim nhanh', full: 'Chỉ cần 16 nhịp để kết liễu' },
+        evo: { e1: '5 đạn, Time Zone hồi +2 viên', e2: 'Time Zone hồi 10s, kim nhanh', full: 'Chỉ cần 16 nhịp để kết liễu' },
         tips: ['Trong Time Zone bắn thật nhiều kim treo']
     },
     coc: {
