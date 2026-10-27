@@ -763,12 +763,12 @@ const BODY_GUIDES = {
         tag: 'Quạt gió: 2 Thế, 3 Khí Áp', diff: 5,
         controls: [
             { input: 'TAP', name: 'Chiêu Quạt', what: 'Theo Thế Quạt đang dùng' },
-            { input: 'HOLD 0.5s', name: 'Đổi Thế', what: 'Thuận Phong Vũ ↔ Nghịch Phong Vũ' },
-            { input: 'HOLD 1s', name: 'Đổi Khí Áp', what: 'Sang vùng Khí Áp kế, +20 Gió' },
+            { input: 'HOLD 0.3s', name: 'Đổi Thế', what: 'Thuận Phong Vũ ↔ Nghịch Phong Vũ' },
+            { input: 'HOLD 0.7s', name: 'Đổi Khí Áp', what: 'Sang vùng Khí Áp kế, +20 Gió' },
             { input: '←/→', name: 'Cửu Thiên', what: 'Bay lên lái vòng, nhấp để giáng' }
         ],
         passive: ['Khí Áp: Thuận (nhanh) / Bão Hòa / Nghịch (mạnh)', 'Xen kẽ 2 Thế -> Hợp Phong +dame'],
-        evo: { e1: 'Gió 130, đổi Thế 0.25s, +Khiên', e2: 'Mỗi vùng Khí Áp mạnh hơn', full: 'Bão Hòa nhận cả 2 nội tại' },
+        evo: { e1: 'Gió 130, đổi Thế 0.18s, +Khiên', e2: 'Mỗi vùng Khí Áp mạnh hơn', full: 'Bão Hòa nhận cả 2 nội tại' },
         tips: ['Đổi Thế liên tục, đừng lặp 1 Thế 3 lần']
     },
     railgun: {

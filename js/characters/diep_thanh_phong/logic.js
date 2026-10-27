@@ -15,8 +15,8 @@
 const DTP_JADE = '#34d399', DTP_LEAF = '#86efac', DTP_TEAL = '#2dd4bf', DTP_STORM = '#8b5cf6', DTP_WHITE = '#ecfdf5';
 const DTP_ZONE_C = ['#86efac', '#2dd4bf', '#8b5cf6'];
 const DTP_ZONE_N = ['THUẬN PHONG', 'BÃO HÒA', 'NGHỊCH PHONG'];
-const DTP_ZONE_HOLD = 60;   // giữ 1.0s: Đổi Khí Áp
-const DTP_SKY_HOLD = 30;    // trên không: giữ 0.5s để lại Vòng Cảnh Báo
+const DTP_ZONE_HOLD = 42;   // giữ 0.7s: Đổi Khí Áp
+const DTP_SKY_HOLD = 21;    // trên không: giữ 0.35s để lại Vòng Cảnh Báo
 const DTP_SKY_LOCK = 40;    // Luật 11: vòng KHÓA 0.67s trước khi giáng
 const DTP_IMMUNE_MODES = ['sky', 'skylock', 'cyc_go', 'cyc_dance', 'cyc_back'];
 
@@ -33,7 +33,7 @@ function dtpCx(o) { return o.x + o.w / 2; }
 function dtpCy(o) { return o.y + o.h / 2; }
 function dtpSfx(n) { if (typeof soundSystem !== 'undefined' && soundSystem && !soundSystem.muted && soundSystem[n]) soundSystem[n](); }
 function dtpTxt(o, s, c, sz, dy) { addFloatingText(o.x + o.w / 2, o.y + (o.id === 1 ? -18 - (dy || 0) : o.h + 22 + (dy || 0)), s, c, sz || 12); }
-function dtpSwitchN(p) { return dtpE1(p) ? 15 : 30; }
+function dtpSwitchN(p) { return dtpE1(p) ? 11 : 18; }
 function dtpBeatN(p) { return dtpFull(p) ? 2 : 3; }
 function dtpZoneCdMax(p) { return dtpE1(p) ? 420 : 540; }
 function dtpTpNeed(p) { return dtpE2(p) ? 270 : 480; }
@@ -216,7 +216,7 @@ function dtpAddP(p, d) {
         triggerScreenShake(5, 10);
     }
     const zo = old < 33.5 ? 0 : (old < 66.5 ? 1 : 2), zn = dtpZone(p);
-    if (zo !== zn) { p.dtpZoneFx = 24; dtpTxt(p, DTP_ZONE_N[zn], DTP_ZONE_C[zn], 11, 26); }
+    if (zo !== zn) { p.dtpZoneFx = 30; }
 }
 function dtpSpend(p, c) {
     if (p.ammo + 1e-6 < c) {
@@ -264,15 +264,11 @@ function dtpZoneSwitch(p) {
     p.dtpZoneFx = 30;
     dtpClearBullets(p, dtpCx(p), dtpCy(p), 60, true);
     if (dtpE1(p) && (p.shield || 0) < 3) p.shield = (p.shield || 0) + 1;
-    explosions.push(new Explosion(dtpCx(p), dtpCy(p), 55, zn === 0 ? 'rgba(134, 239, 172,' : (zn === 1 ? 'rgba(45, 212, 191,' : 'rgba(139, 92, 246,'), 0, null));
-    dtpTxt(p, '🌀 ĐỔI KHÍ ÁP: ' + DTP_ZONE_N[zn], DTP_ZONE_C[zn], 13, 14);
-    triggerScreenShake(3, 6);
     dtpSfx('playPowerup');
 }
 function dtpStanceSwitch(p) {
     p.dtpStance = p.dtpStance ? 0 : 1;
-    p.dtpSwFx = 22;
-    dtpTxt(p, p.dtpStance ? '🪭 NGHỊCH PHONG VŨ' : '🪭 THUẬN PHONG VŨ', p.dtpStance ? '#c4b5fd' : DTP_LEAF, 12);
+    p.dtpSwFx = 16;
     dtpSfx('playClick');
 }
 

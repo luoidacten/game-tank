@@ -258,6 +258,37 @@ function dtpDrawSkyZone(o) {
     }
 }
 
+// Đổi Thế: cung mảnh lật nhanh + icon quạt nhỏ hiện ra ở thế mới (xanh ngọc = Thuận, tím = Nghịch)
+function dtpStanceFxDraw(p, cx, cy) {
+    const k = 1 - p.dtpSwFx / 16, c = p.dtpStance ? '#a78bfa' : DTP_TEAL, up = p.id === 1 ? -1 : 1;
+    ctx.save(); ctx.globalAlpha = (1 - k) * 0.9; ctx.strokeStyle = c; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+    const a = (p.dtpStance ? Math.PI : 0) + k * Math.PI * 1.2;
+    ctx.beginPath(); ctx.arc(cx, cy, p.w * 0.8, a, a + 1.5); ctx.stroke();
+    // icon pop
+    const iy = cy + up * (p.h * 0.5 + 14 + k * 6), sc = 0.7 + 0.5 * Math.sin(Math.min(1, k * 2) * Math.PI / 2);
+    ctx.translate(cx, iy); ctx.scale(sc, sc);
+    ctx.fillStyle = 'rgba(8,20,24,0.7)'; ctx.beginPath(); ctx.arc(0, 0, 8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.rotate(p.dtpStance ? Math.PI : 0); ctx.fillStyle = c;
+    ctx.beginPath(); ctx.moveTo(0, 4); ctx.arc(0, 4, 8 - 2, -Math.PI * 0.85, -Math.PI * 0.15); ctx.closePath(); ctx.globalAlpha *= 0.9; ctx.fill();
+    ctx.restore();
+}
+// Đổi Khí Áp: vòng xung mảnh màu vùng mới + chip tên vùng
+function dtpZoneFxDraw(p, cx, cy) {
+    const k = 1 - p.dtpZoneFx / 30, z = dtpZone(p), c = DTP_ZONE_C[z], up = p.id === 1 ? -1 : 1;
+    ctx.save(); ctx.lineCap = 'round';
+    ctx.globalAlpha = (1 - k) * 0.85; ctx.strokeStyle = c; ctx.lineWidth = 2.2 * (1 - k) + 0.8;
+    ctx.beginPath(); ctx.arc(cx, cy, p.w * (0.6 + k * 1.5), 0, Math.PI * 2); ctx.stroke();
+    ctx.globalAlpha = (1 - k) * 0.5; ctx.strokeStyle = '#fde047'; ctx.lineWidth = 1; ctx.setLineDash([3, 5]);
+    ctx.beginPath(); ctx.arc(cx, cy, p.w * (0.6 + k * 1.05), 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+    const al = k < 0.75 ? 1 : (1 - k) / 0.25, cy2 = cy + up * (p.h * 0.5 + 22 + k * 5);
+    ctx.globalAlpha = al; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const w = ctx.measureText(DTP_ZONE_N[z]).width + 14;
+    ctx.fillStyle = 'rgba(8,16,20,0.78)'; ctx.strokeStyle = c; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.roundRect ? ctx.roundRect(cx - w / 2, cy2 - 8, w, 16, 8) : ctx.rect(cx - w / 2, cy2 - 8, w, 16); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = c; ctx.fillText(DTP_ZONE_N[z], cx, cy2 + 0.5);
+    ctx.restore();
+}
+
 // ---------- Hiệu ứng quanh xe ----------
 CharHooks.register('diep_thanh_phong', Object.assign(CharHooks.registry.diep_thanh_phong || {}, {
     draw() {
@@ -277,7 +308,8 @@ CharHooks.register('diep_thanh_phong', Object.assign(CharHooks.registry.diep_tha
         // Giáp Gió (Nuôi Lốc)
         if (p.dtpCh === 'tor') dtpVortex(cx, cy, p.w * 0.95, t, DTP_TEAL, 0.5, 3, 4);
         // Đổi Khí Áp / Loạn Phong / Khiên Gió vỡ
-        if (p.dtpZoneFx > 0) { const k = 1 - p.dtpZoneFx / 30; ctx.globalAlpha = 1 - k; ctx.strokeStyle = dtpZoneColor(p); ctx.lineWidth = 3; ctx.shadowBlur = 12; ctx.shadowColor = ctx.strokeStyle; ctx.beginPath(); ctx.arc(cx, cy, p.w * (0.7 + k * 1.6), 0, Math.PI * 2); ctx.stroke(); ctx.globalAlpha = 1; ctx.shadowBlur = 0; }
+        if (p.dtpZoneFx > 0) dtpZoneFxDraw(p, cx, cy);
+        if (p.dtpSwFx > 0) dtpStanceFxDraw(p, cx, cy);
         if (p.dtpLpFx > 0) dtpVortex(cx, cy, 80 * (1 - p.dtpLpFx / 30) + 10, t, DTP_TEAL, p.dtpLpFx / 30, 4, 8);
         if (p.dtpBurstFx > 0) dtpVortex(cx, cy, (p.dtpBurstR || 110) * (1 - p.dtpBurstFx / 26 * 0.6), t, DTP_JADE, p.dtpBurstFx / 26, 5, 10);
         // Phong Vũ: vệt lướt + Vòng Cảnh Báo
@@ -310,17 +342,21 @@ CharHooks.register('diep_thanh_phong', Object.assign(CharHooks.registry.diep_tha
             ctx.globalAlpha = 1; ctx.shadowBlur = 0;
         }
         if (p.dtpArriveFx > 0) dtpVortex(cx, cy, p.w * (1.4 - p.dtpArriveFx / 22 * 0.6), t, '#a7f3d0', p.dtpArriveFx / 22, 3, 10);
-        // Vòng giữ nút: xanh ngọc = nhả để Đổi Thế Quạt; vàng = sắp Đổi Khí Áp (1.0s)
+        // Vòng giữ nút (mảnh): xanh ngọc tới mốc đổi Thế, rồi vàng tới mốc đổi Khí Áp
         const h = p.dtpHold || 0;
-        if (p.dtpValid && !p.dtpUsed && h > 6 && m === 'idle') {
-            const sN = dtpSwitchN(p), ok = h >= sN;
-            const teal = h >= Math.min(24, sN) && h < 51;
-            ctx.lineWidth = 2.2 + h * 2.2; ctx.shadowBlur = 10;
-            ctx.strokeStyle = teal || ok && h < 51 ? DTP_TEAL : (h >= 51 ? (p.dtpZoneCd > 0 ? '#64748b' : '#fde047') : 'rgba(45,212,191,0.4)');
-            ctx.shadowColor = ctx.strokeStyle;
-            ctx.beginPath(); ctx.arc(cx, cy, p.w * 0.95, -Math.PI / 2, -Math.PI / 2 + Math.min(1, h / DTP_ZONE_HOLD) * Math.PI * 2); ctx.stroke();
-            if (ok && h < 51) { ctx.globalAlpha = 0.5 + 0.3 * Math.sin(t * 20); ctx.beginPath(); ctx.arc(cx, cy, p.w * 1.15, 0, Math.PI * 2); ctx.stroke(); ctx.globalAlpha = 1; }
-            ctx.shadowBlur = 0;
+        if (p.dtpValid && !p.dtpUsed && h > 3 && m === 'idle') {
+            const sN = dtpSwitchN(p), Z = DTP_ZONE_HOLD, R = p.w * 0.9, a0 = -Math.PI / 2, TAU = Math.PI * 2;
+            const cd = p.dtpZoneCd > 0, ok = h >= sN;
+            ctx.lineCap = 'round'; ctx.lineWidth = 1.4;
+            ctx.strokeStyle = 'rgba(148,163,184,0.25)'; ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU); ctx.stroke();
+            ctx.strokeStyle = dtpRgba(p.dtpStance ? '#a78bfa' : DTP_TEAL, ok ? 0.95 : 0.55); ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(cx, cy, R, a0, a0 + Math.min(h, sN) / Z * TAU); ctx.stroke();
+            if (h > sN) { ctx.strokeStyle = cd ? 'rgba(100,116,139,0.8)' : 'rgba(253,224,71,0.95)'; ctx.beginPath(); ctx.arc(cx, cy, R, a0 + sN / Z * TAU, a0 + Math.min(h, Z) / Z * TAU); ctx.stroke(); }
+            for (const [mk, mc] of [[sN, p.dtpStance ? '#a78bfa' : DTP_TEAL], [Z, cd ? '#64748b' : '#fde047']]) {
+                const an = a0 + mk / Z * TAU; ctx.strokeStyle = h >= mk ? '#fff' : dtpRgba(mc, 0.8); ctx.lineWidth = 1.6;
+                ctx.beginPath(); ctx.moveTo(cx + Math.cos(an) * (R - 3), cy + Math.sin(an) * (R - 3)); ctx.lineTo(cx + Math.cos(an) * (R + 3), cy + Math.sin(an) * (R + 3)); ctx.stroke();
+            }
+            ctx.lineCap = 'butt';
         }
         ctx.restore();
     },
