@@ -3090,3 +3090,19 @@ body.online-active .player-column:has(.body-pick-card) { flex-wrap: nowrap; gap:
 }
 .lobby-host-info.done { background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.55); color: #bbf7d0; }
 body.low-quality .room-item, body.low-quality .room-vis-btn.active { box-shadow: none; }
+/* ===== G.E.A.R: biểu tượng lõi (js/render/gear-fx.js) ===== */
+.card.gear-card { position: relative; }
+.card.gear-card > .gear-icon { position: absolute; top: 5px; right: 4px; pointer-events: none; }
+.card.gear-card .gear-tier-header { padding-right: 22px; }
+.card.gear-card .gear-tier-badge { white-space: nowrap; }
+.gear-icon { flex: 0 0 auto; display: inline-block; vertical-align: middle; }
+.gear-icon .gi-dot { fill: currentColor; stroke: none; }
+.gear-icon .gi-fill { fill: rgba(255, 255, 255, 0.92); }
+.gear-icon g { color: #f8fafc; }
+.gear-icon-silver { filter: drop-shadow(0 0 3px rgba(148, 163, 184, 0.55)); }
+.gear-icon-gold { filter: drop-shadow(0 0 4px rgba(250, 204, 21, 0.6)); }
+.gear-icon-prismatic { filter: drop-shadow(0 0 5px rgba(34, 211, 238, 0.7)); animation: gearIconHue 4s linear infinite; }
+@keyframes gearIconHue { 0%, 100% { filter: drop-shadow(0 0 5px rgba(34, 211, 238, 0.75)); } 50% { filter: drop-shadow(0 0 6px rgba(232, 121, 249, 0.85)); } }
+.card.gear-card:hover .gear-icon { transform: rotate(-6deg) scale(1.06); transition: transform 0.18s ease; }
+.gear-mini-pill .gear-icon { margin: -2px 2px -2px -3px; }
+@media (prefers-reduced-motion: reduce) { .gear-icon-prismatic { animation: none; } }

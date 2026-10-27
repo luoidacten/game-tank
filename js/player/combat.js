@@ -115,7 +115,7 @@ Object.assign(Player.prototype, {
         }
 
         // Chỉ đòn đánh thật mới ngắt niệm: bỏ qua sát thương môi trường / G.E.A.R / DoT nhỏ (< 0.5)
-        const jjkBreak = !options.isEnvironmental && !options.isDot && amount >= 0.5;
+        const jjkBreak = !options.isEnvironmental && !options.isDot && !options.isGearBonus && amount >= 0.5;
         // Gojo: Đang gồng niệm Chú Lực / Lãnh Địa mà ăn sát thương -> Bị ngắt niệm!
         if (jjkBreak && this.weapon === 'the_strongest' && (this.gojoChargeTimer || 0) > 0) {
             this.gojoChargeTimer = 0;

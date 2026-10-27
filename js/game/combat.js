@@ -62,12 +62,12 @@ function checkHits(attacker, victim) {
             }
 
             // Ngắt Lãnh địa / Phản chuyển khi bị đánh trúng
-            if (!victim.skFugaArmed && !b.isGearBonusShot && (b.dmg || 1) >= 0.5) victim.sukunaChargeTimer = 0; // Fuga đã nạp / đạn G.E.A.R / đạn nhỏ: không bị ngắt
-            if (victim.domainActive && !b.isGearBonusShot && (b.dmg || 1) >= 0.5) victim.domainActive = false;
+            if (!victim.skFugaArmed && !b.isGearBonusShot && !b.isGearDroneBullet && (b.dmg || 1) >= 0.5) victim.sukunaChargeTimer = 0; // Fuga đã nạp / đạn G.E.A.R / đạn nhỏ: không bị ngắt
+            if (victim.domainActive && !b.isGearBonusShot && !b.isGearDroneBullet && (b.dmg || 1) >= 0.5) victim.domainActive = false;
         }
         if (victim.weapon === 'the_strongest') {
             // Ngắt niệm Chú Lực khi bị đánh trúng (bỏ qua đạn G.E.A.R / đạn nhỏ < 0.5)
-            if (!b.isGearBonusShot && (b.dmg || 1) >= 0.5) victim.gojoChargeTimer = 0;
+            if (!b.isGearBonusShot && !b.isGearDroneBullet && (b.dmg || 1) >= 0.5) victim.gojoChargeTimer = 0;
         }
         // =========================================================================
         // HÀM DÙNG CHUNG: KÍCH HOẠT HIỆU ỨNG LÊN VẬT CẢN (Y HỆT NHƯ LÊN NGƯỜI CHƠI)
@@ -700,7 +700,8 @@ function checkHits(attacker, victim) {
             }
 
             if (localApplyDamage) {
-                let dealtDmg = victim.takeDamage(finalDmg, attacker);
+                // Đạn phụ G.E.A.R không ngắt niệm; truyền viên đạn cho lõi tính theo quãng bay (#35)
+                let dealtDmg = victim.takeDamage(finalDmg, attacker, (b.isGearBonusShot || b.isGearDroneBullet) ? { isGearBonus: true, gearBullet: b } : { gearBullet: b });
                 BulletHooks.call(b, 'hit', attacker, victim, dealtDmg);
                 if (typeof onGearBulletHitPlayer === 'function') {
                     onGearBulletHitPlayer(attacker, victim, b, dealtDmg);

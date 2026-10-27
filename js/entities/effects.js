@@ -19,6 +19,7 @@ class Explosion {
         this.pal = expPaletteFor(color, owner);
         this.seed = (Math.random() * 1000) | 0;
         this.t = 0; this.life = expLifeFor(maxR);
+        if (Explosion.gearNext) this.isGearBonus = true; // nổ do G.E.A.R (xem pushGearExplosion)
         this.checkCollision();
     }
 
@@ -45,7 +46,7 @@ class Explosion {
                 }
 
                 if (typeof t.takeDamage === 'function') {
-                    t.takeDamage(finalDmg, this.owner);
+                    t.takeDamage(finalDmg, this.owner, this.isGearBonus ? { isGearBonus: true } : undefined); // nổ G.E.A.R: không ngắt niệm
                 } else {
                     if (t.shield > 0) t.shield--;
                     else t.hp -= finalDmg;

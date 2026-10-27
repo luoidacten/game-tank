@@ -40,7 +40,7 @@ const NET_CLASSES = {
     ArWeb, ArSpiderling, ArFinisher,
     MapVehicle, MvShot, MvHealOrbs, MvAura, CrLaser, CrTrapFx, CrAura,
     MainAwakenFx,
-    GearSupportDrone, GearMine, GearBarrierWall, GearCenterPrism, GearMirage, GearPrankBox, GearStormBolt, GearFieldDevice,
+    GearSupportDrone, GearMine, GearBarrierWall, GearCenterPrism, GearMirage, GearPrankBox, GearStormBolt, GearFieldDevice, GearProcFx,
     BmStraight, BmCurve, BmBlast, BmCatch, BmFinisher,
     PsyWave, PsyFinisher,
     TlPin, TlWhite, TlBlack, TlFinisher,

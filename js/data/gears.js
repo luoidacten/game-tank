@@ -120,12 +120,12 @@ const GEARS = [
     {
         num: 16, id: 'gear_speed_heal_p', name: 'Đột Phá Tốc Ảnh',
         tier: 'PRISMATIC', stage: 'ALL', familyId: 'fam_uncap_speed',
-        desc: 'Mua Động Cơ không giới hạn trong Shop và nhận ngay +18% Tốc chạy. Hồi Phục Động Năng: Mỗi khi di chuyển ngang đủ 200px, tự động hồi +0.35 HP!'
+        desc: 'Mua Động Cơ không giới hạn trong Shop và nhận ngay +18% Tốc chạy. Hồi Phục Động Năng: Mỗi khi di chuyển ngang đủ 260px, tự động hồi +0.3 HP!'
     },
     {
         num: 17, id: 'gear_stat_rain_g', name: 'Cơn Mưa Chỉ Số',
         tier: 'GOLD', stage: 'ALL', familyId: 'fam_all_stats',
-        desc: 'Cộng trực tiếp tất cả chỉ số cơ bản: +2.0 Max HP, +20% Sát thương, +12% Tốc độ di chuyển, +1 Đạn tối đa (hoặc +20% tốc hồi Năng Lượng/Nội Năng).'
+        desc: 'Cộng trực tiếp tất cả chỉ số cơ bản: +1.5 Max HP, +15% Sát thương, +10% Tốc độ di chuyển, +1 Đạn tối đa (hoặc +15% tốc hồi Năng Lượng/Nội Năng).'
     },
     {
         num: 18, id: 'gear_infinite_stat_p', name: 'Chỉ Số Vô Tận',
@@ -142,13 +142,13 @@ const GEARS = [
         tier: 'SILVER', stage: 'ALL',
         excludeBodies: ['customize'],
         incompatibleWith: ['gear_giant_tank_g'],
-        desc: 'Kích thước thân xe của bạn thu nhỏ đi 20% (khó bị bắn trúng hơn hẳn) và nhận thêm +12% Tốc độ di chuyển.'
+        desc: 'Kích thước thân xe của bạn thu nhỏ đi 20% (khó bị bắn trúng hơn hẳn) và nhận thêm +15% Tốc độ di chuyển, +10% Tốc độ bắn.'
     },
     {
         num: 21, id: 'gear_giant_tank_g', name: 'Pháo Đài Khổng Lồ',
         tier: 'GOLD', stage: 'ALL',
         incompatibleWith: ['gear_mini_tank_s'],
-        desc: 'Kích thước thân xe phóng to lên +25%, bù lại nhận ngay +4.0 Max HP, +20% Sát thương và miễn nhiễm hiệu ứng bị đẩy lùi/kéo lệch ngang!'
+        desc: 'Kích thước thân xe phóng to lên +25%, bù lại nhận ngay +2.0 Max HP, +10% Sát thương và miễn nhiễm hiệu ứng bị đẩy lùi/kéo lệch ngang!'
     },
     {
         num: 22, id: 'gear_heavy_tread_s', name: 'Bánh Xích Hạng Nặng',
@@ -158,7 +158,7 @@ const GEARS = [
     {
         num: 23, id: 'gear_headstart_s', name: 'Khởi Đầu Hoàn Hảo',
         tier: 'SILVER', stage: 'ALL',
-        desc: 'Trong 10 giây đầu tiên của mỗi hiệp đấu, bạn nhận thêm +25% Tốc độ di chuyển và +25% Tốc độ bắn / Tốc độ nạp đạn.'
+        desc: 'Trong 12 giây đầu tiên của mỗi hiệp đấu, bạn nhận thêm +30% Tốc độ di chuyển và +30% Tốc độ bắn / Tốc độ nạp đạn.'
     },
     {
         num: 24, id: 'gear_scaling_time_g', name: 'Chiến Binh Bền Bỉ',
@@ -221,7 +221,7 @@ const GEARS = [
         num: 33, id: 'gear_burn_ammo_s', name: 'Đạn Nhiệt Hạch',
         tier: 'SILVER', stage: 'ALL',
         excludeBodies: ['furnace', 'sprayer', 'shortgunATK'],
-        desc: 'Đòn đánh của bạn thiêu đốt mục tiêu, gây thêm 0.4 sát thương Đốt trong 2 giây (làm mới thời gian khi trúng đạn).'
+        desc: 'Đòn đánh của bạn thiêu đốt mục tiêu, gây thêm 0.3 sát thương Đốt trong 2 giây (làm mới thời gian khi trúng đạn).'
     },
     {
         num: 34, id: 'gear_shield_breaker_g', name: 'Đạn Phá Giáp',
@@ -262,7 +262,7 @@ const GEARS = [
         num: 38, id: 'gear_energy_core_g', name: 'Lõi Năng Lượng Vĩnh Cửu',
         tier: 'GOLD', stage: 'ALL',
         bodies: GEAR_BODY_GROUPS.ENERGY_HEAT,
-        desc: 'Tăng +30% tốc độ hồi Năng Lượng / Nội Năng (hoặc hạ Nhiệt nhanh hơn +30%) và giảm 15% mức tiêu hao năng lượng của mọi kỹ năng!'
+        desc: 'Tăng +30% tốc độ hồi Năng Lượng / Nội Năng (hoặc hạ Nhiệt nhanh hơn +30%) giúp tung kỹ năng liên tục hơn!'
     },
     {
         num: 39, id: 'gear_first_strike_s', name: 'Phát Bắn Đầu Tiên',
@@ -306,7 +306,7 @@ const GEARS = [
     {
         num: 45, id: 'gear_bullet_eater_g', name: 'Hấp Thụ Đạn Đạo',
         tier: 'GOLD', stage: 'ALL',
-        desc: 'Cứ mỗi 8 giây, xe của bạn bật lớp màng từ trường trong 1.0s: Viên đạn thường đầu tiên của địch chạm vào màng này sẽ bị nuốt chửng (0 sát thương) và chuyển thành +0.5 HP!'
+        desc: 'Cứ mỗi 6 giây, xe của bạn bật lớp màng từ trường trong 1.5s: Viên đạn thường đầu tiên của địch chạm vào màng này sẽ bị nuốt chửng (0 sát thương) và chuyển thành +0.5 HP!'
     },
     {
         num: 46, id: 'gear_sudden_death_s', name: 'Chiến Binh Vòng Bo (Đột Tử)',
@@ -324,12 +324,12 @@ const GEARS = [
     {
         num: 48, id: 'gear_combat_regen_s', name: 'Hồi Máu Chiến Trường',
         tier: 'SILVER', stage: 'ALL',
-        desc: 'Sau 4 giây không nhận sát thương từ kẻ địch, xe của bạn tự động hồi phục +0.25 HP mỗi giây cho đến khi bị bắn trúng.'
+        desc: 'Sau 6 giây không nhận sát thương từ kẻ địch, xe của bạn tự động hồi phục +0.15 HP mỗi giây cho đến khi bị bắn trúng.'
     },
     {
         num: 49, id: 'gear_omnivamp_p', name: 'Hút Máu Toàn Phần',
         tier: 'PRISMATIC', stage: 'ALL',
-        desc: 'Nhận 20% Hút Máu từ mọi sát thương gây ra lên tướng địch. Nếu máu đang đầy, lượng máu hút dư sẽ chuyển thành Giáp Trắng (tối đa 3.0 Giáp)!'
+        desc: 'Nhận 30% Hút Máu từ mọi sát thương gây ra lên tướng địch. Nếu máu đang đầy, lượng máu hút dư sẽ chuyển thành Giáp Trắng (tối đa 3.0 Giáp)!'
     },
     {
         num: 50, id: 'gear_tenacity_s', name: 'Ý Chí Bất Khuất',
@@ -364,27 +364,27 @@ const GEARS = [
     {
         num: 55, id: 'gear_ctrl_zone_s', name: 'Trường Lực Kiểm Soát',
         tier: 'SILVER', stage: 'ALL', roleReq: 'Kiểm Soát', familyId: 'fam_ctrl_zone',
-        desc: 'Mọi Vùng hiệu ứng mặt đất bạn tạo ra có chiều rộng lớn hơn +20% và tồn tại lâu hơn +1.0 giây.'
+        desc: 'Mọi Vùng hiệu ứng mặt đất bạn tạo ra có bán kính lớn hơn +25% và tồn tại lâu hơn +1.0 giây (Đạn Băng Giá làm chậm lâu hơn +30%).'
     },
     {
         num: 56, id: 'gear_ctrl_master_g', name: 'Bậc Thầy Phong Tỏa',
         tier: 'GOLD', stage: 'ALL', roleReq: 'Kiểm Soát', familyId: 'fam_ctrl_zone',
-        desc: 'Vùng hiệu ứng mặt đất rộng hơn +30%, đồng thời kẻ địch đang chịu Khống Chế (Chậm, Choáng, Băng, Câm lặng, Trói) sẽ nhận thêm +20% sát thương từ mọi nguồn!'
+        desc: 'Kẻ địch đang chịu Khống Chế (Chậm, Choáng, Băng, Câm lặng, Trói, Đốt, Độc) nhận thêm +20% sát thương từ đòn của bạn và mất thêm 0.15 HP mỗi giây!'
     },
     {
         num: 57, id: 'gear_ctrl_prison_p', name: 'Ngục Tù Không Gian 1D',
         tier: 'PRISMATIC', stage: 'MID_LATE', roleReq: 'Kiểm Soát',
-        desc: 'Mỗi 10 giây, phát đạn trúng đích tiếp theo sẽ dựng lên 2 Cột Chắn Năng Lượng ở hai bên sườn kẻ địch (cách địch 90px Trái/Phải) trong 2.5s, khóa không cho địch chạy dạt ra mép!'
+        desc: 'Mỗi 10 giây, phát đạn trúng đích tiếp theo sẽ dựng lên 2 Cột Chắn Năng Lượng ở hai bên sườn kẻ địch (cách địch 85px Trái/Phải) trong 2.5s, khóa không cho địch chạy dạt ra mép!'
     },
     {
         num: 58, id: 'gear_ctrl_jammer_g', name: 'Nhiễu Sóng Tâm Trí',
         tier: 'GOLD', stage: 'ALL', roleReq: 'Kiểm Soát',
-        desc: 'Mỗi khi bạn gây hiệu ứng Làm Chậm hoặc Choáng lên kẻ địch, tốc độ nạp đạn / hồi năng lượng của kẻ địch đó cũng bị giảm đi 30% trong 2.0 giây.'
+        desc: 'Mỗi đòn bắn trúng kẻ địch làm tốc độ nạp đạn / hồi năng lượng của kẻ địch đó cũng bị giảm đi 30% trong 2.0 giây.'
     },
     {
         num: 59, id: 'gear_mob_step_s', name: 'Bộ Pháp Linh Hoạt',
         tier: 'SILVER', stage: 'ALL', roleReq: 'Cơ Động', familyId: 'fam_mob_dash',
-        desc: 'Tăng +10% Tốc độ di chuyển. Mỗi khi đổi hướng di chuyển (Trái ↔ Phải) hoặc dùng kỹ năng Lướt/Dịch chuyển, nhận +25% Tốc chạy trong 0.8s (CD: 3s).'
+        desc: 'Tăng +12% Tốc độ di chuyển. Mỗi khi đổi hướng di chuyển (Trái ↔ Phải) hoặc dùng kỹ năng Lướt/Dịch chuyển, nhận +30% Tốc chạy trong 1.2s (CD: 2.5s).'
     },
     {
         num: 60, id: 'gear_mob_mirage_g', name: 'Ảo Ảnh Gia Tốc',
@@ -399,17 +399,17 @@ const GEARS = [
     {
         num: 62, id: 'gear_mob_run_gun_s', name: 'Bắn Khi Đang Chạy',
         tier: 'SILVER', stage: 'ALL', roleReq: 'Cơ Động',
-        desc: 'Bạn không bao giờ bị giảm tốc độ di chuyển khi đang bắn/tụ lực, và khi vừa di chuyển vừa bắn thì đạn bay nhanh hơn +25%.'
+        desc: 'Khi vừa di chuyển vừa bắn, đạn bay nhanh hơn +25% (khó né hơn hẳn khi thả diều).'
     },
     {
         num: 63, id: 'gear_surv_plate_s', name: 'Giáp Cốt Thép',
         tier: 'SILVER', stage: 'ALL', roleReq: 'Sinh Tồn', familyId: 'fam_surv_armor',
-        desc: 'Nhận ngay +2.0 Max HP và giảm 0.15 sát thương từ mọi đòn đánh trực tiếp (tối thiểu địch vẫn gây 0.1 dame).'
+        desc: 'Nhận ngay +1.5 Max HP và giảm 0.12 sát thương từ mọi đòn đánh trực tiếp (tối thiểu địch vẫn gây 0.1 dame).'
     },
     {
         num: 64, id: 'gear_surv_fortress_g', name: 'Pháo Đài Sinh Học',
         tier: 'GOLD', stage: 'ALL', roleReq: 'Sinh Tồn', familyId: 'fam_surv_armor',
-        desc: 'Nhận +3.0 Max HP. Khi máu dưới 50% Max HP, tự động hồi +0.35 HP/giây và mọi hiệu ứng Hồi Máu / Tạo Giáp của bạn tăng +30% hiệu quả!'
+        desc: 'Nhận +1.5 Max HP. Khi máu dưới 50% Max HP: giảm 15% sát thương nhận vào, tự động hồi +0.2 HP/giây và mọi hiệu ứng Hồi Máu / Tạo Giáp của bạn tăng +30% hiệu quả!'
     },
     {
         num: 65, id: 'gear_surv_titan_p', name: 'Trái Tim Bất Diệt',
@@ -459,7 +459,7 @@ const GEARS = [
         num: 72, id: 'gear_ram_master_g', name: 'Lao Húc Không Phanh',
         tier: 'GOLD', stage: 'ALL',
         bodies: GEAR_BODY_GROUPS.RAM,
-        desc: 'Khi thực hiện kỹ năng Lao lên phía trước, bạn nhận thêm 1 lớp Giáp Trắng 1.5 HP trong 2s, tốc độ lao nhanh hơn +30% và để lại vệt chấn động làm Chậm 40% kẻ địch!'
+        desc: 'Khi thực hiện kỹ năng Lao lên phía trước, bạn nhận thêm +1.0 Giáp Trắng (tối đa 3.0) và phát sóng chấn động làm Chậm kẻ địch trong 1.5s!'
     },
     {
         num: 73, id: 'gear_fast_charge_s', name: 'Tụ Lực Siêu Tốc',
@@ -470,17 +470,17 @@ const GEARS = [
     {
         num: 74, id: 'gear_minefield_s', name: 'Bẫy Mìn Giữa Sân',
         tier: 'SILVER', stage: 'ALL',
-        desc: 'Cứ mỗi 8 giây, tự động thả 1 Quả Mìn Tàng Hình nằm trên làn đường của kẻ địch (chớp đèn đỏ nhẹ 0.5s khi mới đặt). Địch dẫm phải nổ gây 1.0 sát thương và đẩy trượt ngang!'
+        desc: 'Cứ mỗi 10 giây, tự động thả 1 Quả Mìn Tàng Hình nằm trên làn đường của kẻ địch (chớp đèn đỏ nhẹ 0.5s khi mới đặt). Địch dẫm phải nổ gây 0.6 sát thương và đẩy trượt ngang!'
     },
     {
         num: 75, id: 'gear_artillery_call_g', name: 'Pháo Kích Hỗ Trợ',
         tier: 'GOLD', stage: 'ALL',
-        desc: 'Cứ mỗi 7 giây, gọi 2 quả đạn Pháo Kích (có vòng cảnh báo đỏ 1.5s) rơi thẳng xuống vị trí hiện tại trên làn của kẻ địch!'
+        desc: 'Cứ mỗi 8 giây, gọi 2 quả đạn Pháo Kích (có vòng cảnh báo đỏ 1.5s) rơi thẳng xuống vị trí hiện tại trên làn của kẻ địch (mỗi quả 0.7 sát thương)!'
     },
     {
         num: 76, id: 'gear_map_storm_p', name: 'Cơn Bão Từ Trường (Sửa Đổi Sân)',
         tier: 'PRISMATIC', stage: 'MID_LATE',
-        desc: 'Biến sân đấu thành Vùng Bão Sét: Cứ mỗi 5 giây, 3 tia sét ngẫu nhiên giáng xuống làn kẻ địch (1.2 dame + Choáng 0.5s); riêng bạn đứng vào vết sét trên làn mình được hồi +0.5 HP và +25% tốc bắn!'
+        desc: 'Biến sân đấu thành Vùng Bão Sét: Cứ mỗi 6 giây, 2 tia sét ngẫu nhiên giáng xuống làn kẻ địch (1.0 dame + Choáng 0.4s); riêng bạn đứng vào vết sét trên làn mình được hồi +0.5 HP và +25% tốc bắn!'
     },
     {
         num: 77, id: 'gear_auto_wall_g', name: 'Tường Chắn Di Động',
@@ -526,7 +526,7 @@ const GEARS = [
         bodies: ['basic'],
         incompatibleWith: ['gear_protagonist_p'],
         cond: (p) => p && !p.mainEgg && !p.mainAwakened && !p.isMainChar,
-        desc: 'Cứ mỗi viên đạn thứ 4 của Cơ Bản sẽ biến thành Đạn Pháo Liên Hợp: To gấp đôi, gây x1.5 sát thương nổ lan và hồi lại ngay +0.5 HP khi trúng đích!'
+        desc: 'Cứ mỗi viên đạn thứ 4 của Cơ Bản sẽ biến thành Đạn Pháo Liên Hợp: To gấp đôi, gây x1.5 sát thương (+0.3 nổ lan) và hồi lại ngay +0.5 HP khi trúng đích!'
     },
     {
         num: 84, id: 'gear_hero_tank_g', name: 'Chiến Xa Thiết Giáp',
@@ -592,7 +592,7 @@ const GEARS = [
         num: 94, id: 'gear_hero_time_g', name: 'Dây Cót Vĩnh Cửu',
         tier: 'GOLD', stage: 'ALL',
         bodies: ['paradox', 'chrononeo'],
-        desc: 'Giảm 25% hồi chiêu của Tua Ngược / Đổi Thế. Mỗi khi bạn kích hoạt Tua Ngược hoặc Đổi Thế / Thời Khắc, bạn được hồi ngay +0.75 HP và làm chậm kẻ địch 30% trong 1.5s!'
+        desc: 'Giảm 20% thời gian hồi đạn / kỹ năng. Mỗi khi bạn Tua Ngược hoặc dịch chuyển xa (CD: 3s), nhận ngay +1.0 Giáp Trắng và bắn ra 2 Mảnh Thời Gian (mỗi mảnh 0.4 sát thương)!'
     },
     {
         num: 95, id: 'gear_hero_family_p', name: 'Gia Tộc Cơ Khí Alano',
@@ -604,13 +604,13 @@ const GEARS = [
         num: 96, id: 'gear_hero_dj_g', name: 'Sân Khấu Siêu Sao',
         tier: 'GOLD', stage: 'ALL',
         bodies: ['dj'],
-        desc: 'Mỗi điểm Combo cộng thêm cho DJ sẽ cho hiệu quả tăng tốc và sát thương cao hơn +35%; mốc nhận Khiên và Hồi máu giảm từ 30 / 45 Combo xuống chỉ còn 20 / 30 Combo!'
+        desc: 'Cứ mỗi 4 phát bắn, DJ tung 1 nhịp Bass Drop: hồi +0.35 HP, gây 0.35 sát thương âm thanh và làm Chậm kẻ địch 1.25s!'
     },
     {
         num: 97, id: 'gear_hero_hook_g', name: 'Xích Tử Thần Nung Đỏ',
         tier: 'GOLD', stage: 'ALL',
         bodies: ['steel_hook', 'death_lock'],
-        desc: 'Đầu móc của Móc Thép có máu gấp đôi (khó bị bắn đứt) và đạn Cấm Chế của Trói Chết bay nhanh hơn +35%; kẻ địch bị trúng xích của cả hai sẽ bị Thiêu Đốt và Câm Lặng thêm 1.0s!'
+        desc: 'Đạn Cấm Chế của Trói Chết bay nhanh hơn +35%; kẻ địch bị trúng xích của cả hai sẽ bị Thiêu Đốt và Câm Lặng thêm 1.0s!'
     },
     {
         num: 98, id: 'gear_hero_twins_g', name: 'Đồng Tâm Hiệp Lực',
@@ -622,13 +622,13 @@ const GEARS = [
         num: 99, id: 'gear_hero_blood_g', name: 'Huyết Hải Vô Biên',
         tier: 'GOLD', stage: 'ALL',
         bodies: ['blood_lord', 'berserker', 'healer'],
-        desc: 'Tăng +2.5 Max HP ngay lập tức. Hiệu suất tích Bể Máu, tích thanh Huyết Chiến và tích Năng Lượng Sinh Mệnh đều tăng thêm +35%!'
+        desc: 'Tăng +2.5 Max HP mỗi hiệp: Huyết Hải dày hơn giúp trụ lâu để tích đầy Bể Máu / Huyết Chiến / Năng Lượng Sinh Mệnh!'
     },
     {
         num: 100, id: 'gear_hero_martial_p', name: 'Bậc Thầy Võ Đạo',
         tier: 'PRISMATIC', stage: 'ALL',
         bodies: ['flower_shadow', 'kiem_vu', 'tsukiyo', 'kazuki'],
-        desc: 'Giảm 30% mức tiêu hao Thanh Hoa / Tâm Định / Nội Năng / Ý Niệm. Mỗi khi thực hiện thành công một đòn Cường Hóa / Tâm Kiếm / Nhẫn Đạo / Loạn Vũ Hư Ảnh, nhận 1 lớp Khiên và hồi +0.6 HP!'
+        desc: 'Võ Đạo Hộ Thể: cứ mỗi 4 giây, đòn tấn công kế tiếp của bạn (Cường Hóa / Tâm Kiếm / Nhẫn Đạo / Loạn Vũ...) cho ngay 1 lớp Khiên và hồi +0.6 HP!'
     },
 
     // =========================================================================
@@ -683,7 +683,7 @@ const GEARS = [
     {
         num: 108, id: 'gear_atk_thunder_god_p', name: 'Lôi Thần Giáng Thế',
         tier: 'PRISMATIC', stage: 'MID_LATE', familyId: 'fam_atk_volt',
-        desc: 'Đòn bắn tích Điện Tích lên kẻ địch; đủ 4 Điện Tích sẽ giáng 1 Cột Sét Phán Quyết từ đỉnh màn hình xuống thẳng đầu địch gây 1.3 sát thương chuẩn, xóa 1 lớp Khiên và làm Choáng 0.6s!'
+        desc: 'Đòn bắn tích Điện Tích lên kẻ địch; đủ 3 Điện Tích sẽ giáng 1 Cột Sét Phán Quyết từ đỉnh màn hình xuống thẳng đầu địch gây 1.3 sát thương chuẩn, xóa 1 lớp Khiên và làm Choáng 0.6s!'
     },
     {
         num: 109, id: 'gear_atk_boomerang_g', name: 'Đạn Hồi Tuyển (Boomerang)',
@@ -742,7 +742,7 @@ const GEARS = [
     {
         num: 119, id: 'gear_atk_soul_burn_g', name: 'Đạn Thiêu Đốt Linh Hồn',
         tier: 'GOLD', stage: 'MID_LATE',
-        desc: 'Đòn bắn của bạn gây thêm sát thương chuẩn bằng 3% Max HP của kẻ địch và rút cạn 10% thanh Năng Lượng / Nội Năng (hoặc kéo dài thời gian nạp đạn) của địch (CD: 1.2s).'
+        desc: 'Đòn bắn của bạn gây thêm sát thương chuẩn bằng 5% Max HP của kẻ địch và rút cạn 10% thanh Năng Lượng / Nội Năng (hoặc kéo dài thời gian nạp đạn) của địch (CD: 1.0s).'
     },
     {
         num: 120, id: 'gear_atk_phase_pierce_g', name: 'Đạn Xuyên Không (Phase Shot)',
@@ -758,7 +758,7 @@ const GEARS = [
         num: 122, id: 'gear_atk_twin_fang_g', name: 'Nanh Kép Song Hành',
         tier: 'GOLD', stage: 'ALL',
         excludeBodies: ['shotgun', 'shortgunATK', 'cluster_gun', 'tank', 'storm', 'lazer_beam'],
-        desc: 'Cứ mỗi phát bắn thứ 2, nòng súng tách viên đạn thành 2 viên Nanh Kép bay song song (mỗi viên gây 65% sát thương gốc = tổng 130% sát thương và diện tích trúng rộng gấp đôi)!'
+        desc: 'Cứ mỗi phát bắn thứ 2, nòng súng tách viên đạn thành 2 viên Nanh Kép bay song song (mỗi viên gây 70% sát thương gốc = tổng 140% sát thương và diện tích trúng rộng gấp đôi)!'
     },
 
     // =========================================================================
@@ -767,7 +767,7 @@ const GEARS = [
     {
         num: 123, id: 'gear_sup_heal_beacon_g', name: 'Trạm Quân Y Dã Chiến',
         tier: 'GOLD', stage: 'ALL',
-        desc: 'Đầu hiệp và mỗi 12 giây, thả 1 Trạm Quân Y (3.0 HP, tồn tại 7s) trên làn của bạn: phát sóng xanh lá hồi +0.35 HP/giây và tăng +15% tốc bắn khi bạn đứng trong bán kính 75px quanh trạm!'
+        desc: 'Đầu hiệp và mỗi 12 giây, thả 1 Trạm Quân Y (3.0 HP, tồn tại 7s) trên làn của bạn: phát sóng xanh lá hồi +0.25 HP/giây và tăng +15% tốc bắn khi bạn đứng trong bán kính 75px quanh trạm!'
     },
     {
         num: 124, id: 'gear_sup_trophy_ads_g', name: 'Hệ Thống Đánh Chặn (Trophy ADS)',
@@ -777,7 +777,7 @@ const GEARS = [
     {
         num: 125, id: 'gear_sup_tesla_coil_g', name: 'Cột Thu Lôi Từ Trường',
         tier: 'GOLD', stage: 'ALL',
-        desc: 'Đầu hiệp và mỗi 13 giây, dựng 1 Cột Thu Lôi ở rìa nửa sân bạn (3.5 HP, tồn tại 8s): mỗi 2 giây tự động phóng tia điện giật kẻ địch gây 0.45 sát thương và làm chậm 20%!'
+        desc: 'Đầu hiệp và mỗi 13 giây, dựng 1 Cột Thu Lôi ở rìa nửa sân bạn (3.5 HP, tồn tại 8s): mỗi 2 giây tự động phóng tia điện giật kẻ địch gây 0.3 sát thương và làm chậm 20%!'
     },
     {
         num: 126, id: 'gear_sup_frost_totem_s', name: 'Cọc Băng Hàn Khí',
@@ -787,17 +787,17 @@ const GEARS = [
     {
         num: 127, id: 'gear_sup_speed_rail_s', name: 'Đường Ray Gia Tốc',
         tier: 'SILVER', stage: 'ALL',
-        desc: 'Trải một dải Đường Ray Quang Học ở trung tâm làn của bạn (rộng 140px): khi di chuyển trên dải ray này, bạn nhận +28% Tốc độ di chuyển và +15% Tốc độ nạp đạn!'
+        desc: 'Trải một dải Đường Ray Quang Học ở trung tâm làn của bạn (rộng 170px): khi di chuyển trên dải ray này, bạn nhận +28% Tốc độ di chuyển và +20% Tốc độ nạp đạn!'
     },
     {
         num: 128, id: 'gear_sup_satellite_p', name: 'Vệ Tinh Quỹ Đạo (Orbital Laser)',
         tier: 'PRISMATIC', stage: 'MID_LATE',
-        desc: 'Triệu hồi Vệ Tinh Tác Chiến khóa mục tiêu từ không gian: cứ mỗi 6.5 giây, một cột tia Laser Vũ Trụ quét dọc theo vị trí của kẻ địch trong 1.2s, gây tổng cộng 1.4 sát thương và đốt cháy mặt đất!'
+        desc: 'Triệu hồi Vệ Tinh Tác Chiến khóa mục tiêu từ không gian: cứ mỗi 8 giây, một cột tia Laser Vũ Trụ quét dọc theo vị trí của kẻ địch trong 1.2s, gây tổng cộng 1.4 sát thương và đốt cháy mặt đất!'
     },
     {
         num: 129, id: 'gear_sup_decoy_holo_s', name: 'Máy Chiếu Phân Thân (Holo-Decoy)',
         tier: 'SILVER', stage: 'ALL',
-        desc: 'Cứ mỗi 9 giây, tự động tạo 1 Phân Thân Quang Học biết tự di chuyển tuần tra trên làn của bạn (1.5 HP, tồn tại 5s): chắn đạn hộ bạn và phát nổ gây 0.5 sát thương + làm chậm khi bị bắn vỡ!'
+        desc: 'Cứ mỗi 7 giây, tự động tạo 1 Phân Thân Quang Học biết tự di chuyển tuần tra trên làn của bạn (2.0 HP, tồn tại 5s): chắn đạn hộ bạn và phát nổ gây 0.5 sát thương + làm chậm khi bị bắn vỡ!'
     },
     {
         num: 130, id: 'gear_sup_supply_pod_g', name: 'Khoang Tiếp Tế Không Gian',
@@ -812,12 +812,12 @@ const GEARS = [
     {
         num: 132, id: 'gear_sup_shield_drone_g', name: 'Drone Hộ Vệ Quang Khiên',
         tier: 'GOLD', stage: 'ALL',
-        desc: 'Triệu hồi 1 Drone Hộ Vệ bay quanh xe bạn: đầu hiệp và cứ mỗi 6 giây nó nạp cho bạn +0.75 Giáp Trắng (tối đa tích trữ 2.25 Giáp Trắng) và bắn tia laze hỗ trợ 0.25 sát thương!'
+        desc: 'Triệu hồi 1 Drone Hộ Vệ bay quanh xe bạn: đầu hiệp và cứ mỗi 10 giây nó nạp cho bạn +0.5 Giáp Trắng (tối đa tích trữ 1.5 Giáp Trắng) và bắn tia laze hỗ trợ 0.25 sát thương!'
     },
     {
         num: 133, id: 'gear_sup_ammo_turret_s', name: 'Trạm Tiếp Đạn & Hỏa Lực',
         tier: 'SILVER', stage: 'ALL',
-        desc: 'Đầu hiệp đặt 1 Trạm Hậu Cần mini đi theo phía sau lưng bạn: mỗi 3 giây tự động nạp thêm +1 viên đạn (hoặc +12% Năng lượng) cho bạn và bắn 1 viên đạn yểm trợ 0.3 sát thương!'
+        desc: 'Đầu hiệp đặt 1 Trạm Hậu Cần mini đi theo phía sau lưng bạn: mỗi 3.5 giây tự động nạp thêm +1 viên đạn (hoặc +12% Năng lượng) cho bạn và bắn 1 viên đạn yểm trợ 0.3 sát thương!'
     },
     {
         num: 134, id: 'gear_sup_mecha_core_p', name: 'Lõi Pháo Đài Cơ Giới (Mecha Core)',
@@ -841,12 +841,12 @@ const GEARS = [
     {
         num: 137, id: 'gear_tac_fire_trail_s', name: 'Bước Chân Hỏa Ngục',
         tier: 'SILVER', stage: 'ALL',
-        desc: 'Tăng +12% Tốc độ di chuyển. Mỗi khi bạn Lướt hoặc đổi hướng chạy nhanh, xe phóng ra 2 Cầu Lửa Nhiệt Hạch bay về phía kẻ địch (gây 0.4 sát thương + Đốt cháy) (CD: 2.5s)!'
+        desc: 'Tăng +12% Tốc độ di chuyển. Mỗi khi bạn Lướt hoặc đổi hướng chạy nhanh, xe phóng ra 2 Cầu Lửa Nhiệt Hạch bay về phía kẻ địch (gây 0.5 sát thương + Đốt cháy) (CD: 2s)!'
     },
     {
         num: 138, id: 'gear_tac_bullet_time_p', name: 'Ma Trận Làm Chậm Thời Gian (Bullet Time)',
         tier: 'PRISMATIC', stage: 'MID_LATE',
-        desc: 'Tạo một trường Không-Thời Gian bán kính 115px quanh xe của bạn: mọi viên đạn của kẻ địch khi bay vào vùng này đều bị giảm 45% tốc độ bay, giúp bạn dễ dàng lách né!'
+        desc: 'Tạo một trường Không-Thời Gian bán kính 130px quanh xe của bạn: mọi viên đạn của kẻ địch khi bay vào vùng này bị giảm 55% tốc độ bay và chỉ còn 85% sát thương, giúp bạn dễ dàng lách né!'
     },
     {
         num: 139, id: 'gear_tac_adrenaline_g', name: 'Hưng Phấn Tác Chiến',
@@ -876,7 +876,7 @@ const GEARS = [
         num: 143, id: 'gear_hero_mystic_p', name: 'Bí Thuật Hắc Ám & Âm Dương',
         tier: 'PRISMATIC', stage: 'ALL',
         bodies: ['necromancer', 'am_duong_su', 'magician'],
-        desc: 'Tăng +35% tốc độ tích Linh Hồn / Bùa Chú / Bài Ma Thuật. Mỗi khi tấn công hoặc triệu hồi (CD: 2.5s), tự động phóng kèm 1 luồng Linh Hỏa dẫn đường gây 0.55 sát thương và hồi +0.3 HP!'
+        desc: 'Mỗi khi tấn công hoặc triệu hồi (CD: 2.5s), tự động phóng kèm 1 luồng Linh Hỏa dẫn đường gây 0.55 sát thương và hồi +0.3 HP!'
     },
     {
         num: 144, id: 'gear_hero_elemental_g', name: 'Áp Suất Nguyên Tố Cực Đại',
@@ -888,13 +888,13 @@ const GEARS = [
         num: 145, id: 'gear_hero_heavy_ord_g', name: 'Đầu Đạn Hạt Nhân Chiến Thuật',
         tier: 'GOLD', stage: 'ALL',
         bodies: ['rocket', 'aaa', 'big_bullet', 'cluster_gun'],
-        desc: 'Tăng +30% tốc độ bay của đầu đạn; mỗi khi đạn của bạn trúng đích sẽ phát nổ chấn động tạo thêm 3 mảnh đạn thứ cấp văng quanh mục tiêu (mỗi mảnh 0.3 sát thương) và làm chậm 30%!'
+        desc: 'Tăng +30% tốc độ bay của đầu đạn; mỗi khi đạn của bạn trúng đích sẽ phát nổ chấn động lan gây thêm 0.3 sát thương diện rộng và làm chậm 30%!'
     },
     {
         num: 146, id: 'gear_hero_gatling_g', name: 'Cơn Bão Chì Liên Thanh',
         tier: 'GOLD', stage: 'ALL',
         bodies: ['smg', 'six_barrel'],
-        desc: 'Tăng +25% tốc độ bắn và hạ nhiệt nhanh hơn; cứ mỗi 8 viên đạn bắn ra sẽ tự động phóng kèm 1 quả Tên Lửa Mini dẫn đường gây 0.6 sát thương nổ!'
+        desc: 'Tăng +15% tốc độ bắn; cứ mỗi 10 viên đạn bắn ra sẽ tự động phóng kèm 1 quả Tên Lửa Mini dẫn đường gây 0.5 sát thương (+0.15 nổ lan)!'
     },
     {
         num: 147, id: 'gear_hero_thunder_mag_g', name: 'Cộng Hưởng Điện Từ Bão Tố',
@@ -918,7 +918,7 @@ const GEARS = [
         num: 150, id: 'gear_hero_clone_army_g', name: 'Liên Minh Bóng Tối',
         tier: 'GOLD', stage: 'ALL',
         bodies: ['clone', 'gemini', 'mirror', 'ghost'],
-        desc: 'Giảm 25% hồi chiêu kỹ năng phân thân/tàng hình; mỗi 4 giây khi bạn khai hỏa sẽ tự động gọi 1 Bóng Ma Phụ Trợ bắn bồi 2 tia Đạn Ảnh (mỗi tia 0.35 sát thương) và hồi +0.25 HP!'
+        desc: 'Mỗi 4 giây khi bạn khai hỏa sẽ tự động gọi 1 Bóng Ma Phụ Trợ bắn bồi 2 tia Đạn Ảnh (mỗi tia 0.35 sát thương) và hồi +0.25 HP!'
     }
 ];
 
