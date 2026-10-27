@@ -23,8 +23,11 @@ let gameState = {
     lastObstacleSpawn: 0,
     roundStartTime: 0,
     currentMap: 'classic',
-    selectedMapMode: 'random'
+    selectedMapMode: 'random',
+    classicMode: false // chế độ Cổ Điển: KHÔNG có G.E.A.R
 };
+// Một cửa duy nhất: G.E.A.R có hoạt động không (false ở chế độ Cổ Điển)
+function gearsEnabled() { return !(typeof gameState !== 'undefined' && gameState.classicMode); }
 
 const inputs = {
     p1: { l: false, r: false, s: false },

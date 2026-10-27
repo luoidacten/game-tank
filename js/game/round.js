@@ -121,6 +121,8 @@ function updateMapHUD() {
         laser_field: '🔆 TRƯỜNG LAZER',
         wind_hill: '🌬️ ĐỒI GIÓ'
     };
+    const rb = document.getElementById('hudRoundBadge');
+    if (rb && !/C\u1ED4 \u0110I\u1EC2N/.test(rb.innerText) && gameState.classicMode) rb.innerText += ' \u2022 C\u1ED4 \u0110I\u1EC2N';
     badge.innerText = `MAP: ${mapNames[gameState.currentMap] || (gameState.currentMap ? gameState.currentMap.toUpperCase() : 'CỔ ĐIỂN')}`;
 }
 function endRound(winnerId) {
@@ -275,7 +277,7 @@ function updateScoreBoard() {
     const badge = document.getElementById('hudRoundBadge');
     if (badge) {
         let totalRounds = targetWins * 2 - 1;
-        badge.innerText = `BO${totalRounds} \u2022 HI\u1EC6P ${gameState.round}`;
+        badge.innerText = `BO${totalRounds} \u2022 HI\u1EC6P ${gameState.round}` + (gameState.classicMode ? ' \u2022 C\u1ED4 \u0110I\u1EC2N' : '');
     }
     if (typeof triggerRoundIntroBanner === 'function' && gameState.phase === 'playing') {
         triggerRoundIntroBanner();

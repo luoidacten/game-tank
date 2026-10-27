@@ -33,7 +33,7 @@ class Player {
         return true;
     }
 
-    hasGear(id) { return Array.isArray(this.equippedGears) && this.equippedGears.includes(id); }
+    hasGear(id) { return gearsEnabled() && Array.isArray(this.equippedGears) && this.equippedGears.includes(id); }
     addGear(gearId) {
         if (!Array.isArray(this.equippedGears)) this.equippedGears = [];
         if (this.equippedGears.includes(gearId)) return false;

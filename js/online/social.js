@@ -217,7 +217,7 @@ const OnlineSocial = {
     CHAT_GAP: 1500, EMOTE_CD: 3000, PAUSE_MAX: 2, PAUSE_MS: 30000, EMOTE_MS: 2400,
     loadout: ['gg', 'laugh', 'thumbs', 'angry'],
     chatLog: [], lastChatAt: 0, lastEmoteAt: 0, lastRecv: {},
-    settings: { map: 'random', win: 3 },
+    settings: { map: 'random', win: 3, classic: false },
     pause: { active: false, by: null, endsAt: 0, used: { p1: 0, p2: 0 } },
     live: [], // biểu cảm đang hiện: {pid,id,t0}
     els: {},
@@ -287,7 +287,7 @@ const OnlineSocial = {
                 return true;
             }
             case 'LOBBY_SET':
-                if (m.role !== 'host') this.applySettings(d.map, d.win);
+                if (m.role !== 'host') this.applySettings(d.map, d.win, d.classic);
                 return true;
             case 'LOBBY_SET_REQ':
                 if (m.role === 'host') this.pushSettings();
@@ -475,14 +475,17 @@ const OnlineSocial = {
     setSetting(key, val) {
         if (!this.isHost()) return;
         if (key === 'map') this.applySettings(val, this.settings.win);
+        else if (key === 'classic') this.applySettings(this.settings.map, this.settings.win, !!val);
         else this.applySettings(this.settings.map, val);
         this.pushSettings();
     },
-    pushSettings() { this.send({ type: 'LOBBY_SET', map: this.settings.map, win: this.settings.win }); },
-    applySettings(map, win) {
+    pushSettings() { this.send({ type: 'LOBBY_SET', map: this.settings.map, win: this.settings.win, classic: !!this.settings.classic }); },
+    applySettings(map, win, classic) {
+        if (classic !== undefined) this.settings.classic = !!classic;
         if (NS_MAPS.some(m => m[0] === map)) this.settings.map = map;
         win = parseInt(win); if (NS_WINS.includes(win)) this.settings.win = win;
         if (typeof gameState !== 'undefined') gameState.winScore = this.settings.win;
+        if (typeof gameState !== 'undefined') gameState.classicMode = !!this.settings.classic;
         this.renderSettings();
     },
     // Dùng bởi shop-ui (host chọn map trước mỗi hiệp)
@@ -586,7 +589,11 @@ const OnlineSocial = {
         const chips = this.mk('div', 'ns-chips'); chips.id = 'nsWinChips';
         for (const w of NS_WINS) { const b = this.mk('button', 'ns-chip', 'Chạm ' + w); b.type = 'button'; b.dataset.win = w; b.addEventListener('click', () => this.setSetting('win', w)); chips.appendChild(b); }
         row2.appendChild(chips);
-        set.append(row1, row2);
+        const row3 = this.mk('div', 'ns-row'); row3.appendChild(this.mk('span', 'ns-lbl', 'Luật'));
+        const chips3 = this.mk('div', 'ns-chips'); chips3.id = 'nsRuleChips';
+        for (const [v, t] of [[0, 'G.E.A.R'], [1, 'Cổ Điển']]) { const b = this.mk('button', 'ns-chip', t); b.type = 'button'; b.dataset.classic = v; b.addEventListener('click', () => this.setSetting('classic', !!v)); chips3.appendChild(b); }
+        row3.appendChild(chips3);
+        set.append(row1, row2, row3);
         // Chọn biểu cảm
         const emo = this.mk('div', 'ns-sec');
         emo.appendChild(this.mk('div', 'ns-sec-title', '😀 VÒNG BIỂU CẢM <small id="nsEmoNote"></small>'));
@@ -608,7 +615,7 @@ const OnlineSocial = {
         view.insertBefore(box, actions || null);
         this.renderSettings(); this.renderPicker(); this.renderChat();
         // Hoạt ảnh icon khi sảnh hiện
-        new MutationObserver(() => { if (view.style.display !== 'none') { if (this.isHost()) { if (!this._adopted && NS_WINS.includes(gameState.winScore)) this.settings.win = gameState.winScore; this._adopted = true; this.applySettings(this.settings.map, this.settings.win); } else this.renderSettings(); this.animateIcons(); } }).observe(view, { attributes: true, attributeFilter: ['style'] });
+        new MutationObserver(() => { if (view.style.display !== 'none') { if (this.isHost()) { if (!this._adopted && NS_WINS.includes(gameState.winScore)) this.settings.win = gameState.winScore; if (!this._adopted) this.settings.classic = !!gameState.classicMode; this._adopted = true; this.applySettings(this.settings.map, this.settings.win); } else this.renderSettings(); this.animateIcons(); } }).observe(view, { attributes: true, attributeFilter: ['style'] });
     },
     renderSettings() {
         const host = this.isHost();
@@ -616,6 +623,9 @@ const OnlineSocial = {
         if (sel) { sel.value = this.settings.map; sel.disabled = !host; }
         document.querySelectorAll('#nsWinChips .ns-chip').forEach(b => {
             b.classList.toggle('on', +b.dataset.win === this.settings.win); b.disabled = !host;
+        });
+        document.querySelectorAll('#nsRuleChips .ns-chip').forEach(b => {
+            b.classList.toggle('on', (b.dataset.classic === '1') === !!this.settings.classic); b.disabled = !host;
         });
         const note = document.getElementById('nsSetNote');
         if (note) note.textContent = host ? '(bạn là chủ phòng)' : '(chủ phòng chỉnh)';

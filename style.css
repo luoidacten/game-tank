@@ -794,7 +794,7 @@ canvas {
     justify-content: center;
 }
 
-.mode-btn {
+.mode-btn, .rule-btn {
     flex: 1;
     padding: 9px 4px;
     background: rgba(23, 29, 43, 0.9);
@@ -808,13 +808,13 @@ canvas {
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.mode-btn:hover {
+.mode-btn:hover, .rule-btn:hover {
     color: #fff;
     border-color: rgba(0, 240, 255, 0.4);
     background: rgba(14, 116, 144, 0.25);
 }
 
-.mode-btn.active {
+.mode-btn.active, .rule-btn.active {
     background: linear-gradient(135deg, #0891b2 0%, #0284c7 100%);
     border-color: var(--p1-neon);
     color: #fff;

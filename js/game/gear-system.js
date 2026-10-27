@@ -47,6 +47,7 @@ function generateMatchGearTiers() {
 }
 
 function getGearMilestoneIndex(round) {
+    if (!gearsEnabled()) return -1; // Cổ Điển: không có mốc G.E.A.R
     const r = round || (typeof gameState !== 'undefined' ? gameState.round : 1) || 1;
     const winScore = (typeof gameState !== 'undefined' && gameState.winScore) ? gameState.winScore : 3;
     if (winScore <= 2) {
@@ -428,6 +429,7 @@ function rollSingleGearReplacement(player, milestoneIdx, currentChoices, slotIdx
 }
 
 function showGearSelectionIfNeeded(playerId, onComplete) {
+    if (!gearsEnabled()) { if (onComplete) onComplete(); return; }
     const player = (playerId === 'p1') ? p1 : p2;
     if (!player) { if (onComplete) onComplete(); return; }
     ensurePlayerGearState(player);

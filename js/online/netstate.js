@@ -114,7 +114,7 @@ const NET_LOCAL_PLAYER_KEYS = ['ghostHp'];
 const NET_PLAIN_LISTS = new Set(['thunderPlantedSpears', 'magnetNodes']);
 
 // Trường của gameState được host quyết định
-const NET_GAMESTATE_KEYS = ['round', 'p1Score', 'p2Score', 'p1Coins', 'p2Coins', 'phase', 'currentMap', 'winScore', 'lastObstacleSpawn', 'lastArtillerySpawn', 'zoneOff', 'matchGearTiers'];
+const NET_GAMESTATE_KEYS = ['round', 'p1Score', 'p2Score', 'p1Coins', 'p2Coins', 'phase', 'currentMap', 'winScore', 'lastObstacleSpawn', 'lastArtillerySpawn', 'zoneOff', 'matchGearTiers', 'classicMode'];
 
 // Trang bị / ví của người chơi (đồng bộ ở màn hình shop)
 const NET_LOADOUT_KEYS = ['upgrades', 'rerollCount', 'upgradeLevel', 'invUpgrades', 'boughtInvShopItems', 'boughtShopItems', 'isFullEvoInventor',

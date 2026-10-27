@@ -73,6 +73,16 @@ function setupControls() {
         });
     });
 
+    // Luật chơi: G.E.A.R / Cổ Điển (không G.E.A.R)
+    document.querySelectorAll('.rule-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.rule-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            gameState.classicMode = btn.dataset.classic === '1';
+            if (soundSystem && !soundSystem.muted) soundSystem.playCoin();
+        });
+    });
+
     // Map Buttons in Main Menu
     document.querySelectorAll('.map-btn').forEach(btn => {
         btn.addEventListener('click', () => {
