@@ -815,11 +815,10 @@ const BODY_GUIDES = {
         tag: 'Hai viên song song, khó lách', diff: 1,
         controls: [
             { input: 'TAP', name: 'Song Xạ', what: '2 viên trái/phải, cách 24px' },
-            { input: 'HOLD 0.4s', name: 'Đổi Nòng', what: 'Rộng 75px ↔ Hẹp 20px' }
         ],
         passive: ['Trúng cả 2 viên: phát kế +25% tốc đạn, +0.3 Dame'],
         evo: { e1: '+2 đạn, nạp nhanh 30%', e2: 'Trúng 1 viên: hút địch về làn viên kia', full: 'Mỗi phát thứ 3: +1 viên giữa xuyên vật cản' },
-        tips: ['Nòng Rộng khi địch lách ngang, Nòng Hẹp khi địch đứng yên']
+        tips: ['Căn giữa xe địch để trúng cả 2 viên và nhận thưởng phát kế']
     },
     mortar: {
         tag: 'Pháo kích từ trời, vượt mọi vật cản', diff: 1,

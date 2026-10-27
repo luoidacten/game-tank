@@ -4,7 +4,7 @@
 // Nhấp: 2 viên bay dọc, 1 viên bên trái trước rồi viên bên phải (phát sau đảo thứ tự).
 //   Khoảng cách 2 nòng: Chuẩn 24px (đầu hiệp). Cả 2 viên của cùng 1 phát trúng xe địch ->
 //   phát kế +25% tốc đạn & +0.3 Dame (chia đều 2 viên).
-// Giữ 0.4s: đổi Nòng Rộng (75px, khe giữa) <-> Nòng Hẹp (20px, dồn sát thương).
+// (Đã bỏ đổi Nòng Rộng/Hẹp — khoảng cách nòng cố định 24px.)
 // Evo 1: +2 đạn, nạp nhanh 30%. Evo 2: chỉ trúng 1 viên -> đẩy địch lệch ngang về đường bay viên kia.
 // FULL EVO: mỗi phát thứ 3 kèm viên thứ 3 ở giữa (xuyên vật cản).
 // Trạng thái: trường thuần trên player / đạn -> đồng bộ online.
@@ -106,13 +106,8 @@ CharHooks.register('twin_gun', {
     shoot(inp) {
         const s = !!inp.s;
         if (this.silenceTimer > 0 || this.freezeTimer > 0) { this.tgHold = 0; this.tgPrevS = s; return true; }
-        if (s) {
-            this.tgHold++;
-            if (this.tgHold === TG_HOLD && !this.tgHoldUsed) { this.tgHoldUsed = true; tgToggle(this); }
-        } else if (this.tgPrevS) {
-            if (!this.tgHoldUsed && this.tgHold < TG_HOLD && this.tgGcd <= 0 && this.ammo > 0 && !this.tgQ) tgFire(this);
-            this.tgHold = 0; this.tgHoldUsed = false;
-        }
+        // Bỏ đổi nòng: nhấp là bắn, giữ nút thì bắn liên tục theo nhịp (khoảng cách nòng luôn 24px)
+        if (s && this.tgGcd <= 0 && this.ammo > 0 && !this.tgQ) tgFire(this);
         this.tgPrevS = s;
         return true;
     },
@@ -169,7 +164,6 @@ function tgBotAction(bot, enemy) {
     const dx = Math.abs(enemy.x + enemy.w / 2 - (bot.x + bot.w / 2)), ev = Math.abs(enemy._vx || 0);
     // địch chạy nhiều -> Nòng Rộng khoá 2 bên; địch đứng yên -> Nòng Hẹp dồn sát thương
     if (bot.tgMode !== 'wide' && ev > 2.2 && Math.random() < 0.03) return 'toggle';
-    if (bot.tgMode === 'wide' && ev < 1 && Math.random() < 0.03) return 'toggle';
     if (bot.tgGcd > 0 || bot.ammo <= 0 || bot.tgQ) return null;
     const half = tgSpacing(bot) / 2, reach = enemy.w / 2 + 3;
     const ok = bot.tgMode === 'wide' ? Math.abs(dx - half) < reach + 6 : dx < half + reach;
