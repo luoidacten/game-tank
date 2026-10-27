@@ -698,22 +698,24 @@ class GearMine {
         this.y = y;
         this.w = 16;
         this.h = 16;
-        this.life = 900; // 15s
+        this.life = 600; // [CÂN BẰNG] 15s -> 10s
+        this.arm = 60;   // 1s mới kích hoạt (thấy mìn & né được)
         this.active = true;
     }
     update() {
         if (!this.active) return;
         if (--this.life <= 0) { this.active = false; return; }
+        if (this.arm > 0) { this.arm--; return; }
         const owner = this.team === 1 ? p1 : p2;
         const enemy = this.team === 1 ? p2 : p1;
         if (!enemy || enemy.hp <= 0) return;
 
-        // Chặn đạn địch bay qua mìn
+        // [CÂN BẰNG] Đạn địch bắn trúng mìn: phá mìn (không chặn đạn, không gây sát thương)
         for (let i = enemy.bullets.length - 1; i >= 0; i--) {
             const b = enemy.bullets[i];
-            if (rectIntersect(this.x, this.y, this.w, this.h, b.x, b.y, b.w, b.h)) {
-                if (!b.isPiercing) enemy.bullets.splice(i, 1);
-                this.detonate(owner, enemy);
+            if (b && rectIntersect(this.x, this.y, this.w, this.h, b.x, b.y, b.w, b.h)) {
+                this.active = false;
+                spawnSparkParticles(this.x + this.w / 2, this.y + this.h / 2, '#94a3b8', 6);
                 return;
             }
         }
@@ -727,7 +729,7 @@ class GearMine {
         if (!this.active) return;
         this.active = false;
         const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
-        pushGearExplosion(cx, cy, 42, 'rgba(251, 146, 60,', 0.6, owner);
+        pushGearExplosion(cx, cy, 36, 'rgba(251, 146, 60,', 0.6, owner); // [CÂN BẰNG] 42 -> 36
         spawnSparkParticles(cx, cy, '#fb923c', 10);
         // Đẩy trượt ngang kẻ địch ra khỏi tâm mìn
         if (enemy && enemy.hp > 0 && !(enemy.hasGear && enemy.hasGear('gear_giant_tank_g')) && Math.abs((enemy.x + enemy.w / 2) - cx) < 60) {
@@ -740,6 +742,7 @@ class GearMine {
         const blink = Math.floor(Date.now() / 200) % 2 === 0;
         const cx = this.x + this.w / 2, cy = this.y + this.h / 2;
         ctx.save();
+        if (this.arm > 0) ctx.globalAlpha = 0.45; // đang kích hoạt
         ctx.fillStyle = '#1e293b';
         ctx.strokeStyle = blink ? '#ef4444' : '#f97316';
         ctx.lineWidth = 2;
@@ -2374,8 +2377,13 @@ function updatePlayerGearsTick(p) {
             const activeMines = bodyEffects.filter(e => e instanceof GearMine && e.team === p.id && e.active);
             if (activeMines.length >= 2) activeMines[0].active = false;
             if (enemy && enemy.hp > 0) {
+                // [CÂN BẰNG] không thả ngay dưới chân địch: lệch ít nhất 50px sang bên
                 const pt = laneTargetPoint(enemy, 90);
-                bodyEffects.push(new GearMine(p, pt.x - 8, pt.y - 8));
+                const ex = enemy.x + enemy.w / 2;
+                let mx = pt.x;
+                if (Math.abs(mx - ex) < 50) mx = ex + (Math.random() < 0.5 ? -1 : 1) * (50 + Math.random() * 60);
+                mx = Math.max(12, Math.min(canvas.width - 12, mx));
+                bodyEffects.push(new GearMine(p, mx - 8, pt.y - 8));
             }
         }
     }

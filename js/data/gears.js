@@ -470,7 +470,7 @@ const GEARS = [
     {
         num: 74, id: 'gear_minefield_s', name: 'Bẫy Mìn Giữa Sân',
         tier: 'SILVER', stage: 'ALL',
-        desc: 'Cứ mỗi 10 giây, tự động thả 1 Quả Mìn Tàng Hình nằm trên làn đường của kẻ địch (chớp đèn đỏ nhẹ 0.5s khi mới đặt). Địch dẫm phải nổ gây 0.6 sát thương và đẩy trượt ngang!'
+        desc: 'Cứ mỗi 10 giây thả 1 Quả Mìn trên làn kẻ địch (lệch khỏi chân địch, mất 1s mới kích hoạt, tồn tại 10s, tối đa 2). Địch dẫm phải nổ 0.6 sát thương + đẩy trượt ngang. Đạn địch bắn trúng sẽ phá mìn.'
     },
     {
         num: 75, id: 'gear_artillery_call_g', name: 'Pháo Kích Hỗ Trợ',
