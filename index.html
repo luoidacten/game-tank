@@ -376,6 +376,15 @@
 
                         <div id="lobbyRoomInfo" class="lobby-room-info"></div>
                         <div id="lobbyHostInfo" class="lobby-host-info" style="display: none;"></div>
+                        <div id="lobbyHostPick" class="lobby-host-info" style="display: none; align-items: center; gap: 8px; justify-content: center;">
+                            <span>Máy chủ:</span>
+                            <select id="lobbyHostPickSel" onchange="onlineManager.setHostPref(this.value)">
+                                <option value="auto">Tự động</option>
+                                <option value="owner">Tôi</option>
+                                <option value="other">Đối thủ</option>
+                            </select>
+                            <b id="lobbyHostPickRO" style="display: none;"></b>
+                        </div>
                         <!-- PING / NETWORK INFO -->
                         <div class="ping-status-bar">
                             <span class="ping-dot"></span>

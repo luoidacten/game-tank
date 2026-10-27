@@ -58,6 +58,7 @@ class OnlineMultiplayerManager {
         this.roomVis = 'public';
         this.roomPw = '';
         this.roomName = '';
+        this.hostPref = 'auto';  // chọn máy chủ (tuyệt đối theo chủ phòng): auto | owner (chủ phòng) | other (đối thủ)
         this.roomOwner = false;  // máy tạo phòng (giữ mã phòng, kiểm tra mật khẩu, quảng cáo phòng công khai)
         this.adActive = false;
         this.elect = null;       // { other, samples, mine, theirs, done, result }
@@ -112,6 +113,7 @@ class OnlineMultiplayerManager {
         if (data.type === 'ROOM_PROBE') { this.answerRoomProbe(transportId, data.t); return; }
         if (data.type === 'BPING') { this.sendNetworkMessage({ type: 'BPONG', t: data.t }); return; }
         if (data.type === 'BPONG') { this.onBenchPong(data.t); return; }
+        if (data.type === 'HOST_PREF') { this.onHostPref(data); return; }
         // Chủ phòng đã nhường vai host (đang là guest): người lạ xin vào -> báo phòng đủ
         if (data.type === 'JOIN_LOBBY' && this.role === 'guest' && this.roomOwner && this.elect && from !== this.elect.other) {
             const c = transportId && this.connections[transportId];
@@ -1124,7 +1126,7 @@ class OnlineMultiplayerManager {
     onTickEnd() {
         if (!this.isOnline || this.role !== 'host') return;
         NetState.recording = true;
-        if (this.netTick % 2 !== 0) return;
+        if (this.netTick % 2 !== 0) { NetState.noteTickBullets(); return; }
         let world;
         try { world = NetState.captureSync(); } catch (e) { console.warn('captureSync', e); NetState.resetDelta(); return; }
         this.sendNetworkMessage({ type: 'SYNC', world, ev: NetState.flushEvents() });
@@ -1336,6 +1338,7 @@ class OnlineMultiplayerManager {
         if (this.elect && this.elect.timer) clearInterval(this.elect.timer);
         if (this.elect && this.elect.deadline) clearTimeout(this.elect.deadline);
         this.elect = null;
+        this.hostPref = 'auto';
         this.roomOwner = false;
         this.isOnline = false;
         this.role = null;
@@ -1567,16 +1570,21 @@ class OnlineMultiplayerManager {
         if (!el || el.done || this.role !== 'host') return;
         if (!el.mine || (!el.theirs && !force)) return;
         const my = el.mine.score, th = el.theirs ? el.theirs.score : null;
-        const pick = DeviceBench.pickHost(my, th);
+        const autoPick = DeviceBench.pickHost(my, th);
+        const autoHostCid = autoPick === 'guest' ? el.other : this.clientId;
+        let pick = autoPick;
+        if (this.hostPref !== 'auto') pick = ((this.hostPref === 'owner') === this.roomOwner) ? 'host' : 'guest'; // chủ phòng chọn tay
         const oppNick = (el.theirs && el.theirs.nick) || ((this.playersLobbyData.find(p => p.id === el.other) || {}).nickname) || 'Đối thủ';
         const hostCid = pick === 'guest' ? el.other : this.clientId;
         const hostNick = pick === 'guest' ? oppNick : this.nick;
         el.done = true;
         clearTimeout(el.deadline);
+        el.autoHostCid = autoHostCid;
         el.result = { hostCid, hostNick, hostScore: pick === 'guest' ? th : my, otherScore: pick === 'guest' ? my : th, stronger: th === null || Math.abs(my - th) > 0.05 };
         this.sendNetworkMessage({
             type: 'ELECT', hostCid, hostNick, hostScore: el.result.hostScore, otherScore: el.result.otherScore,
-            stronger: el.result.stronger, winScore: gameState.winScore || 3, roomOwnerNick: this.nick
+            stronger: el.result.stronger, winScore: gameState.winScore || 3, roomOwnerNick: this.nick,
+            autoHostCid, hostPref: this.hostPref
         });
         if (pick === 'guest') this.swapRole('guest', el.other, oppNick);
         this.updateHostInfo();
@@ -1590,6 +1598,8 @@ class OnlineMultiplayerManager {
         el.done = true;
         el.result = { hostCid: d.hostCid, hostNick: d.hostNick, hostScore: d.hostScore, otherScore: d.otherScore, stronger: d.stronger };
         if (d.winScore) gameState.winScore = d.winScore;
+        el.autoHostCid = d.autoHostCid || d.hostCid;
+        if (d.hostPref) this.hostPref = d.hostPref;
         if (d.hostCid === this.clientId) this.swapRole('host', d._from, d.roomOwnerNick);
         this.updateHostInfo();
         this.updateLobbyDisplay('connected');
@@ -1638,7 +1648,56 @@ class OnlineMultiplayerManager {
         this.updateAd();
     }
 
+    // ----- Chọn máy chủ thủ công (chủ phòng điều khiển; máy kia thấy trực tiếp) -----
+    setHostPref(v) {
+        if (!this.roomOwner || this.matchActive || !['auto', 'owner', 'other'].includes(v)) return;
+        this.hostPref = v;
+        this.sendNetworkMessage({ type: 'HOST_PREF', pref: v });
+        this.applyHostPref();
+    }
+
+    onHostPref(d) {
+        if (this.matchActive || !['auto', 'owner', 'other'].includes(d.pref)) return;
+        this.hostPref = d.pref;
+        this.applyHostPref();
+    }
+
+    // Đưa vai về đúng lựa chọn: thủ công ghi đè bầu chọn; Tự động = kết quả bầu chọn (nếu đã có)
+    applyHostPref() {
+        const el = this.elect;
+        if (this.matchActive || !el || !el.other) { this.updateHostInfo(); return; }
+        let hostMe;
+        if (this.hostPref === 'auto') { if (!el.autoHostCid) { this.updateHostInfo(); return; } hostMe = el.autoHostCid === this.clientId; }
+        else hostMe = (this.hostPref === 'owner') === this.roomOwner;
+        const nick = (this.playersLobbyData.find(p => p.id === el.other) || {}).nickname || el.otherNick || 'Đối thủ';
+        if (hostMe && this.role === 'guest') this.swapRole('host', el.other, nick);
+        else if (!hostMe && this.role === 'host') this.swapRole('guest', el.other, nick);
+        if (el.result) {
+            el.result.hostCid = hostMe ? this.clientId : el.other;
+            el.result.hostNick = hostMe ? this.nick : nick;
+        }
+        this.updateHostInfo();
+        this.updateLobbyDisplay('connected');
+    }
+
+    updateHostPick() {
+        const box = document.getElementById('lobbyHostPick'), sel = document.getElementById('lobbyHostPickSel');
+        if (!box || !sel) return;
+        const show = this.isOnline && !this.matchActive && this.elect && this.playersLobbyData.length >= 2;
+        box.style.display = show ? 'flex' : 'none';
+        if (!show) return;
+        const rm = document.getElementById('lobbyHostPickRO');
+        // Với chủ phòng: Tôi/Đối thủ; với máy kia: nhãn đảo lại
+        sel.value = this.hostPref;
+        sel.style.display = this.roomOwner ? '' : 'none';
+        if (rm) {
+            rm.style.display = this.roomOwner ? 'none' : '';
+            rm.innerText = this.hostPref === 'auto' ? 'Tự động' : (this.hostPref === 'owner' ? 'Đối thủ (chủ phòng)' : 'Tôi');
+        }
+    }
+
     updateHostInfo() {
+        this.updateHostPick();
         const el = document.getElementById('lobbyHostInfo');
         if (!el) return;
         const e = this.elect;
@@ -1652,7 +1711,7 @@ class OnlineMultiplayerManager {
         const r = e.result || {};
         const me = r.hostCid === this.clientId;
         el.className = 'lobby-host-info done';
-        const tag = r.stronger === false ? '(tương đương)' : '(mạnh hơn)';
+        const tag = this.hostPref !== 'auto' ? '(chọn tay)' : r.stronger === false ? '(tương đương)' : '(mạnh hơn)';
         const sc = (typeof r.hostScore === 'number' && typeof r.otherScore === 'number') ? ` · ${r.hostScore} vs ${r.otherScore} điểm` : '';
         el.innerText = `🖥 Máy chủ: ${r.hostNick || '?'}${me ? ' (bạn)' : ''} ${tag}${sc}`;
     }

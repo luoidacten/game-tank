@@ -245,6 +245,7 @@ const NetState = {
         const now = Date.now();
         if (!this._epoch) this._epoch = now;
         const ep = this._epoch;
+        const ghosts = this.addGhostBullets();
         this.tagNetIds();
         const key = this._forceKey || !this._sent || ++this._sinceKey >= NET_KEY_EVERY;
         if (key) { this._sinceKey = 0; this._forceKey = false; }
@@ -285,6 +286,7 @@ const NetState = {
         this._seq++;
         this._sent = sent;
         this._sentKeys = sentKeys;
+        this.removeGhostBullets(ghosts);
         return '{"s":' + this._seq + ',"b":' + base + ',"e":' + (now - ep) + ',"w":{' + parts.join(',') + '}}';
     },
 
@@ -409,6 +411,28 @@ const NetState = {
         }
     },
 
+    // Host: đạn sinh ra và biến mất giữa 2 ảnh chụp (ảnh chụp cách nhau 2 tick) sẽ không bao giờ tới guest.
+    // Mỗi tick ghi nhớ đạn đang có; khi chụp, đạn có ở cuối tick trước nhưng đã mất và chưa từng được gửi thì
+    // gắn tạm vào mảng đạn của chủ (cờ _gh) để guest vẽ nó 1 nhịp ở vị trí cuối.
+    _tickB: null, _snapB: new Set(),
+    noteTickBullets() {
+        const m = new Map();
+        for (const p of [p1, p2]) if (p && Array.isArray(p.bullets)) p.bullets.forEach(b => m.set(b, p));
+        this._tickB = m;
+    },
+    addGhostBullets() {
+        const out = [], prev = this._tickB, cur = new Set();
+        for (const p of [p1, p2]) if (p && Array.isArray(p.bullets)) p.bullets.forEach(b => cur.add(b));
+        if (prev) for (const [b, p] of prev) {
+            if (cur.has(b) || this._snapB.has(b)) continue;
+            b._gh = 1; p.bullets.push(b); out.push([p, b]);
+        }
+        this._tickB = null;
+        this._snapB = cur;
+        return out;
+    },
+    removeGhostBullets(g) { for (const [p, b] of g) { const i = p.bullets.lastIndexOf(b); if (i >= 0) p.bullets.splice(i, 1); } },
+
     // Host: gắn id mạng (_nid) cho đạn & thực thể để guest nối đúng object giữa 2 ảnh chụp (nội suy)
     _nidNext: 1,
     tagNetIds() {
@@ -445,7 +469,7 @@ const NetSmooth = {
 
     each(fn) {
         if (typeof p1 !== 'undefined' && p1) fn('P1', p1); // xe đối thủ (xe mình = p2 đã có dự đoán riêng)
-        for (const p of [p1, p2]) if (p && Array.isArray(p.bullets)) p.bullets.forEach(b => { if (b && b._nid) fn(b._nid, b); });
+        for (const p of [p1, p2]) if (p && Array.isArray(p.bullets)) p.bullets.forEach(b => { if (b && b._nid) fn(b._nid, b, p === p1 ? p1 : p2); });
         for (const [name, get] of NET_ROOTS) {
             if (NET_PLAIN_LISTS.has(name)) continue;
             const a = get();
@@ -471,7 +495,7 @@ const NetSmooth = {
             this.lateVar = Math.max(4, this.lateVar * (1 - k) + d * d * k);
         }
         const next = new Map();
-        this.each((k, o) => {
+        this.each((k, o, src) => {
             if (typeof o.x !== 'number' || typeof o.y !== 'number') return;
             const old = this.tr.get(k);
             let h;
@@ -483,8 +507,19 @@ const NetSmooth = {
                 h.push({ t, x: o.x, y: o.y });
             }
             while (h.length > 8) h.shift();
-            next.set(k, { o, h });
+            next.set(k, { o, h, src: src || null });
         });
+        // Đạn biến mất khỏi ảnh chụp (trúng đích / hết tầm): màn hình guest đang trễ ~đệm so với host nên giữ vẽ
+        // thêm tới khi nội suy chạm vị trí cuối của host (không thì đạn "tắt" cách mục tiêu cả chục px)
+        const rt = this.hostNow();
+        for (const [k, e] of this.tr) {
+            if (next.has(k) || !e.src || !Array.isArray(e.src.bullets)) continue;
+            const last = e.h[e.h.length - 1];
+            if (rt >= last.t || t - last.t > 400) continue;
+            e.dead = true;
+            e.src.bullets.push(e.o);
+            next.set(k, e);
+        }
         this.tr = next;
         this.apply();
     },
@@ -499,15 +534,21 @@ const NetSmooth = {
     apply() {
         if (!this.tr.size) return;
         const rt = this.hostNow();
-        for (const e of this.tr.values()) {
+        for (const [k, e] of this.tr) {
             const h = e.h, n = h.length;
+            if (e.dead && rt >= h[n - 1].t) { // hết hạn: gỡ khỏi mảng đạn
+                const i = e.src.bullets.indexOf(e.o);
+                if (i >= 0) e.src.bullets.splice(i, 1);
+                this.tr.delete(k);
+                continue;
+            }
             let x = h[n - 1].x, y = h[n - 1].y;
             if (rt <= h[0].t) { x = h[0].x; y = h[0].y; }
             else if (rt >= h[n - 1].t) {
-                if (n >= 2) { // ngoại suy ngắn theo 2 ảnh cuối
+                if (n >= 2 && !e.dead) { // ngoại suy ngắn theo 2 ảnh cuối
                     const a = h[n - 2], b = h[n - 1], dt = b.t - a.t;
                     if (dt > 0 && Math.abs(b.x - a.x) < this.SNAP && Math.abs(b.y - a.y) < this.SNAP) {
-                        const k = Math.min(rt - b.t, 50) / dt;
+                        const k = Math.min(Math.min(rt - b.t, 50) / dt, 1.5); // 2 gói sát nhau (host bù tick) làm dt ~0 -> không để vọt đi xa
                         x = b.x + (b.x - a.x) * k; y = b.y + (b.y - a.y) * k;
                     }
                 }
