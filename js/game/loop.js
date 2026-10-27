@@ -81,30 +81,8 @@ function gameLoop(timestamp) {
 }
 
 // ==========================================
-// Tự giảm chất lượng hình ảnh khi máy yếu (điện thoại cũ)
+// Tự giảm chất lượng hình ảnh khi máy yếu -> js/core/quality.js (Quality: high/medium/low)
 // ==========================================
-const PerfMonitor = {
-    avg: 16.7,
-    slowTime: 0,
-    sample(dt) {
-        if (Display.lowQuality || dt <= 0 || dt > 120) return; // bỏ qua khung bị gián đoạn (đổi tab...)
-        this.avg = this.avg * 0.95 + dt * 0.05;
-        // Trung bình < ~40 FPS liên tục 3 giây -> bật chế độ nhẹ
-        if (this.avg > 25) this.slowTime += dt; else this.slowTime = Math.max(0, this.slowTime - dt);
-        if (this.slowTime > 3000) enableLowQuality();
-    },
-};
-
-function enableLowQuality() {
-    if (Display.lowQuality) return;
-    Display.lowQuality = true;
-    Display.maxDpr = 1;
-    // Tắt hiệu ứng phát sáng (shadowBlur) – tốn GPU nhất trên điện thoại
-    ctx.shadowBlur = 0;
-    try { Object.defineProperty(ctx, 'shadowBlur', { get() { return 0; }, set() {}, configurable: true }); } catch (e) {}
-    document.body.classList.add('low-quality');
-    canvas.applySize();
-    arenaFloorCache = null;
-    if (typeof addFloatingText === 'function') addFloatingText(canvas.width / 2, canvas.height / 2, 'CHẾ ĐỘ ĐỒ HOẠ NHẸ ⚡', '#94a3b8', 12);
-}
+const PerfMonitor = { sample(dt) { if (typeof Quality !== 'undefined') Quality.sample(dt); } };
+function enableLowQuality() { if (typeof Quality !== 'undefined') Quality.set('low'); }
 

@@ -25,8 +25,10 @@ function getArenaFloor() {
     g.fillStyle = bg;
     g.fillRect(0, 0, w, h);
 
+    // Đồ hoạ thấp: nền giản lược (chỉ nền + làn + vạch giữa)
+    const simple = typeof Quality !== 'undefined' && Quality.level === 'low';
     // Lưới neon mờ
-    let cell = 34;
+    let cell = simple ? 1e9 : 34;
     g.lineWidth = 1;
     g.strokeStyle = 'rgba(0, 240, 255, 0.045)';
     g.beginPath();
@@ -69,7 +71,7 @@ function getArenaFloor() {
     g.strokeStyle = 'rgba(0, 240, 255, 0.18)';
     g.lineWidth = 2;
     const corner = (x, y, dx, dy) => { g.beginPath(); g.moveTo(x + dx * 18, y); g.lineTo(x, y); g.lineTo(x, y + dy * 18); g.stroke(); };
-    corner(6, 6, 1, 1); corner(w - 6, 6, -1, 1); corner(6, h - 6, 1, -1); corner(w - 6, h - 6, -1, -1);
+    if (!simple) corner(6, 6, 1, 1); if (!simple) { corner(w - 6, 6, -1, 1); corner(6, h - 6, 1, -1); corner(w - 6, h - 6, -1, -1); }
 
     arenaFloorCache = off;
     return off;

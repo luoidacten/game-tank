@@ -230,6 +230,7 @@
                         <button id="restartCurrentMatchBtn" class="glow-btn btn-warning">&#128260; CH&#416;I L&#7840;I TR&#7852;N N&Agrave;Y</button>
                         <button id="openGuideFromPauseBtn" class="glow-btn btn-secondary">&#128214; H&#431;&#7898;NG D&#7854;N &#272;I&#7870;U KHI&#7870;N</button>
                         <button class="glow-btn btn-secondary ctrl-layout-toggle">🎮 KIỂU NÚT: MỚI</button>
+                        <button class="glow-btn btn-secondary quality-toggle">🖥 ĐỒ HOẠ: TỰ ĐỘNG</button>
                         <button class="glow-btn btn-secondary fullscreen-toggle"><span class="fs-text">⛶ TOÀN MÀN HÌNH</span></button>
                         <button id="backToMainMenuBtn" class="glow-btn btn-danger">&#127968; V&#7872; MENU CH&Iacute;NH</button>
                     </div>
@@ -280,16 +281,35 @@
                     <button id="closeOnlineBtn" class="close-btn">&times;</button>
                 </div>
                 <div class="modal-body online-content">
+                    <div class="online-nick-row">
+                        <label for="onlineNickInput">👤 TÊN:</label>
+                        <input type="text" id="onlineNickInput" class="online-input" maxlength="16" placeholder="Tên hiển thị">
+                    </div>
                     <!-- MODE TABS: CREATE / JOIN / QUICK MATCH -->
                     <div class="online-tabs">
                         <button id="tabCreateRoom" class="online-tab-btn active">🏠 TẠO PHÒNG (HOST)</button>
-                        <button id="tabJoinRoom" class="online-tab-btn">🔑 VÀO PHÒNG (GUEST)</button>
+                        <button id="tabJoinRoom" class="online-tab-btn">🔎 TÌM / VÀO PHÒNG</button>
                         <button id="tabQuickMatch" class="online-tab-btn">⚡ GHÉP NHANH .IO</button>
                     </div>
 
                     <!-- VIEW: CREATE ROOM -->
                     <div id="createRoomView" class="online-subview">
-                        <p class="online-desc">Tạo phòng P2P WebRTC. Hệ thống sẽ cấp mã phòng để bạn bè kết nối trực tiếp hai máy với nhau!</p>
+                        <p class="online-desc">Tạo phòng P2P WebRTC. Phòng <b>Công khai</b> hiện trong danh sách tìm phòng; phòng <b>Riêng tư</b> chỉ vào được bằng mã + mật khẩu. Máy mạnh hơn sẽ tự làm máy chủ.</p>
+                        <input type="text" id="createRoomName" class="online-input" maxlength="24" placeholder="Tên phòng (tuỳ chọn)">
+                        <div class="room-vis-toggle">
+                            <button id="visPublicBtn" class="room-vis-btn active" type="button">🌐 CÔNG KHAI</button>
+                            <button id="visPrivateBtn" class="room-vis-btn" type="button">🔒 RIÊNG TƯ</button>
+                        </div>
+                        <input type="password" id="createRoomPassword" class="online-input" maxlength="24" placeholder="Mật khẩu phòng (bắt buộc)" style="display: none;" autocomplete="new-password">
+                        <div class="room-mode-row">
+                            <span>Thể thức:</span>
+                            <select id="createRoomMode" class="online-input">
+                                <option value="3">Chạm 3 hiệp</option>
+                                <option value="5">Chạm 5 hiệp</option>
+                                <option value="2">Chạm 2 hiệp</option>
+                            </select>
+                        </div>
+                        <div id="createRoomError" class="online-error-msg" style="display: none;"></div>
                         <div id="createRoomLoading" class="online-loading-box" style="display: none;">
                             <div class="online-spinner"></div>
                             <span>Đang khởi tạo máy chủ phòng P2P...</span>
@@ -301,9 +321,16 @@
 
                     <!-- VIEW: JOIN ROOM -->
                     <div id="joinRoomView" class="online-subview" style="display: none;">
-                        <p class="online-desc">Nhập mã phòng được chia sẻ từ Host (VD: CY-8842):</p>
+                        <div class="room-browser-head">
+                            <span>🌐 PHÒNG CÔNG KHAI</span>
+                            <button id="btnRefreshRooms" class="mini-copy-btn" type="button">🔄 LÀM MỚI</button>
+                        </div>
+                        <div id="roomBrowserStatus" class="qm-notice qm-none">Bấm LÀM MỚI để tìm phòng...</div>
+                        <div id="roomBrowserList" class="room-browser-list"></div>
+                        <p class="online-desc room-code-sep">— hoặc vào bằng MÃ PHÒNG (phòng riêng tư cần mật khẩu) —</p>
                         <div class="join-input-group">
                             <input type="text" id="joinRoomInput" class="online-input" placeholder="VD: CY-8842" maxlength="12">
+                            <input type="password" id="joinRoomPassword" class="online-input" placeholder="Mật khẩu (nếu có)" maxlength="24" autocomplete="off">
                             <button id="btnJoinRoomAction" class="glow-btn btn-online-join">VÀO PHÒNG</button>
                         </div>
                         <div id="joinRoomLoading" class="online-loading-box" style="display: none;">
@@ -347,6 +374,8 @@
                             </div>
                         </div>
 
+                        <div id="lobbyRoomInfo" class="lobby-room-info"></div>
+                        <div id="lobbyHostInfo" class="lobby-host-info" style="display: none;"></div>
                         <!-- PING / NETWORK INFO -->
                         <div class="ping-status-bar">
                             <span class="ping-dot"></span>
@@ -465,6 +494,7 @@
                         <button id="openBodyCodexBtn" class="glow-btn btn-secondary" type="button" onclick="openBodyCodex()">📚 CẨM NANG TƯỚNG</button>
                         <button class="glow-btn btn-dark fullscreen-toggle"><span class="fs-text">⛶ TOÀN MÀN HÌNH</span></button>
                         <button class="glow-btn btn-dark ctrl-layout-toggle">🎮 KIỂU NÚT: MỚI</button>
+                        <button class="glow-btn btn-dark quality-toggle">🖥 ĐỒ HOẠ: TỰ ĐỘNG</button>
                         <button id="menuSoundToggleBtn" class="glow-btn btn-dark">
                             &#128266; &Acirc;M THANH: SFX B&#7852;T
                         </button>
@@ -809,6 +839,7 @@
     <script src="js/render/tank-art/curse.js" charset="utf-8"></script>
     <script src="js/render/tank-art/heavy.js" charset="utf-8"></script>
     <script src="js/render/tank-art/support_summons.js" charset="utf-8"></script>
+    <script src="js/core/quality.js" charset="utf-8"></script>
     <script src="js/game/loop.js" charset="utf-8"></script>
     <script src="js/game/controls.js" charset="utf-8"></script>
     <script src="js/ai/bot.js" charset="utf-8"></script>
@@ -816,6 +847,8 @@
     <script src="js/ai/smart-bot.js" charset="utf-8"></script>
     <script src="js/ai/pve.js" charset="utf-8"></script>
     <script src="js/online/netstate.js" charset="utf-8"></script>
+    <script src="js/online/lobby.js" charset="utf-8"></script>
+    <script src="js/online/election.js" charset="utf-8"></script>
     <script src="js/online/multiplayer.js" charset="utf-8"></script>
     <script src="js/main.js" charset="utf-8"></script>
 </body>

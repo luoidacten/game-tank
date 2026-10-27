@@ -439,6 +439,8 @@ const NetSmooth = {
     tr: new Map(),      // khoá -> { o, h: [{ t, x, y }] } (x/y gốc của host)
     late: 15,           // trung bình độ trễ thêm (ms) so với gói đến nhanh nhất -> độ trễ đệm
     SNAP: 140,
+    lateVar: 64,        // phương sai độ trễ thêm (ms²) -> độ dao động (jitter)
+    _d: 60,             // độ trễ đệm hiện tại (ms), trượt dần về mục tiêu để không giật hình
     reset() { this.tr.clear(); },
 
     each(fn) {
@@ -451,13 +453,23 @@ const NetSmooth = {
         }
     },
 
-    delay() { return Math.max(45, Math.min(200, 40 + this.late * 2)); },
+    // Độ trễ đệm mục tiêu thích ứng theo mạng: 1 khoảng gói (~33ms) + trễ trung bình + 2.2 x độ dao động.
+    // Mạng ổn định -> đệm ngắn (phản hồi nhanh); mạng giật -> đệm dài hơn (vẫn mượt, không khựng)
+    target() { return Math.max(45, Math.min(220, 35 + this.late + 2.2 * Math.sqrt(this.lateVar))); },
+    jitter() { return Math.round(Math.sqrt(this.lateVar)); },
+    delay() { return this._d; },
     hostNow() { return Date.now() - NetState._gEpoch - this.delay(); },
 
     // Gọi ngay sau khi áp 1 ảnh chụp có thời điểm host t (ms tính từ mốc host)
     onSnapshot(t, lateMs) {
         if (typeof t !== 'number') return;
-        if (typeof lateMs === 'number') this.late = this.late * 0.9 + Math.max(0, Math.min(300, lateMs)) * 0.1;
+        if (typeof lateMs === 'number') {
+            const l = Math.max(0, Math.min(300, lateMs)), d = l - this.late;
+            // gói đến trễ bất thường: tăng nhanh; mạng ổn định trở lại: giảm chậm
+            const k = d > 0 ? 0.2 : 0.05;
+            this.late += d * k;
+            this.lateVar = Math.max(4, this.lateVar * (1 - k) + d * d * k);
+        }
         const next = new Map();
         this.each((k, o) => {
             if (typeof o.x !== 'number' || typeof o.y !== 'number') return;
@@ -478,7 +490,11 @@ const NetSmooth = {
     },
 
     // Gọi mỗi tick guest
-    step() { this.apply(); },
+    step() {
+        const d = this.target() - this._d; // tăng tối đa 3ms / giảm 0.5ms mỗi tick -> thời gian hiển thị liền mạch
+        this._d += Math.max(-0.5, Math.min(3, d));
+        this.apply();
+    },
 
     apply() {
         if (!this.tr.size) return;

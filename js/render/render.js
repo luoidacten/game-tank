@@ -7,7 +7,8 @@ function drawRain() {
     ctx.strokeStyle = 'rgba(43, 128, 255, 0.46)';
     ctx.lineWidth = 1;
     ctx.beginPath();
-    for (let i = 0; i < 50; i++) { // Vẽ 50 hạt mưa mỗi frame
+    const nRain = Math.round(50 * ((typeof Quality !== 'undefined') ? Quality.particleMult : 1));
+    for (let i = 0; i < nRain; i++) { // Vẽ 50 hạt mưa mỗi frame (ít hơn khi đồ hoạ thấp)
         let rx = Math.random() * canvas.width;
         let ry = Math.random() * canvas.height;
         let rlen = 10 + Math.random() * 20;

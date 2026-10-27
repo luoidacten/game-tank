@@ -211,8 +211,12 @@ function updateAndDrawFloatingTexts() {
 let particles = [];
 const MAX_PARTICLES = 500;
 function spawnSparkParticles(x, y, color = '#ffd700', count = 8) {
+    // Đồ hoạ thấp/trung bình (js/core/quality.js): bớt hạt
+    const qm = (typeof Quality !== 'undefined') ? Quality.particleMult : 1;
+    if (qm < 1) count = Math.max(1, Math.round(count * qm));
+    const cap = MAX_PARTICLES * qm;
     for (let i = 0; i < count; i++) {
-        if (particles.length >= MAX_PARTICLES) particles.shift();
+        if (particles.length >= cap) particles.shift();
         let angle = Math.random() * Math.PI * 2;
         let speed = 1 + Math.random() * 4;
         particles.push({

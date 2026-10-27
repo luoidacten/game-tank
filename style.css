@@ -3047,3 +3047,46 @@ body.online-active .player-column:has(.body-pick-card) { flex-wrap: nowrap; gap:
 @media (max-width: 560px) {
     #labPanel { left: 8px; right: 8px; width: auto; }
 }
+/* ===== Online: tên, tạo phòng Công khai / Riêng tư, danh sách phòng, máy chủ được bầu ===== */
+.online-nick-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.online-nick-row label { font-family: 'Orbitron', monospace; font-size: 11px; color: #94a3b8; white-space: nowrap; }
+.online-nick-row .online-input, #createRoomName, #createRoomPassword, #joinRoomPassword { text-transform: none; letter-spacing: 0.5px; font-size: 14px; }
+.online-nick-row .online-input { padding: 7px 10px; }
+.room-vis-toggle { display: flex; gap: 8px; }
+.room-vis-btn {
+    flex: 1; padding: 10px 6px; border-radius: 8px; cursor: pointer;
+    font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 800; letter-spacing: 1px;
+    background: #0f172a; color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.35); transition: all 0.2s;
+}
+.room-vis-btn.active { color: #fff; border-color: #00f0ff; background: rgba(0, 240, 255, 0.14); box-shadow: 0 0 10px rgba(0, 240, 255, 0.35); }
+#visPrivateBtn.active { border-color: #f472b6; background: rgba(244, 114, 182, 0.14); box-shadow: 0 0 10px rgba(244, 114, 182, 0.35); }
+.room-mode-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #94a3b8; }
+.room-mode-row select { text-transform: none; letter-spacing: 0; font-size: 13px; padding: 7px 8px; }
+.room-browser-head { display: flex; justify-content: space-between; align-items: center; font-family: 'Orbitron', monospace; font-size: 12px; color: #a5f3fc; }
+.room-browser-list { display: flex; flex-direction: column; gap: 6px; max-height: 210px; overflow-y: auto; }
+.room-item {
+    display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; text-align: left; cursor: pointer;
+    padding: 8px 10px; border-radius: 8px; background: rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(0, 240, 255, 0.3); color: #e2e8f0; font-size: 12px; transition: all 0.15s;
+}
+.room-item:hover:not(:disabled) { border-color: #00f0ff; box-shadow: 0 0 10px rgba(0, 240, 255, 0.35); }
+.room-item:disabled { opacity: 0.5; cursor: not-allowed; }
+.room-item .ri-name { font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.room-item .ri-players { font-family: 'Orbitron', monospace; color: #22c55e; text-align: right; }
+.room-item .ri-meta { color: #94a3b8; font-size: 11px; }
+.room-item .ri-ping { font-family: 'Orbitron', monospace; font-size: 11px; text-align: right; color: #94a3b8; }
+.room-item .ri-ping.good { color: #22c55e; }
+.room-item .ri-ping.mid { color: #facc15; }
+.room-item .ri-ping.bad { color: #f87171; }
+.room-code-sep { font-size: 11px; text-align: center; margin: 4px 0 0; }
+.join-input-group { flex-wrap: wrap; }
+.join-input-group .online-input { min-width: 120px; }
+.join-input-group .btn-online-join { flex: 1 1 100%; min-height: 40px; }
+#joinRoomInput, #joinRoomPassword { font-size: 13px; letter-spacing: 1px; }
+.lobby-room-info { font-size: 11px; color: #94a3b8; text-align: center; }
+.lobby-host-info {
+    font-size: 12px; font-weight: 700; text-align: center; padding: 7px 10px; border-radius: 8px;
+    background: rgba(168, 85, 247, 0.12); border: 1px solid rgba(168, 85, 247, 0.5); color: #e9d5ff;
+}
+.lobby-host-info.done { background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.55); color: #bbf7d0; }
+body.low-quality .room-item, body.low-quality .room-vis-btn.active { box-shadow: none; }

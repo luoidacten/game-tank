@@ -53,7 +53,29 @@ class OnlineMultiplayerManager {
         this.inSeq = 0;        // guest: số thứ tự phím đang giữ
         this.p2InSeq = -1;     // host: phím mới nhất đã nhận từ guest
         this.p2InTicks = 0;
+        // Phòng: công khai / riêng tư, tên người chơi, bầu máy chủ
+        this.nick = this.loadNick();
+        this.roomVis = 'public';
+        this.roomPw = '';
+        this.roomName = '';
+        this.roomOwner = false;  // máy tạo phòng (giữ mã phòng, kiểm tra mật khẩu, quảng cáo phòng công khai)
+        this.adActive = false;
+        this.elect = null;       // { other, samples, mine, theirs, done, result }
+        this.browseToken = 0;
         this.resetNetPrediction();
+    }
+
+    loadNick() {
+        let n = '';
+        try { n = localStorage.getItem('cy_nick') || ''; } catch (e) {}
+        return n || ('Tank-' + Math.random().toString(36).substring(2, 6).toUpperCase());
+    }
+
+    saveNick(v) {
+        v = String(v || '').replace(/[<>]/g, '').trim().slice(0, 16);
+        if (!v) return;
+        this.nick = v;
+        try { localStorage.setItem('cy_nick', v); } catch (e) {}
     }
 
     // Dự đoán xe của guest: lịch sử phím chưa được host xác nhận (mỗi tick 1 phần tử {seq, dir})
@@ -87,10 +109,19 @@ class OnlineMultiplayerManager {
 
         // Thăm dò Ghép nhanh: trả lời riêng kết nối thăm dò, không tính là người chơi
         if (data.type === 'QM_PROBE') { this.answerQuickProbe(transportId); return; }
+        if (data.type === 'ROOM_PROBE') { this.answerRoomProbe(transportId, data.t); return; }
+        if (data.type === 'BPING') { this.sendNetworkMessage({ type: 'BPONG', t: data.t }); return; }
+        if (data.type === 'BPONG') { this.onBenchPong(data.t); return; }
+        // Chủ phòng đã nhường vai host (đang là guest): người lạ xin vào -> báo phòng đủ
+        if (data.type === 'JOIN_LOBBY' && this.role === 'guest' && this.roomOwner && this.elect && from !== this.elect.other) {
+            const c = transportId && this.connections[transportId];
+            try { if (c && c.open) c.send({ type: 'ROOM_FULL', targetId: from, code: this.roomCode, _from: this.clientId, _seq: ++this.sendSeq }); } catch (e) {}
+            return;
+        }
         if (data.type === 'PING') { this.sendNetworkMessage({ type: 'PONG', t: data.t }); return; }
         if (data.type === 'PONG') { this.onPong(data.t); return; }
 
-        if (this.role === 'host') this.handleHostReceivedData(from, data);
+        if (this.role === 'host') this.handleHostReceivedData(from, data, transportId);
         else this.handleClientReceivedData(data);
     }
 
@@ -101,7 +132,8 @@ class OnlineMultiplayerManager {
         const pingEl = document.getElementById('pingValueText');
         const hudPingText = document.getElementById('hudPingText');
         const via = (this.hostConn && this.hostConn.open) || Object.values(this.connections).some(c => c && c.open) ? 'P2P WebRTC' : 'Local Broadcast';
-        if (pingEl) pingEl.innerText = `Độ trễ: ${this.pingMs}ms (${via})`;
+        const buf = (this.role === 'guest' && typeof NetSmooth !== 'undefined') ? ` · đệm ${Math.round(NetSmooth.delay())}ms, dao động ${NetSmooth.jitter()}ms` : '';
+        if (pingEl) pingEl.innerText = `Độ trễ: ${this.pingMs}ms (${via})${buf}`;
         if (hudPingText) hudPingText.innerText = `${this.pingMs}ms`;
     }
 
@@ -169,6 +201,7 @@ class OnlineMultiplayerManager {
         const btnLeaveOnlineRoom = document.getElementById('btnLeaveOnlineRoom');
 
         if (!openOnlineBtn || !onlineModal) return;
+        this.initRoomUI();
 
         openOnlineBtn.addEventListener('click', () => {
             if (soundSystem && !soundSystem.muted) soundSystem.playClick();
@@ -195,6 +228,7 @@ class OnlineMultiplayerManager {
             tabJoinRoom.addEventListener('click', () => {
                 if (soundSystem && !soundSystem.muted) soundSystem.playClick();
                 this.switchTab('join');
+                this.refreshRooms();
             });
         }
 
@@ -216,12 +250,12 @@ class OnlineMultiplayerManager {
         if (btnJoinRoomAction && joinRoomInput) {
             btnJoinRoomAction.addEventListener('click', () => {
                 if (soundSystem && !soundSystem.muted) soundSystem.playClick();
-                this.joinRoom(joinRoomInput.value);
+                this.joinRoom(joinRoomInput.value, this.joinPwValue());
             });
             joinRoomInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     if (soundSystem && !soundSystem.muted) soundSystem.playClick();
-                    this.joinRoom(joinRoomInput.value);
+                    this.joinRoom(joinRoomInput.value, this.joinPwValue());
                 }
             });
         }
@@ -256,6 +290,11 @@ class OnlineMultiplayerManager {
                 if (soundSystem && !soundSystem.muted) soundSystem.playClick();
                 if (this.role === 'host') {
                     this.hostStartMatch();
+                } else if (this.role === 'guest' && this.elect && this.elect.done) {
+                    // Máy chủ là máy kia (mạnh hơn) -> nhờ nó bắt đầu
+                    this.sendNetworkMessage({ type: 'REQ_START' });
+                    btnStartOnlineMatch.disabled = true;
+                    btnStartOnlineMatch.innerText = '⏳ ĐANG BẮT ĐẦU...';
                 }
             });
         }
@@ -299,6 +338,8 @@ class OnlineMultiplayerManager {
         if (loadCreate) loadCreate.style.display = 'none';
         const loadQuick = document.getElementById('quickMatchLoading');
         if (loadQuick) loadQuick.style.display = 'none';
+        const cErr = document.getElementById('createRoomError');
+        if (cErr) cErr.style.display = 'none';
     }
 
     showJoinError(msg) {
@@ -313,14 +354,32 @@ class OnlineMultiplayerManager {
     }
 
     createRoom() {
+        const vis = this.uiVis || 'public';
+        const pwEl = document.getElementById('createRoomPassword');
+        const nameEl = document.getElementById('createRoomName');
+        const modeEl = document.getElementById('createRoomMode');
+        const errEl = document.getElementById('createRoomError');
+        const pw = pwEl ? pwEl.value.trim() : '';
+        if (errEl) errEl.style.display = 'none';
+        if (vis === 'private' && pw.length < 3) {
+            if (errEl) { errEl.style.display = 'block'; errEl.innerText = '🔒 Phòng riêng tư cần mật khẩu (ít nhất 3 ký tự)!'; }
+            if (soundSystem && !soundSystem.muted) soundSystem.playHit();
+            return;
+        }
         this.cleanup();
         this.role = 'host';
         this.isOnline = true;
+        this.roomOwner = true;
+        this.roomVis = vis;
+        this.roomPw = vis === 'private' ? pw : '';
+        this.roomName = (nameEl && nameEl.value.trim().slice(0, 24)) || ('Phòng của ' + this.nick);
+        const ws = modeEl ? parseInt(modeEl.value, 10) : 3;
+        gameState.winScore = (ws >= 1 && ws <= 9) ? ws : 3;
         const rawCode = this.generateRoomCode();
         this.roomCode = "CY-" + rawCode;
         this.myPeerId = this.roomCode;
         this.playersLobbyData = [
-            { id: this.myPeerId, nickname: 'Host (Blue)', isHost: true }
+            { id: this.myPeerId, nickname: this.nick, isHost: true }
         ];
 
         const loadCreate = document.getElementById('createRoomLoading');
@@ -328,13 +387,8 @@ class OnlineMultiplayerManager {
 
         this.setupLocalBroadcastChannel(this.roomCode);
 
-        if (typeof Peer === 'undefined') {
-            this.initHostLobby();
-            return;
-        }
-
         try {
-            this.peer = new Peer(this.roomCode, PEER_CONFIG);
+            this.peer = makeNetPeer(this.roomCode);
 
             this.peer.on('open', (id) => {
                 this.myPeerId = id;
@@ -370,16 +424,23 @@ class OnlineMultiplayerManager {
         if (loadCreate) loadCreate.style.display = 'none';
 
         this.playersLobbyData = [
-            { id: this.myPeerId, nickname: 'Host (Blue)', isHost: true }
+            { id: this.myPeerId, nickname: this.nick, isHost: true }
         ];
 
         this.showLobbyView();
         this.updateLobbyDisplay('host_waiting');
+        this.updateAd();
         if (soundSystem && !soundSystem.muted) soundSystem.playPowerup();
     }
 
-    joinRoom(rawCode) {
+    joinPwValue() {
+        const el = document.getElementById('joinRoomPassword');
+        return el ? el.value : '';
+    }
+
+    joinRoom(rawCode, pw) {
         this.cleanup();
+        this.joinPw = String(pw || '').trim();
         let codeInput = (rawCode || '').trim().toUpperCase();
         if (!codeInput) {
             this.showJoinError('Vui lòng nhập mã phòng hợp lệ (VD: CY-8842 hoặc 8842)!');
@@ -408,7 +469,7 @@ class OnlineMultiplayerManager {
 
         // 1. Setup local BroadcastChannel (handles same-device multi-tab instant connection)
         this.setupLocalBroadcastChannel(this.roomCode);
-        this.sendNetworkMessage({ type: 'JOIN_LOBBY', nickname: 'Guest (Red)' });
+        this.sendNetworkMessage(this.joinMsg());
 
         // 2. Set timeout of 6 seconds
         this.joinTimeoutTimer = setTimeout(() => {
@@ -420,8 +481,7 @@ class OnlineMultiplayerManager {
 
         // 3. Connect via PeerJS WebRTC (for cross-device online play)
         try {
-            if (typeof Peer === 'undefined') return;
-            this.peer = new Peer(undefined, PEER_CONFIG);
+            this.peer = makeNetPeer();
 
             this.peer.on('open', (id) => {
                 if (!this.isJoinedSuccess) {
@@ -433,15 +493,16 @@ class OnlineMultiplayerManager {
 
                     this.hostConn.on('open', () => {
                         isWebRTCOpen = true;
-                        this.sendNetworkMessage({ type: 'JOIN_LOBBY', nickname: 'Guest (Red)' });
+                        this.sendNetworkMessage(this.joinMsg());
                     });
 
                     this.hostConn.on('data', (data) => {
                         this.receive(data, targetHostPeerId);
                     });
 
+                    const myConn = this.hostConn;
                     this.hostConn.on('close', () => {
-                        if (this.isJoinedSuccess && isWebRTCOpen) {
+                        if (this.isJoinedSuccess && isWebRTCOpen && (this.hostConn === myConn || this.connections[myConn.peer] === myConn)) {
                             this.onDisconnected();
                         }
                     });
@@ -463,6 +524,10 @@ class OnlineMultiplayerManager {
         }
     }
 
+    joinMsg() {
+        return { type: 'JOIN_LOBBY', nickname: this.nick, pw: this.joinPw || '' };
+    }
+
     initClientLobby() {
         this.isJoinedSuccess = true;
         this.isOnline = true;
@@ -476,20 +541,34 @@ class OnlineMultiplayerManager {
         if (soundSystem && !soundSystem.muted) soundSystem.playPowerup();
     }
 
-    handleHostReceivedData(peerId, data) {
+    handleHostReceivedData(peerId, data, tid) {
         if (!data || !data.type) return;
 
         switch(data.type) {
             case 'JOIN_LOBBY':
-            case 'HANDSHAKE_REQUEST':
-                if (this.playersLobbyData.length >= 2 && !this.playersLobbyData.some(p => p.id === peerId)) {
+            case 'HANDSHAKE_REQUEST': {
+                const known = this.playersLobbyData.some(p => p.id === peerId);
+                if (this.playersLobbyData.length >= 2 && !known) {
                     this.sendNetworkMessage({ type: 'ROOM_FULL', targetId: peerId, code: this.roomCode });
                     return;
                 }
-                if (!this.playersLobbyData.some(p => p.id === peerId)) {
+                // Phòng riêng tư: chủ phòng kiểm tra mật khẩu TRƯỚC khi nhận kết nối
+                if (!known && this.roomOwner && this.roomVis === 'private') {
+                    const pw = String(data.pw || '').trim();
+                    if (pw !== this.roomPw) {
+                        this.sendNetworkMessage({ type: 'JOIN_DENIED', targetId: peerId, reason: pw ? 'bad_pw' : 'need_pw', code: this.roomCode });
+                        // đóng kết nối WebRTC của máy bị từ chối (không nhận gói trận đấu)
+                        setTimeout(() => {
+                            const c = tid && this.connections[tid];
+                            if (c && !this.playersLobbyData.some(p => p.id === peerId)) { try { c.close(); } catch (e) {} delete this.connections[tid]; }
+                        }, 400);
+                        return;
+                    }
+                }
+                if (!known) {
                     this.playersLobbyData.push({
                         id: peerId,
-                        nickname: data.nickname || 'Guest (Red)',
+                        nickname: String(data.nickname || 'Guest').slice(0, 16),
                         isHost: false
                     });
                 }
@@ -498,9 +577,25 @@ class OnlineMultiplayerManager {
                     targetId: peerId,
                     players: this.playersLobbyData,
                     roomCode: this.roomCode,
+                    roomName: this.roomName,
+                    roomVis: this.roomVis,
                     winScore: gameState.winScore || 3
                 });
                 this.broadcastLobbyState();
+                if (!known || !this.elect || this.elect.other !== peerId) this.beginElection(peerId);
+                this.updateAd();
+                break;
+            }
+
+            case 'BENCH':
+                if (this.elect && this.elect.other === peerId && !this.elect.done) {
+                    this.elect.theirs = { score: +data.score || 0, nick: String(data.nick || '').slice(0, 16), info: data.info || null };
+                    this.tryDecideHost();
+                }
+                break;
+
+            case 'REQ_START':
+                if (!this.matchActive && this.playersLobbyData.length >= 2) this.hostStartMatch();
                 break;
 
             case 'SYNC_KEY': // guest lỡ 1 gói delta -> gửi ngay keyframe ở lần chụp tới
@@ -541,6 +636,8 @@ class OnlineMultiplayerManager {
                 break;
 
             case 'LEAVE':
+                // Rời phòng lúc còn ở sảnh: chủ phòng giữ phòng, chờ người mới
+                if (!this.matchActive && this.roomOwner) { this.dropOpponent(peerId); break; }
                 this.onDisconnected();
                 break;
         }
@@ -559,7 +656,26 @@ class OnlineMultiplayerManager {
                 }
                 if (data.players) this.playersLobbyData = data.players;
                 if (data.winScore) gameState.winScore = data.winScore;
+                if (data.roomName) this.roomName = data.roomName;
+                if (data.roomVis) this.roomVis = data.roomVis;
+                if (data.type === 'JOIN_ACCEPT') {
+                    const h = (data.players || []).find(p => p.isHost);
+                    if (!this.elect || this.elect.other !== data._from) this.beginElection(data._from, h && h.nickname);
+                }
                 this.updateLobbyDisplay('connected');
+                break;
+
+            case 'JOIN_DENIED':
+                if (data.targetId && data.targetId !== this.clientId) return;
+                if (this.isJoinedSuccess) return;
+                this.showJoinError(data.reason === 'need_pw'
+                    ? `🔒 Phòng "${data.code || this.roomCode}" là phòng RIÊNG TƯ — hãy nhập mật khẩu!`
+                    : `❌ Sai mật khẩu phòng "${data.code || this.roomCode}"! Kiểm tra lại với chủ phòng.`);
+                this.cleanup(true);
+                break;
+
+            case 'ELECT':
+                this.onElectResult(data);
                 break;
 
             case 'ROOM_FULL':
@@ -697,7 +813,7 @@ class OnlineMultiplayerManager {
         this.isJoinedSuccess = false;
 
         this.setupLocalBroadcastChannel(quickCode);
-        this.sendNetworkMessage({ type: 'JOIN_LOBBY', nickname: 'Guest (Red)' });
+        this.sendNetworkMessage(this.joinMsg());
 
         let quickTimeout = setTimeout(() => {
             if (!this.isJoinedSuccess) {
@@ -708,15 +824,14 @@ class OnlineMultiplayerManager {
         }, 2200);
 
         try {
-            if (typeof Peer === 'undefined') return;
-            this.peer = new Peer(undefined, PEER_CONFIG);
+            this.peer = makeNetPeer();
 
             this.peer.on('open', (id) => {
                 this.myPeerId = id;
                 try {
                     this.hostConn = this.peer.connect(quickCode, { reliable: true });
                     this.hostConn.on('open', () => {
-                        this.sendNetworkMessage({ type: 'JOIN_LOBBY', nickname: 'Guest (Red)' });
+                        this.sendNetworkMessage(this.joinMsg());
                     });
                     this.hostConn.on('data', (data) => {
                         clearTimeout(quickTimeout);
@@ -739,6 +854,7 @@ class OnlineMultiplayerManager {
         this.cleanup();
         this.role = 'host';
         this.isOnline = true;
+        this.roomOwner = true;
         this.roomCode = code;
         this.myPeerId = code;
 
@@ -754,7 +870,7 @@ class OnlineMultiplayerManager {
         this.setupLocalBroadcastChannel(code);
 
         try {
-            this.peer = new Peer(code, PEER_CONFIG);
+            this.peer = makeNetPeer(code);
             this.peer.on('open', () => {
                 if (loadQuick) loadQuick.style.display = 'none';
                 this.initHostLobby();
@@ -808,10 +924,6 @@ class OnlineMultiplayerManager {
     // Thăm dò (không vào phòng) xem có ai đang mở phòng Ghép nhanh không
     probeQuickMatch() {
         if (this.qmProbeBusy || (this.isQuickMatch && this.qmPhase)) return;
-        if (typeof Peer === 'undefined') {
-            this.setQuickNotice('none', '⚪ Không kết nối được máy chủ ghép. Bấm tìm để mở phòng chờ trên máy này, hoặc mời bạn bè bằng mã phòng.');
-            return;
-        }
         this.qmProbeBusy = true;
         this.setQuickNotice('scan', '🔎 Đang kiểm tra phòng ghép công khai...');
         let probe = null, done = false;
@@ -826,7 +938,7 @@ class OnlineMultiplayerManager {
         const NONE = '⚪ Chưa có ai đang ghép. Bấm <b>TÌM TRẬN</b> để mở phòng và chờ, hoặc mời bạn bè.';
         const t = setTimeout(() => finish('none', NONE), 5000);
         try {
-            probe = new Peer(undefined, PEER_CONFIG);
+            probe = makeNetPeer();
             probe.on('open', () => {
                 try {
                     const c = probe.connect('CY-IO-PUBLIC', { reliable: true });
@@ -880,6 +992,7 @@ class OnlineMultiplayerManager {
         if (viewQuick) viewQuick.style.display = 'none';
         if (viewLobby) viewLobby.style.display = 'flex';
         if (displayCode) displayCode.innerText = this.roomCode || 'CY-0000';
+        this.updateRoomInfo();
         const qmLobby = document.getElementById('lobbyQuickNotice');
         if (qmLobby && !this.isQuickMatch) qmLobby.style.display = 'none';
 
@@ -894,7 +1007,7 @@ class OnlineMultiplayerManager {
         if (this.role === 'host') {
             if (p1Status) {
                 p1Status.className = 'slot-status ready';
-                p1Status.innerText = '✔ BẠN (HOST XANH)';
+                p1Status.innerText = '✔ BẠN: ' + this.nick + ' (HOST XANH)';
             }
             if (status === 'host_waiting' && this.playersLobbyData.length < 2) {
                 if (p2Status) {
@@ -906,27 +1019,31 @@ class OnlineMultiplayerManager {
                     btnStart.innerText = '⏳ CHỜ ĐỐI THỦ VÀO PHÒNG...';
                 }
             } else if (status === 'connected' || this.playersLobbyData.length >= 2) {
+                const opp = this.playersLobbyData.find(p => !p.isHost);
                 if (p2Status) {
                     p2Status.className = 'slot-status ready';
-                    p2Status.innerText = '✔ ĐỐI THỦ ĐÃ VÀO!';
+                    p2Status.innerText = '✔ ' + (opp && opp.nickname ? opp.nickname : 'ĐỐI THỦ ĐÃ VÀO!');
                 }
                 if (btnStart) {
-                    btnStart.disabled = false;
-                    btnStart.innerText = '⚔️ BẮT ĐẦU TRẬN ĐẤU (HOST)';
+                    const ready = !this.elect || this.elect.done;
+                    btnStart.disabled = !ready;
+                    btnStart.innerText = ready ? '⚔️ BẮT ĐẦU TRẬN ĐẤU (HOST)' : '⏳ ĐANG CHỌN MÁY CHỦ...';
                 }
             }
         } else if (this.role === 'guest') {
+            const hostP = this.playersLobbyData.find(p => p.isHost);
             if (p1Status) {
                 p1Status.className = 'slot-status ready';
-                p1Status.innerText = '✔ HOST (XANH SẴN SÀNG)';
+                p1Status.innerText = '✔ ' + (hostP && hostP.nickname ? hostP.nickname : 'HOST') + ' (XANH)';
             }
             if (p2Status) {
                 p2Status.className = 'slot-status ready';
-                p2Status.innerText = '✔ BẠN (GUEST ĐỎ)';
+                p2Status.innerText = '✔ BẠN: ' + this.nick + ' (GUEST ĐỎ)';
             }
             if (btnStart) {
-                btnStart.disabled = true;
-                btnStart.innerText = '⏳ CHỜ CHỦ PHÒNG BẮT ĐẦU TRẬN...';
+                const ready = this.elect && this.elect.done;
+                btnStart.disabled = !ready;
+                btnStart.innerText = ready ? '⚔️ BẮT ĐẦU TRẬN ĐẤU' : '⏳ ĐANG CHỌN MÁY CHỦ...';
             }
         }
     }
@@ -936,6 +1053,7 @@ class OnlineMultiplayerManager {
             alert('Chưa có đối thủ kết nối vào phòng!');
             return;
         }
+        if (this.elect && !this.elect.done) return; // đang bầu máy chủ
         this.sendNetworkMessage({
             type: 'START_MATCH',
             winScore: gameState.winScore || 3
@@ -976,6 +1094,7 @@ class OnlineMultiplayerManager {
 
         NetState.installHooks();
         this.matchActive = true;
+        this.updateAd();
         this.lastHeard = Date.now();
         gameState.winScore = winScore || 3;
         startBattle();
@@ -1135,6 +1254,12 @@ class OnlineMultiplayerManager {
 
     // Host: 1 kết nối WebRTC đóng
     onHostConnClosed(peerId) {
+        // Máy này đã nhường vai host (đang là guest): kết nối tới máy chủ mới đóng = mất kết nối
+        if (this.role === 'guest') {
+            if (this.hostConn && this.hostConn.peer === peerId) this.onDisconnected();
+            else delete this.connections[peerId];
+            return;
+        }
         delete this.connections[peerId];
         const cid = this.peerToClient[peerId] || peerId;
         if (this.qmProbePeers && this.qmProbePeers[peerId]) { delete this.qmProbePeers[peerId]; return; }
@@ -1145,15 +1270,33 @@ class OnlineMultiplayerManager {
             if (!this.broadcastChannel) this.onDisconnected();
             return;
         }
-        this.playersLobbyData = this.playersLobbyData.filter(p => p.id !== cid && p.id !== peerId);
+        if (!this.roomOwner) { // máy chủ được bầu (không giữ mã phòng): chủ phòng rời -> phòng đóng
+            if (this.playersLobbyData.some(p => p.id === cid || p.id === peerId)) this.onDisconnected();
+            return;
+        }
+        this.dropOpponent(cid, peerId);
+    }
+
+    // Chủ phòng: đối thủ rời sảnh -> về trạng thái chờ người mới (phòng vẫn mở)
+    dropOpponent(cid, peerId) {
+        this.playersLobbyData = this.playersLobbyData.filter(p => p.isHost || (p.id !== cid && p.id !== peerId));
+        if (this.elect && (this.elect.other === cid || this.elect.other === peerId)) this.elect = null;
+        this.updateHostInfo();
         this.broadcastLobbyState();
+        this.updateLobbyDisplay('host_waiting');
+        this.updateAd();
     }
 
     onDisconnected() {
+        // Chủ phòng đã nhường vai host cho máy kia, máy kia rời khi còn ở sảnh -> lấy lại vai host, chờ người mới
+        if (this.isOnline && this.roomOwner && this.role === 'guest' && !this.matchActive) {
+            this.reclaimHost();
+            return;
+        }
         if (this.isOnline) {
             this.matchActive = false;
             this.leaveRoom();
-            alert('⚠️ Đối thủ đã ngắt kết nối hoặc rời phòng đấu!');
+            if (!window.__cyUnloading) alert('⚠️ Đối thủ đã ngắt kết nối hoặc rời phòng đấu!');
             const upg = document.getElementById('upgradeScreen');
             if (upg) upg.style.display = 'none';
             const endScreen = document.getElementById('endScreen');
@@ -1187,6 +1330,11 @@ class OnlineMultiplayerManager {
     }
 
     cleanup(preserveErrors = false) {
+        if (this.adActive && typeof lobbyDir !== 'undefined') { lobbyDir.setAd(null); this.adActive = false; }
+        if (this.elect && this.elect.timer) clearInterval(this.elect.timer);
+        if (this.elect && this.elect.deadline) clearTimeout(this.elect.deadline);
+        this.elect = null;
+        this.roomOwner = false;
         this.isOnline = false;
         this.role = null;
         this.roomCode = null;
@@ -1237,6 +1385,276 @@ class OnlineMultiplayerManager {
             if (loadQuick) loadQuick.style.display = 'none';
         }
     }
+
+    // ===================== PHÒNG: UI tạo phòng + danh sách phòng công khai =====================
+    initRoomUI() {
+        const nickEl = document.getElementById('onlineNickInput');
+        if (nickEl) {
+            nickEl.value = this.nick;
+            nickEl.addEventListener('change', () => { this.saveNick(nickEl.value); nickEl.value = this.nick; });
+        }
+        const pub = document.getElementById('visPublicBtn'), pri = document.getElementById('visPrivateBtn');
+        const pw = document.getElementById('createRoomPassword');
+        const setVis = (v) => {
+            this.uiVis = v;
+            if (pub) pub.classList.toggle('active', v === 'public');
+            if (pri) pri.classList.toggle('active', v === 'private');
+            if (pw) pw.style.display = v === 'private' ? 'block' : 'none';
+            if (v === 'private' && pw) pw.focus();
+        };
+        if (pub) pub.addEventListener('click', () => setVis('public'));
+        if (pri) pri.addEventListener('click', () => setVis('private'));
+        const ref = document.getElementById('btnRefreshRooms');
+        if (ref) ref.addEventListener('click', () => {
+            if (soundSystem && !soundSystem.muted) soundSystem.playClick();
+            this.refreshRooms();
+        });
+        // Đo trước cấu hình máy (dùng khi bầu máy chủ) lúc mở bảng online
+        const open = document.getElementById('openOnlineBtn');
+        if (open) open.addEventListener('click', () => {
+            if (nickEl) nickEl.value = this.nick;
+            setTimeout(() => DeviceBench.runDevice(), 300);
+            if (typeof lobbyDir !== 'undefined') lobbyDir.start(); // sẵn sàng sổ phòng sớm
+        });
+    }
+
+    updateRoomInfo() {
+        const el = document.getElementById('lobbyRoomInfo');
+        if (!el) return;
+        const vis = this.roomVis === 'private' ? '🔒 Riêng tư' : '🌐 Công khai';
+        el.innerText = `${vis} · ${this.roomName || this.roomCode || ''} · Chạm ${gameState.winScore || 3}`;
+    }
+
+    // Chủ phòng công khai: quảng cáo phòng lên sổ phòng (cập nhật số người); xoá khi vào trận / rời
+    updateAd() {
+        if (typeof lobbyDir === 'undefined') return;
+        const want = this.isOnline && this.roomOwner && this.roomVis === 'public' && !this.matchActive && !this.isQuickMatch;
+        if (!want) {
+            if (this.adActive) { lobbyDir.setAd(null); this.adActive = false; }
+            return;
+        }
+        this.adActive = true;
+        lobbyDir.setAd({
+            code: this.roomCode, name: this.roomName, host: this.nick,
+            mode: 'Chạm ' + (gameState.winScore || 3),
+            players: Math.max(1, Math.min(2, this.playersLobbyData.length)),
+        });
+    }
+
+    // Trả lời đo ping từ danh sách phòng (kết nối thăm dò, không vào phòng)
+    answerRoomProbe(tid, t) {
+        if (!tid) return;
+        if (!this.qmProbePeers) this.qmProbePeers = {};
+        this.qmProbePeers[tid] = true;
+        const c = this.connections[tid];
+        const open = this.isOnline && this.roomOwner && !this.matchActive && this.playersLobbyData.length < 2;
+        try { if (c && c.open) c.send({ type: 'ROOM_PONG', t, players: this.playersLobbyData.length, open }); } catch (e) {}
+    }
+
+    setBrowserStatus(kind, html) {
+        const el = document.getElementById('roomBrowserStatus');
+        if (!el) return;
+        el.className = 'qm-notice qm-' + kind;
+        el.innerHTML = html;
+        el.style.display = html ? 'block' : 'none';
+    }
+
+    async refreshRooms() {
+        if (typeof lobbyDir === 'undefined') return;
+        const token = ++this.browseToken;
+        const list = document.getElementById('roomBrowserList');
+        this.setBrowserStatus('scan', '🔎 Đang tìm phòng công khai...');
+        let rooms = null;
+        try { rooms = await lobbyDir.list(); } catch (e) { rooms = null; }
+        if (token !== this.browseToken) return;
+        if (!rooms) {
+            if (list) list.innerHTML = '';
+            this.setBrowserStatus('busy', '⚠️ Không kết nối được hệ thống tìm phòng (mạng / máy chủ PeerJS bận). Hãy vào bằng <b>MÃ PHÒNG</b> bên dưới hoặc thử LÀM MỚI.');
+            return;
+        }
+        rooms = rooms.filter(r => r.code !== this.roomCode);
+        const regNote = lobbyDir.mode === 'registry' ? ' <span style="opacity:.6">(máy bạn đang giữ sổ phòng)</span>' : '';
+        if (!rooms.length) {
+            if (list) list.innerHTML = '';
+            // Máy này vừa giành sổ phòng: các chủ phòng cần vài giây để quảng cáo lại -> tự làm mới 1 lần
+            if (lobbyDir.mode === 'registry' && Date.now() - (lobbyDir.regSince || 0) < LOBBY.beat + 1000 && !this._autoRetry) {
+                this._autoRetry = true;
+                setTimeout(() => { if (token === this.browseToken) this.refreshRooms(); this._autoRetry = false; }, LOBBY.beat + 500);
+            }
+            this.setBrowserStatus('none', '⚪ Chưa có phòng công khai nào. Hãy tạo phòng hoặc LÀM MỚI sau ít giây.' + regNote);
+            return;
+        }
+        this.setBrowserStatus('found', `🟢 Tìm thấy <b>${rooms.length}</b> phòng công khai. Chạm để vào.` + regNote);
+        if (!list) return;
+        list.innerHTML = '';
+        const esc = (v) => String(v).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+        rooms.slice(0, 20).forEach((r, i) => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'room-item';
+            b.dataset.code = r.code;
+            b.disabled = r.players >= 2;
+            b.innerHTML = `<span class="ri-name">${esc(r.name)}</span><span class="ri-players">👥 ${r.players}/2</span>` +
+                `<span class="ri-meta">👑 ${esc(r.host)} · ${esc(r.mode)} · ${esc(r.code)}</span><span class="ri-ping">…</span>`;
+            b.addEventListener('click', () => {
+                if (soundSystem && !soundSystem.muted) soundSystem.playClick();
+                const inp = document.getElementById('joinRoomInput');
+                if (inp) inp.value = r.code;
+                this.joinRoom(r.code, '');
+            });
+            list.appendChild(b);
+            if (i < 6) lobbyDir.probe(r.code).then(res => {
+                if (token !== this.browseToken) return;
+                const pe = b.querySelector('.ri-ping');
+                if (!pe) return;
+                if (!res) { pe.textContent = '— ms'; b.classList.add('ri-dead'); return; }
+                pe.textContent = res.rtt + ' ms';
+                pe.className = 'ri-ping ' + (res.rtt < 80 ? 'good' : res.rtt < 160 ? 'mid' : 'bad');
+                if (typeof res.players === 'number') {
+                    b.querySelector('.ri-players').textContent = `👥 ${Math.max(1, res.players)}/2`;
+                    b.disabled = !res.open;
+                }
+            });
+        });
+    }
+
+    // ===================== BẦU MÁY CHỦ (máy mạnh hơn làm host) =====================
+    // Cả 2 máy: đo thiết bị (đã lưu sẵn) + RTT / dao động qua kênh dữ liệu ~1.5s. Guest gửi BENCH cho host;
+    // host quyết định và gửi ELECT; nếu guest mạnh hơn -> 2 máy đổi vai ngay trong sảnh (dùng chung 1 kết nối).
+    beginElection(otherCid, otherNick) {
+        if (!otherCid) return;
+        if (this.elect && this.elect.timer) clearInterval(this.elect.timer);
+        if (this.elect && this.elect.deadline) clearTimeout(this.elect.deadline);
+        const el = { other: otherCid, otherNick: otherNick || '', samples: [], mine: null, theirs: null, done: false, result: null };
+        this.elect = el;
+        this.updateHostInfo();
+        this.updateLobbyDisplay('connected');
+        let n = 0;
+        // đo mạng sau khi máy này đo xong thiết bị (vòng lặp CPU chặn luồng -> làm sai RTT)
+        DeviceBench.runDevice().then(() => { if (this.elect === el) el.timer = setInterval(() => {
+            if (this.elect !== el) { clearInterval(el.timer); return; }
+            this.sendNetworkMessage({ type: 'BPING', t: performance.now() });
+            if (++n >= 14) {
+                clearInterval(el.timer); el.timer = null;
+                setTimeout(() => this.finishMyBench(el), 150);
+            }
+        }, 105); });
+        // Host: không nhận được BENCH -> giữ nguyên vai
+        if (this.role === 'host') el.deadline = setTimeout(() => { if (this.elect === el && !el.done) this.tryDecideHost(true); }, 5000);
+    }
+
+    onBenchPong(t) {
+        const el = this.elect;
+        if (!el || el.mine || typeof t !== 'number') return;
+        const rtt = performance.now() - t;
+        if (rtt >= 0 && rtt < 5000) el.samples.push(rtt);
+    }
+
+    async finishMyBench(el) {
+        const dev = await DeviceBench.runDevice();
+        if (this.elect !== el) return;
+        const net = DeviceBench.netStats(el.samples);
+        el.mine = { score: DeviceBench.score(dev, net), nick: this.nick, info: Object.assign({}, dev, { rtt: net.rtt, jit: net.jit }) };
+        if (this.role === 'guest') this.sendNetworkMessage({ type: 'BENCH', score: el.mine.score, nick: this.nick, info: el.mine.info });
+        else this.tryDecideHost();
+        this.updateHostInfo();
+    }
+
+    tryDecideHost(force) {
+        const el = this.elect;
+        if (!el || el.done || this.role !== 'host') return;
+        if (!el.mine || (!el.theirs && !force)) return;
+        const my = el.mine.score, th = el.theirs ? el.theirs.score : null;
+        const pick = DeviceBench.pickHost(my, th);
+        const oppNick = (el.theirs && el.theirs.nick) || ((this.playersLobbyData.find(p => p.id === el.other) || {}).nickname) || 'Đối thủ';
+        const hostCid = pick === 'guest' ? el.other : this.clientId;
+        const hostNick = pick === 'guest' ? oppNick : this.nick;
+        el.done = true;
+        clearTimeout(el.deadline);
+        el.result = { hostCid, hostNick, hostScore: pick === 'guest' ? th : my, otherScore: pick === 'guest' ? my : th, stronger: th === null || Math.abs(my - th) > 0.05 };
+        this.sendNetworkMessage({
+            type: 'ELECT', hostCid, hostNick, hostScore: el.result.hostScore, otherScore: el.result.otherScore,
+            stronger: el.result.stronger, winScore: gameState.winScore || 3, roomOwnerNick: this.nick
+        });
+        if (pick === 'guest') this.swapRole('guest', el.other, oppNick);
+        this.updateHostInfo();
+        this.updateLobbyDisplay('connected');
+    }
+
+    onElectResult(d) {
+        if (!this.elect) this.elect = { other: d._from, samples: [], mine: null, theirs: null, done: false };
+        const el = this.elect;
+        if (el.timer) clearInterval(el.timer);
+        el.done = true;
+        el.result = { hostCid: d.hostCid, hostNick: d.hostNick, hostScore: d.hostScore, otherScore: d.otherScore, stronger: d.stronger };
+        if (d.winScore) gameState.winScore = d.winScore;
+        if (d.hostCid === this.clientId) this.swapRole('host', d._from, d.roomOwnerNick);
+        this.updateHostInfo();
+        this.updateLobbyDisplay('connected');
+    }
+
+    // Đổi vai host <-> guest trong sảnh (trước khi vào trận). Kênh dữ liệu 2 chiều nên giữ nguyên kết nối.
+    swapRole(newRole, otherCid, otherNick) {
+        if (this.matchActive) return;
+        const other = { id: otherCid, nickname: otherNick || 'Đối thủ' };
+        if (newRole === 'host') {
+            const c = this.hostConn;
+            this.role = 'host';
+            this.hostConn = null;
+            if (c) { this.connections[c.peer] = c; this.peerToClient[c.peer] = otherCid; }
+            this.playersLobbyData = [
+                { id: this.clientId, nickname: this.nick, isHost: true },
+                { id: otherCid, nickname: other.nickname, isHost: false },
+            ];
+        } else {
+            let tid = Object.keys(this.connections).find(k => this.peerToClient[k] === otherCid);
+            if (!tid) tid = Object.keys(this.connections).find(k => this.connections[k] && this.connections[k].open && !(this.qmProbePeers && this.qmProbePeers[k]));
+            this.role = 'guest';
+            this.hostConn = tid ? this.connections[tid] : null;
+            if (tid) delete this.connections[tid];
+            this.isJoinedSuccess = true;
+            this.playersLobbyData = [
+                { id: otherCid, nickname: other.nickname, isHost: true },
+                { id: this.clientId, nickname: this.nick, isHost: false },
+            ];
+        }
+        this.p2InSeq = -1; this.p2InTicks = 0; this.inSeq = 0; this.lastInputSent = '';
+        this.resetNetPrediction();
+        this.updateLobbyDisplay('connected');
+    }
+
+    // Chủ phòng (đang là guest sau khi nhường vai) lấy lại vai host khi máy kia rời sảnh
+    reclaimHost() {
+        if (this.hostConn) { try { this.hostConn.close(); } catch (e) {} }
+        this.hostConn = null;
+        this.role = 'host';
+        this.elect = null;
+        this.playersLobbyData = [{ id: this.myPeerId, nickname: this.nick, isHost: true }];
+        this.resetNetPrediction();
+        this.updateHostInfo();
+        this.updateLobbyDisplay('host_waiting');
+        this.updateAd();
+    }
+
+    updateHostInfo() {
+        const el = document.getElementById('lobbyHostInfo');
+        if (!el) return;
+        const e = this.elect;
+        if (!e) { el.style.display = 'none'; return; }
+        el.style.display = 'block';
+        if (!e.done) {
+            el.className = 'lobby-host-info';
+            el.innerText = e.mine ? `⚙️ Đã đo máy bạn (${e.mine.score} điểm). Đang chờ máy kia...` : '⚙️ Đang đo cấu hình & mạng 2 máy để chọn máy chủ...';
+            return;
+        }
+        const r = e.result || {};
+        const me = r.hostCid === this.clientId;
+        el.className = 'lobby-host-info done';
+        const tag = r.stronger === false ? '(tương đương)' : '(mạnh hơn)';
+        const sc = (typeof r.hostScore === 'number' && typeof r.otherScore === 'number') ? ` · ${r.hostScore} vs ${r.otherScore} điểm` : '';
+        el.innerText = `🖥 Máy chủ: ${r.hostNick || '?'}${me ? ' (bạn)' : ''} ${tag}${sc}`;
+    }
+
 }
 
 const onlineManager = new OnlineMultiplayerManager();
