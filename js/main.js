@@ -14,6 +14,7 @@ function init() {
     onlineManager.initUI();
     botAI.initEvents();
     PVE.initEvents();
+    if (typeof TOURNEY !== 'undefined') TOURNEY.init();
     // The main menu is visible by default in index.html!
 }
 
