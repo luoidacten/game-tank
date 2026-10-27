@@ -20,7 +20,7 @@ const TC_HOLD_TZ = 20, TC_HOLD_END = 18, TC_REV_MAX = 6; // [BUFF] giữ ngắn 
 
 function tcE1(p) { return p.hasUpgrade('evo_clock_1'); }
 function tcE2(p) { return p.hasUpgrade('evo_clock_2'); }
-function tcFull(p) { return tcE1(p) && tcE2(p); }
+function tcFull(p) { return tcE1(p) && tcE2(p) && hasFullEvo(p, 'the_clock'); }
 function tcIs(p) { return !!p && p.weapon === 'the_clock'; }
 function tcEnemy(p) { return p === p1 ? p2 : p1; }
 function tcAlive(t) { return t && t.hp > 0; }

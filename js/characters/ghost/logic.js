@@ -17,7 +17,7 @@ Object.assign(Player.prototype, {
                 this.ghostDuration = 120;
                 this.ghostCooldown = 120; // 2s hồi
             }
-            if (this.hasUpgrade('evo_ghost_1') && this.hasUpgrade('evo_ghost_2')) {
+            if (hasFullEvo(this, 'ghost')) {
                 this.ghostDuration = 120;
                 this.ghostCooldown = 90; // 1.5s hồi
             }

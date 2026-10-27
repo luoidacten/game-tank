@@ -261,7 +261,7 @@ Player.prototype.drawSukuna = function () {
     const t = Date.now() / 1000;
     const charge = (this.sukunaChargeTimer || 0) / 60;
     const evo1 = this.hasUpgrade('evo_sukuna_1'), evo2 = this.hasUpgrade('evo_sukuna_2');
-    const full = evo1 && evo2;
+    const full = evo1 && evo2 && hasFullEvo(this, 'sukuna');
     ctx.save();
     if (charge > 0 && !this.domainActive) {
         // Vòng tiến trình gồng: mốc 1.2s hồi máu, 2s Fuga (Evo1, CE đầy), 5s Lãnh địa (Full Evo)

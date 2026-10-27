@@ -15,7 +15,7 @@ const TAT_RED = '#ff2d55', TAT_GOLD = '#fde047', TAT_VIOLET = '#c084fc', TAT_STE
 
 function tatE1(p) { return p.hasUpgrade('evo_ts_1'); }
 function tatE2(p) { return p.hasUpgrade('evo_ts_2'); }
-function tatFull(p) { return tatE1(p) && tatE2(p); }
+function tatFull(p) { return tatE1(p) && tatE2(p) && hasFullEvo(p, 'tat_sat'); }
 function tatEnemy(p) { return p.id === 1 ? p2 : p1; }
 function tatTeam(id) { return id === 1 ? p1 : p2; }
 function tatDir(p) { return p.id === 1 ? -1 : 1; }

@@ -16,7 +16,7 @@ class CreatorTurret {
         this.h = 20;
         
         let hasEvo1 = owner.hasUpgrade && owner.hasUpgrade('evo_cr_1');
-        let isFullEvo = hasEvo1 && owner.hasUpgrade('evo_cr_2');
+        let isFullEvo = hasEvo1 && owner.hasUpgrade('evo_cr_2') && hasFullEvo(owner, 'creator');
         let ratio = isFullEvo ? 2.0 : (hasEvo1 ? 1.0 : 0.5);
         
         this.hp = Math.max(1, owner.maxHp * ratio) * (1 + 0.5 * bodyShopLvl(owner, 'cr_turret_hp'));
@@ -128,7 +128,7 @@ class CreatorShield {
     constructor(owner) {
         this.owner = owner;
         let hasEvo1 = owner.hasUpgrade && owner.hasUpgrade('evo_cr_1');
-        let isFullEvo = hasEvo1 && owner.hasUpgrade('evo_cr_2');
+        let isFullEvo = hasEvo1 && owner.hasUpgrade('evo_cr_2') && hasFullEvo(owner, 'creator');
         let ratio = isFullEvo ? 4.0 : (hasEvo1 ? 2.0 : 1.0);
         
         this.maxHp = 5 * ratio + 3 * bodyShopLvl(owner, 'cr_shield'); // 5 HP gốc, 10 HP Evo 1, 20 HP Full Evo (+3/cấp Xưởng)
@@ -244,12 +244,12 @@ class CreatorDrone {
     }
 
     getMaxHp() {
-        let isFullEvo = this.owner.hasUpgrade && this.owner.hasUpgrade('evo_cr_1') && this.owner.hasUpgrade('evo_cr_2');
+        let isFullEvo = this.owner.hasUpgrade && hasFullEvo(this.owner, 'creator');
         return Math.max(1, this.owner.maxHp * (isFullEvo ? 2.0 : 1.0)) + bodyShopLvl(this.owner, 'cr_drone');
     }
 
     getDamage() {
-        let isFullEvo = this.owner.hasUpgrade && this.owner.hasUpgrade('evo_cr_1') && this.owner.hasUpgrade('evo_cr_2');
+        let isFullEvo = this.owner.hasUpgrade && hasFullEvo(this.owner, 'creator');
         return this.owner.damage * (isFullEvo ? 2.0 : 1.0) * (1 + 0.25 * bodyShopLvl(this.owner, 'cr_drone'));
     }
 
@@ -408,7 +408,7 @@ class CreatorRobot {
         }
 
         const enemy = (this.owner.id === 1) ? p2 : p1;
-        let isFullEvo = this.owner.hasUpgrade && this.owner.hasUpgrade('evo_cr_1') && this.owner.hasUpgrade('evo_cr_2');
+        let isFullEvo = this.owner.hasUpgrade && hasFullEvo(this.owner, 'creator');
 
         // Hồi năng lượng tự nhiên
         if (this.energy < this.maxEnergy) this.energy = Math.min(this.maxEnergy, this.energy + 0.1);

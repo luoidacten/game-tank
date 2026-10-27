@@ -61,7 +61,7 @@ Object.assign(Player.prototype, {
 
     updateBladeGodPassives() {
         if (gameState.phase !== 'playing' || this.hp <= 0) return;
-        const e1 = this.hasUpgrade('evo_blade_1'), e2 = this.hasUpgrade('evo_blade_2'), full = e1 && e2;
+        const e1 = this.hasUpgrade('evo_blade_1'), e2 = this.hasUpgrade('evo_blade_2'), full = e1 && e2 && hasFullEvo(this, 'blade_god');
         // Evo 1: Quang Kiếm tự rải; Full Evo: thêm Ám Kiếm tự xuất hiện
         if (e1 && --this.bgRandTimer <= 0) {
             this.bgRandTimer = full ? 150 : 200;

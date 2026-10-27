@@ -29,7 +29,7 @@ function spAddSoak(p, v) {
     addFloatingText(v.x + v.w / 2, v.y + (v.id === 1 ? -30 : v.h + 30), 'NGẤM SÂU x' + v.spSoak, '#e879f9', 12);
 }
 
-function spIsFullEvo(p) { return p.hasUpgrade('evo_spray_1') && p.hasUpgrade('evo_spray_2'); }
+function spIsFullEvo(p) { return hasFullEvo(p, 'sprayer'); }
 
 function spNozzle(p) {
     const dirY = p.id === 1 ? -1 : 1;

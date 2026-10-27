@@ -23,7 +23,7 @@ function swCounterPop(p, s, c, sz, dy) { if (!(p.swChipT > 0)) { p.swChipT = 40;
 
 function swE1(p) { return p.hasUpgrade('evo_skin_1'); }
 function swE2(p) { return p.hasUpgrade('evo_skin_2'); }
-function swFull(p) { return swE1(p) && swE2(p); }
+function swFull(p) { return swE1(p) && swE2(p) && hasFullEvo(p, 'skinwalker'); }
 function swIs(p) { return !!p && p.weapon === 'skinwalker'; }
 function swEnemy(p) { return p === p1 ? p2 : p1; }
 function swAlive(t) { return t && t.hp > 0; }

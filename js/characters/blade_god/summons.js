@@ -9,7 +9,7 @@
 // Tất cả nằm trong bodyEffects (đã thêm vào NET_CLASSES), trạng thái chỉ là số/chuỗi.
 // ==========================================
 
-function bgFull(p) { return p.hasUpgrade('evo_blade_1') && p.hasUpgrade('evo_blade_2'); }
+function bgFull(p) { return hasFullEvo(p, 'blade_god'); }
 function bgEnemy(p) { return p === p1 ? p2 : p1; }
 
 // Vẽ 1 thanh kiếm vector, mũi hướng theo góc `ang`, tâm (x,y), dài L, bản rộng W

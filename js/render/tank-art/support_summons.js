@@ -832,7 +832,7 @@
         const smart = !!this.isSmart;
         const cx = this.x + this.w / 2, cy = this.y + this.h / 2, r = this.w / 2;
         const hasEvo2 = o.hasUpgrade('evo_eng_2');
-        const full = o.hasUpgrade('evo_eng_1') && hasEvo2;
+        const full = o.hasUpgrade('evo_eng_1') && hasEvo2 && hasFullEvo(o, 'engineer');
         const t = Date.now() / 1000;
         ctx.save();
         // Vòng mạng LAN (Evo 2) quanh ụ thường

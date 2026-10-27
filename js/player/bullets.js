@@ -389,7 +389,7 @@ Object.assign(Player.prototype, {
 
                 // --- MAGNET BULLET CẮM CỘT TỪ TRƯỜNG ---
                 if (b.isMagnetBullet) {
-                    let maxNodes = (this.hasUpgrade && this.hasUpgrade('evo_mag_net_1') && this.hasUpgrade('evo_mag_net_2')) ? 4 : (this.hasUpgrade && this.hasUpgrade('evo_mag_net_2') ? 3 : 2);
+                    let maxNodes = (this.hasUpgrade && hasFullEvo(this, 'magnet')) ? 4 : (this.hasUpgrade && this.hasUpgrade('evo_mag_net_2') ? 3 : 2);
                     let myNodes = magnetNodes.filter(n => n.owner === this && n.active);
                     if (myNodes.length >= maxNodes) {
                         let oldest = myNodes[0];
@@ -398,7 +398,7 @@ Object.assign(Player.prototype, {
                     }
                     let plantX = Math.max(10, Math.min(canvas.width - 10, b.x));
                     let plantY = Math.max(10, Math.min(canvas.height - 10, b.y));
-                    let isFullEvo = (this.hasUpgrade && this.hasUpgrade('evo_mag_net_1') && this.hasUpgrade('evo_mag_net_2'));
+                    let isFullEvo = (this.hasUpgrade && hasFullEvo(this, 'magnet'));
                     let radius = isFullEvo ? 118 : 78; // bán kính từ trường (đã thu nhỏ)
                     magnetNodes.push({
                         id: Math.random(),
@@ -447,7 +447,7 @@ Object.assign(Player.prototype, {
                     let range = 60;
                     if (this.hasUpgrade('evo_rocket_1')) range = 100;
                     // Full Evo Rocket: Range 140
-                    if (this.hasUpgrade('evo_rocket_1') && this.hasUpgrade('evo_rocket_2')) range = 140;
+                    if (hasFullEvo(this, 'rocket')) range = 140;
 
                     let color = this.hasUpgrade('evo_rocket_1') ? 'rgba(0, 255, 0,' : 'rgba(255, 100, 0,';
                     let dmg = this.hasUpgrade('evo_rocket_2') ? 2 : 1;

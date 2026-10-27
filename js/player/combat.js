@@ -106,7 +106,7 @@ Object.assign(Player.prototype, {
         // Bow (Cung) - Nội tại Nhạy Bén: Tự động né 1 đòn đánh mỗi 8s (5s Full Evo)
         if (canDodge && this.weapon === 'cung' && this.bowDodgeReady && !options.isEnvironmental) {
             this.bowDodgeReady = false;
-            let cd = (this.hasUpgrade('evo_cung_1') && this.hasUpgrade('evo_cung_2')) ? 300 : 480;
+            let cd = (hasFullEvo(this, 'cung')) ? 300 : 480;
             this.bowDodgeCooldown = cd;
             addFloatingText(this.x + this.w / 2, this.y - 10, "NÉ ĐÒN! 💨", "#00ffcc", 14);
             spawnSparkParticles(this.x + this.w / 2, this.y + this.h / 2, "#00ffcc", 10);
@@ -375,7 +375,7 @@ Object.assign(Player.prototype, {
         if (this.weapon === 'big_bullet') size = 20;
         if (this.hasUpgrade('evo_big_1')) size = 32;
         // FULL EVO BIG BULLET: Siêu to
-        let isFullEvoBig = (this.weapon === 'big_bullet' && this.hasUpgrade('evo_big_1') && this.hasUpgrade('evo_big_2'));
+        let isFullEvoBig = (this.weapon === 'big_bullet' && hasFullEvo(this, 'big_bullet'));
         if (isFullEvoBig) size = 44;
         if (this.weapon === 'big_bullet') hSize = size; // quả cầu tròn: hitbox vuông
         if (this.weapon === 'overload') size += (multiplier * 1.5);
@@ -445,7 +445,7 @@ Object.assign(Player.prototype, {
         let isDuongChuBullet = false;
 
         if (this.weapon === 'am_duong_su') {
-            let isFullEvo = this.hasUpgrade('evo_ads_1') && this.hasUpgrade('evo_ads_2');
+            let isFullEvo = hasFullEvo(this, 'am_duong_su');
             if (this.isAmChu) {
                 isAmChuBullet = true;
             } else {
@@ -526,7 +526,7 @@ Object.assign(Player.prototype, {
         if (this.weapon === 'magician' && this.invisTimer > 0) {
             dmg *= 1.35; // +35% Đòn Đột Kích Bất Ngờ khi Tàng Hình
         }
-        if (isGhostBullet && this.hasPhantom && this.isGhostActive && this.hasUpgrade('evo_ghost_1') && this.hasUpgrade('evo_ghost_2')) {
+        if (isGhostBullet && this.hasPhantom && this.isGhostActive && hasFullEvo(this, 'ghost')) {
             const enemy = (this.id === 1) ? p2 : p1;
             let angle = Math.atan2(enemy.y - startY, enemy.x - (this.x + this.w / 2));
             vx = Math.cos(angle) * spd * 0.5;
@@ -559,7 +559,7 @@ Object.assign(Player.prototype, {
 
         if (isSniperBullet) {
             isPiercing = true; // Mặc định xuyên vật thể
-            let isFullEvo = this.hasUpgrade('evo_sniper_1') && this.hasUpgrade('evo_sniper_2');
+            let isFullEvo = hasFullEvo(this, 'sniper');
 
             // Raycast RNG
             let rayChance = isFullEvo ? 0.5 : (this.hasUpgrade('evo_sniper_2') ? 0.25 : 0);

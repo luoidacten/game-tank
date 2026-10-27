@@ -20,7 +20,7 @@ const MT_MILESTONE_REWARDS = [
     { k: 'shield', v: 1, txt: '+1 Khiên đầu hiệp' },
 ];
 
-function mtIsFull(p) { return p.weapon === 'money_tank' && p.hasUpgrade('evo_money_atk') && p.hasUpgrade('evo_money_2'); }
+function mtIsFull(p) { return p.weapon === 'money_tank' && hasFullEvo(p, 'money_tank'); }
 // Hệ số giá trong shop cho Xe Tiền (Evo 2: -25%, Full Evo: -50%)
 function mtPriceMult(p) {
     if (!p || p.weapon !== 'money_tank') return 1;

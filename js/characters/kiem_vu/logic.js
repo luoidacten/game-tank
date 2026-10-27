@@ -22,7 +22,7 @@ const KV_AMMO_SENTINEL = 1000; // maxAmmo ảo: hòm Nạp Đạn đặt ammo = 
 
 function kvEvo1(p) { return p.hasUpgrade('evo_kv_1'); }
 function kvEvo2(p) { return p.hasUpgrade('evo_kv_2'); }
-function kvFull(p) { return kvEvo1(p) && kvEvo2(p); }
+function kvFull(p) { return kvEvo1(p) && kvEvo2(p) && hasFullEvo(p, 'kiem_vu'); }
 function kvEnemy(p) { return p === p1 ? p2 : p1; }
 function kvDirY(p) { return p.id === 1 ? -1 : 1; }
 function kvSwordDmg(p) { return (p.damage + (p.dmgBuff || 0)) * (kvFull(p) ? 1.15 : 1); }

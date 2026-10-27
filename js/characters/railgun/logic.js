@@ -27,7 +27,7 @@ const RG_HOLD_ZONE = 30, RG_HOLD_AIM = 60, RG_RELOAD = 54, RG_ZW = 115, RG_ZD = 
 function rgIs(p) { return !!p && p.weapon === 'railgun'; }
 function rgE1(p) { return p.hasUpgrade('evo_rail_1'); }
 function rgE2(p) { return p.hasUpgrade('evo_rail_2'); }
-function rgFull(p) { return rgE1(p) && rgE2(p); }
+function rgFull(p) { return rgE1(p) && rgE2(p) && hasFullEvo(p, 'railgun'); }
 function rgEnemy(p) { return p.id === 1 ? p2 : p1; }
 function rgDir(p) { return p.id === 1 ? -1 : 1; }
 function rgCx(p) { return p.x + p.w / 2; }

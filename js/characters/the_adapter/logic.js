@@ -20,7 +20,7 @@ const AD_ROLE_FX = {
 
 function adE1(p) { return p.hasUpgrade('evo_adapter_1'); }
 function adE2(p) { return p.hasUpgrade('evo_adapter_2'); }
-function adFull(p) { return adE1(p) && adE2(p); }
+function adFull(p) { return adE1(p) && adE2(p) && hasFullEvo(p, 'the_adapter'); }
 function adIs(p) { return !!p && p.weapon === 'the_adapter'; }
 function adEnemy(p) { return p === p1 ? p2 : p1; }
 function adAlive(t) { return t && t.hp > 0; }

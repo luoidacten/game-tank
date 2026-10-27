@@ -62,7 +62,7 @@ function kkSkillDone(d) {
     return Object.values(d.skill).reduce((a, v) => a + (v > 0 ? 1 : 0), 0);
 }
 
-function kkIsFullEvo(p) { return p.hasUpgrade('evo_kk_1') && p.hasUpgrade('evo_kk_2'); }
+function kkIsFullEvo(p) { return hasFullEvo(p, 'kiem_khach'); }
 
 function kkReqMult(p) {
     if (kkIsFullEvo(p)) return 0.35;

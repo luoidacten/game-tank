@@ -17,7 +17,7 @@ const JL_HOLD = 60;
 
 function jlE1(p) { return p.hasUpgrade('evo_jack_1'); }
 function jlE2(p) { return p.hasUpgrade('evo_jack_2'); }
-function jlFull(p) { return jlE1(p) && jlE2(p); }
+function jlFull(p) { return jlE1(p) && jlE2(p) && hasFullEvo(p, 'jack_6_lo'); }
 function jlIs(p) { return !!p && p.weapon === 'jack_6_lo'; }
 function jlEnemy(p) { return p === p1 ? p2 : p1; }
 function jlDir(p) { return p.id === 1 ? -1 : 1; }

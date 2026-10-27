@@ -10,7 +10,7 @@ const SNIPER_WALL_INVULN = 120;        // Full Evo: bất tử 2s đầu
 class SniperWall {
     constructor(x, y, owner, isMoving = false) {
         // [Full Evo] Tường dài hơn & cứng hơn (chỉ áp dụng tường tự đặt)
-        this.isFullEvo = !isMoving && !!owner && owner.hasUpgrade('evo_sniper_1') && owner.hasUpgrade('evo_sniper_2');
+        this.isFullEvo = !isMoving && !!owner && hasFullEvo(owner, 'sniper');
         this.w = this.isFullEvo ? 92 : 60; this.h = this.isFullEvo ? 22 : 20;
         this.x = x - (this.w - 60) / 2; this.y = y;
         if (this.isFullEvo) this.x = Math.max(0, Math.min(canvas.width - this.w, this.x));

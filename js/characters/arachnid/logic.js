@@ -18,7 +18,7 @@ const AR_HOLD = 30, AR_CD = 540, AR_ZONE_T = 240, AR_ZONE_R = 24, AR_BIG_R = 44;
 
 function arE1(p) { return p.hasUpgrade('evo_spider_1'); }
 function arE2(p) { return p.hasUpgrade('evo_spider_2'); }
-function arFull(p) { return arE1(p) && arE2(p); }
+function arFull(p) { return arE1(p) && arE2(p) && hasFullEvo(p, 'arachnid'); }
 function arIs(p) { return p && p.weapon === 'arachnid'; }
 function arEnemy(p) { return p === p1 ? p2 : p1; }
 function arTeam(id) { return id === 1 ? p1 : p2; }

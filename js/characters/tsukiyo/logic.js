@@ -27,7 +27,7 @@ const TS_BR_DESC = {
 
 function tsE1(p) { return p.hasUpgrade('evo_tsu_1'); }
 function tsE2(p) { return p.hasUpgrade('evo_tsu_2'); }
-function tsFull(p) { return tsE1(p) && tsE2(p); }
+function tsFull(p) { return tsE1(p) && tsE2(p) && hasFullEvo(p, 'tsukiyo'); }
 function tsEnemy(p) { return p === p1 ? p2 : p1; }
 function tsDir(p) { return p.id === 1 ? -1 : 1; }
 function tsAlive(t) { return t && t.hp > 0; }

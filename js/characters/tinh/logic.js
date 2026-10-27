@@ -15,7 +15,7 @@ const TN_HOLD = 24;
 
 function tnE1(p) { return p.hasUpgrade('evo_tinh_1'); }
 function tnE2(p) { return p.hasUpgrade('evo_tinh_2'); }
-function tnFull(p) { return tnE1(p) && tnE2(p); }
+function tnFull(p) { return tnE1(p) && tnE2(p) && hasFullEvo(p, 'tinh'); }
 function tnIs(p) { return !!p && p.weapon === 'tinh'; }
 function tnEnemy(p) { return p === p1 ? p2 : p1; }
 function tnAlive(t) { return t && t.hp > 0; }

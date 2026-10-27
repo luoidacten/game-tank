@@ -57,7 +57,7 @@ Object.assign(Player.prototype, {
                     this.smgSprayCount++;
                     this.smgMagShots = (this.smgMagShots || 0) + 1;
                     // Full Evo: 6 viên đầu mỗi băng xuyên thấu
-                    if (this.smgMagShots <= 6 && this.hasUpgrade('evo_smg_1') && this.hasUpgrade('evo_smg_2')) {
+                    if (this.smgMagShots <= 6 && hasFullEvo(this, 'smg')) {
                         const b = this.bullets[this.bullets.length - 1];
                         if (b) b.isPiercing = true;
                     }

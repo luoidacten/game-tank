@@ -21,7 +21,7 @@ Object.assign(Player.prototype, {
         if (this.weapon === 'mirror') {
             let hasEvo1 = this.hasUpgrade('evo_mirror_1');
             let hasEvo2 = this.hasUpgrade('evo_mirror_2');
-            let isFullEvo = hasEvo1 && hasEvo2;
+            let isFullEvo = hasEvo1 && hasEvo2 && hasFullEvo(this, 'mirror');
 
             if (this.mirrorCD > 0) this.mirrorCD--;
             if (this.mirrorQuickShot > 0) this.mirrorQuickShot--;

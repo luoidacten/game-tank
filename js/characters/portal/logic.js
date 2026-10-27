@@ -7,7 +7,7 @@ Object.assign(Player.prototype, {
         const now = Date.now();
         const hasEvo1 = this.hasUpgrade('evo_portal_1');
         const hasEvo2 = this.hasUpgrade('evo_portal_2');
-        const isFullEvo = hasEvo1 && hasEvo2;
+        const isFullEvo = hasEvo1 && hasEvo2 && hasFullEvo(this, 'portal');
 
         // Evo 1: Đạn nổ (Cũ - giữ nguyên)
         if (hasEvo1) this.nextShotExplosive = true;
@@ -90,7 +90,7 @@ Object.assign(Player.prototype, {
     // [handleShooting] Cổng Không Gian — trả về true nếu cần dừng handleShooting()
     shootPortal(inp, now) {
         if (this.weapon === 'portal') {
-            let isFullEvo = (this.hasUpgrade('evo_portal_1') && this.hasUpgrade('evo_portal_2'));
+            let isFullEvo = (hasFullEvo(this, 'portal'));
 
             if (inp.s) {
                 // Nếu Full Evo -> Chế độ Sấy (Auto fire)
@@ -128,7 +128,7 @@ const PORTAL_GATE_CD = 300;     // 5s
 const PORTAL_GATE_LOCK = 24;    // 0.4s cảnh báo (khoá hướng) trước mỗi phát
 const PORTAL_GATE_GAP = 44;     // nhịp giữa các phát của 1 cổng
 
-function portalGateCap(p) { return (p.hasUpgrade('evo_portal_1') && p.hasUpgrade('evo_portal_2')) ? 3 : 2; }
+function portalGateCap(p) { return (hasFullEvo(p, 'portal')) ? 3 : 2; }
 function portalActiveGates(p) {
     let n = 0;
     for (const g of bodyEffects) if (g instanceof PortalGate && g.active && g.owner === p) n++;

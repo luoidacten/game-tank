@@ -22,7 +22,7 @@ function ksRandomEl(exclude) {
     do { e = KS_ELEMENTS[Math.floor(Math.random() * KS_ELEMENTS.length)]; } while (e === exclude);
     return e;
 }
-function ksFull(p) { return p.hasUpgrade('evo_ks_1') && p.hasUpgrade('evo_ks_2'); }
+function ksFull(p) { return hasFullEvo(p, 'kiem_su'); }
 function ksPow(p) { return ksFull(p) ? 1.6 : (p.hasUpgrade('evo_ks_1') ? 1.3 : 1); }
 
 function ksGiveCoins(p, n) { if (p.id === 1) gameState.p1Coins += n; else gameState.p2Coins += n; }

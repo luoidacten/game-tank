@@ -18,7 +18,7 @@ function ovAuxCount(p) {
     if (!p.hasUpgrade('evo_over_1')) return 0;
     return p.hasUpgrade('evo_over_2') ? 5 : 1;
 }
-function ovIsFull(p) { return p.hasUpgrade('evo_over_1') && p.hasUpgrade('evo_over_2'); }
+function ovIsFull(p) { return hasFullEvo(p, 'overload'); }
 // Số đạn sạc đang trữ (thanh chính đầy + các thanh phụ đầy)
 function ovStored(p) {
     if ((p.ovMain || 0) < 1) return 0;

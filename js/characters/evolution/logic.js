@@ -132,7 +132,7 @@ Object.assign(Player.prototype, {
     setupEvolution() {
         if (this.weapon === 'evolution') {
             this.evolutionPermanentBonus = this.evolutionPermanentBonus || { hp: 0, dmg: 0, ammo: 0, speed: 0, ammoCrates: 0 };
-            if (this.hasUpgrade('evo_evo_1') && this.hasUpgrade('evo_evo_2')) {
+            if (hasFullEvo(this, 'evolution')) {
                 this.evolutionPermanentBonus.hp += 1.5;
                 this.evolutionPermanentBonus.dmg += 0.5;
                 this.evolutionPermanentBonus.ammo += 2;

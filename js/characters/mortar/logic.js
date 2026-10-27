@@ -18,7 +18,7 @@ const MR_RED = '#ff3b3b', MR_ORANGE = '#ff8a1f', MR_GOLD = '#fde047', MR_CYAN = 
 
 function mrE1(p) { return p.hasUpgrade('evo_mortar_1'); }
 function mrE2(p) { return p.hasUpgrade('evo_mortar_2'); }
-function mrFull(p) { return mrE1(p) && mrE2(p); }
+function mrFull(p) { return mrE1(p) && mrE2(p) && hasFullEvo(p, 'mortar'); }
 function mrIs(p) { return p && p.weapon === 'mortar'; }
 function mrEnemy(p) { return p === p1 ? p2 : p1; }
 function mrSfx(n) { if (typeof soundSystem !== 'undefined' && soundSystem && !soundSystem.muted && soundSystem[n]) soundSystem[n](); }

@@ -19,7 +19,7 @@ const LB_COLOR = '#ff2bd6', LB_CORE = '#ffe6fb';
 
 function lbE1(p) { return p.hasUpgrade('evo_beam_1'); }
 function lbE2(p) { return p.hasUpgrade('evo_beam_2'); }
-function lbFull(p) { return lbE1(p) && lbE2(p); }
+function lbFull(p) { return lbE1(p) && lbE2(p) && hasFullEvo(p, 'lazer_beam'); }
 function lbEnemy(p) { return p === p1 ? p2 : p1; }
 function lbNozzle(p) {
     const dirY = p.id === 1 ? -1 : 1;

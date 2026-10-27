@@ -19,7 +19,7 @@ const FS_EMP_PINK = '#ffc4dd', FS_EMP_PINK_LIGHT = '#fff1f7'; // [ĐỔI] cánh 
 
 function fsEvo1(p) { return p.hasUpgrade('evo_flw_1'); }
 function fsEvo2(p) { return p.hasUpgrade('evo_flw_2'); }
-function fsFull(p) { return fsEvo1(p) && fsEvo2(p); }
+function fsFull(p) { return fsEvo1(p) && fsEvo2(p) && hasFullEvo(p, 'flower_shadow'); }
 function fsPow(p) { return fsFull(p) ? 1.25 : 1; }
 const FS_PETAL_NERF = 0.78; // cánh hoa (Khai / hoa tự ngắm) giảm ~22% dame
 const FS_SKILL_NERF = 0.9;  // Phá / Thiên / Ngôi Sao giảm 10% dame

@@ -11,7 +11,7 @@ const ST_TIER = [
     { kind: 'thunder', dur: 240, r: 78, mult: 0.3, pull: 1.0, slow: 0.35, cut: 1.8, name: 'LÔI BÃO ⚡', col: '#a78bfa' },
 ];
 
-function stFull(p) { return p.hasUpgrade('evo_storm_1') && p.hasUpgrade('evo_storm_2'); }
+function stFull(p) { return hasFullEvo(p, 'storm'); }
 function stEnemy(p) { return p.id === 1 ? p2 : p1; }
 function stSfx(n) { if (typeof soundSystem !== 'undefined' && soundSystem && !soundSystem.muted && soundSystem[n]) soundSystem[n](); }
 // Tâm làn địch (tọa độ y)

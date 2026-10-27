@@ -24,7 +24,7 @@ const JP_BOMB_WARN = 60;    // bom oanh tạc: cảnh báo 1s trước khi nổ
 
 function jpE1(p) { return !!(p && p.hasUpgrade && p.hasUpgrade('evo_pilot_1')); }
 function jpE2(p) { return !!(p && p.hasUpgrade && p.hasUpgrade('evo_pilot_2')); }
-function jpFull(p) { return jpE1(p) && jpE2(p); }
+function jpFull(p) { return jpE1(p) && jpE2(p) && hasFullEvo(p, 'jet_pilot'); }
 function jpIs(p) { return p && p.weapon === 'jet_pilot'; }
 function jpEnemy(p) { return p === p1 ? p2 : p1; }
 function jpDir(p) { return p.id === 1 ? -1 : 1; }

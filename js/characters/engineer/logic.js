@@ -20,7 +20,7 @@ Object.assign(Player.prototype, {
         if (this.weapon === 'engineer') {
             let hasEvo1 = this.hasUpgrade('evo_eng_1');
             let hasEvo2 = this.hasUpgrade('evo_eng_2');
-            let isFullEvo = hasEvo1 && hasEvo2;
+            let isFullEvo = hasEvo1 && hasEvo2 && hasFullEvo(this, 'engineer');
 
             // 1. Tự động sinh Ụ súng thường (2s nếu Full Evo, 5s nếu thường)
             let normalInterval = (isFullEvo ? 120 : 300) - (isFullEvo ? 12 : 36) * bodyShopLvl(this, 'eng_build'); // Lắp Ráp Siêu Tốc

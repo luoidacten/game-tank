@@ -22,7 +22,7 @@ const BM_M_STR = 0.75, BM_M_SPIN = 0.18, BM_M_OUT = 0.9, BM_M_RET = 0.6, BM_M_CR
 
 function bmE1(p) { return p.hasUpgrade('evo_boom_1'); }
 function bmE2(p) { return p.hasUpgrade('evo_boom_2'); }
-function bmFull(p) { return bmE1(p) && bmE2(p); }
+function bmFull(p) { return bmE1(p) && bmE2(p) && hasFullEvo(p, 'boomerang'); }
 function bmIs(p) { return !!p && p.weapon === 'boomerang'; }
 function bmTeam(id) { return id === 1 ? p1 : p2; }
 function bmEnemyOf(id) { return id === 1 ? p2 : p1; }

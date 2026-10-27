@@ -21,7 +21,7 @@ const CL_BUL_V = 8.2;
 
 function clE1(p) { return p.hasUpgrade('evo_clone_1'); }
 function clE2(p) { return p.hasUpgrade('evo_clone_2'); }
-function clFull(p) { return clE1(p) && clE2(p); }
+function clFull(p) { return clE1(p) && clE2(p) && hasFullEvo(p, 'clone'); }
 function clIs(p) { return p && p.weapon === 'clone'; }
 function clEnemy(p) { return p === p1 ? p2 : p1; }
 function clDir(p) { return p.id === 1 ? -1 : 1; }

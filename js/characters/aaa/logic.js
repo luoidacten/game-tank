@@ -12,7 +12,7 @@ Object.assign(Player.prototype, {
             this.aaaAutoInterval = 240; // Giảm tần suất mưa đạn pháo
             this.aaaBurstLeft = 0; this.aaaBurstTick = 0;
             if (this.hasUpgrade('evo_aaa_2')) { this.reloadTime = 2500; }
-            if (this.hasUpgrade('evo_aaa_1') && this.hasUpgrade('evo_aaa_2')) {
+            if (hasFullEvo(this, 'aaa')) {
                 this.aaaAutoInterval = 200;
                 this.reloadTime = 1500;
             }
@@ -68,7 +68,7 @@ Object.assign(Player.prototype, {
 
                     mortars.push(new MortarMarker(targetX, targetY, this, false));
                     // Full Evo: không tự đuổi -> thêm 2 quả phụ rơi 2 bên mục tiêu (không nổ bồi, rơi trễ 0.2s)
-                    if (this.hasUpgrade('evo_aaa_1') && this.hasUpgrade('evo_aaa_2')) {
+                    if (hasFullEvo(this, 'aaa')) {
                         [-52, 52].forEach(off => {
                             const m = new MortarMarker(Math.max(14, Math.min(canvas.width - 14, targetX + off)), targetY, this, false);
                             m.echoLeft = 0; m.detonateTime += 200;

@@ -20,7 +20,7 @@ const REV_COPPER = '#ff7a2f';
 
 function revEvo1(p) { return p.hasUpgrade('evo_rev_1'); }
 function revEvo2(p) { return p.hasUpgrade('evo_rev_2'); }
-function revFull(p) { return revEvo1(p) && revEvo2(p); }
+function revFull(p) { return revEvo1(p) && revEvo2(p) && hasFullEvo(p, 'revolver'); }
 function revReloadTicks(p) { return revFull(p) ? 36 : (revEvo2(p) ? 54 : 108); } // 1.8s / 0.9s / 0.6s
 function revEnemy(p) { return p === p1 ? p2 : p1; }
 function revDir(p) { return p.id === 1 ? -1 : 1; }

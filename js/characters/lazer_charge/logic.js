@@ -9,7 +9,7 @@
 // ==========================================
 
 const LC_TOGGLE_TICKS = 24;
-function lcIsFull(p) { return p.hasUpgrade('evo_lazer_c_1') && p.hasUpgrade('evo_lazer_c_2'); }
+function lcIsFull(p) { return hasFullEvo(p, 'lazer_charge'); }
 function lcChargeTicks(p) { return lcIsFull(p) ? 210 : (p.hasUpgrade('evo_lazer_c_2') ? 240 : 300); }
 
 CharHooks.register('lazer_charge', {

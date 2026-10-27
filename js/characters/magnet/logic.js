@@ -5,7 +5,7 @@
 Object.assign(Player.prototype, {
     toggleMagnetPolarity() {
         this.magnetPolarity = (this.magnetPolarity === 1) ? -1 : 1;
-        let isFullEvo = this.hasUpgrade('evo_mag_net_1') && this.hasUpgrade('evo_mag_net_2');
+        let isFullEvo = hasFullEvo(this, 'magnet');
         if (typeof spawnSparkParticles === 'function') {
             spawnSparkParticles(this.x + this.w / 2, this.y + this.h / 2, this.magnetPolarity === 1 ? '#ff3300' : '#00aaff', 16);
         }
@@ -132,7 +132,7 @@ Object.assign(Player.prototype, {
 
     // Va chạm GIỮA SÂN với kẻ địch mang Ấn Từ
     polarClashImpact(enemy) {
-        const full = this.hasUpgrade('evo_mag_net_1') && this.hasUpgrade('evo_mag_net_2');
+        const full = hasFullEvo(this, 'magnet');
         const dmg = this.hasUpgrade('evo_mag_net_1') ? 2.0 : 1.5;
         const x = ((this.x + this.w / 2) + (enemy.x + enemy.w / 2)) / 2, y = ((this.y + this.h / 2) + (enemy.y + enemy.h / 2)) / 2;
         const col = this.magnetPolarity === 1 ? 'rgba(255, 60, 0,' : 'rgba(0, 180, 255,';
@@ -293,7 +293,7 @@ const MAG_FLY_SPEED = 14;    // px/tick khi bay tới điểm va chạm / bay v�
 const MAG_SEAL_TICKS = 360;  // Ấn Từ 6s (Evo 2: 8s)
 
 function magSealAuraR(owner) {
-    return (owner && owner.hasUpgrade && owner.hasUpgrade('evo_mag_net_1') && owner.hasUpgrade('evo_mag_net_2')) ? 44 : 34;
+    return (owner && owner.hasUpgrade && hasFullEvo(owner, 'magnet')) ? 44 : 34;
 }
 
 function magnetClearStatus(p) {

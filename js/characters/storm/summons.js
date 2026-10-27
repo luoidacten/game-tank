@@ -198,7 +198,7 @@ class StormSlash {
 class StFinisher {
     constructor(owner, victim) {
         this.team = owner.id;
-        this.full = !!(owner.hasUpgrade && owner.hasUpgrade('evo_storm_1') && owner.hasUpgrade('evo_storm_2'));
+        this.full = !!(owner.hasUpgrade && hasFullEvo(owner, 'storm'));
         this.x = victim.x + victim.w / 2; this.y = victim.y + victim.h / 2;
         this.t = 0; this.dur = this.full ? 170 : 140; this.active = true;
     }

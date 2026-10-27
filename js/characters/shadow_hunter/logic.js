@@ -9,7 +9,7 @@ Object.assign(Player.prototype, {
         const enemy = (this.id === 1) ? p2 : p1;
         let eh = (enemy && enemy.h) || C.tankH;
         let laneY = (this.id === 1) ? 20 + eh / 2 : canvas.height - 22 - eh / 2;
-        let isFullEvo = this.hasUpgrade('evo_sh_1') && this.hasUpgrade('evo_sh_2');
+        let isFullEvo = hasFullEvo(this, 'shadow_hunter');
         for (let k = 0; k < 2; k++) {
             // Chia đôi sân theo chiều ngang để 2 bẫy không chồng lên nhau
             let half = (canvas.width - 100) / 2;
@@ -103,7 +103,7 @@ Object.assign(Player.prototype, {
         if (this.weapon === 'shadow_hunter') {
             let hasEvo1 = this.hasUpgrade('evo_sh_1');
             let hasEvo2 = this.hasUpgrade('evo_sh_2');
-            let isFullEvo = hasEvo1 && hasEvo2;
+            let isFullEvo = hasEvo1 && hasEvo2 && hasFullEvo(this, 'shadow_hunter');
 
             if (inp.s) {
                 if (!this.stealthActive && this.stealthCooldown <= 0) {

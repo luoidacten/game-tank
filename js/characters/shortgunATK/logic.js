@@ -84,7 +84,7 @@ Object.assign(Player.prototype, {
         if (this.weapon === 'shortgunATK') {
             let hasEvo1 = this.hasUpgrade('evo_sg_1');
             let hasEvo2 = this.hasUpgrade('evo_sg_2');
-            let isFullEvo = hasEvo1 && hasEvo2;
+            let isFullEvo = hasEvo1 && hasEvo2 && hasFullEvo(this, 'shortgunATK');
             let dirY = (this.id === 1) ? -1 : 1;
 
             // 1. Dash lao thẳng lên như tank, dừng lại khi có kẻ địch trong tầm bắn
@@ -139,7 +139,7 @@ Object.assign(Player.prototype, {
         if (this.weapon === 'shortgunATK') {
             let hasEvo1 = this.hasUpgrade('evo_sg_1');
             let hasEvo2 = this.hasUpgrade('evo_sg_2');
-            let isFullEvo = hasEvo1 && hasEvo2;
+            let isFullEvo = hasEvo1 && hasEvo2 && hasFullEvo(this, 'shortgunATK');
 
             if (inp.s) {
                 // Double Tap detection trong lúc lao: cần khoảng đệm >= 200ms để chống double input

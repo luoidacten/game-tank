@@ -29,7 +29,7 @@ Object.assign(Player.prototype, {
         if (this.weapon === 'sukuna') {
             let hasEvo1 = this.hasUpgrade('evo_sukuna_1');
             let hasEvo2 = this.hasUpgrade('evo_sukuna_2');
-            let isFullEvo = hasEvo1 && hasEvo2;
+            let isFullEvo = hasEvo1 && hasEvo2 && hasFullEvo(this, 'sukuna');
 
             // 1. Tự động hồi Chú Lực theo thời gian
             // [NERF]: 10/s -> 8/s (Full Evo & HP < 2: 35/s)
@@ -221,7 +221,7 @@ Object.assign(Player.prototype, {
     // [update] sukuna — trả về currentSpeed mới
     updateSukuna2(currentSpeed) {
         if (this.weapon === 'sukuna') {
-            let isFullEvo = this.hasUpgrade('evo_sukuna_1') && this.hasUpgrade('evo_sukuna_2');
+            let isFullEvo = hasFullEvo(this, 'sukuna');
             // Nếu không có Full Evo và Chú Lực < 15 (không đủ tung Ngự Trảo)
             if (!isFullEvo && this.cursedEnergy < 15) {
                 currentSpeed *= 0.75; // Giảm 25% tốc độ di chuyển
@@ -241,7 +241,7 @@ Object.assign(Player.prototype, {
     // [handleShooting] sukuna — trả về true nếu cần dừng handleShooting()
     shootSukuna(inp, now) {
         if (this.weapon === 'sukuna') {
-            let isFullEvo = this.hasUpgrade('evo_sukuna_1') && this.hasUpgrade('evo_sukuna_2');
+            let isFullEvo = hasFullEvo(this, 'sukuna');
 
             // Chỉ khi có Full Evo mới cho phép xả thêm đạn thường lúc giữ phím
             if (isFullEvo && inp.s) {

@@ -42,7 +42,7 @@ function idolOwn1(p) { return p.hasUpgrade('evo_idol_1'); }
 function idolOwn2(p) { return p.hasUpgrade('evo_idol_2'); }
 function idolE1(p) { return idolOwn1(p) && idolFans(p) >= IDOL_EVO_FANS.evo_idol_1; }
 function idolE2(p) { return idolOwn2(p) && idolFans(p) >= IDOL_EVO_FANS.evo_idol_2; }
-function idolFull(p) { return idolOwn1(p) && idolOwn2(p) && idolFans(p) >= IDOL_EVO_FANS.full; }
+function idolFull(p) { return idolOwn1(p) && idolOwn2(p) && idolFans(p) >= IDOL_EVO_FANS.full && hasFullEvo(p, 'idol'); }
 // Danh sách Evo đã mua nhưng đang tạm khoá (cho HUD)
 function idolEvoLocked(p) {
     const out = [];

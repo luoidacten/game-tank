@@ -91,7 +91,7 @@ class BigBulletBurst extends CrateBurst {
     }
 }
 
-function bigIsFullEvo(p) { return !!p && p.weapon === 'big_bullet' && p.hasUpgrade('evo_big_1') && p.hasUpgrade('evo_big_2'); }
+function bigIsFullEvo(p) { return !!p && p.weapon === 'big_bullet' && hasFullEvo(p, 'big_bullet'); }
 
 // Nổ phân mảnh tại tâm viên đạn
 function bigFragment(owner, x, y, bulletDmg) {

@@ -38,7 +38,7 @@ class Turret {
 
         let hasEvo1 = owner.hasUpgrade('evo_eng_1');
         let hasEvo2 = owner.hasUpgrade('evo_eng_2');
-        let isFullEvo = hasEvo1 && hasEvo2;
+        let isFullEvo = hasEvo1 && hasEvo2 && hasFullEvo(owner, 'engineer');
 
         // Feet calculation
         let feetArmorCount = (owner.upgrades || []).filter(u => u === 'feet_armor').length;
@@ -100,7 +100,7 @@ class Turret {
 
         let hasEvo1 = this.owner.hasUpgrade('evo_eng_1');
         let hasEvo2 = this.owner.hasUpgrade('evo_eng_2');
-        let isFullEvo = hasEvo1 && hasEvo2;
+        let isFullEvo = hasEvo1 && hasEvo2 && hasFullEvo(this.owner, 'engineer');
         const enemy = (this.owner.id === 1) ? p2 : p1;
 
         // Trừ thời gian tồn tại nếu không phải vĩnh viễn
@@ -245,7 +245,7 @@ class Turret {
         this.active = false;
         let hasEvo1 = this.owner.hasUpgrade('evo_eng_1');
         let hasEvo2 = this.owner.hasUpgrade('evo_eng_2');
-        let isFullEvo = hasEvo1 && hasEvo2;
+        let isFullEvo = hasEvo1 && hasEvo2 && hasFullEvo(this.owner, 'engineer');
 
         let expRange = this.isSmart ? 50 : 35;
         if (this.owner.isOverloaded) expRange += 25;
@@ -260,7 +260,7 @@ class Turret {
     draw() {
         if (!this.active) return;
         let hasEvo2 = this.owner.hasUpgrade('evo_eng_2');
-        let isFullEvo = this.owner.hasUpgrade('evo_eng_1') && hasEvo2;
+        let isFullEvo = this.owner.hasUpgrade('evo_eng_1') && hasEvo2 && hasFullEvo(this.owner, 'engineer');
 
         // Vẽ Vòng Mạng LAN (Evo 2) quanh ụ thường
         if (!this.isSmart && (hasEvo2 || isFullEvo)) {

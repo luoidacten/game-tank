@@ -17,7 +17,7 @@ const TG_C1 = '#22d3ee', TG_C2 = '#f472b6', TG_GOLD = '#fde047';
 
 function tgE1(p) { return p.hasUpgrade('evo_twin_1'); }
 function tgE2(p) { return p.hasUpgrade('evo_twin_2'); }
-function tgFull(p) { return tgE1(p) && tgE2(p); }
+function tgFull(p) { return tgE1(p) && tgE2(p) && hasFullEvo(p, 'twin_gun'); }
 function tgIs(p) { return p && p.weapon === 'twin_gun'; }
 function tgEnemy(p) { return p === p1 ? p2 : p1; }
 function tgSfx(n) { if (typeof soundSystem !== 'undefined' && soundSystem && !soundSystem.muted && soundSystem[n]) soundSystem[n](); }

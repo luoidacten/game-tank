@@ -23,7 +23,7 @@ const TZ_AIRSTRIKE_EVERY = 210;    // FULL EVO: chu kỳ tên lửa không kích
 
 function tzEvo1(p) { return p.hasUpgrade('evo_tzero_1'); }
 function tzEvo2(p) { return p.hasUpgrade('evo_tzero_2'); }
-function tzFull(p) { return tzEvo1(p) && tzEvo2(p); }
+function tzFull(p) { return tzEvo1(p) && tzEvo2(p) && hasFullEvo(p, 't_zero'); }
 function tzEnemy(p) { return p === p1 ? p2 : p1; }
 function tzDir(p) { return p.id === 1 ? -1 : 1; }
 function tzBaseDmg(p) { return (p.damage || 1) + (p.dmgBuff || 0); }

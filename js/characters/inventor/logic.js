@@ -74,7 +74,7 @@ Object.assign(Player.prototype, {
             if (this.invUpgrades['inv_tangcuong']) { this.maxAmmo += 2; this.ammo = this.maxAmmo; }
             if (this.invUpgrades['inv_bodam']) { this.speed *= (1 + 0.1 * (this.invUpgrades['inv_bodam'] || 0)); }
 
-            let isFullEvo = this.isFullEvoInventor || (this.hasUpgrade('evo_inv_1') && this.hasUpgrade('evo_inv_2') && this.invUpgrades['inv_full_evo']);
+            let isFullEvo = this.isFullEvoInventor || (hasFullEvo(this, 'inventor') && this.invUpgrades['inv_full_evo']);
 
             this.drones = [];
             if (isFullEvo) {
@@ -186,7 +186,7 @@ Object.assign(Player.prototype, {
             }
 
             // 5. Nhà Phát Minh Tối Hậu (Full Evo: Tích hợp hệ thống vũ khí Drone lên xe chủ)
-            let isFullEvo = this.isFullEvoInventor || (this.hasUpgrade('evo_inv_1') && this.hasUpgrade('evo_inv_2') && upg['inv_full_evo']);
+            let isFullEvo = this.isFullEvoInventor || (hasFullEvo(this, 'inventor') && upg['inv_full_evo']);
             if (isFullEvo) {
                 let cdMod = 0.4;
                 if (this.isOverclocking) cdMod *= 0.5;

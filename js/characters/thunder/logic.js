@@ -190,7 +190,7 @@ Object.assign(Player.prototype, {
         this.thunderSlashIndex++;
         const k = this.thunderSlashIndex;            // số thương đã gom (1..n)
         const e1 = this.hasUpgrade('evo_thun_1'), e2 = this.hasUpgrade('evo_thun_2');
-        const full = e1 && e2;
+        const full = e1 && e2 && hasFullEvo(this, 'thunder');
         const fromX = this.x + this.w / 2, fromY = this.y + this.h / 2;
         this.x = Math.max(0, Math.min(canvas.width - this.w, sp.x - this.w / 2));
         this.y = Math.max(0, Math.min(canvas.height - this.h, sp.y - this.h / 2));
@@ -439,7 +439,7 @@ Object.assign(Player.prototype, {
             }
         });
         // Full Evo: để lại Lôi Vực
-        if (this.hasUpgrade('evo_thun_1') && this.hasUpgrade('evo_thun_2')) {
+        if (hasFullEvo(this, 'thunder')) {
             bodyEffects.push(new ThunderZone(c.x, c.y, 38, this, 240, 0.12));
         }
         // Lộn về làn của mình (tại hoành độ cú giáng)
@@ -559,7 +559,7 @@ Object.assign(Player.prototype, {
             }
 
             // 4. Full Evo: Bão Sấm — sét ngẫu nhiên trên nửa sân đối thủ (báo trước 1s), mỗi 4-6s
-            if (this.hasUpgrade('evo_thun_1') && this.hasUpgrade('evo_thun_2')) {
+            if (hasFullEvo(this, 'thunder')) {
                 this.thunderStormTimer = (this.thunderStormTimer || 0) - 1;
                 if (this.thunderStormTimer <= 0) {
                     this.thunderStormTimer = 330 + Math.floor(Math.random() * 150);

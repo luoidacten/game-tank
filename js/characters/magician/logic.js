@@ -161,7 +161,7 @@ Object.assign(Player.prototype, {
             // Phân Ảnh Khiên (giữ 0.5s): hồi chiêu riêng 10s (tick)
             this.magCloneCd = 0;
             // Thoát Chết: 1 lần/hiệp, Full Evo 2 lần
-            this.magEscapeMax = (this.hasUpgrade('evo_mag_1') && this.hasUpgrade('evo_mag_2')) ? 2 : 1;
+            this.magEscapeMax = (hasFullEvo(this, 'magician')) ? 2 : 1;
             this.magEscapeLeft = this.magEscapeMax;
             // Ảo Ảnh Hoàn Hảo (Evo 2): đếm số đang sống để bắt đầu hồi sinh khi 1 bóng bị phá
             this.magPerfectCd = 0;
@@ -195,7 +195,7 @@ Object.assign(Player.prototype, {
             const enemy = this.id === 1 ? p2 : p1;
             let hasEvo1 = this.hasUpgrade('evo_mag_1');
             let hasEvo2 = this.hasUpgrade('evo_mag_2');
-            let isFullEvo = hasEvo1 && hasEvo2;
+            let isFullEvo = hasEvo1 && hasEvo2 && hasFullEvo(this, 'magician');
 
             // Lớp vẽ phân ảnh (thực thể bodyEffects -> vẫn vẽ khi bản thể tàng hình, đồng bộ online)
             if (typeof MagIllusionLayer !== 'undefined' && (!this.magLayer || !bodyEffects.includes(this.magLayer))) {
@@ -365,7 +365,7 @@ Object.assign(Player.prototype, {
         if (this.weapon === 'magician') {
             let hasEvo1 = this.hasUpgrade('evo_mag_1');
             let hasEvo2 = this.hasUpgrade('evo_mag_2');
-            let isFullEvo = hasEvo1 && hasEvo2;
+            let isFullEvo = hasEvo1 && hasEvo2 && hasFullEvo(this, 'magician');
 
             // ==========================================
             // --- LOGIC MAGICIAN (KỸ NĂNG CHỦ ĐỘNG) ---
@@ -373,7 +373,7 @@ Object.assign(Player.prototype, {
             if (this.weapon === 'magician') {
                 let hasEvo1 = this.hasUpgrade('evo_mag_1');
                 let hasEvo2 = this.hasUpgrade('evo_mag_2');
-                let isFullEvo = hasEvo1 && hasEvo2;
+                let isFullEvo = hasEvo1 && hasEvo2 && hasFullEvo(this, 'magician');
 
                 if (inp.s) {
                     this.magicianCharge++;

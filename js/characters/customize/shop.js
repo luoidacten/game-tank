@@ -64,7 +64,7 @@ function cuRenderPanel(playerId) {
     const p = playerId === 'p1' ? p1 : p2;
     const d = cuNormalize(p);
     cuApplyVip(p);
-    const fullEvo = p.hasUpgrade('evo_cu_1') && p.hasUpgrade('evo_cu_2');
+    const fullEvo = hasFullEvo(p, 'customize');
     const keepScroll = container.scrollLeft;
     const secScroll = [...container.querySelectorAll('.cu-sec')].map(s => s.scrollTop);
     container.innerHTML = '';

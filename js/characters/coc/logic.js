@@ -31,7 +31,7 @@ const COC_SHADE_MULT = 0.6; // Phân Ảnh gây 60% st
 
 function cocE1(p) { return p.hasUpgrade('evo_coc_1'); }
 function cocE2(p) { return p.hasUpgrade('evo_coc_2'); }
-function cocFull(p) { return cocE1(p) && cocE2(p); }
+function cocFull(p) { return cocE1(p) && cocE2(p) && hasFullEvo(p, 'coc'); }
 function cocIs(p) { return !!p && p.weapon === 'coc'; }
 function cocEnemy(p) { return p === p1 ? p2 : p1; }
 function cocDir(p) { return p.id === 1 ? -1 : 1; }

@@ -120,7 +120,7 @@ class Talisman {
 
         let hasEvo1 = this.owner.hasUpgrade('evo_ads_1');
         let hasEvo2 = this.owner.hasUpgrade('evo_ads_2');
-        let isFullEvo = hasEvo1 && hasEvo2;
+        let isFullEvo = hasEvo1 && hasEvo2 && hasFullEvo(this.owner, 'am_duong_su');
 
         let radius = hasEvo1 ? 75 : 50; // Giảm nhẹ bán kính
         let stunFrames = hasEvo1 ? 45 : 30; // 0.75s hoặc 0.5s choáng

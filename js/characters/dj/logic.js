@@ -22,7 +22,7 @@ const DJ_EARLY_BONUS = 2;    // dung sai trễ cảm ứng: sớm tối đa 2 ti
 const DJ_LATE_KEEP = 14;     // nốt đã qua tâm còn hiển thị thêm bao lâu
 const DJ_COLORS = { red: '#ff1744', yellow: '#ffd60a', blue: '#2f6bff', lock: '#64748b' };
 
-function djFull(p) { return p.hasUpgrade('evo_dj_1') && p.hasUpgrade('evo_dj_2'); }
+function djFull(p) { return hasFullEvo(p, 'dj'); }
 function djMaxDiff(p) { return djFull(p) ? 3 : 2; }
 function djDiffOf(p) { return DJ_DIFFS[Math.max(0, Math.min(djMaxDiff(p), p.djDiff | 0))]; }
 function djMaxGuards(p) { return djFull(p) ? 6 : (p.hasUpgrade('evo_dj_1') ? 3 : 0); }

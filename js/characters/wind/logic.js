@@ -19,7 +19,7 @@ const WD_TRAIL_GAP = 26, WD_TRAIL_LIFE = 90, WD_TRAIL_MAX = 10;
 
 function wdE1(p) { return p.hasUpgrade('evo_wind_breeze_1'); }
 function wdE2(p) { return p.hasUpgrade('evo_wind_breeze_2'); }
-function wdFull(p) { return wdE1(p) && wdE2(p); }
+function wdFull(p) { return wdE1(p) && wdE2(p) && hasFullEvo(p, 'wind'); }
 function wdIs(p) { return !!p && p.weapon === 'wind'; }
 function wdEnemy(p) { return p === p1 ? p2 : p1; }
 function wdDir(p) { return p.id === 1 ? -1 : 1; }

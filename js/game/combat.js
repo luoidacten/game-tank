@@ -14,7 +14,7 @@ function checkHits(attacker, victim) {
         // =======================================================
         // [SNIPER LOGIC] - TÍNH TOÁN SÁT THƯƠNG ĐÃ GIẢM KHI XUYÊN
         // =======================================================
-        let isFullEvoSniper = (b.owner && b.owner.weapon === 'sniper' && b.owner.hasUpgrade('evo_sniper_1') && b.owner.hasUpgrade('evo_sniper_2'));
+        let isFullEvoSniper = (b.owner && b.owner.weapon === 'sniper' && hasFullEvo(b.owner, 'sniper'));
         let dmgReduc = 1;
         if (b.isSniperBullet && b.hitIds && b.hitIds.length > 0 && !isFullEvoSniper) dmgReduc = 0.5;
         let currentFinalDmg = b.dmg * dmgReduc;
@@ -136,7 +136,7 @@ function checkHits(attacker, victim) {
                 }
 
                 // Full Evo: Kill All -> Tăng vĩnh viễn +0.25 Max HP và +0.125 Dmg
-                if (attacker.hasUpgrade('evo_sg_1') && attacker.hasUpgrade('evo_sg_2')) {
+                if (hasFullEvo(attacker, 'shortgunATK')) {
                     attacker.shortgunBonusMaxHp = (attacker.shortgunBonusMaxHp || 0) + 0.25;
                     attacker.shortgunBonusDmg = (attacker.shortgunBonusDmg || 0) + 0.125;
                     attacker.maxHp += 0.25;
@@ -502,7 +502,7 @@ function checkHits(attacker, victim) {
         }
 
         if (hitProjection) {
-            let isFullEvo = attacker.hasUpgrade('evo_mirror_1') && attacker.hasUpgrade('evo_mirror_2');
+            let isFullEvo = hasFullEvo(attacker, 'mirror');
             let canDamage = true;
             if (isFullEvo && (!attacker.shatteredClone || !attacker.shatteredClone.active)) {
                 canDamage = false;
@@ -531,7 +531,7 @@ function checkHits(attacker, victim) {
             // Am Duong Su effects
             if (b.isAmChu) {
                 let r = attacker.hasUpgrade('evo_ads_1') ? 55 : 40;
-                let isFullEvo = attacker.hasUpgrade('evo_ads_1') && attacker.hasUpgrade('evo_ads_2');
+                let isFullEvo = hasFullEvo(attacker, 'am_duong_su');
                 victim.slowTimer = isFullEvo ? 60 : 35; // Giảm mạnh từ 240/120 xuống 60/35 frames (1s / 0.6s)
                 iceZones.push(new IceZone(b.x, b.y, r, 90, attacker));
                 talismans.push(new Talisman(victim.x, victim.y, 'am', attacker, victim));
@@ -620,7 +620,7 @@ function checkHits(attacker, victim) {
             if (b.isDeathLockBullet || attacker.weapon === 'death_lock') {
                 let hasEvo1 = attacker.hasUpgrade && attacker.hasUpgrade('evo_dl_1');
                 let hasEvo2 = attacker.hasUpgrade && attacker.hasUpgrade('evo_dl_2');
-                let isFullEvo = hasEvo1 && hasEvo2;
+                let isFullEvo = hasEvo1 && hasEvo2 && hasFullEvo(attacker, 'death_lock');
 
                 let maxDuration = isFullEvo ? 720 : (hasEvo1 ? 480 : 300); // 12s, 8s, 5s (ticks)
                 victim.bindingCurseTimer = maxDuration;
@@ -678,7 +678,7 @@ function checkHits(attacker, victim) {
                 if (attacker.hasUpgrade('evo_ice_2')) finalDmg *= 1.5;
                 if (attacker.hasUpgrade('evo_ice_1')) {
                     victim.coldStack += 25;
-                    let isFullEvo = attacker.hasUpgrade('evo_ice_1') && attacker.hasUpgrade('evo_ice_2');
+                    let isFullEvo = hasFullEvo(attacker, 'ice');
                     if (isFullEvo && victim.speed > 1.75) {
                         victim.speed = Math.max(1.75, victim.speed - 0.05);
                     }
@@ -806,7 +806,7 @@ function checkHits(attacker, victim) {
 
         if (victim.hp <= 0) {
             triggerFatalCinematic(attacker.id, victim);
-            if (attacker.weapon === 'storm' && attacker.hasUpgrade('evo_storm_1') && attacker.hasUpgrade('evo_storm_2')) {
+            if (attacker.weapon === 'storm' && hasFullEvo(attacker, 'storm')) {
                 explosions.push(new Explosion(canvas.width / 2, canvas.height / 2, 300, 'white', 0, attacker));
             }
         }

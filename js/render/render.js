@@ -104,15 +104,15 @@ function renderFrame() {
     if (typeof idolFxUnder === 'function') idolFxUnder();
 
     // VẼ SÀN TỐI & ĐÈN PHA NEON NẾU CÓ SHADOW HUNTER FULL EVO
-    let hasFullEvoShadow = (p1 && p1.weapon === 'shadow_hunter' && p1.hasUpgrade('evo_sh_1') && p1.hasUpgrade('evo_sh_2')) ||
-                           (p2 && p2.weapon === 'shadow_hunter' && p2.hasUpgrade('evo_sh_1') && p2.hasUpgrade('evo_sh_2'));
+    let hasFullEvoShadow = (p1 && p1.weapon === 'shadow_hunter' && hasFullEvo(p1, 'shadow_hunter')) ||
+                           (p2 && p2.weapon === 'shadow_hunter' && hasFullEvo(p2, 'shadow_hunter'));
     if (hasFullEvoShadow) {
         drawShadowHunterAmbiance();
     }
 
     // VẼ BÃO SẤM U ÁM NẾU CÓ THUNDER FULL EVO
-    let hasFullEvoThunder = (p1 && p1.weapon === 'thunder' && p1.hasUpgrade('evo_thun_1') && p1.hasUpgrade('evo_thun_2')) ||
-                            (p2 && p2.weapon === 'thunder' && p2.hasUpgrade('evo_thun_1') && p2.hasUpgrade('evo_thun_2'));
+    let hasFullEvoThunder = (p1 && p1.weapon === 'thunder' && hasFullEvo(p1, 'thunder')) ||
+                            (p2 && p2.weapon === 'thunder' && hasFullEvo(p2, 'thunder'));
     if (hasFullEvoThunder) {
         ctx.fillStyle = "rgba(10, 20, 45, 0.25)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);

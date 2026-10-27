@@ -42,7 +42,7 @@ Object.assign(Player.prototype, {
 
     // [update] Phong Trảm
     updateWindSlash() {
-        if (this.weapon === 'wind_slash' && this.hasUpgrade('evo_wind_1') && this.hasUpgrade('evo_wind_2')) {
+        if (this.weapon === 'wind_slash' && hasFullEvo(this, 'wind_slash')) {
             this.windWallTimer++;
             // 8 giây = 480 frames
             if (this.windWallTimer >= 480) {

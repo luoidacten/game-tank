@@ -18,7 +18,7 @@ const CG_SHELL_V = 6.2, CG_FRAG_V = 6.5;
 
 function cgE1(p) { return p.hasUpgrade('evo_frag_1'); }
 function cgE2(p) { return p.hasUpgrade('evo_frag_2'); }
-function cgFull(p) { return cgE1(p) && cgE2(p); }
+function cgFull(p) { return cgE1(p) && cgE2(p) && hasFullEvo(p, 'cluster_gun'); }
 function cgEnemy(p) { return p === p1 ? p2 : p1; }
 function cgDir(p) { return p.id === 1 ? -1 : 1; }
 function cgIs(p) { return p && p.weapon === 'cluster_gun'; }

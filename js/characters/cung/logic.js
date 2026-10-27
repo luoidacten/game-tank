@@ -28,7 +28,7 @@ const BOW_AIM_R0 = 100, BOW_AIM_R1 = 24;
 
 function bowEvo1(p) { return p.hasUpgrade('evo_cung_1'); }
 function bowEvo2(p) { return p.hasUpgrade('evo_cung_2'); }
-function bowFull(p) { return bowEvo1(p) && bowEvo2(p); }
+function bowFull(p) { return bowEvo1(p) && bowEvo2(p) && hasFullEvo(p, 'cung'); }
 function bowAimCDMax(p) { return bowFull(p) ? 300 : (bowEvo2(p) ? 420 : 480); }
 function bowEnemy(p) { return p === p1 ? p2 : p1; }
 

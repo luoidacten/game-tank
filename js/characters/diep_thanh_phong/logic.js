@@ -22,7 +22,7 @@ const DTP_IMMUNE_MODES = ['sky', 'skylock', 'cyc_go', 'cyc_dance', 'cyc_back'];
 
 function dtpE1(p) { return !!p && p.hasUpgrade('evo_dtp_1'); }
 function dtpE2(p) { return !!p && p.hasUpgrade('evo_dtp_2'); }
-function dtpFull(p) { return dtpE1(p) && dtpE2(p); }
+function dtpFull(p) { return dtpE1(p) && dtpE2(p) && hasFullEvo(p, 'diep_thanh_phong'); }
 function dtpIs(p) { return !!p && p.weapon === 'diep_thanh_phong'; }
 function dtpTeam(id) { return id === 1 ? p1 : p2; }
 function dtpEnemy(p) { return p === p1 ? p2 : p1; }

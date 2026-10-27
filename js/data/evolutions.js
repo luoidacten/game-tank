@@ -362,6 +362,7 @@ const EVOLUTIONS = {
 // (chỉ xuất hiện trong Shop khi đã có đủ Evo 1 + Evo 2). Body không có trong bảng:
 // Full Evo vẫn tự kích hoạt khi có đủ 2 Evo như cũ.
 // ==========================================
+// GIÁ GỐC của 8 body đầu tiên được giữ nguyên; các body còn lại: round(evo2 x 0.6 / 10) x 10, kẹp $150-260.
 const FULL_EVO_GATE = {
     steel_hook: 220,   // Móc Thép
     tank: 250,         // Full Evo ~99% thắng trong mô phỏng
@@ -372,6 +373,12 @@ const FULL_EVO_GATE = {
     genius: 200,
     psychokinesis: 180,
 };
+// MỌI body (trừ basic: dạng MAIN tự có Full Evo) đều phải mua thẻ FULL EVO
+for (const body in EVOLUTIONS) {
+    if (body === 'basic' || FULL_EVO_GATE[body] || EVOLUTIONS[body].length < 2) continue;
+    const evo2 = EVOLUTIONS[body][1].cost || 260;
+    FULL_EVO_GATE[body] = Math.max(150, Math.min(260, Math.round(evo2 * 0.6 / 10) * 10));
+}
 for (const body in FULL_EVO_GATE) {
     if (!EVOLUTIONS[body]) continue;
     // Mô tả Evo có nhắc Full Evo -> ghi chú cần thẻ FULL EVO

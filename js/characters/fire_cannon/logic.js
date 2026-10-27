@@ -16,7 +16,7 @@ const FC_ZONE_DMG = 0.1;          // dame mỗi nhịp vùng lửa thường (Ev
 const FC_MERGE_GAP = 70;          // Full Evo: 2 vùng cách nhau <= 70px (mép) thì hợp nhất
 
 function fcEnemyOf(p) { return p === p1 ? p2 : p1; }
-function fcIsFull(p) { return p.hasUpgrade('evo_fc_1') && p.hasUpgrade('evo_fc_2'); }
+function fcIsFull(p) { return hasFullEvo(p, 'fire_cannon'); }
 function fcMaxStacks(p) { return p.hasUpgrade('evo_fc_2') ? 3 : 1; }
 
 // Châm lửa nạn nhân: dùng chung burnTimer của game làm "cổng" -> mọi hiệu ứng giải trạng thái (xóa burnTimer) cũng dập lửa

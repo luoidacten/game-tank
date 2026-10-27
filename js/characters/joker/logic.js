@@ -25,7 +25,7 @@ const JK_ODDS = [['J', 0.05], ['H', 0.10], ['D', 0.25], ['C', 0.20], ['S', 0.25]
 
 function jkE1(p) { return p.hasUpgrade('evo_joker_1'); }
 function jkE2(p) { return p.hasUpgrade('evo_joker_2'); }
-function jkFull(p) { return jkE1(p) && jkE2(p); }
+function jkFull(p) { return jkE1(p) && jkE2(p) && hasFullEvo(p, 'joker'); }
 function jkEnemy(p) { return p === p1 ? p2 : p1; }
 function jkDir(p) { return p.id === 1 ? -1 : 1; }
 function jkAlive(t) { return t && t.hp > 0; }

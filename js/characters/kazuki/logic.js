@@ -13,7 +13,7 @@ const KZ_NAMES = { AA: 'TOÀN PHONG TRẢM', AB: 'ĐỘT KÍCH ĐIỂM HUYỆT',
 
 function kzE1(p) { return p.hasUpgrade('evo_kaz_1'); }
 function kzE2(p) { return p.hasUpgrade('evo_kaz_2'); }
-function kzFull(p) { return kzE1(p) && kzE2(p); }
+function kzFull(p) { return kzE1(p) && kzE2(p) && hasFullEvo(p, 'kazuki'); }
 function kzEnemy(p) { return p === p1 ? p2 : p1; }
 function kzDir(p) { return p.id === 1 ? -1 : 1; }
 function kzCost(p, base) { return base * (kzE1(p) ? 0.75 : 1); }

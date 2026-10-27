@@ -27,7 +27,7 @@ const RV_CYAN = '#22d3ee', RV_PINK = '#f472b6', RV_VIOLET = '#a78bfa';
 
 function rvE1(p) { return p.hasUpgrade('evo_raven_1'); }
 function rvE2(p) { return p.hasUpgrade('evo_raven_2'); }
-function rvFull(p) { return rvE1(p) && rvE2(p); }
+function rvFull(p) { return rvE1(p) && rvE2(p) && hasFullEvo(p, 'raven_oca'); }
 function rvEnemy(p) { return p === p1 ? p2 : p1; }
 function rvDir(p) { return p.id === 1 ? -1 : 1; }
 function rvSwitchMax(p) { return rvFull(p) ? 120 : 240; }

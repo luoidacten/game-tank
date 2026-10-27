@@ -25,7 +25,7 @@ Object.assign(Player.prototype, {
 
             // Tụ lực dựng tường: vòng cạnh xe (js/render/empower-providers.js)
             if (this.sniperReloading) {
-                const mx = this.sniperReloadMax || ((this.hasUpgrade('evo_sniper_1') && this.hasUpgrade('evo_sniper_2')) ? 150 : 180);
+                const mx = this.sniperReloadMax || ((hasFullEvo(this, 'sniper')) ? 150 : 180);
                 drawReloadRing(this, 1 - this.sniperReloadTimer / mx, '#ffb020');
             }
 

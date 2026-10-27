@@ -20,7 +20,7 @@ const HL_MARK = 300;            // 5s ấn Kháng Hồi Phục
 
 function hlE1(p) { return p.hasUpgrade('evo_heal_1'); }
 function hlE2(p) { return p.hasUpgrade('evo_heal_2'); }
-function hlFull(p) { return hlE1(p) && hlE2(p); }
+function hlFull(p) { return hlE1(p) && hlE2(p) && hasFullEvo(p, 'healer'); }
 function hlEnemy(p) { return p === p1 ? p2 : p1; }
 function hlLifeReq(p) { return hlFull(p) ? 1.5 : (hlE2(p) ? 1.25 : 2); }
 function hlOverMax(p) { return 4 + 0.5 * p.maxHp; }

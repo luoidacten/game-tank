@@ -15,7 +15,7 @@ class MortarMarker {
 
         let hasEvo1 = this.owner.hasUpgrade('evo_aaa_1');
         let hasEvo2 = this.owner.hasUpgrade('evo_aaa_2');
-        let isFullEvo = hasEvo1 && hasEvo2;
+        let isFullEvo = hasEvo1 && hasEvo2 && hasFullEvo(this.owner, 'aaa');
         // [FIX] Đếm theo tick (trước dùng Date.now + setTimeout: nổ bồi không cảnh báo, lặp cả khi
         // hết round / sang round mới, mỗi quả bom tự bắn cũng nổ bồi -> "nổ lặp lại" ngoài ý muốn)
         this.age = 0;

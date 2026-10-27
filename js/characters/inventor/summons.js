@@ -42,7 +42,7 @@ class InventorDrone {
     }
 
     getMaxHp() {
-        let isFullEvo = this.owner.isFullEvoInventor || (this.owner.hasUpgrade('evo_inv_1') && this.owner.hasUpgrade('evo_inv_2') && this.owner.invUpgrades && this.owner.invUpgrades['inv_full_evo']);
+        let isFullEvo = this.owner.isFullEvoInventor || (hasFullEvo(this.owner, 'inventor') && this.owner.invUpgrades && this.owner.invUpgrades['inv_full_evo']);
         let ratio = 0.5;
         if (isFullEvo) ratio = 2.0; // 200% chỉ số từ chủ thể
         else if (this.owner.hasUpgrade('evo_inv_1')) ratio = 0.75; // 75% chỉ số
@@ -69,7 +69,7 @@ class InventorDrone {
     update() {
         let upg = this.owner.invUpgrades || {};
         let hasEvo2 = this.owner.hasUpgrade('evo_inv_2');
-        let isFullEvo = this.owner.isFullEvoInventor || (this.owner.hasUpgrade('evo_inv_1') && this.owner.hasUpgrade('evo_inv_2') && upg['inv_full_evo']);
+        let isFullEvo = this.owner.isFullEvoInventor || (hasFullEvo(this.owner, 'inventor') && upg['inv_full_evo']);
 
         // Respawn logic (Bộ Đàm: giảm 0.5s hồi sinh mỗi cấp)
         let respawnTime = this.getRespawnTime();
@@ -126,7 +126,7 @@ class InventorDrone {
 
         let isPiercing = !!upg['inv_lazer'];
         let numBullets = 1 + (upg['inv_dan'] || 0);
-        let isFullEvo = this.owner.isFullEvoInventor || (this.owner.hasUpgrade('evo_inv_1') && this.owner.hasUpgrade('evo_inv_2') && upg['inv_full_evo']);
+        let isFullEvo = this.owner.isFullEvoInventor || (hasFullEvo(this.owner, 'inventor') && upg['inv_full_evo']);
         let dmgMultiplier = 1.0; // [CÂN BẰNG] 0.5 -> 1.0
         if (isFullEvo) dmgMultiplier = 2.0; // 200% chỉ số từ chủ thể
         else if (this.owner.hasUpgrade('evo_inv_1')) dmgMultiplier = 0.75;
@@ -158,7 +158,7 @@ class InventorDrone {
 
     updateSubWeapons(upg) {
         let now = Date.now();
-        let isFullEvo = this.owner.isFullEvoInventor || (this.owner.hasUpgrade('evo_inv_1') && this.owner.hasUpgrade('evo_inv_2') && upg['inv_full_evo']);
+        let isFullEvo = this.owner.isFullEvoInventor || (hasFullEvo(this.owner, 'inventor') && upg['inv_full_evo']);
         let cdMod = isFullEvo ? 0.4 : 1.0;
         if (this.owner.isOverclocking) cdMod *= 0.5;
 

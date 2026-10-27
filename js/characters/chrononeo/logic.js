@@ -27,7 +27,7 @@ const CN_ERA_MAX = 20;
 
 function cnE1(p) { return p.hasUpgrade('evo_cn_1'); }
 function cnE2(p) { return p.hasUpgrade('evo_cn_2'); }
-function cnFull(p) { return cnE1(p) && cnE2(p); }
+function cnFull(p) { return cnE1(p) && cnE2(p) && hasFullEvo(p, 'chrononeo'); }
 function cnEnemy(p) { return p === p1 ? p2 : p1; }
 function cnDir(p) { return p.id === 1 ? -1 : 1; }
 function cnSwitchMax(p) { return cnFull(p) ? 240 : 360; } // CD đổi thế 6s (Full Evo 4s)

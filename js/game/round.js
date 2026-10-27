@@ -182,7 +182,7 @@ function endRound(winnerId) {
     }
 
     // Thưởng vĩnh viễn cho Shortgun Full Evo khi thắng hiệp (+2 Max HP, +1 DMG)
-    if (winnerPlayer && winnerPlayer.weapon === 'shortgunATK' && winnerPlayer.hasUpgrade('evo_sg_1') && winnerPlayer.hasUpgrade('evo_sg_2')) {
+    if (winnerPlayer && winnerPlayer.weapon === 'shortgunATK' && hasFullEvo(winnerPlayer, 'shortgunATK')) {
         winnerPlayer.shortgunBonusMaxHp = (winnerPlayer.shortgunBonusMaxHp || 0) + 2;
         winnerPlayer.shortgunBonusDmg = (winnerPlayer.shortgunBonusDmg || 0) + 1;
         winnerPlayer.maxHp += 2;

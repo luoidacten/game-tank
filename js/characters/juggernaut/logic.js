@@ -42,7 +42,7 @@ const JG_KIND = {
 
 function jgE1(p) { return p.hasUpgrade('evo_jug_1'); }
 function jgE2(p) { return p.hasUpgrade('evo_jug_2'); }
-function jgFull(p) { return jgE1(p) && jgE2(p); }
+function jgFull(p) { return jgE1(p) && jgE2(p) && hasFullEvo(p, 'juggernaut'); }
 function jgEnemy(p) { return p === p1 ? p2 : p1; }
 function jgDir(p) { return p.id === 1 ? -1 : 1; }
 function jgAlive(t) { return t && t.hp > 0; }

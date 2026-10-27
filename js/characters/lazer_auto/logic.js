@@ -6,7 +6,7 @@
 // Nhiệt đầy 100% -> QUÁ NHIỆT: khóa bắn 1.5s (Full Evo 0.8s). Nhả nút: nhiệt tự giảm ~36%/s.
 // Hòm đạn: xả sạch nhiệt. Mọi trạng thái là trường thuần trên player, đếm theo tick.
 // ==========================================
-function laFull(p) { return p.hasUpgrade('evo_lazer_a_1') && p.hasUpgrade('evo_lazer_a_2'); }
+function laFull(p) { return hasFullEvo(p, 'lazer_auto'); }
 function laHotAt(p) { return p.hasUpgrade('evo_lazer_a_2') ? 50 : 60; }
 function laOverTicks(p) { return laFull(p) ? 48 : 90; }
 

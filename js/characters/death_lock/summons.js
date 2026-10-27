@@ -14,7 +14,7 @@ class ConfinementCage {
         this.y = Math.max(15, Math.min(canvas.height - 15, y));
         
         let hasEvo2 = owner.hasUpgrade && owner.hasUpgrade('evo_dl_2');
-        let isFullEvo = owner.hasUpgrade && owner.hasUpgrade('evo_dl_1') && owner.hasUpgrade('evo_dl_2');
+        let isFullEvo = owner.hasUpgrade && hasFullEvo(owner, 'death_lock');
         
         this.w = isFullEvo ? 100 : (hasEvo2 ? 140 : 200);
         this.h = 50;

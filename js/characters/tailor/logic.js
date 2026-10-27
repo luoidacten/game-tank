@@ -26,7 +26,7 @@ const TL_HOLD = 36, TL_LEASH = 180;
 
 function tlE1(p) { return p.hasUpgrade('evo_tailor_1'); }
 function tlE2(p) { return p.hasUpgrade('evo_tailor_2'); }
-function tlFull(p) { return tlE1(p) && tlE2(p); }
+function tlFull(p) { return tlE1(p) && tlE2(p) && hasFullEvo(p, 'tailor'); }
 function tlIs(p) { return !!p && p.weapon === 'tailor'; }
 function tlEnemy(p) { return p === p1 ? p2 : p1; }
 function tlTeam(id) { return id === 1 ? p1 : p2; }

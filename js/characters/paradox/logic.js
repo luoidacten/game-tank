@@ -13,7 +13,7 @@ const PDX_FIRE_MS = 400;        // nhịp bắn thường (cũ 500ms)
 const PDX_ECHO_DELAY = 20;      // DƯ ÂM: phát bắn lặp lại sau 0.33s từ đúng chỗ đã bắn
 function pdxEchoMult(p) {
     const e1 = p.hasUpgrade('evo_paradox_1'), e2 = p.hasUpgrade('evo_paradox_2');
-    return (e1 && e2) ? 0.6 : (e2 ? 0.5 : 0.4);
+    return (e1 && e2 && hasFullEvo(p, 'paradox')) ? 0.6 : (e2 ? 0.5 : 0.4);
 }
 
 Object.assign(Player.prototype, {
@@ -65,7 +65,7 @@ Object.assign(Player.prototype, {
     updateParadox() {
         if (this.weapon === 'paradox') {
             let hasEvo2 = this.hasUpgrade('evo_paradox_2');
-            let isFullEvo = this.hasUpgrade('evo_paradox_1') && hasEvo2;
+            let isFullEvo = this.hasUpgrade('evo_paradox_1') && hasEvo2 && hasFullEvo(this, 'paradox');
 
             // Tạm thời khởi tạo shot: false, sẽ được kiểm tra lại ĐÚNG THỜI ĐIỂM BẮN ở bên dưới
             this.paradoxHistory.push({ x: this.x, y: this.y, hp: this.hp, shot: false });
@@ -137,7 +137,7 @@ Object.assign(Player.prototype, {
     // Các mốc tụ lực (frame). 0 = mốc không dùng được lúc này.
     //   rewind: tua ngược (giảm từ 20 -> 12 frame) | pull: kéo địch (Full Evo) | anchor: mốc trống cuối -> đặt neo
     paradoxMilestones() {
-        const isFullEvo = this.hasUpgrade('evo_paradox_1') && this.hasUpgrade('evo_paradox_2');
+        const isFullEvo = hasFullEvo(this, 'paradox');
         const pull = (isFullEvo && this.paradoxCooldown <= 0) ? 40 : 0;
         const anchor = (this.paradoxAnchorCD <= 0 && !this.paradoxAnchor) ? (isFullEvo ? 75 : 45) : 0;
         return { rewind: 12, pull, anchor };
@@ -146,7 +146,7 @@ Object.assign(Player.prototype, {
     paradoxRewind(pullOnly) {
         const hasEvo1 = this.hasUpgrade('evo_paradox_1');
         const hasEvo2 = this.hasUpgrade('evo_paradox_2');
-        const isFullEvo = hasEvo1 && hasEvo2;
+        const isFullEvo = hasEvo1 && hasEvo2 && hasFullEvo(this, 'paradox');
         const enemy = (this.id === 1) ? p2 : p1;
         const pastSelf = this.paradoxHistory[0]; // Bản thân 3s trước
         const pastEnemy = this.enemyHistory[0] || { x: enemy.x, y: enemy.y }; // Địch 3s trước
@@ -222,7 +222,7 @@ Object.assign(Player.prototype, {
         if (this.weapon === 'paradox') {
             let hasEvo1 = this.hasUpgrade('evo_paradox_1');
             let hasEvo2 = this.hasUpgrade('evo_paradox_2');
-            let isFullEvo = hasEvo1 && hasEvo2;
+            let isFullEvo = hasEvo1 && hasEvo2 && hasFullEvo(this, 'paradox');
 
             // Bộ đệm nhấp: nhấp sớm trong 0.2s trước khi hết nhịp vẫn được tính
             if (this.pdxBuffer > 0) {

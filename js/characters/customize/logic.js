@@ -139,7 +139,7 @@ function cuApplyPart(p, group, id) {
     const d = cuNormalize(p);
     const info = cuOptInfo(p, group, id);
     if (group === 'passive') {
-        if (!(p.hasUpgrade('evo_cu_1') && p.hasUpgrade('evo_cu_2')) || info.state !== 'pick') return false;
+        if (!(hasFullEvo(p, 'customize')) || info.state !== 'pick') return false;
         d.passive = id; // Nội tại Full Evo: chọn miễn phí, đổi được
         return true;
     }
@@ -175,7 +175,7 @@ function cuAutoSpend(p) {
             n++;
         }
     }
-    const full = p.hasUpgrade('evo_cu_1') && p.hasUpgrade('evo_cu_2');
+    const full = hasFullEvo(p, 'customize');
     if (full && !d.passive) { d.passive = 'revive'; n++; }
     return n;
 }
