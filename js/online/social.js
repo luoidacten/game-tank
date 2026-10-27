@@ -235,10 +235,11 @@ const OnlineSocial = {
         this.settings.win = NS_WINS.includes(w0) ? w0 : 3;
         this.buildLobby();
         this.buildHud();
+        this.buildPrep(); this.buildWheel();
         this.wrap();
         document.addEventListener('pointerdown', (e) => {
             const t = e.target;
-            if (!t.closest || t.closest('.ns-pop, .ns-hud-btn')) return;
+            if (!t.closest || t.closest('.ns-pop, .ns-hud-btn, .ns-prep-btn')) return;
             this.closePops();
         }, true);
         setInterval(() => this.pauseTick(), 200);
@@ -325,10 +326,11 @@ const OnlineSocial = {
         if (this.chatLog.length > 6) this.chatLog.shift();
         this.renderChat();
         if (this.inMatch()) this.floatMsg(pid, nick, text);
+        if (!mine && this.prepOn() && !document.getElementById('nsPrepChat').classList.contains('open')) { const b = document.getElementById('nsPrepBtnChat'); if (b) b.classList.add('ns-unread'); }
         if (!mine && typeof soundSystem !== 'undefined' && soundSystem && !soundSystem.muted && soundSystem.playClick) { try { soundSystem.playClick(); } catch (e) {} }
     },
     renderChat() {
-        for (const id of ['nsLobbyChatLog', 'nsHudChatLog']) {
+        for (const id of ['nsLobbyChatLog', 'nsHudChatLog', 'nsPrepChatLog']) {
             const box = document.getElementById(id); if (!box) continue;
             box.innerHTML = '';
             if (!this.chatLog.length) { const e = document.createElement('div'); e.className = 'ns-chat-empty'; e.textContent = 'Chưa có tin nhắn. Chào đối thủ đi!'; box.appendChild(e); }
@@ -352,7 +354,7 @@ const OnlineSocial = {
         setTimeout(() => el.remove(), 4200);
     },
     flashHint(msg) {
-        for (const id of ['nsLobbyChatInput', 'nsHudChatInput']) {
+        for (const id of ['nsLobbyChatInput', 'nsHudChatInput', 'nsPrepChatInput']) {
             const i = document.getElementById(id); if (!i) continue;
             const ph = i.dataset.ph || i.placeholder; i.dataset.ph = ph; i.placeholder = msg; i.classList.add('ns-warn');
             setTimeout(() => { i.placeholder = ph; i.classList.remove('ns-warn'); }, 1200);
@@ -372,6 +374,7 @@ const OnlineSocial = {
     spawnEmote(pid, id) {
         this.live = this.live.filter(e => e.pid !== pid);
         this.live.push({ pid, id, t0: performance.now() });
+        if (this.prepOn()) this.prepEmote(pid, id);
         if (typeof soundSystem !== 'undefined' && soundSystem && !soundSystem.muted && soundSystem.playCoin) { try { soundSystem.playCoin(); } catch (e) {} }
     },
     drawCanvas() {
@@ -401,6 +404,36 @@ const OnlineSocial = {
             nsDrawEmote(ctx, e.id, 0, 0, 48 * Math.max(0.05, back), age);
             ctx.restore();
         }
+    },
+    // ---------- PHA CHUẨN BỊ (chọn body / shop / G.E.A.R): không có sân -> nút nổi + popup biểu cảm DOM ----------
+    prepOn() {
+        const u = document.getElementById('upgradeScreen');
+        return !!(u && u.style.display !== 'none' && getComputedStyle(u).display !== 'none' && this.inMatch());
+    },
+    buildPrep() {
+        const gc = document.getElementById('gameContainer'); if (!gc) return;
+        const bar = this.mk('div', 'ns-prep'); bar.id = 'nsPrep';
+        const mkBtn = (id, icon, title, fn) => { const b = this.mk('button', 'ns-prep-btn', icon); b.id = id; b.type = 'button'; b.title = title; b.addEventListener('click', fn); return b; };
+        bar.append(mkBtn('nsPrepBtnChat', '💬', 'Chat', () => { this.togglePop('nsPrepChat'); document.getElementById('nsPrepBtnChat').classList.remove('ns-unread'); }),
+                   mkBtn('nsPrepBtnEmote', '😀', 'Biểu cảm', () => this.togglePop('nsPrepWheel')));
+        const chat = this.mk('div', 'ns-pop ns-chat-pop ns-prep-pop'); chat.id = 'nsPrepChat'; chat.appendChild(this.chatForm('nsPrep'));
+        const wheel = this.mk('div', 'ns-pop ns-wheel ns-prep-pop'); wheel.id = 'nsPrepWheel';
+        const pop = this.mk('div', 'ns-prep-emote'); pop.id = 'nsPrepEmote';
+        gc.append(bar, chat, wheel, pop);
+        setInterval(() => {
+            const on = this.prepOn(); bar.classList.toggle('on', on);
+            if (!on) { chat.classList.remove('open'); wheel.classList.remove('open'); }
+            const eb = document.getElementById('nsPrepBtnEmote'); if (eb) eb.classList.toggle('ns-cd', Date.now() - this.lastEmoteAt < this.EMOTE_CD);
+        }, 250);
+    },
+    prepEmote(pid, id) {
+        const box = document.getElementById('nsPrepEmote'); if (!box) return;
+        box.innerHTML = '';
+        const cv = this.iconCanvas(id, 88); cv.className = 'ns-ico ns-prep-ico';
+        const lab = this.mk('div', 'ns-prep-name ' + pid); lab.textContent = this.who(pid);
+        box.append(cv, lab); box.classList.remove('show'); void box.offsetWidth; box.classList.add('show');
+        clearTimeout(this._pe); this._pe = setTimeout(() => box.classList.remove('show'), this.EMOTE_MS);
+        this.animateIcons();
     },
     // Ô canvas nhỏ (DOM) vẽ 1 biểu cảm, có hoạt ảnh nhẹ
     iconCanvas(id, px) {
@@ -628,15 +661,17 @@ const OnlineSocial = {
         setInterval(() => this.refreshHud(), 500);
     },
     buildWheel() {
-        const w = document.getElementById('nsWheel'); if (!w) return;
-        w.innerHTML = '';
-        this.wheelIds().forEach((id, i) => {
-            const b = this.mk('button', 'ns-wheel-slot s' + i); b.type = 'button'; b.title = NS_EMOTE_MAP[id].name;
-            b.appendChild(this.iconCanvas(id, 46));
-            b.addEventListener('click', () => this.sendEmote(id));
-            w.appendChild(b);
-        });
-        w.appendChild(this.mk('div', 'ns-wheel-hub', '😀'));
+        for (const wid of ['nsWheel', 'nsPrepWheel']) {
+            const w = document.getElementById(wid); if (!w) continue;
+            w.innerHTML = '';
+            this.wheelIds().forEach((id, i) => {
+                const b = this.mk('button', 'ns-wheel-slot s' + i); b.type = 'button'; b.title = NS_EMOTE_MAP[id].name;
+                b.appendChild(this.iconCanvas(id, 46));
+                b.addEventListener('click', () => this.sendEmote(id));
+                w.appendChild(b);
+            });
+            w.appendChild(this.mk('div', 'ns-wheel-hub', '😀'));
+        }
     },
     togglePop(id) {
         const el = document.getElementById(id); if (!el) return;

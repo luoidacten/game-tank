@@ -3172,3 +3172,21 @@ body.online-active .ns-hud-btn { display: flex !important; }
 #onlineModal { overflow-y: auto; touch-action: pan-y; }
 #onlineModal * { touch-action: pan-y; }
 #onlineModal .modal-card { overflow: visible; }
+
+/* Online xã hội trong pha chuẩn bị (chọn body / shop / G.E.A.R): nút nổi + chat + popup biểu cảm, nằm trên #upgradeScreen (z 100) */
+.ns-prep { display: none; position: absolute; top: 6px; left: 6px; z-index: 110; gap: 6px; pointer-events: none; }
+.ns-prep.on { display: flex; }
+.ns-prep-btn { pointer-events: auto; width: 44px; height: 44px; border-radius: 12px; border: 1.5px solid rgba(0, 240, 255, 0.6); background: rgba(6, 10, 22, 0.88); font-size: 22px; line-height: 1; padding: 0; cursor: pointer; box-shadow: 0 0 10px rgba(0, 240, 255, 0.3); touch-action: manipulation; }
+.ns-prep-btn.ns-cd { opacity: 0.5; }
+.ns-prep-btn.ns-unread { border-color: #ffd23f; box-shadow: 0 0 12px #ffd23f; animation: nsPulse 0.9s ease-in-out infinite alternate; }
+@keyframes nsPulse { to { transform: scale(1.1); } }
+.ns-prep-pop { z-index: 112; left: 6px; top: 56px; transform: none; }
+.ns-prep-pop.ns-chat-pop { width: min(280px, calc(100% - 12px)); }
+.ns-prep-pop.ns-wheel.open { animation: none; }
+.ns-prep-emote { display: none; position: absolute; top: 56px; right: 8px; z-index: 113; pointer-events: none; flex-direction: column; align-items: center; }
+.ns-prep-emote.show { display: flex; animation: nsEmoPop 2.4s ease-out forwards; }
+.ns-prep-ico { filter: drop-shadow(0 0 14px rgba(0, 240, 255, 0.6)); }
+.ns-prep-name { margin-top: 2px; padding: 2px 12px; border-radius: 12px; background: rgba(6, 10, 22, 0.9); border: 1px solid rgba(0, 240, 255, 0.5); font-size: 13px; font-weight: 800; color: #00f0ff; }
+.ns-prep-name.p2 { color: #ff4d7d; border-color: rgba(255, 0, 85, 0.6); }
+@keyframes nsEmoPop { 0% { opacity: 0; transform: scale(0.3); } 10% { opacity: 1; transform: scale(1.25); } 20% { transform: scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: translateY(-14px); } }
+.ns-float { z-index: 115; }
