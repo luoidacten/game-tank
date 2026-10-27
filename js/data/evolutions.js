@@ -72,7 +72,7 @@ const EVOLUTIONS = {
     ],
     ghost: [
         { id: 'evo_ghost_1', name: 'Bóng Mờ', desc: 'Vô ảnh: 2s (Hồi 1s). Đạn tàng hình khi buff. Đạn chớp tắt giữa map.', cost: 130, type: 'evo' },
-        { id: 'evo_ghost_2', name: 'Ảo Ảnh', desc: 'Chu kỳ Vô ảnh nhanh hơn. Mỗi 12s triệu hồi Hư Ảnh bắn phụ.', cost: 250, type: 'evo' }
+        { id: 'evo_ghost_2', name: 'Ảo Ảnh', desc: 'Chu kỳ Vô ảnh nhanh hơn. Tàn Ảnh (mỗi 1.5s) tự bắn 2 phát phụ về phía địch.', cost: 250, type: 'evo' }
     ],
     aaa: [
         { id: 'evo_aaa_1', name: 'Nhắm Đánh Dấu', desc: 'Pháo kích tự ghim mục tiêu. Tự bắn thường: 3 tia liên tiếp. FULL EVO: pháo kích KHÔNG tự đuổi nữa nhưng rơi thêm 2 quả phụ 2 bên mục tiêu.', cost: 175, type: 'evo' },
