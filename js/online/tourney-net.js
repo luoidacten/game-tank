@@ -6,6 +6,11 @@
 //   online 2 người sẵn có (onlineManager.createRoom / joinRoom, bầu máy chủ), đấu xong CẢ HAI báo kết quả.
 //   Khớp nhau -> ghi kết quả; lệch / rớt mạng -> chủ giải xử tay. Nhiều trận cùng vòng chạy song song.
 // - Rớt kết nối: chủ giải có thể xử thua các trận chờ; vào lại đúng tên -> lấy lại slot.
+// - Lịch đấu (st.sched): 'seq' Từng trận — mỗi lần chỉ gọi 1 trận, mọi máy rảnh (kể cả chủ giải) tự vào XEM trận đó;
+//   'par' Song song — gọi mọi trận của vòng cùng lúc. Chủ giải đổi được bất cứ lúc nào (áp dụng cho lần gọi tới).
+//   Chủ giải cũng là 1 người chơi (slot 0): trận của chủ giải đi qua cùng luồng TCALL (gửi cho chính mình).
+// - Xem trận (js/online/spectate.js): máy chủ trận mở peer "CYW-<mã trận>", báo cho chủ giải qua TREPORT {spec};
+//   chủ giải ghi vào st.live[key].w để máy rảnh nối vào xem (chỉ đọc, tối đa 10 người xem / trận).
 // Giao thức kênh giải (trường t): TJOIN/TWELCOME/TDENY/TSTATE/TCALL/TREPORT/TCHAT/TCLOSE.
 // ==========================================
 
@@ -48,7 +53,7 @@ const TourneyNet = {
                 v: 1, online: true, code, locked: !!this.pw, host: nick, max: Math.max(3, Math.min(12, d.maxP | 0 || 8)),
                 title: (d.title || '').trim() || '🏆 GIẢI ĐẤU ONLINE', theme: !!d.theme, winScore: d.winScore, classic: !!d.classic,
                 pts: { win: d.pts.win, draw: d.pts.draw, loss: d.pts.loss }, players: [{ name: nick, color: TOURNEY_COLORS[0] }],
-                rounds: [], status: 'lobby', lastRanks: null, lastMatch: null, live: {},
+                rounds: [], status: 'lobby', lastRanks: null, lastMatch: null, live: {}, sched: d.sched === 'par' ? 'par' : 'seq',
             };
             TOURNEY.draft = null;
             TOURNEY.view = 'lobby';
@@ -158,15 +163,33 @@ const TourneyNet = {
         return -1;
     },
     // Gọi mọi trận chưa đấu của vòng hiện tại có đủ 2 người online (các cặp trong 1 vòng rời nhau -> song song)
+    // Từng trận: chỉ gọi 1 trận khi không còn trận nào đang đấu
+    busy() { const st = this.st(); return Object.values(st.live || {}).some(L => L.st === 'live'); },
     callRound() {
         const st = this.st(), r = this.curRound();
         if (r < 0) return;
+        const seq = st.sched === 'seq';
+        if (seq) st.autoSeq = true;
         st.rounds[r].forEach((x, m) => {
             const L = st.live[r + '-' + m];
             if (x.b === null || x.res || (L && L.st !== 'issue')) return;
+            if (seq && this.busy()) return;
             if (this.online(st.players[x.a].name) && this.online(st.players[x.b].name)) this.call(r, m, true);
         });
         this.push();
+    },
+    setSched(v) {
+        const st = this.st();
+        if (this.role !== 'host' || !st || !['seq', 'par'].includes(v) || st.sched === v) return;
+        st.sched = v; if (v !== 'seq') st.autoSeq = false;
+        this.sysChat('🗓️ Lịch đấu: ' + (v === 'seq' ? 'Từng trận (mọi người cùng xem)' : 'Song song'));
+        this.push();
+    },
+    schedHtml() {
+        const st = this.st(), seq = st.sched === 'seq';
+        if (this.role !== 'host') return `<p class="tf-note">🗓️ Lịch đấu: <b>${seq ? 'Từng trận (mọi người cùng xem)' : 'Song song'}</b></p>`;
+        const b = (v, t) => `<button class="mode-btn ${st.sched === v ? 'active' : ''}" data-act="tn-sched" data-v="${v}">${t}</button>`;
+        return `<label class="tf-lbl">LỊCH ĐẤU</label><div class="mode-options tn-sched">${b('seq', '👁 Từng trận (mọi người cùng xem)')}${b('par', '⚡ Song song')}</div>`;
     },
     call(r, m, quiet) {
         const st = this.st(), x = st.rounds[r] && st.rounds[r][m];
@@ -189,6 +212,10 @@ const TourneyNet = {
         if (!x || x.res) return;
         const A = st.players[x.a].name, B = st.players[x.b].name;
         if (nick !== A && nick !== B) return;
+        if (d.spec) { // máy chủ trận mở kênh xem
+            L.w = String(d.spec).slice(0, 40); L.n1 = nick; L.n2 = nick === A ? B : A;
+            this.push(); return;
+        }
         if (d.drop) { L.st = 'issue'; L.note = nick + ': trận bị ngắt / rời trận'; this.push(); return; }
         const cl = (v) => Math.max(0, Math.min(9, v | 0));
         L.rep[nick] = { my: cl(d.my), opp: cl(d.opp) };
@@ -206,6 +233,8 @@ const TourneyNet = {
         this.sysChat(`✅ ${st.players[x.a].name} ${sa} - ${sb} ${st.players[x.b].name}${ff ? ' (xử)' : ''}`);
         TOURNEY.record(r, m, sa, sb, ff); // -> save() -> push()
         this.refresh(true);
+        // Từng trận: tự gọi trận tiếp theo sau khi có kết quả
+        if (st.sched === 'seq' && st.autoSeq) setTimeout(() => { const s2 = this.st(); if (this.role === 'host' && s2 && s2.status === 'running' && s2.sched === 'seq' && !this.busy()) this.callRound(); }, 2500);
     },
 
     // ================= THÀNH VIÊN =================
@@ -303,6 +332,7 @@ const TourneyNet = {
     onCall(m) {
         const om = typeof onlineManager !== 'undefined' ? onlineManager : null;
         if (!om) return;
+        if (typeof NetSpec !== 'undefined' && NetSpec.watching) NetSpec.stop(true); // đang xem trận khác -> vào trận của mình
         if (this.cur && this.cur.phase === 'playing' && om.matchActive) return; // đang đấu trận khác
         if (this.cur) this.dropRoom();
         this.cur = { key: m.key, gen: m.gen, code: m.code, pw: m.pw, create: !!m.create, opp: m.opp, winScore: m.winScore, classic: !!m.classic, title: m.title || '', phase: 'connecting', tries: 0, at: Date.now(), next: 0 };
@@ -323,7 +353,12 @@ const TourneyNet = {
     },
     tick() {
         const c = this.cur, om = typeof onlineManager !== 'undefined' ? onlineManager : null;
+        if (!c && om) this.autoWatch();
         if (!c || !om) return;
+        if (c.phase === 'playing' && om.role === 'host' && om.matchActive && !c.spec && typeof NetSpec !== 'undefined') {
+            c.spec = NetSpec.serve(c.code, { n1: this.me, n2: c.opp, key: c.key }); // máy chủ trận: mở kênh xem
+            if (c.spec) this.report({ spec: c.spec });
+        }
         if (c.phase === 'connecting') {
             if (om.matchActive) { c.phase = 'playing'; TOURNEY.el('tourneyOverlay').style.display = 'none'; TOURNEY.stopFx(); return; }
             const ready = om.isOnline && om.playersLobbyData.length >= 2 && (!om.elect || om.elect.done);
@@ -395,6 +430,42 @@ const TourneyNet = {
         TOURNEY.el('tourneyOverlay').style.display = 'flex';
         this.showMain(true);
     },
+    // ================= XEM TRẬN =================
+    watchable() {
+        const st = this.st();
+        if (!st || !st.live || st.status !== 'running') return [];
+        return Object.keys(st.live).filter(k => { const L = st.live[k]; return L.st === 'live' && L.w && L.n1 !== this.me && L.n2 !== this.me; })
+            .sort().map(k => ({ key: k, w: st.live[k].w, n1: st.live[k].n1, n2: st.live[k].n2 }));
+    },
+    watchKey(key) {
+        const x = this.watchable().find(q => q.key === key);
+        if (!x || this.cur || typeof NetSpec === 'undefined') return false;
+        this.note = '';
+        return NetSpec.watch({ key, peerId: x.w, n1: x.n1, n2: x.n2, onEnd: (note) => this.afterWatch(key, note) });
+    },
+    switchWatch() {
+        const list = this.watchable(), cur = NetSpec.watching && NetSpec.watching.key;
+        if (!list.length) return;
+        const i = list.findIndex(q => q.key === cur);
+        const nx = list[(i + 1) % list.length];
+        if (nx && nx.key !== cur) this.watchKey(nx.key);
+    },
+    afterWatch(key, note) {
+        this.noAuto = key; // đã rời / xem xong trận này: không tự vào lại
+        if (note) this.note = note;
+        if (!this.role) return;
+        TOURNEY.el('tourneyOverlay').style.display = 'flex';
+        this.showMain(true);
+    },
+    // Từng trận: máy rảnh đang ở bảng giải tự vào xem trận đang đấu
+    autoWatch() {
+        const st = this.st();
+        if (!st || st.sched !== 'seq' || st.status !== 'running' || this.cur || typeof NetSpec === 'undefined' || NetSpec.watching) return;
+        const ov = TOURNEY.el('tourneyOverlay');
+        if (!ov || ov.style.display === 'none' || TOURNEY.view !== 'hub') return;
+        const x = this.watchable().find(q => q.key !== this.noAuto);
+        if (x) this.watchKey(x.key);
+    },
     showMatchWait() {
         const c = this.cur;
         TOURNEY.view = 'match';
@@ -448,6 +519,7 @@ const TourneyNet = {
             <p class="tf-note">Chạm ${st.winScore} · ${st.classic ? 'CỔ ĐIỂN' : 'G.E.A.R'} · Thắng ${st.pts.win} / Hoà ${st.pts.draw} / Thua ${st.pts.loss}</p>
             <label class="tf-lbl">NGƯỜI CHƠI (${st.players.length}/${st.max})</label>
             <div class="tf-plist">${rows}</div>
+            ${this.schedHtml()}
             ${host ? `<button class="glow-btn btn-primary tf-btn" data-act="tn-start" ${st.players.length < 3 ? 'disabled' : ''}>🏁 BẮT ĐẦU GIẢI (${st.players.length} người)</button>
                 <p class="tf-note">Giải hiện trong danh sách phòng online (🏆). Cần ít nhất 3 người.</p>`
                 : '<p class="tf-note">⏳ Chờ chủ giải bắt đầu...</p>'}
@@ -466,16 +538,20 @@ const TourneyNet = {
             const key = r + '-' + m, L = st.live && st.live[key];
             const res = x.res ? `<span class="tf-score">${x.res.sa} - ${x.res.sb}</span>` : `<span class="tf-vs">${L ? this.liveLabel(L) : 'chờ gọi'}</span>`;
             const btns = host && !x.res ? `<div class="tn-mbtns">
-                ${!L || L.st === 'issue' ? `<button class="glow-btn btn-primary tn-sbtn" data-act="tn-call" data-k="${key}">📣 GỌI</button>` : ''}
+                ${(!L || L.st === 'issue') && !(st.sched === 'seq' && this.busy()) ? `<button class="glow-btn btn-primary tn-sbtn" data-act="tn-call" data-k="${key}">📣 GỌI</button>` : ''}
                 <button class="glow-btn btn-dark tn-sbtn" data-act="tn-res" data-k="${key}">⚖️ XỬ</button></div>` : '';
             const mine = !x.res && (st.players[x.a].name === this.me || st.players[x.b].name === this.me) ? ' tn-mine' : '';
+            const canW = !x.res && !mine && L && L.st === 'live' && L.w;
+            const wbtn = canW ? `<div class="tn-mbtns"><button class="glow-btn btn-secondary tn-sbtn" data-act="tn-watch" data-k="${key}">👁 XEM</button></div>` : '';
             return `<div class="tn-mrow${mine}" data-k="${key}" data-st="${x.res ? 'done' : L ? L.st : 'idle'}"><div class="tf-match ${x.res ? 'done' : 'cur'}"><span>${this.dot(x.a)}${TOURNEY.pname(x.a)}</span> ${res} <span>${TOURNEY.pname(x.b)}${this.dot(x.b)}</span></div>
-                ${L && L.note ? `<div class="tn-mnote">${this.esc(L.note)}</div>` : ''}${btns}</div>`;
+                ${L && L.note ? `<div class="tn-mnote">${this.esc(L.note)}</div>` : ''}${wbtn}${btns}</div>`;
         }).join('');
         return `<div class="tf-next">${this.codeHtml()}${this.noteHtml()}
             <div class="tf-ntitle">VÒNG ${r + 1} · ĐÃ ĐẤU ${TOURNEY.playedMatches(st)}/${TOURNEY.totalMatches(st)} · CHẠM ${st.winScore} · ${st.classic ? 'CỔ ĐIỂN' : 'G.E.A.R'}</div>
             ${rows}
-            ${host ? '<button class="glow-btn btn-primary tf-btn tf-start" data-act="tn-callall">📣 GỌI CÁC TRẬN CỦA VÒNG</button>' : '<p class="tf-note">Chủ giải sẽ gọi trận — máy bạn tự vào trận khi tới lượt.</p>'}</div>`;
+            ${this.schedHtml()}
+            ${host ? `<button class="glow-btn btn-primary tf-btn tf-start" data-act="tn-callall" ${st.sched === 'seq' && this.busy() ? 'disabled' : ''}>${st.sched === 'seq' ? '📣 GỌI TRẬN TIẾP THEO' : '📣 GỌI CÁC TRẬN CỦA VÒNG'}</button>` : '<p class="tf-note">Chủ giải sẽ gọi trận — máy bạn tự vào trận khi tới lượt.</p>'}
+            ${st.sched === 'seq' ? '<p class="tf-note">👁 Từng trận: máy không đấu tự vào xem trận đang diễn ra.</p>' : ''}</div>`;
     },
     actsHtml(final) {
         if (this.role === 'host') return `${final ? '' : '<button class="glow-btn btn-secondary tf-btn" data-act="endearly">🏁 KẾT THÚC SỚM</button>'}
@@ -537,6 +613,8 @@ const TourneyNet = {
             case 'tn-leave': this.leave(); TOURNEY.closeToMenu(); break;
             case 'tn-cancel': this.backToHub(); break;
             case 'tn-chat': this.sendChatFromInput(); break;
+            case 'tn-sched': this.setSched(b.dataset.v); break;
+            case 'tn-watch': if (!this.watchKey(b.dataset.k)) { this.note = '❌ Trận này chưa xem được.'; this.showMain(); } break;
         }
     },
     // Huỷ / rời giải (host: đóng giải). quiet: không đổi UI
@@ -544,6 +622,8 @@ const TourneyNet = {
         this._left = true;
         clearTimeout(this._rt);
         if (this.cur) { this.dropRoom(); this.cur = null; }
+        if (typeof NetSpec !== 'undefined' && NetSpec.watching) NetSpec.stop(true);
+        this.noAuto = null;
         if (this.role === 'host') { this.bcast({ t: 'TCLOSE' }); if (typeof lobbyDir !== 'undefined') lobbyDir.setAd(null, 'tour'); }
         const p = this.peer, conns = Object.values(this.conns), hc = this.hostConn;
         setTimeout(() => { conns.forEach(c => { try { c.close(); } catch (e) {} }); try { hc && hc.close(); } catch (e) {} try { p && p.destroy(); } catch (e) {} }, 150);

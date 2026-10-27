@@ -473,6 +473,7 @@ const NetSmooth = {
 
     each(fn) {
         if (typeof p1 !== 'undefined' && p1) fn('P1', p1); // xe đối thủ (xe mình = p2 đã có dự đoán riêng)
+        if (typeof onlineManager !== 'undefined' && onlineManager.spectator && typeof p2 !== 'undefined' && p2) fn('P2', p2); // khán giả: nội suy cả xe P2
         for (const p of [p1, p2]) if (p && Array.isArray(p.bullets)) p.bullets.forEach(b => { if (b && b._nid) fn(b._nid, b, p === p1 ? p1 : p2); });
         for (const [name, get] of NET_ROOTS) {
             if (NET_PLAIN_LISTS.has(name)) continue;
@@ -503,7 +504,7 @@ const NetSmooth = {
             if (typeof o.x !== 'number' || typeof o.y !== 'number') return;
             const old = this.tr.get(k);
             let h;
-            if (old && old.o === o && k !== 'P1') { // gốc không gửi lại (không đổi) -> vị trí host như lần trước
+            if (old && old.o === o && k !== 'P1' && k !== 'P2') { // gốc không gửi lại (không đổi) -> vị trí host như lần trước
                 const l = old.h[old.h.length - 1];
                 h = old.h; h.push({ t, x: l.x, y: l.y });
             } else {

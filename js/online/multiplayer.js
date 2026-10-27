@@ -122,6 +122,8 @@ class OnlineMultiplayerManager {
         }
         if (data.type === 'PING') { this.sendNetworkMessage({ type: 'PONG', t: data.t }); return; }
         if (data.type === 'PONG') { this.onPong(data.t); return; }
+        // Chat / biểu cảm của guest -> chuyển tiếp cho khán giả
+        if (this.role === 'host' && (data.type === 'CHAT' || data.type === 'EMOTE') && typeof NetSpec !== 'undefined' && NetSpec.n) NetSpec.fwd(data);
         // Chat / biểu cảm / cài đặt sảnh / tạm dừng online (js/online/social.js)
         if (typeof OnlineSocial !== 'undefined' && OnlineSocial.onMessage(data)) return;
 
@@ -172,7 +174,14 @@ class OnlineMultiplayerManager {
     }
 
     sendNetworkMessage(payload) {
+        // Khán giả (js/online/spectate.js): không gửi gì vào kênh trận, chỉ xin keyframe qua kênh khán giả
+        if (this.spectator) {
+            const w = typeof NetSpec !== 'undefined' && NetSpec.watching;
+            if (payload && payload.type === 'SYNC_KEY' && w && w.conn && w.conn.open) { try { w.conn.send(JSON.stringify({ type: 'SYNC_KEY' })); } catch (e) {} }
+            return;
+        }
         payload = Object.assign({}, payload, { _from: this.clientId, _seq: ++this.sendSeq });
+        if (this.role === 'host' && typeof NetSpec !== 'undefined' && NetSpec.n) NetSpec.fwd(payload);
         // 1. Send to local broadcast channel (for same-machine multi-tab/window testing)
         if (this.broadcastChannel) {
             try {
@@ -785,6 +794,7 @@ class OnlineMultiplayerManager {
         const ctrl = document.getElementById('p1-controls');
         if (ctrl) ctrl.classList.remove('blinded-hud');
         updateScoreBoard();
+        if (this.spectator) { if (typeof NetSpec !== 'undefined') NetSpec.onRoundEnd(); return; }
         let targetWins = gameState.winScore || 3;
         if (gameState.p1Score >= targetWins || gameState.p2Score >= targetWins) {
             if (typeof TourneyNet !== 'undefined' && TourneyNet.onMatchEnd(gameState.p1Score, gameState.p2Score)) return;
@@ -1146,6 +1156,7 @@ class OnlineMultiplayerManager {
 
     // Guest: không mô phỏng – chỉ dự đoán chuyển động xe mình cho mượt
     guestTick() {
+        if (this.spectator) { if (screenShake.duration > 0) screenShake.duration--; NetSmooth.step(); return; } // khán giả: không phím, không dự đoán
         this.onGameLoopTick();
         if (screenShake.duration > 0) screenShake.duration--;
         NetSmooth.step();
@@ -1218,6 +1229,7 @@ class OnlineMultiplayerManager {
         NetState.replayEvents(ev);
         if (NetState.lastHostT === null) NetSmooth.reset();
         else NetSmooth.onSnapshot(NetState.lastHostT, NetState.lastLate);
+        if (this.spectator) return; // khán giả: cả 2 xe nội suy bằng NetSmooth
 
         // Hoà giải kiểu "client-side prediction": vị trí host là kết quả của phím seq netInSeq đã chạy
         // netInTicks tick -> bỏ các tick lịch sử đó, chạy lại phần phím host chưa xử lý từ vị trí host.
@@ -1347,6 +1359,8 @@ class OnlineMultiplayerManager {
     }
 
     cleanup(preserveErrors = false) {
+        if (typeof NetSpec !== 'undefined') NetSpec.stopServe(); // đóng kênh khán giả của trận (máy chủ trận)
+        this.spectator = false;
         if (this.adActive && typeof lobbyDir !== 'undefined') { lobbyDir.setAd(null); this.adActive = false; }
         if (this.elect && this.elect.timer) clearInterval(this.elect.timer);
         if (this.elect && this.elect.deadline) clearTimeout(this.elect.deadline);
