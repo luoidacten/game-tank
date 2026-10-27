@@ -834,3 +834,25 @@ function botShopBuy(playerId) {
         return f.call(this, bot, enemy, aligned, inp);
     };
 })();
+
+// The Admin: nhấp khi thẳng hàng, giữ 0.4s /execute khi có đạn sắp trúng (tadBotAction); shop: tự lập trình Luật (tadBotShop)
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon === 'the_admin' && typeof tadBotAction === 'function') {
+            if (this.tadB > 0) { this.tadB--; inp.s = this.tadB > 2; return; }
+            const a = tadBotAction(bot, enemy, aligned);
+            if (a === 'tap') { this.tadB = 5; inp.s = true; return; }
+            if (a === 'exec') { this.tadB = TAD_HOLD + 4; inp.s = true; return; }
+            inp.s = false; return;
+        }
+        return f.call(this, bot, enemy, aligned, inp);
+    };
+    if (typeof bodyShopBotBuy === 'function') {
+        const g = bodyShopBotBuy;
+        bodyShopBotBuy = function (player) {
+            if (player && player.weapon === 'the_admin' && typeof tadBotShop === 'function') return tadBotShop(player);
+            return g.apply(this, arguments);
+        };
+    }
+})();

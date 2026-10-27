@@ -64,6 +64,7 @@ const NET_CLASSES = {
     BtFinisher,
     HlFinisher,
     ColHolo, ColFinisher,
+    TadFinisher,
     FcZone, FcFinisher,
 };
 
@@ -122,7 +123,7 @@ const NET_LOADOUT_KEYS = ['upgrades', 'rerollCount', 'upgradeLevel', 'invUpgrade
     'kkData', 'cuData', 'loseStreak', 'winStreak', 'lastRoundResult', 'lastStreakBonus', 'mtSpend',
     'equippedGears', 'gearTiers', 'gearPickedMilestones', 'gearFreeFeetUpgrades',
     'gearBonusMaxHp', 'gearComebackDmgBuff', 'gearEarlyEvoFallback', 'gearInfiniteStacks', 'gearJackpot',
-    'mainEgg', 'mainAwakened', 'isMainChar', 'idolData', 'crUpgrades', 'crEssence', 'crEssenceAcc', 'engUpgrades', 'engParts', 'engPartsAcc'];
+    'mainEgg', 'mainAwakened', 'isMainChar', 'idolData', 'crUpgrades', 'crEssence', 'crEssenceAcc', 'engUpgrades', 'engParts', 'engPartsAcc', 'adminData'];
 
 // Trường của Player luôn gửi kể cả khi không đổi (guest dự đoán / nội suy ghi đè x,y tại chỗ nên cần giá trị gốc của host)
 const NET_ALWAYS_PLAYER_KEYS = new Set(['x', 'y', 'netInSeq', 'netInTicks']);

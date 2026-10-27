@@ -869,6 +869,17 @@ const BODY_GUIDES = {
         passive: ['Mỗi 2–8s: Hologram (10 body) hiện trên làn bạn, bắn đúng 1 lượt (70% dame) rồi tan', 'Hologram không chặn đạn, địch không nhắm được'],
         evo: { e1: 'CD đổi đạn 6s, +1 đạn, nạp nhanh 25%, sau đổi +25% tốc & 2 phát +30%', e2: 'Hologram 1.5–4.5s, 100% dame + Evo 1, đổi đạn gọi thêm 1 Hologram', full: '50% gọi 2 Hologram; đạn Khui Kho mang hiệu ứng Full Evo gốc' },
         tips: ['Đứng gần vị trí cổng dữ liệu để canh tia Lazer/Sniper của Hologram', 'Khui Kho khi hết đạn để vừa nạp vừa có loại đạn mới']
+    },
+    the_admin: {
+        tag: 'Tự lập trình Luật IF -> THEN', diff: 3,
+        controls: [
+            { input: 'TAP', name: 'Đạn Mã Nguồn', what: '1.1 dame, 4 viên' },
+            { input: 'HOLD 0.4s', name: '/execute', what: 'Lướt nhẹ sang ngang + ép chạy mọi Luật 1 lần (CD 8s)' },
+            { input: 'SHOP', name: 'Admin Terminal', what: 'Mua Luật / ĐK / KQ (giá x2), XÓA hoàn 50%' }
+        ],
+        passive: ['1 ĐK bất kỳ của Luật nổ -> chạy đồng loạt mọi KQ của Luật', 'Từ ĐK thứ 2 mỗi ĐK +15% hiệu lực KQ', 'Luật #1 miễn phí, chọn lại ở shop đầu tiên'],
+        evo: { e1: '2 ĐK + 2 KQ / Luật, /execute 5.5s, +$15 đầu hiệp', e2: '5 Luật, 3+3 khe, mở ĐK 13-18 & KQ 13-16, ĐK nhạy hơn 25%', full: 'Vô hạn Luật & khe, mở ĐK/KQ Lớn (/ban, /godmode, /sudo_jackpot)' },
+        tips: ['Ghép ĐK thường nổ (Chu Kỳ, Xả Đạn) với KQ sát thương', 'Giữ /execute để né đạn và tung toàn bộ Luật đúng lúc']
     }
 };
 

@@ -367,6 +367,10 @@ const EVOLUTIONS = {
         { id: 'evo_col_1', name: 'Bộ Sưu Tập Mở Rộng', desc: 'Hồi chiêu Khui Kho Vũ Khí 12s -> 6s. Mỗi lần đổi đạn: +25% tốc chạy 1.5s và 2 phát đầu +30% sát thương. Băng đạn mọi loại +1 viên, nạp nhanh hơn 25%.', cost: 160, type: 'evo' },
         { id: 'evo_col_2', name: 'Triển Lãm Hologram', desc: 'Hologram gọi mỗi 1.5–4.5s (thay vì 2–8s), sát thương 100% (thay vì 70%) và mang hiệu ứng Evo 1 của body gốc (Lazer Xuyên tia to x3, Sniper 25% Raycast, Lazer Pháo tia Nóng Đỏ...). Mỗi lần Khui Kho gọi ngay thêm 1 Hologram. FULL EVO (Bảo Tàng Sống): mỗi lần gọi có 50% ra CÙNG LÚC 2 Hologram ở 2 vị trí; đạn Khui Kho mang hiệu ứng FULL EVO của body gốc.', cost: 290, type: 'evo' },
     ],
+    the_admin: [
+        { id: 'evo_admin_1', name: 'Mở Rộng Cổng Lập Trình', desc: 'Mỗi Luật gắn tối đa 2 Điều Kiện + 2 Kết Quả. Hồi chiêu /execute 8s -> 5.5s. Đầu mỗi hiệp nhận thêm +$15 ngân sách hệ thống.', cost: 160, type: 'evo' },
+        { id: 'evo_admin_2', name: 'Quyền Quản Trị Cấp Cao', desc: 'Tối đa 5 Luật, mỗi Luật 3 ĐK + 3 KQ. Mở khóa 6 ĐK mới (13-18) và 4 KQ mới (13-16: Cột Lazer, Khóa Kỹ Năng, Bóp Hẹp Màn Hình, Đánh Cắp Thông Số). Mọi ĐK cơ bản nhạy hơn 25%. FULL EVO (Đấng Sáng Tạo): VÔ HẠN Luật & khe ĐK/KQ, mở 3 ĐK Lớn (19-21) + 3 KQ Lớn (/ban, /godmode, /sudo_jackpot), tặng miễn phí 1 ĐK/KQ Lớn.', cost: 290, type: 'evo' },
+    ],
 };
 
 // ==========================================
@@ -387,6 +391,7 @@ const FULL_EVO_GATE = {
     batter: 170,
     hellrider: 170,
     collector: 180,
+    the_admin: 180,
 };
 // MỌI body (trừ basic: dạng MAIN tự có Full Evo) đều phải mua thẻ FULL EVO
 for (const body in EVOLUTIONS) {

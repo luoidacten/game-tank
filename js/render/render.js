@@ -324,6 +324,8 @@ function renderFrame() {
     if (typeof btFxOver === 'function') btFxOver();
     // Kết liễu Kẻ Thu Thập (ĐÓNG HỘP SƯU TẦM) - js/characters/collector/summons.js + render.js
     if (typeof colFxOver === 'function') colFxOver();
+    // Kết liễu The Admin (SYSTEM SHUTDOWN) - js/characters/the_admin/logic.js + render.js
+    if (typeof tadFxOver === 'function') tadFxOver();
     // Kết liễu Hellrider (HIGHWAY TO HELL) - js/characters/hellrider/logic.js + render.js
     if (typeof hlFxOver === 'function') hlFxOver();
     // Kết liễu Pháo Lửa (HỎA NGỤC THIÊU RỤI) - js/characters/fire_cannon/finisher.js
@@ -356,7 +358,7 @@ function renderFrame() {
 const VICTORY_BANNER_SPAN = 87;
 const VICTORY_FX_DELAY = 0;        // kết liễu diễn xong là hiện màn thắng ngay
 const VICTORY_TOTAL_CAP = 600;     // tối đa 10s cho cả màn kết hiệp (không bao giờ treo)
-const FINISHER_FX_CLASSES = ['FsFinisher', 'TsFinisher', 'JkFinisher', 'JgFinisher', 'CgFinisher', 'ClFinisher', 'JpFinisher', 'WsFinisher', 'StFinisher', 'TatFinisher', 'OpFinisher', 'BmFinisher', 'ArFinisher', 'PsyFinisher', 'TlFinisher', 'JlFinisher', 'KgFinisher', 'BodyFinisher', 'TcFinisher', 'CocFinisher', 'PrFinisher', 'AdFinisher', 'TnFinisher', 'WdFinisher', 'DtpFinisher', 'RgFinisher', 'SwFinisher', 'IdolFinisher', 'ThFinisher', 'MainFinisher', 'DynFinisher', 'TgFinisher', 'MrFinisher', 'FcFinisher', 'BtFinisher', 'HlFinisher', 'ColFinisher'];
+const FINISHER_FX_CLASSES = ['FsFinisher', 'TsFinisher', 'JkFinisher', 'JgFinisher', 'CgFinisher', 'ClFinisher', 'JpFinisher', 'WsFinisher', 'StFinisher', 'TatFinisher', 'OpFinisher', 'BmFinisher', 'ArFinisher', 'PsyFinisher', 'TlFinisher', 'JlFinisher', 'KgFinisher', 'BodyFinisher', 'TcFinisher', 'CocFinisher', 'PrFinisher', 'AdFinisher', 'TnFinisher', 'WdFinisher', 'DtpFinisher', 'RgFinisher', 'SwFinisher', 'IdolFinisher', 'ThFinisher', 'MainFinisher', 'DynFinisher', 'TgFinisher', 'MrFinisher', 'FcFinisher', 'BtFinisher', 'HlFinisher', 'ColFinisher', 'TadFinisher'];
 function finisherFxActive() {
     if (typeof bodyEffects === 'undefined') return false;
     for (const e of bodyEffects) {

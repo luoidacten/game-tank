@@ -546,6 +546,14 @@ const MODULES = {
             size: { w: 30, h: 30 },
             stats: { hp: 5, dmg: 1.0, ammo: 5, speedMult: 1.0286 }
         },
+        {
+            id: 'the_admin',
+            name: 'The Admin — Hệ Thống Kiến Tạo Luật Lệ',
+            desc: '"My Game, My Rules!" HP:5 | Dame:1.1 | Đạn:4 (Đạn Mã Nguồn) | Tốc:3.7. Tự lập trình LUẬT trong ADMIN TERMINAL (thẻ trong shop): mỗi Luật gồm các ĐIỀU KIỆN (IF) và KẾT QUẢ (THEN) — một ĐK bất kỳ nổ là chạy đồng loạt mọi KQ; từ ĐK thứ 2 mỗi ĐK +15% hiệu lực. 21 ĐK, 19 KQ; giá x2 sau mỗi lần mua, XÓA hoàn 50%. Luật #1 miễn phí (tự chọn ở shop đầu). GIỮ BẮN 0.4s: /execute — lướt né + ép chạy mọi Luật 1 lần (CD 8s).',
+            type: 'body', role: ['Sinh Tồn', 'Cơ Động'],
+            size: { w: 28, h: 28 },
+            stats: { hp: 5, dmg: 1.1, ammo: 4, speedMult: 1.0571 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 35 },
