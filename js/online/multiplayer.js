@@ -693,7 +693,7 @@ class OnlineMultiplayerManager {
                 break;
 
             case 'START_MATCH':
-                this.startMatchActual(data.winScore);
+                this.startMatchActual(data.winScore, data.gearTiers);
                 break;
 
             case 'START_ROUND':
@@ -1058,14 +1058,17 @@ class OnlineMultiplayerManager {
             return;
         }
         if (this.elect && !this.elect.done) return; // đang bầu máy chủ
+        // Host quyết định cấp G.E.A.R của trận -> gửi kèm để 2 máy nhận cùng cấp
+        const gearTiers = typeof generateMatchGearTiers === 'function' ? generateMatchGearTiers() : null;
         this.sendNetworkMessage({
             type: 'START_MATCH',
-            winScore: gameState.winScore || 3
+            winScore: gameState.winScore || 3,
+            gearTiers
         });
-        this.startMatchActual(gameState.winScore || 3);
+        this.startMatchActual(gameState.winScore || 3, gearTiers);
     }
 
-    startMatchActual(winScore) {
+    startMatchActual(winScore, gearTiers) {
         document.body.classList.add('online-active');
         if (this.role === 'guest') {
             document.body.classList.add('role-guest');
@@ -1102,6 +1105,12 @@ class OnlineMultiplayerManager {
         this.lastHeard = Date.now();
         gameState.winScore = winScore || 3;
         startBattle();
+        // Dùng cấp G.E.A.R do host gửi (startBattle vừa random riêng trên máy này)
+        if (Array.isArray(gearTiers) && gearTiers.length >= 3) {
+            gameState.matchGearTiers = [...gearTiers];
+            if (p1) p1.gearTiers = [...gearTiers];
+            if (p2) p2.gearTiers = [...gearTiers];
+        }
     }
 
     // Gọi mỗi tick vật lý (host & guest)
