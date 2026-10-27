@@ -30,6 +30,7 @@ Chromium: `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`, Playwright: `req
   (`NetState.captureSync/applySync`); mốc Date.now() mã hoá theo mốc cố định của host nên không tự đổi mỗi gói. Guest nội suy x/y của xe đối thủ,
   đạn và thực thể có `_nid` theo thời gian host với độ trễ đệm (`NetSmooth`). Trường Player chỉ của máy cục bộ: `NET_LOCAL_PLAYER_KEYS` / `NET_SKIP_PLAYER_KEYS`.
   Phòng: Công khai (hiện trong danh sách, sổ phòng serverless `js/online/lobby.js`: ID cố định `cytank-v1-lobby-0..4`, máy giành được ID làm sổ phòng, quảng cáo TTL 20s) / Riêng tư (mã + mật khẩu, chủ phòng kiểm tra). Bầu máy chủ `js/online/election.js` (DeviceBench): máy mạnh hơn làm host, đổi vai trong sảnh (`swapRole`). `?net=local` = LocalPeer qua BroadcastChannel để thử nhiều tab.
+  Giải đấu ONLINE `js/online/tourney-net.js` (TourneyNet): chủ giải mở peer `CYT-xxxxx`, quảng cáo key `'tour'` (🏆) trên sổ phòng; thành viên nối kênh giải (TJOIN/TSTATE/TCALL/TREPORT/TCHAT); mỗi trận 2 máy tự vào phòng riêng tư (`onlineManager.createRoom({code,pw,...})` / `joinRoom`) rồi cả 2 báo kết quả, lệch -> chủ giải xử.
 - Đồ hoạ thích ứng `js/core/quality.js` (`Quality.level` high/medium/low: DPR, shadowBlur, số hạt `Quality.particleMult`).
 - Vẽ xe: `js/render/tank-art.js` (`registerTankArt`), nhóm art ở `js/render/tank-art/*.js`. Đạn: `js/render/bullet-art.js` (`registerBulletArt`).
 - HUD: `js/render/tank-hud.js` (thanh máu/đạn/trạng thái, `hudRowY`), `js/render/empower-hud.js` + `empower-providers.js` (vòng & biểu tượng trên nút bắn, `registerEmpowerHUD`).

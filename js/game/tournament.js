@@ -4,7 +4,8 @@
 // Mỗi trận chơi 1v1 cùng máy: P1 (dưới) = người đầu, P2 (trên) = người sau.
 // Kết thúc trận -> tự ghi kết quả -> về bảng giải với bảng xếp hạng cập nhật.
 // Trạng thái lưu localStorage để tải lại trang không mất giải.
-// (Tương lai: cho người chơi online vào phòng của host và gán vào 1 slot — chưa làm.)
+// Biến thể ONLINE (js/online/tourney-net.js): 1 máy làm chủ giải, người khác vào từ danh sách phòng (🏆),
+// mỗi trận 2 người tự nối thẳng với nhau bằng luồng online 2 người sẵn có rồi báo kết quả cho chủ giải.
 // ==========================================
 
 const TOURNEY_KEY = 'cybertank_tourney_v1';
@@ -66,6 +67,8 @@ const TOURNEY = {
     saved: null,
     view: 'setup',
     draft: null,
+    online: null,       // null (offline) | 'host' | 'member' — trạng thái do TourneyNet giữ, không lưu localStorage
+    ffTarget: null,     // trận đang xử (online: chọn trận bất kỳ của vòng)
     _retTimer: null,
     _fxTimer: null,
 
@@ -74,6 +77,7 @@ const TOURNEY = {
         return null;
     },
     save() {
+        if (this.online) { this.updateMenuCard(); if (this.online === 'host' && typeof TourneyNet !== 'undefined') TourneyNet.push(); return; }
         try { if (this.state) localStorage.setItem(TOURNEY_KEY, JSON.stringify(this.state)); else localStorage.removeItem(TOURNEY_KEY); } catch (e) { }
         this.updateMenuCard();
     },
@@ -120,7 +124,10 @@ const TOURNEY = {
         }
         // Thoát trận giữa chừng (menu tạm dừng) -> về bảng giải, trận vẫn chưa đấu
         const back = this.el('backToMainMenuBtn');
-        if (back) back.addEventListener('click', () => { if (this.active) this.returnToHub(true); });
+        if (back) back.addEventListener('click', () => {
+            if (this.active) this.returnToHub(true);
+            else if (typeof TourneyNet !== 'undefined' && TourneyNet.cur) { TourneyNet.report({ drop: true }); TourneyNet.backToHub('Bạn đã rời trận — đã báo chủ giải.'); }
+        });
         const open = this.el('openTourneyBtn');
         if (open) open.addEventListener('click', () => this.open());
         this.state = this.load();
@@ -131,16 +138,18 @@ const TOURNEY = {
         const s = this.el('tourneyMenuSub');
         if (!s) return;
         const st = this.state;
-        if (st && st.status !== 'done') s.textContent = `▶ Tiếp tục: ${this.playedMatches(st)}/${this.totalMatches(st)} trận · ${st.players.length} người`;
+        if (this.online && st) s.textContent = `🌐 Giải online (${this.online === 'host' ? 'chủ giải' : 'thành viên'}) · ${st.players.length} người · bấm để mở`;
+        else if (st && st.status !== 'done') s.textContent = `▶ Tiếp tục: ${this.playedMatches(st)}/${this.totalMatches(st)} trận · ${st.players.length} người`;
         else s.textContent = '3–12 người · vòng tròn tính điểm · 1 máy làm chủ';
     },
 
     open() {
-        this.state = this.load();
         const ov = this.el('tourneyOverlay');
         const mm = this.el('mainMenu');
         if (mm) mm.style.display = 'none';
         ov.style.display = 'flex';
+        if (this.online && typeof TourneyNet !== 'undefined') { TourneyNet.showMain(); if (soundSystem && !soundSystem.muted) soundSystem.playClick(); return; }
+        this.state = this.load();
         if (!this.state) this.showSetup();
         else if (this.state.status === 'done') this.showPodium();
         else this.showResume();
@@ -211,7 +220,7 @@ const TOURNEY = {
     showSetup() {
         this.view = 'setup';
         if (!this.draft) this.draft = {
-            title: '🎂 GIẢI ĐẤU SINH NHẬT', theme: true, winScore: 2, classic: false,
+            title: '🎂 GIẢI ĐẤU SINH NHẬT', theme: true, winScore: 2, classic: false, net: false, pw: '', maxP: 8,
             pts: { win: 3, draw: 1, loss: -1 },
             players: ['', '', '', ''].map((_, i) => ({ name: '', color: TOURNEY_COLORS[i] })),
         };
@@ -228,11 +237,19 @@ const TOURNEY = {
         this.render(`
             <div class="tf-card">
                 <div class="tf-head"><span class="tf-cake">${d.theme ? '🎂' : '🏆'}</span><h2>TẠO GIẢI ĐẤU</h2></div>
+                <div class="mode-options tn-net">${opt('net', false, '📱 OFFLINE (1 máy)')}${opt('net', true, '🌐 ONLINE')}</div>
                 <label class="tf-lbl">TÊN GIẢI</label>
                 <input class="tf-in tf-wide" data-k="title" maxlength="40" value="${this.esc(d.title)}">
+                ${d.net ? `
+                <label class="tf-lbl">TÊN CỦA BẠN (CHỦ GIẢI)</label>
+                <input class="tf-in tf-wide" data-k="nick" maxlength="16" value="${this.esc(typeof onlineManager !== 'undefined' ? onlineManager.nick : '')}">
+                <label class="tf-lbl">MẬT KHẨU (TUỲ CHỌN)</label>
+                <input class="tf-in tf-wide" data-k="tpw" maxlength="16" placeholder="Để trống = ai cũng vào được" value="${this.esc(d.pw)}">
+                <label class="tf-lbl">SỐ NGƯỜI TỐI ĐA</label>
+                <input class="tf-in tf-num" type="number" min="3" max="12" data-k="tmax" value="${d.maxP}">` : `
                 <label class="tf-lbl">NGƯỜI CHƠI (${d.players.length}/12)</label>
                 <div class="tf-plist">${rows}</div>
-                <button class="glow-btn btn-dark tf-btn" data-act="addp" ${d.players.length >= 12 ? 'disabled' : ''}>＋ THÊM NGƯỜI CHƠI</button>
+                <button class="glow-btn btn-dark tf-btn" data-act="addp" ${d.players.length >= 12 ? 'disabled' : ''}>＋ THÊM NGƯỜI CHƠI</button>`}
                 <label class="tf-lbl">THỂ THỨC MỖI TRẬN</label>
                 <div class="mode-options">${opt('winScore', 2, 'CHẠM 2')}${opt('winScore', 3, 'CHẠM 3')}</div>
                 <label class="tf-lbl">LUẬT CHƠI</label>
@@ -245,9 +262,9 @@ const TOURNEY = {
                 </div>
                 <button class="glow-btn tf-btn tf-toggle ${d.theme ? 'on' : ''}" data-act="theme">🎉 GIAO DIỆN SINH NHẬT: ${d.theme ? 'BẬT' : 'TẮT'}</button>
                 <div class="tf-err" id="tfErr"></div>
-                <button class="glow-btn btn-primary tf-btn" data-act="create">🏁 TẠO GIẢI &amp; XẾP LỊCH</button>
+                <button class="glow-btn btn-primary tf-btn" data-act="create">${d.net ? '🌐 MỞ GIẢI ONLINE' : '🏁 TẠO GIẢI &amp; XẾP LỊCH'}</button>
                 <button class="glow-btn btn-dark tf-btn" data-act="menu">← MENU CHÍNH</button>
-                <p class="tf-note">Mỗi trận chơi trên máy này (2 người cùng máy). Chơi online theo slot: sẽ có trong bản sau.</p>
+                <p class="tf-note">${d.net ? 'Giải hiện trong danh sách phòng online (🏆). Người chơi vào từ máy của họ; mỗi trận 2 máy tự nối với nhau, đấu xong cả 2 báo kết quả cho chủ giải.' : 'Mỗi trận chơi trên máy này (2 người cùng máy).'}</p>
             </div>`);
     },
     onInput(e) {
@@ -260,9 +277,13 @@ const TOURNEY = {
         else if (k === 'pwin') d.pts.win = Math.round(+t.value || 0);
         else if (k === 'pdraw') d.pts.draw = Math.round(+t.value || 0);
         else if (k === 'ploss') d.pts.loss = Math.round(+t.value || 0);
+        else if (k === 'tpw') d.pw = t.value;
+        else if (k === 'tmax') d.maxP = Math.max(3, Math.min(12, Math.round(+t.value || 8)));
+        else if (k === 'nick' && typeof onlineManager !== 'undefined') onlineManager.saveNick(t.value);
     },
     create() {
         const d = this.draft;
+        if (d.net) { if (typeof TourneyNet !== 'undefined') TourneyNet.host(d); return; }
         const players = d.players.map((p, i) => ({ name: (p.name || '').trim() || `Người ${i + 1}`, color: p.color }));
         const names = players.map(p => p.name.toLowerCase());
         if (players.length < 3 || players.length > 12) return this.err('Cần 3–12 người chơi.');
@@ -344,11 +365,12 @@ const TOURNEY = {
         const st = this.state;
         if (!st) return this.showSetup();
         if (st.status === 'done') return this.showPodium();
+        if (st.online && st.status === 'lobby') return TourneyNet.showLobby();
         this.view = 'hub';
         this.setTheme(st.theme);
-        const nx = this.nextMatch(st);
+        const nx = st.online ? null : this.nextMatch(st);
         const rows = tourneyStandings(st);
-        let card = '';
+        let card = st.online ? TourneyNet.liveHtml() : '';
         if (nx) {
             const m = st.rounds[nx.r][nx.m];
             card = `<div class="tf-next">
@@ -372,10 +394,10 @@ const TOURNEY = {
                 ${this.standingsHtml(rows, animate)}
                 <div class="tf-sec">🗓️ LỊCH ĐẤU</div>
                 <div class="tf-sched">${this.scheduleHtml()}</div>
-                <div class="tf-actions">
+                <div class="tf-actions">${st.online ? TourneyNet.actsHtml(false) : `
                     <button class="glow-btn btn-secondary tf-btn" data-act="endearly">🏁 KẾT THÚC SỚM</button>
                     <button class="glow-btn btn-secondary tf-btn" data-act="new">🆕 GIẢI MỚI</button>
-                    <button class="glow-btn btn-dark tf-btn" data-act="menu">← MENU CHÍNH</button>
+                    <button class="glow-btn btn-dark tf-btn" data-act="menu">← MENU CHÍNH</button>`}
                 </div>
             </div>`);
         if (animate) { this.animateRows(); if (st.theme) this.confetti(30); }
@@ -384,6 +406,7 @@ const TOURNEY = {
     showForfeit() {
         const st = this.state, nx = this.nextMatch(st);
         if (!nx) return;
+        this.ffTarget = nx;
         const m = st.rounds[nx.r][nx.m];
         this.view = 'forfeit';
         this.render(`
@@ -417,8 +440,9 @@ const TOURNEY = {
         this.save();
     },
     forfeit(v) {
-        const st = this.state, nx = this.nextMatch(st);
-        if (!nx) return;
+        const st = this.state, nx = this.ffTarget || this.nextMatch(st);
+        this.ffTarget = null;
+        if (!nx || !st.rounds[nx.r] || st.rounds[nx.r][nx.m].res) return this.showHub();
         const W = st.winScore;
         if (v === 'a') this.record(nx.r, nx.m, 0, W, true);
         else if (v === 'b') this.record(nx.r, nx.m, W, 0, true);
@@ -493,6 +517,7 @@ const TOURNEY = {
 
     // Về bảng giải (sau trận hoặc thoát giữa chừng: aborted -> trận chưa ghi)
     returnToHub(aborted) {
+        if (typeof TourneyNet !== 'undefined' && TourneyNet.cur) return TourneyNet.backToHub();
         this.active = false;
         this.match = null;
         if (this.saved) { gameState.winScore = this.saved.winScore; gameState.classicMode = this.saved.classic; this.saved = null; }
@@ -511,7 +536,7 @@ const TOURNEY = {
     showPodium(celebrate) {
         const st = this.state;
         this.view = 'podium';
-        if (st.status !== 'done') { st.status = 'done'; this.save(); }
+        if (st.status !== 'done' && this.online !== 'member') { st.status = 'done'; this.save(); }
         this.setTheme(st.theme);
         const rows = tourneyStandings(st);
         const step = (r, cls, medal) => r ? `<div class="tf-pod ${cls}">
@@ -529,9 +554,9 @@ const TOURNEY = {
                 ${this.standingsHtml(rows, false)}
                 <div class="tf-sec">🗓️ KẾT QUẢ CÁC VÒNG</div>
                 <div class="tf-sched">${this.scheduleHtml()}</div>
-                <div class="tf-actions">
+                <div class="tf-actions">${st.online ? TourneyNet.actsHtml(true) : `
                     <button class="glow-btn btn-primary tf-btn" data-act="new">🆕 GIẢI MỚI</button>
-                    <button class="glow-btn btn-dark tf-btn" data-act="menu">← MENU CHÍNH</button>
+                    <button class="glow-btn btn-dark tf-btn" data-act="menu">← MENU CHÍNH</button>`}
                 </div>
             </div>`);
         if (st.theme) this.startFx(celebrate === false ? 0 : 120);
@@ -550,7 +575,7 @@ const TOURNEY = {
             case 'delp': if (d.players.length > 3) { d.players.splice(+b.dataset.i, 1); this.showSetup(); } break;
             case 'opt': {
                 const k = b.dataset.k;
-                d[k] = k === 'classic' ? b.dataset.v === 'true' : +b.dataset.v;
+                d[k] = (k === 'classic' || k === 'net') ? b.dataset.v === 'true' : +b.dataset.v;
                 this.showSetup(); break;
             }
             case 'theme': d.theme = !d.theme; this.showSetup(); break;
@@ -560,12 +585,13 @@ const TOURNEY = {
             case 'forfeit': this.showForfeit(); break;
             case 'ff': this.forfeit(b.dataset.v); break;
             case 'endearly': this.confirmBox('Kết thúc giải ngay? Các trận chưa đấu sẽ bị bỏ qua và trao giải theo bảng xếp hạng hiện tại.', 'doend'); break;
-            case 'doend': this.state.status = 'done'; this.save(); this.showPodium(true); break;
+            case 'doend': if (this.online === 'member') break; this.state.status = 'done'; this.save(); this.showPodium(true); break;
             case 'new':
                 if (this.state && this.state.status !== 'done' && this.view !== 'confirm') this.confirmBox('Huỷ giải đang chơi và tạo giải mới? Kết quả hiện tại sẽ bị xoá.', 'donew');
                 else this.newTourney();
                 break;
             case 'donew': this.newTourney(); break;
+            default: if (act.startsWith('tn-') && typeof TourneyNet !== 'undefined') TourneyNet.onAct(act, b);
         }
     },
     newTourney() {

@@ -357,13 +357,14 @@ class OnlineMultiplayerManager {
         if (soundSystem && !soundSystem.muted) soundSystem.playHit();
     }
 
-    createRoom() {
-        const vis = this.uiVis || 'public';
-        const pwEl = document.getElementById('createRoomPassword');
-        const nameEl = document.getElementById('createRoomName');
-        const modeEl = document.getElementById('createRoomMode');
+    // opts (giải đấu online): { code, pw, name, winScore } -> phòng riêng tư mã/mật khẩu cho sẵn
+    createRoom(opts) {
+        const vis = opts ? 'private' : (this.uiVis || 'public');
+        const pwEl = opts ? null : document.getElementById('createRoomPassword');
+        const nameEl = opts ? null : document.getElementById('createRoomName');
+        const modeEl = opts ? null : document.getElementById('createRoomMode');
         const errEl = document.getElementById('createRoomError');
-        const pw = pwEl ? pwEl.value.trim() : '';
+        const pw = opts ? String(opts.pw || '') : (pwEl ? pwEl.value.trim() : '');
         if (errEl) errEl.style.display = 'none';
         if (vis === 'private' && pw.length < 3) {
             if (errEl) { errEl.style.display = 'block'; errEl.innerText = '🔒 Phòng riêng tư cần mật khẩu (ít nhất 3 ký tự)!'; }
@@ -376,10 +377,10 @@ class OnlineMultiplayerManager {
         this.roomOwner = true;
         this.roomVis = vis;
         this.roomPw = vis === 'private' ? pw : '';
-        this.roomName = (nameEl && nameEl.value.trim().slice(0, 24)) || ('Phòng của ' + this.nick);
-        const ws = modeEl ? parseInt(modeEl.value, 10) : 3;
+        this.roomName = (opts && opts.name) || (nameEl && nameEl.value.trim().slice(0, 24)) || ('Phòng của ' + this.nick);
+        const ws = opts ? opts.winScore : (modeEl ? parseInt(modeEl.value, 10) : 3);
         gameState.winScore = (ws >= 1 && ws <= 9) ? ws : 3;
-        const rawCode = this.generateRoomCode();
+        const rawCode = (opts && opts.code) || this.generateRoomCode();
         this.roomCode = "CY-" + rawCode;
         this.myPeerId = this.roomCode;
         this.playersLobbyData = [
@@ -446,6 +447,7 @@ class OnlineMultiplayerManager {
         this.cleanup();
         this.joinPw = String(pw || '').trim();
         let codeInput = (rawCode || '').trim().toUpperCase();
+        if (/^CYT-/.test(codeInput) && typeof TourneyNet !== 'undefined') { TourneyNet.join(codeInput, this.joinPw); return; }
         if (!codeInput) {
             this.showJoinError('Vui lòng nhập mã phòng hợp lệ (VD: CY-8842 hoặc 8842)!');
             return;
@@ -785,6 +787,7 @@ class OnlineMultiplayerManager {
         updateScoreBoard();
         let targetWins = gameState.winScore || 3;
         if (gameState.p1Score >= targetWins || gameState.p2Score >= targetWins) {
+            if (typeof TourneyNet !== 'undefined' && TourneyNet.onMatchEnd(gameState.p1Score, gameState.p2Score)) return;
             const iWon = (gameState.p2Score >= targetWins);
             document.getElementById('finalWinner').innerText = (iWon ? "BẠN (PLAYER 2)" : "PLAYER 1") + " VÔ ĐỊCH!";
             setTimeout(() => { document.getElementById('endScreen').style.display = 'block'; }, 1200);
@@ -1301,6 +1304,7 @@ class OnlineMultiplayerManager {
     }
 
     onDisconnected() {
+        if (typeof TourneyNet !== 'undefined' && TourneyNet.onRoomDrop()) return; // trận của giải online: giải tự xử lý
         // Chủ phòng đã nhường vai host cho máy kia, máy kia rời khi còn ở sảnh -> lấy lại vai host, chờ người mới
         if (this.isOnline && this.roomOwner && this.role === 'guest' && !this.matchActive) {
             this.reclaimHost();
@@ -1507,13 +1511,16 @@ class OnlineMultiplayerManager {
             b.type = 'button';
             b.className = 'room-item';
             b.dataset.code = r.code;
-            b.disabled = r.players >= 2;
-            b.innerHTML = `<span class="ri-name">${esc(r.name)}</span><span class="ri-players">👥 ${r.players}/2</span>` +
+            const tour = r.kind === 'tour', max = r.max || 2;
+            if (tour) b.classList.add('ri-tour');
+            b.disabled = r.players >= max;
+            b.innerHTML = `<span class="ri-name">${tour ? '<b class="ri-badge">🏆 GIẢI</b> ' : ''}${esc(r.name)}${r.locked ? ' 🔒' : ''}</span><span class="ri-players">👥 ${r.players}/${max}</span>` +
                 `<span class="ri-meta">👑 ${esc(r.host)} · ${esc(r.mode)} · ${esc(r.code)}</span><span class="ri-ping">…</span>`;
             b.addEventListener('click', () => {
                 if (soundSystem && !soundSystem.muted) soundSystem.playClick();
                 const inp = document.getElementById('joinRoomInput');
                 if (inp) inp.value = r.code;
+                if (tour && typeof TourneyNet !== 'undefined') { TourneyNet.join(r.code, this.joinPwValue()); return; }
                 this.joinRoom(r.code, '');
             });
             list.appendChild(b);
@@ -1525,7 +1532,7 @@ class OnlineMultiplayerManager {
                 pe.textContent = res.rtt + ' ms';
                 pe.className = 'ri-ping ' + (res.rtt < 80 ? 'good' : res.rtt < 160 ? 'mid' : 'bad');
                 if (typeof res.players === 'number') {
-                    b.querySelector('.ri-players').textContent = `👥 ${Math.max(1, res.players)}/2`;
+                    b.querySelector('.ri-players').textContent = `👥 ${Math.max(1, res.players)}/${max}`;
                     b.disabled = !res.open;
                 }
             });

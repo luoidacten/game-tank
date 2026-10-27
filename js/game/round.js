@@ -242,6 +242,7 @@ function endRound(winnerId) {
             setTimeout(() => PVE.onMatchEnd(won), 1200);
             return;
         }
+        if (typeof TourneyNet !== 'undefined' && TourneyNet.onMatchEnd(gameState.p1Score, gameState.p2Score)) return;
         if (typeof TOURNEY !== 'undefined' && TOURNEY.active) { TOURNEY.onMatchEnd(gameState.p1Score, gameState.p2Score); return; }
         let winnerName = (gameState.p1Score >= targetWins) ? "PLAYER 1" : "PLAYER 2";
         document.getElementById('finalWinner').innerText = winnerName + " VÔ ĐỊCH!";

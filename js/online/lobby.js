@@ -20,11 +20,14 @@ class RoomRegistry {
             name: String(ad.name || ad.code).slice(0, 28),
             host: String(ad.host || '?').slice(0, 20),
             mode: String(ad.mode || '').slice(0, 20),
-            players: Math.max(0, Math.min(2, ad.players | 0)),
-            max: 2,
+            kind: ad.kind === 'tour' ? 'tour' : '',   // 'tour' = giải đấu online (🏆, nhiều người)
+            locked: !!ad.locked,
+            players: 0, max: 2,
             hostPing: typeof ad.hostPing === 'number' ? ad.hostPing : null,
             at: now,
         };
+        if (clean.kind === 'tour') clean.max = Math.max(3, Math.min(12, ad.max | 0 || 12));
+        clean.players = Math.max(0, Math.min(clean.max, ad.players | 0));
         this.ads[clean.code] = clean;
         return true;
     }
@@ -32,7 +35,7 @@ class RoomRegistry {
     prune(now) { for (const k in this.ads) if (now - this.ads[k].at > this.ttl) delete this.ads[k]; }
     list(now) {
         this.prune(now);
-        return Object.values(this.ads).sort((a, b) => (a.players - b.players) || (b.at - a.at)).map(a => Object.assign({}, a, { age: now - a.at }));
+        return Object.values(this.ads).sort((a, b) => ((a.players >= a.max) - (b.players >= b.max)) || (a.players - b.players) || (b.at - a.at)).map(a => Object.assign({}, a, { age: now - a.at }));
     }
 }
 
@@ -45,7 +48,12 @@ class LocalConn {
     _emit(ev, ...a) { (this.h[ev] || []).forEach(f => { try { f(...a); } catch (e) { console.warn('LocalConn', ev, e); } }); }
     send(d) { if (this.open) this.owner._post({ t: 'data', cid: this.cid, to: this.peer, d }); }
     close() { if (this.closed) return; this.owner._post({ t: 'close', cid: this.cid, to: this.peer }); this._closed(); }
-    _open() { if (this.open || this.closed) return; this.open = true; this._emit('open'); }
+    _open() {
+        if (this.open || this.closed) return;
+        this.open = true; this._emit('open');
+        const q = this._q; this._q = null; // gói đến trước khi 'open' (tab nền bị hoãn setTimeout) -> phát lại, không bỏ
+        if (q) q.forEach(d => { if (this.open) this._emit('data', d); });
+    }
     _closed() { if (this.closed) return; this.closed = true; this.open = false; delete this.owner.conns[this.cid]; this._emit('close'); }
 }
 class LocalPeer {
@@ -99,6 +107,7 @@ class LocalPeer {
             case 'data': {
                 const c = m.to === this.id && this.conns[m.cid];
                 if (c && c.open) c._emit('data', m.d);
+                else if (c && !c.closed) (c._q = c._q || []).push(m.d);
                 return;
             }
             case 'close': {
@@ -155,7 +164,7 @@ class LobbyDirectory {
         this.conn = null;         // kết nối tới sổ phòng (khi là client)
         this.reg = new RoomRegistry();
         this.pending = {};        // rid -> resolve
-        this.myAd = null;
+        this.myAds = {};          // key ('room' | 'tour') -> quảng cáo của máy này
         this.beatTimer = null;
         this._starting = null;
         this._waits = {};         // peerId đích -> hàm kết thúc khi PeerJS báo peer-unavailable
@@ -217,7 +226,7 @@ class LobbyDirectory {
             if (this.conn !== c) return;
             this.conn = null; this.mode = 'idle';
             // sổ phòng mất -> chủ phòng quảng cáo lại ngay (tự tìm / giành sổ phòng mới)
-            if (this.myAd) setTimeout(() => this._announce(), 300 + Math.random() * 700);
+            if (this.hasAds()) setTimeout(() => this._announce(), 300 + Math.random() * 700);
         });
     }
 
@@ -262,7 +271,7 @@ class LobbyDirectory {
                     const old = this.regPeer; this.regPeer = null;
                     try { old.destroy(); } catch (e) {}
                     this.reg = new RoomRegistry();
-                    if (this.myAd) this._announce();
+                    if (this.hasAds()) this._announce();
                     return;
                 }
             }
@@ -318,10 +327,11 @@ class LobbyDirectory {
         return null;
     }
 
-    // Đặt / xoá quảng cáo phòng của máy này (null = xoá)
-    setAd(ad) {
-        const old = this.myAd;
-        this.myAd = ad ? Object.assign({}, ad) : null;
+    hasAds() { return Object.keys(this.myAds).length > 0; }
+    // Đặt / xoá quảng cáo phòng của máy này (null = xoá). key: 'room' (phòng 1v1) | 'tour' (giải đấu)
+    setAd(ad, key = 'room') {
+        const old = this.myAds[key];
+        if (ad) this.myAds[key] = Object.assign({}, ad); else delete this.myAds[key];
         if (!ad && old) {
             if (this.mode === 'registry') this.reg.del(old.code);
             else this._req({ t: 'DEL', code: old.code });
@@ -331,11 +341,13 @@ class LobbyDirectory {
     }
 
     async _announce() {
-        if (!this.myAd) return false;
+        if (!this.hasAds()) return false;
         if (!(await this.start())) return false;
-        if (!this.myAd) return false;
-        if (this.mode === 'registry') { this.reg.put(this.myAd, Date.now()); return true; }
-        const ok = await this._req({ t: 'ANN', ad: this.myAd });
+        const ads = Object.values(this.myAds);
+        if (!ads.length) return false;
+        if (this.mode === 'registry') { ads.forEach(a => this.reg.put(a, Date.now())); return true; }
+        let ok = true;
+        for (const a of ads) ok = (await this._req({ t: 'ANN', ad: a })) && ok;
         if (!ok) { try { this.conn && this.conn.close(); } catch (e) {} this.conn = null; this.mode = 'idle'; }
         return !!ok;
     }
@@ -343,7 +355,7 @@ class LobbyDirectory {
     _startBeat() {
         if (this.beatTimer) return;
         this.beatTimer = setInterval(() => {
-            if (this.myAd) this._announce();
+            if (this.hasAds()) this._announce();
             if (this.mode === 'registry') { this.reg.prune(Date.now()); this._maybeResign(); }
         }, LOBBY.beat);
     }

@@ -114,3 +114,28 @@
 @keyframes tfRise { 0%, 40% { background: rgba(74, 222, 128, 0.28); } 100% { background: rgba(10, 14, 24, 0.9); } }
 @keyframes tfFall { 0%, 40% { background: rgba(251, 113, 133, 0.22); } 100% { background: rgba(10, 14, 24, 0.9); } }
 @media (prefers-reduced-motion: reduce) { .tf-balloon, .tf-confetti { display: none; } }
+
+/* ===== GIẢI ĐẤU ONLINE (js/online/tourney-net.js) ===== */
+.tn-net { margin-bottom: 6px; }
+.tn-code { font-size: 12px; color: #9fe9ff; background: rgba(0, 240, 255, 0.08); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: 8px; padding: 6px 8px; margin: 6px 0; text-align: center; }
+.tn-code b { color: #fff; letter-spacing: 1px; }
+.tn-note { color: #fde68a; }
+.tn-on { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #64748b; margin: 0 4px; box-shadow: none; vertical-align: middle; }
+.tn-on.on { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
+.tn-prow { gap: 6px; align-items: center; }
+.tn-mrow { margin: 4px 0; }
+.tn-mrow.tn-mine .tf-match { border-color: #facc15; box-shadow: 0 0 8px rgba(250, 204, 21, 0.35); }
+.tn-mrow[data-st="dispute"] .tf-match, .tn-mrow[data-st="issue"] .tf-match { border-color: #ff0055; }
+.tn-mnote { font-size: 11px; color: #fda4af; text-align: center; margin: 2px 0; }
+.tn-mbtns { display: flex; gap: 6px; justify-content: center; margin: 3px 0 6px; }
+.tn-sbtn { padding: 4px 10px !important; font-size: 12px !important; min-height: 0 !important; width: auto !important; }
+.tn-chat { position: relative; width: min(460px, calc(100% - 32px)); margin: 8px auto 16px; background: rgba(5, 10, 25, 0.85); border: 1px solid rgba(0, 240, 255, 0.35); border-radius: 10px; padding: 6px; box-sizing: border-box; flex-shrink: 0; }
+.tn-chat-log { max-height: 120px; overflow-y: auto; font-size: 12px; color: #e2e8f0; padding: 2px 4px; word-break: break-word; }
+.tn-chat-log b { color: #00f0ff; }
+.tn-chat-log .tn-sys { color: #94a3b8; font-style: italic; }
+.tn-chat-row { display: flex; gap: 6px; margin-top: 4px; }
+.tn-chat-row .tf-in { flex: 1; min-width: 0; }
+.room-item.ri-tour { border-color: #facc15; background: linear-gradient(90deg, rgba(250, 204, 21, 0.12), transparent); }
+.ri-badge { color: #111; background: #facc15; border-radius: 4px; padding: 0 4px; font-size: 11px; }
+.tourney-overlay.tn-online { flex-direction: column; justify-content: flex-start; align-items: stretch; }
+.tourney-overlay.tn-online .tourney-wrap { margin: 0 auto; }
