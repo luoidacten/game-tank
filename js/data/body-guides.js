@@ -859,6 +859,16 @@ const BODY_GUIDES = {
         passive: ['Giữ chạy ngang: tốc 3.0 -> 5.6; dừng 0.25s thì tụt dần', 'Chạm tường tự Drift đảo chiều giữ nguyên đà, +0.4 tốc 1.5s', 'Tốc >= 4.8 BỐC LỬA: giảm 25% sát thương, đạn Thiêu Đốt'],
         evo: { e1: 'Gia tốc +50%, +0.09 dame/bậc, Drift +1 đạn +0.6 tốc', e2: 'Trần tốc 6.2, bốc lửa miễn Làm Chậm, giảm 35%', full: 'Drift/Nitro phun 2 Cầu Lửa; tốc >= 6.0 xuyên khiên 50%' },
         tips: ['Đừng đứng yên: luôn giữ phím chạy và bắn lúc đang lướt', 'Bấm Nitro lúc đang chạy để đổi hướng mà không mất đà']
+    },
+    collector: {
+        tag: 'Triệu hồi bóng ma 10 loại súng', diff: 2,
+        controls: [
+            { input: 'TAP', name: 'Bắn đạn đang cầm', what: 'Mặc định 1.0 dame, 5 viên; đổi loại theo kho đạn' },
+            { input: 'HOLD 0.5s', name: 'Khui Kho Vũ Khí', what: 'Nạp đầy + đổi 1 trong 10 loại đạn ngẫu nhiên (CD 12s)' }
+        ],
+        passive: ['Mỗi 2–8s: Hologram (10 body) hiện trên làn bạn, bắn đúng 1 lượt (70% dame) rồi tan', 'Hologram không chặn đạn, địch không nhắm được'],
+        evo: { e1: 'CD đổi đạn 6s, +1 đạn, nạp nhanh 25%, sau đổi +25% tốc & 2 phát +30%', e2: 'Hologram 1.5–4.5s, 100% dame + Evo 1, đổi đạn gọi thêm 1 Hologram', full: '50% gọi 2 Hologram; đạn Khui Kho mang hiệu ứng Full Evo gốc' },
+        tips: ['Đứng gần vị trí cổng dữ liệu để canh tia Lazer/Sniper của Hologram', 'Khui Kho khi hết đạn để vừa nạp vừa có loại đạn mới']
     }
 };
 

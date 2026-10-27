@@ -363,6 +363,10 @@ const EVOLUTIONS = {
         { id: 'evo_hell_1', name: 'Bộ Tăng Áp Vô Cấp', desc: 'Gia tốc khi chạy ngang nhanh hơn 50% (0.8s đạt tối đa). Mỗi 0.2 tốc vượt 3.0 cho +0.09 sát thương (thay vì +0.07). Mỗi lần Drift chạm tường: +1 đạn và +0.6 tốc bứt phá (1.5s).', cost: 160, type: 'evo' },
         { id: 'evo_hell_2', name: 'Bánh Xe Bất Khuất', desc: 'Trần tốc chạy 5.6 -> 6.2 (Nitro vượt 7.5). Khi Bốc Lửa (tốc >= 4.8): MIỄN NHIỄM Làm Chậm, giảm sát thương nhận 25% -> 35%. FULL EVO (Ác Quỷ Tốc Độ): mỗi Drift chạm tường / mỗi Rồ Ga Nitro phun 2 Cầu Lửa ống xả (50% sát thương đạn); tốc >= 6.0 đạn xuyên khiên 50%.', cost: 290, type: 'evo' },
     ],
+    collector: [
+        { id: 'evo_col_1', name: 'Bộ Sưu Tập Mở Rộng', desc: 'Hồi chiêu Khui Kho Vũ Khí 12s -> 6s. Mỗi lần đổi đạn: +25% tốc chạy 1.5s và 2 phát đầu +30% sát thương. Băng đạn mọi loại +1 viên, nạp nhanh hơn 25%.', cost: 160, type: 'evo' },
+        { id: 'evo_col_2', name: 'Triển Lãm Hologram', desc: 'Hologram gọi mỗi 1.5–4.5s (thay vì 2–8s), sát thương 100% (thay vì 70%) và mang hiệu ứng Evo 1 của body gốc (Lazer Xuyên tia to x3, Sniper 25% Raycast, Lazer Pháo tia Nóng Đỏ...). Mỗi lần Khui Kho gọi ngay thêm 1 Hologram. FULL EVO (Bảo Tàng Sống): mỗi lần gọi có 50% ra CÙNG LÚC 2 Hologram ở 2 vị trí; đạn Khui Kho mang hiệu ứng FULL EVO của body gốc.', cost: 290, type: 'evo' },
+    ],
 };
 
 // ==========================================
@@ -382,6 +386,7 @@ const FULL_EVO_GATE = {
     psychokinesis: 180,
     batter: 170,
     hellrider: 170,
+    collector: 180,
 };
 // MỌI body (trừ basic: dạng MAIN tự có Full Evo) đều phải mua thẻ FULL EVO
 for (const body in EVOLUTIONS) {

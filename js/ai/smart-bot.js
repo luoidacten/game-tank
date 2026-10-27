@@ -819,3 +819,18 @@ function botShopBuy(playerId) {
         return f.call(this, bot, enemy, aligned, inp);
     };
 })();
+
+// Kẻ Thu Thập: nhấp khi thẳng hàng, giữ 0.5s Khui Kho Vũ Khí khi hết đạn / hồi chiêu xong (colBotAction)
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon === 'collector' && typeof colBotAction === 'function') {
+            if (this.colB > 0) { this.colB--; inp.s = this.colB > 2; return; }
+            const a = colBotAction(bot, enemy, aligned);
+            if (a === 'tap') { this.colB = 5; inp.s = true; return; }
+            if (a === 'switch') { this.colB = COL_HOLD + 4; inp.s = true; return; }
+            inp.s = false; return;
+        }
+        return f.call(this, bot, enemy, aligned, inp);
+    };
+})();

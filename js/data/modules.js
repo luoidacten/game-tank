@@ -538,6 +538,14 @@ const MODULES = {
             size: { w: 30, h: 30 },
             stats: { hp: 5.5, dmg: 1.0, ammo: 4, speedMult: 0.8571 }
         },
+        {
+            id: 'collector',
+            name: 'Kẻ Thu Thập — Bảo Tàng Chiến Tranh',
+            desc: '"Mọi chiến binh từng bước qua đấu trường này... đều nằm trong bộ sưu tập của ta!" HP:5 | Dame:1.0 | Đạn:5 (đổi theo loại đạn) | Tốc:3.6. Nội tại: mỗi 2–8s mở cổng dữ liệu triệu hồi 1 Hologram (1 trong 10 body cơ bản, 70% dame, không chặn đạn, không bị nhắm) thực hiện đúng 1 lượt tấn công rồi tan. GIỮ BẮN 0.5s: Khui Kho Vũ Khí (CD 12s) — nạp đầy & đổi sang 1 loại đạn ngẫu nhiên (Băng, Lửa, Đạn Lớn, Shotgun, Tên Lửa, Sniper, Axit, Phi Kiếm, Phân Mảnh, Bài Phóng), đổi luôn số đạn & tốc nạp.',
+            type: 'body', role: ['Đối Đầu', 'Kiểm Soát'],
+            size: { w: 30, h: 30 },
+            stats: { hp: 5, dmg: 1.0, ammo: 5, speedMult: 1.0286 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 35 },
