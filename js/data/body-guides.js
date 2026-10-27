@@ -839,5 +839,15 @@ const BODY_GUIDES = {
         passive: ['Đứng trong Vùng Lửa luôn bị Đốt', '3 chấm cạnh xe: đủ 2 chấm -> phát tới là Hỏa Cầu'],
         evo: { e1: '+1 Máu, vùng to hơn, cứ 2 vùng có 1 Đại Hỏa', e2: 'x1.4 dame lên địch cháy, Đốt 3 tầng, kích nổ', full: 'Tường Lửa + Hỏa Ngục mỗi 7s' },
         tips: ['Rải Hỏa Cầu cạnh nhau để dồn địch vào góc', 'Đốt địch trước rồi mới tung Hỏa Cầu']
+    },
+    batter: {
+        tag: 'Phản đạn địch bằng gậy, hồi máu', diff: 1,
+        controls: [
+            { input: 'TAP', name: 'Ném Bóng', what: 'Pitch thứ 4 là Bóng Lửa nhanh x2, 1.6 dame' },
+            { input: 'HOLD 0.35s', name: 'Vung Gậy', what: 'Cung rộng 0.45s, CD 4.5s: đạn địch bị đập ngược' }
+        ],
+        passive: ['Home Run: đạn phản x2 tốc, +0.7 dame, hồi 0.3 HP', 'Vung trượt không mất máu, ra Bóng Vàng 1.4 dame'],
+        evo: { e1: 'CD 3.0s, cung rộng, +20% tốc sau vung', e2: 'Đạn phản to x1.5, xuyên, Khiên 2s', full: 'Phản mọi đạn trong tầm, +$5 mỗi Home Run' },
+        tips: ['Giữ nút ngay khi đạn địch sắp tới gần mũi xe']
     }
 };

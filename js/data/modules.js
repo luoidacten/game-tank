@@ -522,6 +522,14 @@ const MODULES = {
             stats: { hp: 4.5, dmg: 1.35, ammo: 3, speedMult: 0.9714 }
         },
         { id: 'fire_cannon', name: 'Pháo Lửa', desc: '"Băng làm chậm, lửa thiêu rụi." HP:4 | Dame:1 | Đạn:5 (Thiêu đốt). Đạn trúng địch gây ĐỐT 1.5s (0.05 dame mỗi 0.5s). Mỗi phát thứ 3 là HỎA CẦU bay nhanh, để lại VÙNG LỬA trên làn địch 3s (0.1 dame mỗi 0.5s, đứng trong lửa luôn bị Đốt). Evo 1: +1 Máu, vùng lửa to, lâu & nóng hơn, cứ 2 vùng có 1 vùng ĐẠI HỎA (rất to, 5s, dame x3). Evo 2: x1.4 dame lên địch đang cháy, Đốt cộng dồn 3 tầng; Hỏa Cầu trúng địch đang cháy KÍCH NỔ các tầng (0.35 dame/tầng). Full Evo: vùng lửa gần nhau hợp nhất thành TƯỜNG LỬA; mỗi 7s HỎA NGỤC dựng lửa dưới chân địch & Đốt tối đa.', type: 'body', role: ['Kiểm Soát', 'Đối Đầu'], size: { w: 30, h: 30 }, stats: { hp: 4, dmg: 1, ammo: 5 } },
+        {
+            id: 'batter',
+            name: 'Batter — Vua Bóng Chày',
+            desc: '"Home Run! Trả lại viên đạn cho ngươi này!" HP:6.0 | Dame:1.1 | Đạn:4 | Tốc:3.8. NHẤP: ném Bóng Chày; pitch thứ 4 là Bóng Lửa (x2 tốc, 1.6 dame). GIỮ 0.35s: Vung Gậy (CD 4.5s) quét cung rộng 0.45s — trúng đạn địch = HOME RUN (đập ngược x2 tốc, +0.7 dame, hồi 0.3 HP); không có đạn thì đánh ra Bóng Vàng 1.4 dame.',
+            type: 'body', role: ['Sinh Tồn', 'Đối Đầu'],
+            size: { w: 30, h: 30 },
+            stats: { hp: 6.0, dmg: 1.1, ammo: 4, speedMult: 1.0857 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 35 },

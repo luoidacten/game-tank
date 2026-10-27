@@ -785,3 +785,18 @@ function botShopBuy(playerId) {
         return f.call(this, bot, enemy, aligned, inp);
     };
 })();
+
+// Batter: nhấp ném bóng khi địch trên làn; giữ 0.35s vung gậy khi có đạn địch bay tới gần (btBotAction)
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon === 'batter' && typeof btBotAction === 'function') {
+            if (this.btB > 0) { this.btB--; inp.s = this.btB > 2; return; }
+            const a = btBotAction(bot, enemy);
+            if (a === 'tap') { this.btB = 5; inp.s = true; return; }
+            if (a === 'swing') { this.btB = BT_HOLD + 4; inp.s = true; return; }
+            inp.s = false; return;
+        }
+        return f.call(this, bot, enemy, aligned, inp);
+    };
+})();

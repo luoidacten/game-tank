@@ -355,6 +355,10 @@ const EVOLUTIONS = {
         { id: 'evo_mortar_1', name: 'Thuốc Phóng Áp Suất Cao', desc: 'Thời gian đạn rơi (vòng cảnh báo) 0.85s -> 0.65s. +1 đạn (thành 4 quả) và tốc độ nạp đạn nhanh hơn 25% (so với nạp gốc đã chậm đi 15%).', cost: 160, type: 'evo' },
         { id: 'evo_mortar_2', name: 'Đạn Cối Nhiệt Nhôm', desc: 'Mỗi quả bắn thường nổ xong để lại Hố Đạn Nóng Đỏ (65px) trên làn địch 2.5s: đốt 0.2 HP/s & làm chậm 25%. Hồi chiêu Mưa Pháo Rải Thảm 10s -> 7s. FULL EVO (Pháo Đài Bầu Trời): mỗi phát bắn thường thứ 3 là Đại Pháo Cối (vòng 90px, 1.8 Dame), chạm đất nảy 2 Đạn Chùm sang Trái/Phải ±70px (nổ sau 0.35s, 0.6 Dame/quả). Mỗi lần Hồng Tâm: +0.3 Giáp Trắng & giảm 1.0s hồi chiêu Rải Thảm.', cost: 290, type: 'evo' },
     ],
+    batter: [
+        { id: 'evo_bat_1', name: 'Gậy Nhôm Siêu Nhẹ', desc: 'Hồi chiêu Vung Gậy 4.5s -> 3.0s, cung vung rộng hơn, +20% tốc chạy trong 1.5s sau khi vung.', cost: 160, type: 'evo' },
+        { id: 'evo_bat_2', name: 'Grand Slam', desc: 'Home Run: đạn bay ngược to gấp rưỡi, xuyên vật cản, tặng Batter Khiên Bóng Chày 2s. FULL EVO: 1 cú vung phản TẤT CẢ đạn địch trong tầm và thưởng +$5 mỗi Home Run.', cost: 290, type: 'evo' },
+    ],
 };
 
 // ==========================================
@@ -372,6 +376,7 @@ const FULL_EVO_GATE = {
     blood_lord: 200,   // Full Evo nhảy vọt mạnh nhất (+42% tỉ lệ thắng)
     genius: 200,
     psychokinesis: 180,
+    batter: 170,
 };
 // MỌI body (trừ basic: dạng MAIN tự có Full Evo) đều phải mua thẻ FULL EVO
 for (const body in EVOLUTIONS) {
