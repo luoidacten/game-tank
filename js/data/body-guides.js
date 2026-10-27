@@ -247,7 +247,7 @@ const BODY_GUIDES = {
             { input: 'HOLD 1s', name: 'Hoán Đổi', what: 'Đổi chỗ với bản sao' }
         ],
         passive: ['Bản sao luôn ở vị trí đối xứng'],
-        evo: { e1: 'Đổi hồi 3s, sau đổi +tốc +dame', e2: 'Ảnh chiếu chia sát thương', full: 'Hoán đổi liên tục, khó bắt' },
+        evo: { e1: 'Đổi hồi 3s, sau đổi +tốc +dame', e2: 'Ảnh chiếu chia sát thương', full: 'Hoán đổi liên tục, Ảnh chiếu động luôn đối xứng địch (đánh trúng = dame lên địch)' },
         tips: ['Hoán đổi để né đạn sắp trúng']
     },
     sukuna: {

@@ -13,6 +13,7 @@ Object.assign(Player.prototype, {
             this.speedBuffActive = false;
             this.enemyClone = null;      // Ảnh chiếu kẻ thù đứng yên
             this.shatteredClone = null;  // Ảnh chiếu tan vỡ (Full Evo)
+            this.dynClone = null;        // Ảnh chiếu động đối xứng qua tâm (Full Evo)
         }
     },
 
@@ -22,6 +23,32 @@ Object.assign(Player.prototype, {
             let hasEvo1 = this.hasUpgrade('evo_mirror_1');
             let hasEvo2 = this.hasUpgrade('evo_mirror_2');
             let isFullEvo = hasEvo1 && hasEvo2 && hasFullEvo(this, 'mirror');
+
+            // [FULL EVO] Ảnh chiếu động: luôn có 1 bản sao địch di chuyển đối xứng (cùng làn), không bắn.
+            // Đạn của Gương trúng nó -> chuyển sát thương sang địch như Ảnh chiếu tĩnh (x1.5, đạn xuyên không trúng lặp).
+            if (isFullEvo) {
+                const foe = (this.id === 1) ? p2 : p1;
+                if (foe) {
+                    if (!this.dynClone) this.dynClone = { active: true };
+                    const d = this.dynClone;
+                    d.w = foe.w; d.h = foe.h;
+                    d.x = canvas.width - foe.x - foe.w;
+                    d.y = foe.y;
+                    d.active = foe.hp > 0;
+                    if (d.active) {
+                        for (let i = this.bullets.length - 1; i >= 0; i--) {
+                            const b = this.bullets[i];
+                            if (b._dynHit || !rectIntersect(b.x, b.y, b.w, b.h, d.x, d.y, d.w, d.h)) continue;
+                            if (rectIntersect(b.x, b.y, b.w, b.h, foe.x, foe.y, foe.w, foe.h)) continue; // trúng bản thể thì để combat xử lý
+                            b._dynHit = true;
+                            foe.takeDamage((b.dmg || 1) * 1.5, this);
+                            explosions.push(new Explosion(d.x + d.w / 2, d.y + d.h / 2, 40, 'cyan', 0, this));
+                            explosions.push(new Explosion(foe.x + foe.w / 2, foe.y + foe.h / 2, 40, 'red', 0, this));
+                            if (!b.isPiercing) this.bullets.splice(i, 1);
+                        }
+                    }
+                }
+            } else this.dynClone = null;
 
             if (this.mirrorCD > 0) this.mirrorCD--;
             if (this.mirrorQuickShot > 0) this.mirrorQuickShot--;

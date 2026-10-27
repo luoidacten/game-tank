@@ -46,6 +46,23 @@ Object.assign(Player.prototype, {
                 ctx.restore();
             }
 
+            // 2b. ẢNH CHIẾU ĐỘNG (Full Evo): bản sao địch đối xứng, lấp lánh
+            if (this.dynClone && this.dynClone.active) {
+                ctx.save();
+                const foe = (this.id === 1) ? p2 : p1, d = this.dynClone;
+                if (!((typeof coreSmallArtAt === 'function') && coreSmallArtAt(foe, d.x, d.y, 0.35, '#00ffff'))) {
+                    ctx.globalAlpha = 0.35; ctx.fillStyle = foe.color; ctx.fillRect(d.x, d.y, d.w, d.h);
+                }
+                ctx.globalAlpha = 0.4 + 0.3 * Math.sin(Date.now() / 120);
+                ctx.strokeStyle = "#aef"; ctx.lineWidth = 2; ctx.setLineDash([3, 4]);
+                ctx.strokeRect(d.x, d.y, d.w, d.h);
+                ctx.setLineDash([]);
+                const sh = ((Date.now() / 6) % (d.h + 20)) - 10;
+                ctx.fillStyle = "#fff"; ctx.globalAlpha = 0.35;
+                ctx.fillRect(d.x, d.y + Math.max(0, Math.min(d.h - 3, sh)), d.w, 3);
+                ctx.restore();
+            }
+
             // 3. VẼ ẢNH CHIẾU TAN VỠ (Full Evo)
             if (this.shatteredClone && this.shatteredClone.active) {
                 ctx.save();
