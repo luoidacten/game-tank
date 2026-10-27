@@ -282,23 +282,22 @@ class BastionWall {
     }
     draw() {
         if (!this.active) return;
+        const x = this.x, y = this.y, w = this.w, h = this.h;
         ctx.save();
-        ctx.fillStyle = "#2c3e50";
-        ctx.fillRect(this.x, this.y, this.w, this.h);
-        ctx.strokeStyle = "#1abc9c";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(this.x, this.y, this.w, this.h);
-
+        let gr = ctx.createLinearGradient(0, y, 0, y + h);
+        gr.addColorStop(0, '#5b6b80'); gr.addColorStop(1, '#2a3444');
+        ctx.fillStyle = gr; ctx.fillRect(x, y, w, h);
+        // gạch đá
+        ctx.strokeStyle = 'rgba(0,0,0,0.35)'; ctx.lineWidth = 1; ctx.beginPath();
+        ctx.moveTo(x, y + h / 2); ctx.lineTo(x + w, y + h / 2);
+        for (let bx = 15; bx < w; bx += 15) { ctx.moveTo(x + bx, y); ctx.lineTo(x + bx, y + h / 2); }
+        for (let bx = 7; bx < w; bx += 15) { ctx.moveTo(x + bx, y + h / 2); ctx.lineTo(x + bx, y + h); }
+        ctx.stroke();
+        ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2; ctx.strokeRect(x, y, w, h);
         // HP bar
-        ctx.fillStyle = "rgba(0,0,0,0.6)";
-        ctx.fillRect(this.x, this.y - 6, this.w, 4);
-        ctx.fillStyle = "#2ecc71";
-        ctx.fillRect(this.x, this.y - 6, this.w * (this.hp / this.maxHp), 4);
-
-        ctx.fillStyle = "white";
-        ctx.font = "bold 9px 'Orbitron', Arial";
-        ctx.textAlign = "center";
-        ctx.fillText("BASTION", this.x + this.w / 2, this.y + 12);
+        ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(x, y - 7, w, 5);
+        ctx.fillStyle = this.hp / this.maxHp > 0.35 ? '#2ecc71' : '#ef4444';
+        ctx.fillRect(x, y - 7, w * Math.max(0, this.hp / this.maxHp), 5);
         ctx.restore();
     }
 }

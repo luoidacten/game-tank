@@ -63,13 +63,12 @@ function startRound() {
     }
 
     if (gameState.currentMap === 'bastion') {
-        let count = 3;
-        let step = (canvas.height - 240) / (count + 1);
-        for (let bIdx = 0; bIdx < count; bIdx++) {
-            let bY = 120 + (bIdx + 1) * step;
-            let vx = (bIdx % 2 === 0 ? 1.6 : -1.6); // [CÂN BẰNG] chậm hơn, tường dễ phá hơn
-            bastions.push(new BastionWall(bY, 45, vx));
-        }
+        // 2 tường đối xứng tâm (công bằng): HP x2.5 (45 -> 113), tốc độ vừa phải
+        const bw = 90, ax = 40 + (canvas.width - 170) * 0.25;
+        const wA = new BastionWall(canvas.height * 0.4, 113, 1.2);
+        const wB = new BastionWall(canvas.height * 0.6 - 16, 113, -1.2);
+        wA.x = ax; wB.x = canvas.width - ax - bw;
+        bastions.push(wA, wB);
     }
 
     updateMapHUD();
