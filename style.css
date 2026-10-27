@@ -3167,3 +3167,8 @@ body.online-active .ns-hud-btn { display: flex !important; }
 .ns-pause-hint { font-size: 11px; color: #94a3b8; margin: 4px 0 12px; }
 .ns-resume { min-height: 48px; padding: 0 26px; border-radius: 10px; border: 1.5px solid #39ff9f; background: rgba(57, 255, 159, 0.14); color: #39ff9f; font-size: 15px; font-weight: 900; letter-spacing: 1px; cursor: pointer; box-shadow: 0 0 14px rgba(57, 255, 159, 0.35); }
 .ns-pause-left { font-size: 10px; color: #64748b; margin-top: 10px; }
+
+/* Bảng chỉnh phòng online: luôn cuộn dọc được trên điện thoại */
+#onlineModal { overflow-y: auto; touch-action: pan-y; }
+#onlineModal * { touch-action: pan-y; }
+#onlineModal .modal-card { overflow: visible; }
