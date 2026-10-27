@@ -74,6 +74,22 @@ Object.assign(Player.prototype, {
                 effectiveInp.r = tempL;
             }
         }
+        { // FEET: Kháng Khống Chế (giảm phần tăng thêm của choáng/băng/câm) + Tự Hồi Máu
+            const ups = this.upgrades || [];
+            const nCc = ups.filter(u => u === 'ccres').length;
+            if (!this._ccPrev) this._ccPrev = {};
+            for (const k of ['freezeTimer', 'silenceTimer', 'stunTimer', 'rootTimer']) {
+                const v = this[k] || 0, pv = this._ccPrev[k] || 0;
+                let nv = v;
+                if (nCc && v > pv) nv = pv + Math.round((v - pv) * Math.pow(0.65, nCc));
+                if (nv !== v) this[k] = nv;
+                this._ccPrev[k] = Math.max(0, nv - 1);
+            }
+            const nRg = ups.filter(u => u === 'regen').length;
+            if (this._lastHpFeet !== undefined && this.hp < this._lastHpFeet) this._noHitTicks = 0; else this._noHitTicks = (this._noHitTicks || 0) + 1;
+            if (nRg && this.hp > 0 && this.hp < this.maxHp && this._noHitTicks >= 180) this.hp = Math.min(this.maxHp, this.hp + 0.12 * nRg / 60);
+            this._lastHpFeet = this.hp;
+        }
         if (this.silenceTimer > 0) {
             effectiveInp.s = false; // Bị câm lặng -> ép nút bắn thành false
         }

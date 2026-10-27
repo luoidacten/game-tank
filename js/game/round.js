@@ -122,6 +122,7 @@ function updateMapHUD() {
 }
 function endRound(winnerId) {
     if (gameState.phase === 'end_round') return;
+    gameState.lastRoundLoser = winnerId === 1 ? 2 : (winnerId === 2 ? 1 : 0); // hoà = không bảo hiểm Lợi Tức
     // --- LOGIC LỢI TỨC (MỚI - CỘNG LÃI TIẾT KIỆM THEO TIỀN GIỮ LẠI) ---
     // Duyệt qua cả 2 người chơi để tính tiền lãi trước khi cộng tiền thưởng hiệp
     [p1, p2].forEach(p => {

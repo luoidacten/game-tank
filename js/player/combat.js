@@ -190,6 +190,12 @@ Object.assign(Player.prototype, {
         }
         if (this.statusVuln) amount *= (1 + this.statusVuln); // Suy Yếu từ vùng / lớp phủ axit
 
+        { // FEET: Giảm Sát Thương (-10%/lần) và Giáp Gia Cố (-0.08/đòn)
+            const ups = this.upgrades || [];
+            const nCut = ups.filter(u => u === 'dmgcut').length, nPlate = ups.filter(u => u === 'plate').length;
+            if (nCut) amount *= Math.pow(0.9, nCut);
+            if (nPlate && !options.isDot) amount -= 0.08 * nPlate;
+        }
         let actualDmg = Math.max(0.05, amount);
 
         // (Basic Evo 2 "Hồi Ức" -> CharHooks beforeLethal: js/characters/basic/logic.js)

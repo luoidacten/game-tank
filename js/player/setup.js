@@ -211,6 +211,8 @@ Object.assign(Player.prototype, {
 
         this.shield = (this.weapon === 'money_tank' && this.upgradeLevel >= 3) ? 1 : 0;
         if (this.weapon === 'tank') this.shield = 0; // Reset lại shield tank (sẽ tự hồi bằng passiveShieldTimer)
+        this.shield += this.upgrades.filter(u => u === 'startshield').length; // Khiên Khởi Đầu
+        this._ccPrev = {}; this._noHitTicks = 0; this._lastHpFeet = this.hp;
 
         // Silence Debuff
         this.silenceTimer = 0;

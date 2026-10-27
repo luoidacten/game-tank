@@ -134,7 +134,7 @@ Object.assign(Player.prototype, {
                         if (obj && obj.active && rectIntersect(b.x, b.y, b.w, b.h, obj.x, obj.y, obj.w, obj.h)) {
                             hitSomething = true;
                             // Phá hủy vật thể cản đường
-                            if (obj.hp !== undefined) obj.hp -= b.dmg;
+                            if (obj.hp !== undefined) obj.hp -= b.dmg * feetBreakMult(this);
                             else obj.active = false;
                             break;
                         }
@@ -279,7 +279,7 @@ Object.assign(Player.prototype, {
                     group.forEach(obj => {
                         if (obj.active && rectIntersect(b.x, b.y, b.w, b.h, obj.x, obj.y, obj.w, obj.h)) {
                             // Gây dame lên xe/thùng nhưng không xóa bóng
-                            obj.hp -= b.dmg * 2;
+                            obj.hp -= b.dmg * 2 * feetBreakMult(this);
                             if (obj.hp <= 0 && obj instanceof MoneyTruck) { /* Logic nổ xe...*/ }
                             // Thêm logic phá thùng tại đây nếu muốn
                         }
@@ -489,7 +489,7 @@ Object.assign(Player.prototype, {
                 let hitBastion = false;
                 for (let bw of bastions) {
                     if (bw.active && rectIntersect(b.x, b.y, b.w, b.h, bw.x, bw.y, bw.w, bw.h)) {
-                        bw.hp -= (b.dmg || 1);
+                        bw.hp -= (b.dmg || 1) * feetBreakMult(this);
                         BulletHooks.call(b, 'obstacle', this, bw, 'bastion');
                         if (bw.hp <= 0) {
                             bw.active = false;
@@ -512,6 +512,7 @@ Object.assign(Player.prototype, {
                     let dmg = b.dmg;
                     if (this.weapon === 'money_tank') dmg *= 3;
                     dmg *= (BulletHooks.call(b, 'truckDmgMult', this, t) || 1);
+                    dmg *= feetBreakMult(this);
                     t.hp -= dmg;
                     BulletHooks.call(b, 'obstacle', this, t, 'truck');
                     if (b.isPiercing) b.hitIds.push(t);

@@ -423,6 +423,7 @@ function botShopBuy(playerId) {
                     else pri = 0.6;
                 }
                 if (/Bánh Xích|Giáp Thép/.test(t)) pri += 0.6;
+                if (/Kháng Khống Chế|Tự Hồi Máu|Giáp Gia Cố|Khiên Khởi Đầu|Giảm Sát Thương/.test(t)) pri += 0.4;
 
                 // Nếu đang tiết kiệm lên Evo: không tiêu tiền lẻ vào Module Chân trừ khi miễn phí (0$),
                 // mua Lợi Tức sớm (<= 2 tầng), hoặc mua xong vẫn dư đủ tiền mua Evo

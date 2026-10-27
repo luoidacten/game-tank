@@ -70,6 +70,7 @@ class Explosion {
                         finalDmg *= (1 - (dist / this.maxR));
                     }
 
+                    finalDmg *= (typeof feetBreakMult === 'function' ? feetBreakMult(this.owner) : 1);
                     t.hp -= finalDmg;
                     if (t.hp <= 0 && this.owner) {
                         t.active = false;

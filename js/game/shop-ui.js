@@ -7,12 +7,14 @@
 // Module chân: mỗi lần đã mua làm giá tăng thêm 50% giá gốc.
 // Động Cơ giới hạn 3 lần (chống "ma tốc độ"), đủ rồi thì không xuất hiện trong shop nữa.
 const FEET_PRICE_STEP = 0.5;
-const FEET_MAX = { speed: 3 };
+const FEET_MAX = { speed: 3, ccres: 2, regen: 3, plate: 3, startshield: 2, dmgcut: 3, breaker: 1 };
 function feetOwnedCount(player, id) {
     const total = (player.upgrades || []).filter(u => u === id).length;
     const free = (player.gearFreeFeetUpgrades || []).filter(u => u === id).length;
     return Math.max(0, total - free);
 }
+// Phá Công Trình: x1.8 sát thương lên công trình (tường/trụ/triệu hồi/thùng/xe tiền/chướng ngại)
+function feetBreakMult(owner) { return owner && Array.isArray(owner.upgrades) && owner.upgrades.includes('breaker') ? 1.8 : 1; }
 function feetTotalCount(player, id) { return (player.upgrades || []).filter(u => u === id).length; }
 function feetMaxed(player, id) {
     if (id === 'speed' && player && typeof player.hasGear === 'function' && (player.hasGear('gear_uncap_speed_g') || player.hasGear('gear_speed_heal_p'))) return false;
@@ -119,6 +121,7 @@ function showUpgradeScreen() {
             pl._gearShopRound = gameState.round;
             pl._gearFreeRerollAvailable = typeof pl.hasGear === 'function' && pl.hasGear('gear_starter_p');
             pl._gearFreeFootAvailable = typeof pl.hasGear === 'function' && pl.hasGear('gear_free_foot_s');
+            pl._shopGuar = (gameState.lastRoundLoser && gameState.lastRoundLoser === pl.id) ? 2 : 0; // Bên thua hiệp trước: lần mở shop đầu + reroll đầu chắc chắn có Lợi Tức
             pl._gamblerFreeReroll = isGamblerBody(pl); // Nội tại Cờ Bạc: Reroll đầu tiên mỗi hiệp miễn phí
         }
     });
@@ -435,6 +438,15 @@ function renderShop(playerId, keepItems = false) {
             if (shopItems.some(it => it.type === 'evo')) player.rerollCount = 0;
         }
 
+        if ((player._shopGuar || 0) > 0) { // Bảo hiểm Lợi Tức cho bên thua
+            player._shopGuar--;
+            const intItem = MODULES.FEET.find(f => f.id === 'interest');
+            if (intItem && !feetMaxed(player, 'interest') && !shopItems.some(it => it && it.id === 'interest')) {
+                let idx = shopItems.map(it => it && it.type).lastIndexOf('feet');
+                if (idx < 0) idx = shopItems.length - 1;
+                shopItems[idx] = intItem;
+            }
+        }
         player.currentShopItems = shopItems;
         player.boughtShopItems = []; // "ĐÃ MUA" chỉ tính trong lượt hàng hiện tại
     }
@@ -1000,7 +1012,7 @@ function handlePlayerReady(pid, fromRemote = false) {
 // Trang trí thẻ shop (neon-cyber): icon, nhãn giá, trạng thái mua được / thiếu tiền / đã có / khoá.
 // Chạy tự động sau mỗi lần một bảng shop (kể cả bảng riêng của body) vẽ lại -> không đổi logic mua bán.
 // ==========================================
-const SHOP_ICON = { speed: '⚡', armor: '🛡️', damage: '⛓️', interest: '💹' };
+const SHOP_ICON = { speed: '⚡', armor: '🛡️', damage: '⛓️', interest: '💹', ccres: '🧿', regen: '💚', plate: '🔩', startshield: '🔰', dmgcut: '🔻', breaker: '🔨' };
 const SHOP_LEAD_EMOJI = /^\s*((?:\p{Extended_Pictographic}|\p{Regional_Indicator})(?:️|‍\p{Extended_Pictographic})*)\s*/u;
 const SHOP_PRICE_RE = /\$\s?(\d+)|(-?\d+)\s*(LK|LINH KIỆN|Bánh Răng|Tinh Hoa|Phụ Tùng|CP)\b|^\s*(\d+)\s*(LK|CP)\s*$/i;
 

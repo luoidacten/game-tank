@@ -559,6 +559,12 @@ const MODULES = {
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 35 },
         { id: 'armor', name: 'Giáp Thép', desc: '+1 Máu tối đa.', type: 'feet', cost: 20 },
         { id: 'damage', name: 'Bánh Xích', desc: 'x1.25 Sát thương (3 lần đầu), sau đó giảm dần.', type: 'feet', cost: 25 },
-        { id: 'interest', name: 'Lợi Tức', desc: 'Sau mỗi hiệp nhận Lãi Cố Định tăng tiến (45$/108$/189$/288$...; Xe Tiền x2) + Lãi Tiết Kiệm: +15% số tiền đang giữ trong ví mỗi tầng (tối đa +35$/tầng).', type: 'feet', cost: 25 }
+        { id: 'interest', name: 'Lợi Tức', desc: 'Sau mỗi hiệp nhận Lãi Cố Định tăng tiến (45$/108$/189$/288$...; Xe Tiền x2) + Lãi Tiết Kiệm: +15% số tiền đang giữ trong ví mỗi tầng (tối đa +35$/tầng).', type: 'feet', cost: 25 },
+        { id: 'ccres', name: 'Kháng Khống Chế', desc: 'Giảm 35% thời gian bị choáng / đóng băng / câm lặng. Tối đa 2 lần.', type: 'feet', cost: 30 },
+        { id: 'regen', name: 'Tự Hồi Máu', desc: 'Hồi 0.12 máu/giây sau 3s không bị trúng đòn. Tối đa 3 lần.', type: 'feet', cost: 30 },
+        { id: 'plate', name: 'Giáp Gia Cố', desc: 'Mỗi đòn nhận vào giảm 0.08 sát thương (tối thiểu 0.05). Tối đa 3 lần.', type: 'feet', cost: 25 },
+        { id: 'startshield', name: 'Khiên Khởi Đầu', desc: 'Đầu mỗi hiệp có sẵn 1 khiên chặn đòn. Tối đa 2 lần.', type: 'feet', cost: 35 },
+        { id: 'dmgcut', name: 'Giảm Sát Thương', desc: 'Giảm 10% sát thương nhận vào. Tối đa 3 lần.', type: 'feet', cost: 30 },
+        { id: 'breaker', name: 'Phá Công Trình', desc: 'x1.8 sát thương lên tường, trụ,vật triệu hồi, thùng, xe tiền, chướng ngại vật. Tối đa 1 lần.', type: 'feet', cost: 20 }
     ]
 };
