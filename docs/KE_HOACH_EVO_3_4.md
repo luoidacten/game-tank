@@ -751,3 +751,13 @@ Gợi ý tầng cho cửa hàng: Thường 4, Hiếm 4, Sử Thi 3, còn một �
 10. **Online**: ưu tiên lockstep (như hiện tại) hay chuyển nhẹ sang host-authoritative cho phần Nộ/Skill?
 11. **Thí điểm 10 body**: danh sách đề xuất (mục 1.11) đã hợp lý chưa, hay muốn đổi body nào?
 12. **Thông tin Nộ của đối thủ**: có hiển thị viền phát sáng khi Nộ ≥ 80% để đối thủ biết không?
+
+---
+## 5. Bổ sung (người dùng)
+
+- **Giới hạn Evo:** mỗi trận chỉ mua được **2 Evo** (trong 4). Muốn lên **3 Evo** phải có G.E.A.R cấp **Lăng Kính (PRISMATIC)** mở thêm 1 ô Evo.
+- **G.E.A.R Lăng Kính mới — "Con Đường Tiến Hóa":**
+  - Mở khóa ô Evo thứ 3 (và Full Evo theo tổ hợp vẫn tính theo 2 Evo bất kỳ đã sở hữu).
+  - Bạn **mạnh hơn theo mỗi Evo đang có** (gợi ý: +8% sát thương & +0.5 Max HP mỗi Evo).
+  - Đổi lại: **không được mua FEET** (trừ **Lợi Tức**).
+  - Đối thủ được bồi thường ngay **+$200** và **nhận thêm 1 lượt chọn G.E.A.R**.
