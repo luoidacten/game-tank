@@ -980,12 +980,10 @@ function handlePlayerReady(pid, fromRemote = false) {
         if (typeof onlineManager !== 'undefined' && onlineManager.isOnline) {
             if (onlineManager.role === 'host') {
                 // Chọn map trước để gửi cho guest cùng lúc
-                if (!gameState.selectedMapMode || gameState.selectedMapMode === 'random') {
-                    const mapList = ['classic', 'bastion', 'artillery', 'overdrive', 'fast_shrink', 'rush_hour', 'supply_drop'];
-                    gameState.currentMap = mapList[Math.floor(Math.random() * mapList.length)];
-                } else {
-                    gameState.currentMap = gameState.selectedMapMode;
-                }
+                // Map do chủ phòng chọn ở sảnh (Ngẫu nhiên / map cố định) - js/online/social.js
+                const mapList = ['classic', 'bastion', 'artillery', 'overdrive', 'fast_shrink', 'rush_hour', 'supply_drop'];
+                gameState.currentMap = (typeof OnlineSocial !== 'undefined') ? OnlineSocial.pickMap(mapList)
+                    : mapList[Math.floor(Math.random() * mapList.length)];
                 gameState.mapPreselected = true;
                 onlineManager.sendStartRound();
                 setTimeout(startRound, 400);

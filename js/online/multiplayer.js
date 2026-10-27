@@ -120,6 +120,8 @@ class OnlineMultiplayerManager {
         }
         if (data.type === 'PING') { this.sendNetworkMessage({ type: 'PONG', t: data.t }); return; }
         if (data.type === 'PONG') { this.onPong(data.t); return; }
+        // Chat / biểu cảm / cài đặt sảnh / tạm dừng online (js/online/social.js)
+        if (typeof OnlineSocial !== 'undefined' && OnlineSocial.onMessage(data)) return;
 
         if (this.role === 'host') this.handleHostReceivedData(from, data, transportId);
         else this.handleClientReceivedData(data);

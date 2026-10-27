@@ -41,7 +41,9 @@ function gameLoop(timestamp) {
     // [FIX] Tạm dừng thật sự (trước đây isPaused không được kiểm tra nên game vẫn chạy sau menu).
     // Online thì không dừng được vì đối thủ vẫn đang chơi.
     const isOnlineMatch = (typeof onlineManager !== 'undefined' && onlineManager.isOnline);
-    if (gameState.isPaused && !isOnlineMatch) {
+    // Online: tạm dừng chung do host quyết định (js/online/social.js)
+    const onlinePaused = isOnlineMatch && typeof OnlineSocial !== 'undefined' && OnlineSocial.isPaused();
+    if ((gameState.isPaused && !isOnlineMatch) || onlinePaused) {
         if (!gameState.pauseStartedAt) gameState.pauseStartedAt = Date.now();
         fixedPhysicsAccumulator = 0;
         renderFrame();
