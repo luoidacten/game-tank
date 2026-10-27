@@ -369,7 +369,7 @@ const EVOLUTIONS = {
     ],
     the_admin: [
         { id: 'evo_admin_1', name: 'Mở Rộng Cổng Lập Trình', desc: 'Mỗi Luật gắn tối đa 2 Điều Kiện + 2 Kết Quả. Hồi chiêu /execute 8s -> 5.5s. Đầu mỗi hiệp nhận thêm +$15 ngân sách hệ thống.', cost: 160, type: 'evo' },
-        { id: 'evo_admin_2', name: 'Quyền Quản Trị Cấp Cao', desc: 'Tối đa 5 Luật, mỗi Luật 3 ĐK + 3 KQ. Mở khóa 6 ĐK mới (13-18) và 4 KQ mới (13-16: Cột Lazer, Khóa Kỹ Năng, Bóp Hẹp Màn Hình, Đánh Cắp Thông Số). Mọi ĐK cơ bản nhạy hơn 25%. FULL EVO (Đấng Sáng Tạo): VÔ HẠN Luật & khe ĐK/KQ, mở 3 ĐK Lớn (19-21) + 3 KQ Lớn (/ban, /godmode, /sudo_jackpot), tặng miễn phí 1 ĐK/KQ Lớn.', cost: 290, type: 'evo' },
+        { id: 'evo_admin_2', name: 'Quyền Quản Trị Cấp Cao', desc: 'Tối đa 5 Luật, mỗi Luật 3 ĐK + 3 KQ. Mở khóa 8 ĐK mới (13-18, 25 Trúng 1 Hit, 29 Nhận Sát Thương) và 11 KQ mới (13-16, Vùng Axit, Vô Hình, Bất Tử 1s, Bản Sao, Vùng Phản Đạn, Không Kích). Mọi ĐK cơ bản nhạy hơn 25%. Mua/Đổi được chọn trong 5 lựa chọn ngẫu nhiên (thay vì 3). FULL EVO (Đấng Sáng Tạo): VÔ HẠN Luật & khe ĐK/KQ, mở 3 ĐK Lớn (19-21) + 5 KQ Lớn (/ban, /godmode, /sudo_jackpot, Phân Ảnh Chém, Phân Ảnh Lazer), tặng miễn phí 1 ĐK/KQ Lớn, mỗi lần Mua/Đổi có 12 lựa chọn.', cost: 290, type: 'evo' },
     ],
 };
 

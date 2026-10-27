@@ -209,3 +209,79 @@ function tadDrawFinisher(f) {
     }
     ctx.restore();
 }
+
+// ---------- Hình ảnh KQ mới: Bản Sao / Màn Phản Đạn / Phân Ảnh / Không Kích ----------
+function tadGhostHull(x, y, w, h, col, a, up) {
+    ctx.save();
+    ctx.globalAlpha = a; ctx.strokeStyle = col; ctx.fillStyle = 'rgba(2, 20, 16, 0.55)'; ctx.lineWidth = 1.6;
+    ctx.shadowColor = col; ctx.shadowBlur = 12;
+    TA.rr(x, y, w, h, 4); ctx.fill(); ctx.stroke();
+    const cx = x + w / 2, cy = y + h / 2;
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx, up ? y - 6 : y + h + 6); ctx.stroke();
+    ctx.shadowBlur = 0; ctx.fillStyle = col; ctx.font = "bold 8px monospace"; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    tadWText('>_', cx, cy + 0.5);
+    ctx.restore();
+}
+function tadDrawClone(c) {
+    const a = 0.55 + 0.15 * Math.sin(c.t * 0.2), up = c.id === 1;
+    tadGhostHull(c.x, c.y, c.w, c.h, TAD_CYAN, a, up);
+    ctx.save(); ctx.fillStyle = 'rgba(15,23,42,0.7)'; ctx.fillRect(c.x, c.y + (up ? c.h + 3 : -6), c.w, 3);
+    ctx.fillStyle = TAD_CYAN; ctx.fillRect(c.x, c.y + (up ? c.h + 3 : -6), c.w * Math.max(0, c.hp / c.maxHp), 3); ctx.restore();
+}
+function tadDrawWall(wl) {
+    const a = Math.min(1, wl.life / 20), t = wl.life;
+    ctx.save();
+    ctx.globalAlpha = 0.25 * a; ctx.fillStyle = TAD_GOLD; ctx.fillRect(wl.x, wl.y, wl.w, wl.h);
+    ctx.globalAlpha = a; ctx.strokeStyle = TAD_GOLD; ctx.lineWidth = 2; ctx.shadowColor = TAD_GOLD; ctx.shadowBlur = 14;
+    ctx.strokeRect(wl.x, wl.y, wl.w, wl.h);
+    ctx.shadowBlur = 0; ctx.lineWidth = 1; ctx.globalAlpha = 0.6 * a;
+    for (let i = 0; i < 6; i++) { const xx = wl.x + ((i * 18 + t) % wl.w); ctx.beginPath(); ctx.moveTo(xx, wl.y); ctx.lineTo(Math.min(wl.x + wl.w, xx + 6), wl.y + wl.h); ctx.stroke(); }
+    ctx.restore();
+}
+function tadDrawPhantom(f) {
+    const L = f.warn, k = Math.min(1, f.t / L), up = f.id === 1;
+    ctx.save();
+    if (f.kind === 'slash') {
+        // vòng cảnh báo dưới chân địch: vạch quay + vòng thu nhỏ, đỏ dần trước khi chém
+        if (f.t <= L + 10) {
+            const R = 46;
+            ctx.globalAlpha = 0.18 + 0.2 * k; ctx.fillStyle = TAD_VIO;
+            ctx.beginPath(); ctx.arc(f.tx, f.ty, R, 0, Math.PI * 2); ctx.fill();
+            ctx.globalAlpha = 0.9; ctx.strokeStyle = k > 0.75 ? TAD_RED : TAD_VIO; ctx.lineWidth = 2; ctx.setLineDash([6, 4]); ctx.lineDashOffset = -f.t;
+            ctx.beginPath(); ctx.arc(f.tx, f.ty, R, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+            ctx.beginPath(); ctx.arc(f.tx, f.ty, R * (1 - k) + 4, 0, Math.PI * 2); ctx.stroke();
+        } else {
+            const q = (f.t - L - 10) / 30;
+            ctx.globalAlpha = Math.max(0, 1 - q); ctx.strokeStyle = '#f0abfc'; ctx.lineWidth = 5; ctx.shadowColor = TAD_VIO; ctx.shadowBlur = 18;
+            ctx.beginPath(); ctx.arc(f.tx, f.ty, 30 + q * 22, q * 6, q * 6 + Math.PI * 1.7); ctx.stroke();
+        }
+        tadGhostHull(f.x, f.y, f.w, f.h, TAD_VIO, f.t > L + 10 ? Math.max(0, 1 - (f.t - L - 10) / 30) * 0.7 : 0.3 + 0.4 * k, up);
+    } else {
+        tadGhostHull(f.x, f.y, f.w, f.h, TAD_VIO, f.t > L ? Math.max(0, 1 - (f.t - L) / 40) * 0.8 : 0.3 + 0.5 * k, up);
+    }
+    ctx.restore();
+}
+function tadDrawMark(m) {
+    const k = m.t / m.dur, locked = m.t >= m.lock, col = locked ? TAD_RED : TAD_GOLD;
+    ctx.save();
+    ctx.globalAlpha = 0.15 + 0.25 * k; ctx.fillStyle = col;
+    ctx.beginPath(); ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 0.95; ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.shadowColor = col; ctx.shadowBlur = 10;
+    ctx.beginPath(); ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(m.x, m.y, m.r * (1 - k) + 3, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(m.x - 10, m.y); ctx.lineTo(m.x + 10, m.y); ctx.moveTo(m.x, m.y - 10); ctx.lineTo(m.x, m.y + 10); ctx.stroke();
+    ctx.restore();
+}
+// Hào quang KQ có thời hạn: Bất Tử / Tăng Dame / Đạn Nguyên Tố
+(function () {
+    const base = CharHooks.registry.the_admin.draw;
+    CharHooks.registry.the_admin.draw = function () {
+        base.call(this);
+        const p = this, cx = p.x + p.w / 2, cy = p.y + p.h / 2, t = (p.tadT || 0) / 60;
+        ctx.save();
+        if (p.tadImmFx > 0) { ctx.globalAlpha = 0.5; ctx.strokeStyle = '#fff7ae'; ctx.lineWidth = 2; ctx.shadowColor = TAD_GOLD; ctx.shadowBlur = 14; ctx.beginPath(); ctx.arc(cx, cy, 22, 0, Math.PI * 2); ctx.stroke(); }
+        if (p.tadDUT > 0) { ctx.globalAlpha = 0.6; ctx.strokeStyle = '#f472b6'; ctx.lineWidth = 1.5; ctx.shadowColor = '#f472b6'; ctx.shadowBlur = 8; ctx.beginPath(); ctx.arc(cx, cy, 19, t * 6, t * 6 + Math.PI); ctx.stroke(); }
+        if (p.tadElT > 0 && p.tadEl) { const c = TAD_EL_COL[p.tadEl]; ctx.globalAlpha = 0.7; ctx.fillStyle = c; ctx.shadowColor = c; ctx.shadowBlur = 8; for (let i = 0; i < 3; i++) { const a = t * 4 + i * 2.09; ctx.beginPath(); ctx.arc(cx + Math.cos(a) * 20, cy + Math.sin(a) * 20, 2.2, 0, Math.PI * 2); ctx.fill(); } }
+        ctx.restore();
+    };
+})();

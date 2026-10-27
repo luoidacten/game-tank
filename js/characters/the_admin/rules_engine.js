@@ -30,6 +30,14 @@ const TAD_CONDS = [
     { id: 19, ic: '⚡', n: 'Xung Nhịp 1.5s', d: 'Tự kích hoạt mỗi 1.5s', tier: 3 },
     { id: 20, ic: '📡', n: 'Cảm Biến Toàn Trận', d: 'Mỗi 2 phát bắn của bạn HOẶC của địch', tier: 3 },
     { id: 21, ic: '♾️', n: 'Đệ Quy Vô Tận', d: 'KQ gây sát thương/hồi máu: 50% chạy lại Luật (tối đa 3 lần/2s)', tier: 3 },
+    { id: 22, ic: '🖐️', n: 'Nhấn Giữ', d: 'Giữ Bắn đủ 0.4s (hồi 2s)', tier: 0 },
+    { id: 23, ic: '🔂', n: 'Loạt 3 Phát', d: 'Mỗi 3 phát bắn', tier: 0 },
+    { id: 24, ic: '🔁', n: 'Loạt 5 Phát', d: 'Mỗi 5 phát bắn', tier: 0 },
+    { id: 25, ic: '☝️', n: 'Trúng 1 Hit', d: 'Mỗi phát trúng địch (hồi 1.5s)', tier: 2 },
+    { id: 26, ic: '🥉', n: 'Trúng 3 Hit', d: 'Mỗi 3 phát trúng địch', tier: 0 },
+    { id: 27, ic: '🖐', n: 'Trúng 5 Hit', d: 'Mỗi 5 phát trúng địch', tier: 0 },
+    { id: 28, ic: '💥', n: 'Phá Hủy Vật Thể', d: 'Phá Thùng/Xe Tiền/Vật triệu hồi/Công trình (hồi 0.5s)', tier: 0 },
+    { id: 29, ic: '🩸', n: 'Nhận Sát Thương', d: 'Mỗi lần mất Máu hoặc Khiên (hồi 1.5s)', tier: 2 },
 ];
 const TAD_RES = [
     { id: 1, ic: '💚', n: 'Hồi Phục Mã Nguồn', d: '+0.45 HP (dư thành Khiên)', tier: 0 },
@@ -51,6 +59,22 @@ const TAD_RES = [
     { id: 17, ic: '☄️', n: '/ban', d: '3 Cột Dữ Liệu (cảnh báo 0.6s) 2.0 Dame xuyên khiên + choáng 0.75s', tier: 3 },
     { id: 18, ic: '👑', n: '/godmode', d: 'Bất Tử 1.2s, xóa hiệu ứng xấu, phản đạn (hồi 4s)', tier: 3 },
     { id: 19, ic: '🎰', n: '/sudo_jackpot', d: '+$15, +0.8 HP, đầy đạn, phát kế +12% Max HP địch (<15% máu: KẾT LIỄU)', tier: 3 },
+    { id: 20, ic: '🔰', n: 'Khiên Hệ Thống', d: '+1 Khiên (tối đa 3) · CD 12s', tier: 0, cd: 720 },
+    { id: 21, ic: '❄️', n: 'Vùng Băng', d: 'Vùng băng 3s dưới chân địch, làm chậm · CD 5s', tier: 0, cd: 300 },
+    { id: 22, ic: '🔥', n: 'Vùng Lửa', d: 'Vùng lửa 3s dưới chân địch, 0.25/0.5s · CD 5s', tier: 0, cd: 300 },
+    { id: 23, ic: '🧪', n: 'Vùng Axit', d: 'Vùng axit 3s: địch +25% st nhận, ăn mòn · CD 5s', tier: 2, cd: 300 },
+    { id: 24, ic: '👻', n: 'Vô Hình', d: 'Tàng hình 2.5s, 40% né đòn · CD 10s', tier: 2, cd: 600 },
+    { id: 25, ic: '🤍', n: 'Giáp Trắng', d: '+0.6 Giáp Trắng (tối đa 2) · CD 5s', tier: 0, cd: 300 },
+    { id: 26, ic: '💠', n: 'Đạn Nguyên Tố', d: '5s: đạn thành Băng/Lửa/Axit/Điện ngẫu nhiên · CD 6s', tier: 0, cd: 360 },
+    { id: 27, ic: '👟', n: 'Chạy Nhanh', d: '+30% tốc chạy 5s · CD 5s', tier: 0, cd: 300 },
+    { id: 28, ic: '✨', n: 'Bất Tử', d: 'Bất Tử 1s · CD 10s', tier: 2, cd: 600 },
+    { id: 29, ic: '⚔️', n: 'Tăng Dame', d: '+0.3 Dame 5s · CD 5s', tier: 0, cd: 300 },
+    { id: 30, ic: '👥', n: 'Bản Sao', d: 'Bản sao 8s (1.5 HP, chặn đạn, bắn 0.4) · CD 20s', tier: 2, cd: 1200 },
+    { id: 31, ic: '⚡', n: 'Lướt Ảo', d: 'Lướt 70px + Bất Tử 0.5s · CD 1s', tier: 0, cd: 60 },
+    { id: 32, ic: '🪞', n: 'Vùng Phản Đạn', d: 'Màn chắn 2.5s trước mũi xe: chặn & phản đạn địch (80%) · CD 8s', tier: 2, cd: 480 },
+    { id: 33, ic: '🗡️', n: 'Phân Ảnh Chém', d: 'Cảnh báo 2s rồi phân ảnh lướt tới chém vòng 1.6 Dame · CD 8s', tier: 3, cd: 480 },
+    { id: 34, ic: '🔦', n: 'Phân Ảnh Lazer', d: 'Phân ảnh khóa cột, cảnh báo 2s rồi Lazer 1.8 Dame xuyên · CD 8s', tier: 3, cd: 480 },
+    { id: 35, ic: '🎯', n: 'Không Kích', d: 'Đánh dấu vị trí địch, 1.3s sau nổ 1.3 Dame · CD 6s', tier: 2, cd: 360 },
 ];
 const TAD_BASIC_COND = 2, TAD_BASIC_RES = 5; // Luật #1 mặc định: Chu Kỳ Thời Gian -> Tên Lửa Truy Kích
 
@@ -160,6 +184,12 @@ function tadMissile(p, dx, dmg, ri, kind, col) {
 function tadApply(p, id, m, ri) {
     const e = tadEnemy(p), W = canvas.width, cx = p.x + p.w / 2, cy = p.y + p.h / 2, d = tadData(p);
     const ex = e ? e.x + e.w / 2 : W / 2;
+    const it = tadRes(id);
+    if (it && it.cd) {
+        if (!p.tadRC) p.tadRC = {};
+        if ((p.tadRC[id] || 0) > 0) return;
+        p.tadRC[id] = it.cd;
+    }
     switch (id) {
         case 1: tadHeal(p, 0.45 * m, ri); break;
         case 2:
@@ -244,7 +274,53 @@ function tadApply(p, id, m, ri) {
             tadPrintCoins(p, 15); tadHeal(p, 0.8 * m, ri); p.ammo = p.maxAmmo; p.tadJack = 1;
             tadTxt(p, '/sudo_jackpot', TAD_GOLD, 12);
             break;
+        case 20:
+            if ((p.shield || 0) < 3) p.shield = (p.shield || 0) + 1;
+            tadTxt(p, '+1 SHIELD', TAD_CYAN, 11);
+            break;
+        case 21: case 22: case 23: {
+            const kind = id === 21 ? 'ice' : (id === 22 ? 'fire' : 'acid');
+            if (e && typeof BodyZone !== 'undefined') bodyEffects.push(new BodyZone(ex, e.y + e.h / 2, 38, kind, p, 180, (id === 21 ? 0.8 : 0.9) * m));
+            break;
+        }
+        case 24: p.tadInvT = 150; tadTxt(p, 'INVISIBLE', '#cbd5e1', 11); break;
+        case 25: p.gearWhiteShield = Math.min(2, (p.gearWhiteShield || 0) + 0.6 * m); tadTxt(p, '+GIÁP TRẮNG', '#f8fafc', 10); break;
+        case 26: {
+            const els = ['ice', 'fire', 'acid', 'shock'];
+            p.tadEl = els[Math.floor(Math.random() * els.length)]; p.tadElT = 300; p.tadElM = m;
+            tadTxt(p, TAD_EL_NAME[p.tadEl], TAD_EL_COL[p.tadEl], 11);
+            break;
+        }
+        case 27: p.tadSpdT = 300; p.tadSpdM = 0.3 * m; break;
+        case 28: p.invincibleTimer = Math.max(p.invincibleTimer || 0, 60); p.tadImmFx = 60; tadTxt(p, 'IMMORTAL 1s', TAD_GOLD, 11); break;
+        case 29:
+            if (!(p.tadDUT > 0)) { p.tadDU = 0.3 * m; p.dmgBuff += p.tadDU; }
+            p.tadDUT = 300; tadTxt(p, '+DMG 5s', '#f472b6', 10);
+            break;
+        case 30: bodyEffects.push(new TadClone(p, ri, m)); tadSfx('playPowerup'); break;
+        case 31: {
+            if (p.tadDashT > 0) break;
+            const dir = p.tadDir || 1;
+            p.tadDashT = 10; p.tadDashDir = dir; p.tadDashV = 7;
+            p.invincibleTimer = Math.max(p.invincibleTimer || 0, 30);
+            spawnSparkParticles(cx, cy, TAD_CYAN, 8);
+            break;
+        }
+        case 32: bodyEffects.push(new TadWall(p, m)); break;
+        case 33: if (e) bodyEffects.push(new TadPhantom(p, 'slash', ex, ri, m)); break;
+        case 34: if (e) bodyEffects.push(new TadPhantom(p, 'laser', ex, ri, m)); break;
+        case 35: if (e) bodyEffects.push(new TadMark(p, ex, e.y + e.h / 2, ri, m)); break;
     }
+}
+const TAD_EL_NAME = { ice: '❄️ ĐẠN BĂNG', fire: '🔥 ĐẠN LỬA', acid: '🧪 ĐẠN AXIT', shock: '⚡ ĐẠN ĐIỆN' };
+const TAD_EL_COL = { ice: '#5ee7ff', fire: '#ff6a1a', acid: '#7bf85c', shock: '#fde047' };
+// Hiệu ứng đạn Nguyên Tố khi trúng (KQ 26)
+function tadElHit(p, v, el, m) {
+    if (!v || v === p || !(v.hp > 0)) return;
+    if (el === 'ice') { addStatusSlow(v, 0.6); v.tadIceT = Math.max(v.tadIceT || 0, 90); }
+    else if (el === 'fire') v.tadBurnT = Math.max(v.tadBurnT || 0, 91), v.tadBurnD = 0.12 * (m || 1);
+    else if (el === 'acid') v.tadAcidT = Math.max(v.tadAcidT || 0, 150);
+    else if (el === 'shock') { v.freezeTimer = Math.max(v.freezeTimer || 0, 12); spawnSparkParticles(v.x + v.w / 2, v.y + v.h / 2, '#fde047', 6); }
 }
 
 // ---------- ĐK theo tick (gọi trong update của host) ----------
@@ -275,6 +351,13 @@ function tadTickConds(p) {
     if (coins > p.tadCoinPrev + 0.01 && cd(18)) { setCd(18, 30); tadFire(p, 18); }
     p.tadCoinPrev = coins;
     if (coins >= 60) { if (++K.t18 >= 210) { K.t18 = 0; tadFire(p, 18); } } else K.t18 = 0;
+    // 28 — vật thể đạn Admin vừa chạm đã bị phá
+    const pend = TAD_PEND[p.id];
+    for (let i = pend.length - 1; i >= 0; i--) {
+        const q = pend[i], o = q.o;
+        if (o.active === false || o.dead || (typeof o.hp === 'number' && o.hp <= 0)) { pend.splice(i, 1); if (cd(28)) { K.cd28 = 30; tadFire(p, 28); } }
+        else if (--q.t <= 0) pend.splice(i, 1);
+    }
     if (!e || e.hp <= 0) return;
     const ecx = e.x + e.w / 2;
     // 7 — đạn sượt qua / 20 — địch bắn
@@ -306,6 +389,8 @@ function tadTickConds(p) {
 // ---------- ĐK theo sự kiện ----------
 function tadOnShot(p) {
     const K = p.tadK, s = tadE2(p);
+    if (++K.s3 >= 3) { K.s3 = 0; tadFire(p, 23); }
+    if (++K.s5 >= 5) { K.s5 = 0; tadFire(p, 24); }
     if (++K.sh >= (s ? 3 : 4)) { K.sh = 0; tadFire(p, 1); }
     if (++K.ms % 2 === 0) tadFire(p, 20);
     if (p.ammo <= 0 && (K.cd5 || 0) <= 0) { K.cd5 = s ? 135 : 180; tadFire(p, 5); }
@@ -313,6 +398,7 @@ function tadOnShot(p) {
 function tadOnHurt(p, lost) {
     const K = p.tadK, thr = tadE2(p) ? 0.75 : 1;
     if (!K) return;
+    tadOnHurtAny(p);
     K.dmg = (K.dmg || 0) + lost;
     if (K.dmg >= thr) { K.dmg = Math.min(K.dmg - thr, thr); tadFire(p, 3); }
 }
@@ -320,6 +406,32 @@ function tadOnHit(p) {
     const K = p.tadK;
     if (!K) return;
     if (++K.hit >= (tadE2(p) ? 2 : 3)) { K.hit = 0; tadFire(p, 6); }
+    if ((K.cd25 || 0) <= 0) { K.cd25 = 90; tadFire(p, 25); }
+    if (++K.h3 >= 3) { K.h3 = 0; tadFire(p, 26); }
+    if (++K.h5 >= 5) { K.h5 = 0; tadFire(p, 27); }
+}
+// 29 — mỗi lần mất Máu / Khiên
+function tadOnHurtAny(p) {
+    const K = p.tadK;
+    if (!K || (K.cd29 || 0) > 0) return;
+    K.cd29 = tadE2(p) ? 68 : 90;
+    tadFire(p, 29);
+}
+// 22 — giữ bắn đủ 0.4s
+function tadOnHold(p) {
+    const K = p.tadK;
+    if (!K || (K.cd22 || 0) > 0) return;
+    K.cd22 = 120;
+    tadFire(p, 22);
+}
+// 28 — ghi nhận vật thể đạn Admin vừa chạm (chỉ host; không phải dữ liệu đồng bộ)
+const TAD_PEND = { 1: [], 2: [] };
+function tadNoteObj(p, o) {
+    if (!o || typeof o !== 'object' || o === p) return;
+    const pend = TAD_PEND[p.id];
+    if (!pend || pend.some(q => q.o === o)) return;
+    if (pend.length > 24) pend.shift();
+    pend.push({ o, t: 30 });
 }
 function tadOnObstacle(p) {
     const K = p.tadK;

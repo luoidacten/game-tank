@@ -64,7 +64,7 @@ const NET_CLASSES = {
     BtFinisher,
     HlFinisher,
     ColHolo, ColFinisher,
-    TadFinisher,
+    TadFinisher, TadClone, TadWall, TadPhantom, TadMark,
     FcZone, FcFinisher,
 };
 

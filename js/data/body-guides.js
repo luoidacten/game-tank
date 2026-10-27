@@ -875,10 +875,10 @@ const BODY_GUIDES = {
         controls: [
             { input: 'TAP', name: 'Đạn Mã Nguồn', what: '1.1 dame, 4 viên' },
             { input: 'HOLD 0.4s', name: '/execute', what: 'Lướt nhẹ sang ngang + ép chạy mọi Luật 1 lần (CD 8s)' },
-            { input: 'SHOP', name: 'Admin Terminal', what: 'Mua Luật / ĐK / KQ (giá x2), XÓA hoàn 50%' }
+            { input: 'SHOP', name: 'Admin Terminal', what: 'Mua Luật / ĐK / KQ (giá x2), ĐỔI khe, XÓA hoàn 50%; chọn trong 3/5/12 lựa chọn ngẫu nhiên, Reroll $5' }
         ],
-        passive: ['1 ĐK bất kỳ của Luật nổ -> chạy đồng loạt mọi KQ của Luật', 'Từ ĐK thứ 2 mỗi ĐK +15% hiệu lực KQ', 'Luật #1 miễn phí, chọn lại ở shop đầu tiên'],
-        evo: { e1: '2 ĐK + 2 KQ / Luật, /execute 5.5s, +$15 đầu hiệp', e2: '5 Luật, 3+3 khe, mở ĐK 13-18 & KQ 13-16, ĐK nhạy hơn 25%', full: 'Vô hạn Luật & khe, mở ĐK/KQ Lớn (/ban, /godmode, /sudo_jackpot)' },
+        passive: ['1 ĐK bất kỳ của Luật nổ -> chạy đồng loạt mọi KQ của Luật', 'Từ ĐK thứ 2 mỗi ĐK +15% hiệu lực KQ', 'Luật #1 miễn phí, chọn lại ở shop đầu tiên', 'Cờ Bạc: Reroll đầu tiên mỗi hiệp miễn phí, +1 ô shop & G.E.A.R'],
+        evo: { e1: '2 ĐK + 2 KQ / Luật, /execute 5.5s, +$15 đầu hiệp', e2: '5 Luật, 3+3 khe, mở ĐK/KQ Evo 2 (Vùng Axit, Bản Sao, Không Kích...), 5 lựa chọn, ĐK nhạy hơn 25%', full: 'Vô hạn Luật & khe, 12 lựa chọn, mở ĐK/KQ Lớn (/ban, /godmode, /sudo_jackpot, Phân Ảnh Chém/Lazer)' },
         tips: ['Ghép ĐK thường nổ (Chu Kỳ, Xả Đạn) với KQ sát thương', 'Giữ /execute để né đạn và tung toàn bộ Luật đúng lúc']
     }
 };

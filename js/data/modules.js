@@ -549,7 +549,7 @@ const MODULES = {
         {
             id: 'the_admin',
             name: 'The Admin — Hệ Thống Kiến Tạo Luật Lệ',
-            desc: '"My Game, My Rules!" HP:5 | Dame:1.1 | Đạn:4 (Đạn Mã Nguồn) | Tốc:3.7. Tự lập trình LUẬT trong ADMIN TERMINAL (thẻ trong shop): mỗi Luật gồm các ĐIỀU KIỆN (IF) và KẾT QUẢ (THEN) — một ĐK bất kỳ nổ là chạy đồng loạt mọi KQ; từ ĐK thứ 2 mỗi ĐK +15% hiệu lực. 21 ĐK, 19 KQ; giá x2 sau mỗi lần mua, XÓA hoàn 50%. Luật #1 miễn phí (tự chọn ở shop đầu). GIỮ BẮN 0.4s: /execute — lướt né + ép chạy mọi Luật 1 lần (CD 8s).',
+            desc: '"My Game, My Rules!" HP:5 | Dame:1.1 | Đạn:4 (Đạn Mã Nguồn) | Tốc:3.7. Tự lập trình LUẬT trong ADMIN TERMINAL (thẻ trong shop): mỗi Luật gồm các ĐIỀU KIỆN (IF) và KẾT QUẢ (THEN) — một ĐK bất kỳ nổ là chạy đồng loạt mọi KQ; từ ĐK thứ 2 mỗi ĐK +15% hiệu lực. 29 ĐK, 35 KQ (vùng Băng/Lửa/Axit, Khiên, Vô Hình, Đạn Nguyên Tố, Bản Sao, Phân Ảnh Chém/Lazer, Không Kích...); giá x2 sau mỗi lần mua, XÓA hoàn 50%, ĐỔI khe tốn 50% giá khe. Mỗi lần THÊM/ĐỔI chỉ được chọn trong 3 lựa chọn ngẫu nhiên (Evo 2: 5, FULL EVO: 12), Reroll $5. NỘI TẠI CỜ BẠC: Reroll đầu tiên mỗi hiệp miễn phí, +1 ô shop & G.E.A.R. Luật #1 miễn phí (tự chọn ở shop đầu). GIỮ BẮN 0.4s: /execute — lướt né + ép chạy mọi Luật 1 lần (CD 8s).',
             type: 'body', role: ['Sinh Tồn', 'Cơ Động'],
             size: { w: 28, h: 28 },
             stats: { hp: 5, dmg: 1.1, ammo: 4, speedMult: 1.0571 }

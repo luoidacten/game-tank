@@ -313,7 +313,7 @@ function renderStandardCards(playerId, list) {
 }
 
 // Nội tại Cờ Bạc (docs/BODY_MOI_4.md): Joker, Jack - 6 Lỗ, COC -> Reroll đầu tiên mỗi hiệp miễn phí, +1 ô lựa chọn shop & G.E.A.R
-const GAMBLER_BODIES = ['joker', 'jack_6_lo', 'coc'];
+const GAMBLER_BODIES = ['joker', 'jack_6_lo', 'coc', 'the_admin'];
 function isGamblerBody(p) {
     if (!p) return false;
     if (GAMBLER_BODIES.includes(p.weapon)) return true;
