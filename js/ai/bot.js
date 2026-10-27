@@ -45,7 +45,10 @@ const SANDBOX_MAPS = [
     { id: 'overdrive', name: 'SIÊU TỐC' },
     { id: 'fast_shrink', name: 'BO THẦN TỐC' },
     { id: 'rush_hour', name: 'CAO ĐIỂM' },
-    { id: 'supply_drop', name: 'TIẾP TẾ' }
+    { id: 'supply_drop', name: 'TIẾP TẾ' },
+    { id: 'ice_rink', name: 'SÂN BĂNG' },
+    { id: 'laser_field', name: 'TRƯỜNG LAZER' },
+    { id: 'wind_hill', name: 'ĐỒI GIÓ' }
 ];
 
 class BotAIController {

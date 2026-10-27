@@ -308,7 +308,7 @@ class ArtilleryHazard {
         this.x = x;
         this.y = y;
         this.r = 10;
-        this.maxR = 60;
+        this.maxR = 54;
         this.spawnTime = Date.now();
         this.detonateTime = 2500;
         this.active = true;
@@ -322,10 +322,10 @@ class ArtilleryHazard {
     }
     explode() {
         this.active = false;
-        explosions.push(new Explosion(this.x, this.y, this.maxR, 'rgba(231, 76, 60,', 2.0, null, true));
+        explosions.push(new Explosion(this.x, this.y, this.maxR, 'rgba(231, 76, 60,', 1.5, null, true));
         [p1, p2].forEach(p => {
             if (p && p.hp > 0 && Math.hypot((p.x + p.w / 2) - this.x, (p.y + p.h / 2) - this.y) <= this.maxR) {
-                p.takeDamage(2.0, null);
+                p.takeDamage(1.5, null);
             }
         });
     }

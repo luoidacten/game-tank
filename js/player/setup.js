@@ -74,8 +74,8 @@ Object.assign(Player.prototype, {
         this.reloadTime = C.reloadTime;
 
         if (typeof gameState !== 'undefined' && gameState.currentMap === 'overdrive') {
-            this.speed *= 1.35;
-            this.reloadTime *= 0.5;
+            this.speed *= 1.25; // [CÂN BẰNG] 1.35 -> 1.25
+            this.reloadTime *= 0.62; // [CÂN BẰNG] 0.5 -> 0.62
         }
 
         // 3. ÁP DỤNG CÁC NÂNG CẤP CHỈ SỐ (UPGRADES & EVOLUTIONS)

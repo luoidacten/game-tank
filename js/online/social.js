@@ -201,6 +201,7 @@ const NS_EMOTE_MAP = Object.fromEntries(NS_EMOTES.map(e => [e.id, e]));
 const NS_MAPS = [
     ['random', '🎲 Ngẫu nhiên'], ['classic', '🏛️ Cổ Điển'], ['bastion', '🛡️ Pháo Đài'], ['artillery', '💣 Pháo Kích'],
     ['overdrive', '⚡ Siêu Tốc'], ['fast_shrink', '💀 Bo Thần Tốc'], ['rush_hour', '🚛 Cao Điểm'], ['supply_drop', '📦 Tiếp Tế'],
+    ['ice_rink', '🧊 Sân Băng'], ['laser_field', '🔆 Trường Lazer'], ['wind_hill', '🌬️ Đồi Gió'],
 ];
 const NS_WINS = [2, 3, 5, 7];
 

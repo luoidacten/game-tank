@@ -43,8 +43,8 @@ function tickPhysics() {
     const isSandboxSpawnLocked = (typeof botAI !== 'undefined' && botAI.enabled && botAI.freezeNaturalSpawns);
 
     if (!isOnlineGuest && !isSandboxSpawnLocked) {
-        let crateInterval = (gameState.currentMap === 'supply_drop') ? 1500 : 3000;
-        let maxCrates = (gameState.currentMap === 'supply_drop') ? 12 : 5;
+        let crateInterval = (gameState.currentMap === 'supply_drop') ? 2000 : 3000;
+        let maxCrates = (gameState.currentMap === 'supply_drop') ? 9 : 5;
         if (now - lastCrateSpawn > crateInterval && crates.length < maxCrates) {
             crates.push(new Crate()); lastCrateSpawn = now;
         }
@@ -52,9 +52,9 @@ function tickPhysics() {
         // Rush Hour map: duy trì liên tục 2 - 3 xe chở tiền
         if (gameState.currentMap === 'rush_hour') {
             let activeTrucks = moneyTrucks.filter(t => t.active).length;
-            const truckCap = ([p1, p2].some(p => mtIsFull(p))) ? 4 : 3; // Xe Tiền Full Evo: thêm xe tiền trên sân
+            const truckCap = ([p1, p2].some(p => mtIsFull(p))) ? 3 : 2; // Xe Tiền Full Evo: thêm xe tiền trên sân
             if (activeTrucks < truckCap) {
-                if (activeTrucks < 2 || Math.random() < 0.05) {
+                if (activeTrucks < 2 || Math.random() < 0.02) {
                     moneyTrucks.push(new MoneyTruck());
                 }
             }
@@ -70,7 +70,7 @@ function tickPhysics() {
 
         // Artillery map: bão đạn pháo kích ngẫu nhiên mỗi 2.5s
         if (gameState.currentMap === 'artillery') {
-            if (!gameState.lastArtillerySpawn || now - gameState.lastArtillerySpawn > 2500) {
+            if (!gameState.lastArtillerySpawn || now - gameState.lastArtillerySpawn > 3200) {
                 gameState.lastArtillerySpawn = now;
                 // [FIX] Trước đây rơi ngẫu nhiên khắp sân (đa số vào khoảng trống giữa sân, không trúng ai).
                 // Nay nhắm luân phiên vào làn của 2 xe, lệch ngang ngẫu nhiên để còn né được.
@@ -331,7 +331,11 @@ function tickPhysics() {
         if (!bodyEffects[i].active) bodyEffects.splice(i, 1);
     }
 
+    if (typeof mapHazardEnsure === 'function') mapHazardEnsure();
+    const iceMap = gameState.currentMap === 'ice_rink' && gameState.phase === 'playing';
+    const icePrev = iceMap ? [p1.x, p2.x] : null;
     p1.update(); p2.update();
+    if (iceMap) mapIceStep(icePrev);
     checkHits(p1, p2); checkHits(p2, p1);
     commitStatuses(p1); commitStatuses(p2);
 
@@ -373,10 +377,10 @@ function getZoneState(tp) {
     const fast = gameState.currentMap === 'fast_shrink';
     const hasEarlyZoneGear = (typeof p1 !== 'undefined' && p1 && p1.hasGear && p1.hasGear('gear_early_zone_g'))
         || (typeof p2 !== 'undefined' && p2 && p2.hasGear && p2.hasGear('gear_early_zone_g'));
-    const limit = fast ? 20000 : (hasEarlyZoneGear ? 35000 : C.suddenDeathTime);
+    const limit = fast ? 24000 : (hasEarlyZoneGear ? 35000 : C.suddenDeathTime);
     if (tp <= limit) return null;
     const W = canvas.width;
-    const rate = fast ? 0.15 : 0.05;           // px/ms mỗi bên (như cũ)
+    const rate = fast ? 0.12 : 0.05;           // px/ms mỗi bên (như cũ)
     const t = tp - limit;
     const off = (typeof gameState.zoneOff === 'number' ? gameState.zoneOff : 0.18) * W;
     const W1 = W * 0.5, WF = 84;

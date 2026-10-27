@@ -55,7 +55,7 @@ function startRound() {
         // Map ngẫu nhiên mặc định; chỉ Phòng Tập (bot) & PvE được cố định map
         const mapFixed = (typeof botAI !== 'undefined' && botAI.enabled) || (typeof PVE !== 'undefined' && PVE.active);
         if (!mapFixed || !gameState.selectedMapMode || gameState.selectedMapMode === 'random') {
-            const mapList = ['classic', 'bastion', 'artillery', 'overdrive', 'fast_shrink', 'rush_hour', 'supply_drop'];
+            const mapList = ['classic', 'bastion', 'artillery', 'overdrive', 'fast_shrink', 'rush_hour', 'supply_drop', 'ice_rink', 'laser_field', 'wind_hill'];
             gameState.currentMap = mapList[Math.floor(Math.random() * mapList.length)];
         } else {
             gameState.currentMap = gameState.selectedMapMode;
@@ -67,8 +67,8 @@ function startRound() {
         let step = (canvas.height - 240) / (count + 1);
         for (let bIdx = 0; bIdx < count; bIdx++) {
             let bY = 120 + (bIdx + 1) * step;
-            let vx = (bIdx % 2 === 0 ? 2 : -2);
-            bastions.push(new BastionWall(bY, 60, vx));
+            let vx = (bIdx % 2 === 0 ? 1.6 : -1.6); // [CÂN BẰNG] chậm hơn, tường dễ phá hơn
+            bastions.push(new BastionWall(bY, 45, vx));
         }
     }
 
@@ -116,7 +116,10 @@ function updateMapHUD() {
         overdrive: '⚡ SIÊU TỐC',
         fast_shrink: '💀 BO THẦN TỐC',
         rush_hour: '🚛 CAO ĐIỂM',
-        supply_drop: '📦 TIẾP TẾ'
+        supply_drop: '📦 TIẾP TẾ',
+        ice_rink: '🧊 SÂN BĂNG',
+        laser_field: '🔆 TRƯỜNG LAZER',
+        wind_hill: '🌬️ ĐỒI GIÓ'
     };
     badge.innerText = `MAP: ${mapNames[gameState.currentMap] || (gameState.currentMap ? gameState.currentMap.toUpperCase() : 'CỔ ĐIỂN')}`;
 }

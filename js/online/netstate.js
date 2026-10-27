@@ -8,7 +8,7 @@
 
 // Các class có thể xuất hiện trong ảnh chụp (tái tạo đúng prototype để gọi draw())
 const NET_CLASSES = {
-    Player, Crate, MoneyTruck, MovingObstacle, BastionWall, ArtilleryHazard,
+    MapDirector, Player, Crate, MoneyTruck, MovingObstacle, BastionWall, ArtilleryHazard,
     Explosion, IceZone, Beam, FloatingSword, AcidZone, StormSlash, StTornado, StSplitFx, StDashTrail, StDelayedSlash,
     ArrowRain, ArrowDropMarker, BowSkyShot, MortarMarker, VoidZone, Talisman, SpellZone, RadiationZone,
     ShadowTrap, ShortgunFireZone, FireZone, WindWall, InventorDrone, ConfinementCage,
