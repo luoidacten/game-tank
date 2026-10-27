@@ -516,10 +516,10 @@ const MODULES = {
         {
             id: 'mortar',
             name: 'Mortar — Pháo Cối Công Thành',
-            desc: '"Đừng nhìn phía trước mặt... Hãy ngước nhìn bầu trời trên đầu ngươi kìa!" HP:5.5 | Dame:1.7 (Tâm nổ: 2.1) | Đạn:3 | Tốc:3.4. QUỸ ĐẠO VÒM TRỜI: mọi đạn cối rơi từ trên trời xuống làn địch — không bị chặn bởi Tường, Ụ súng, Búp bê, Khiên chắn, Trường Niệm Lực hay Vùng Điện Tích. HỒNG TÂM: rơi lệch tâm xe địch <= 18px -> +0.4 Dame & phá ngay 1 lớp Khiên. NHẤP: bắn 1 quả theo trục X hiện tại của bạn — Vòng Cảnh Báo đỏ 70px trên làn địch 0.75s rồi nổ 1.7 Dame & hất địch trượt ngang 50px. GIỮ 0.5s: MƯA PHÁO RẢI THẢM (hồi 8s, không tốn đạn) — 3 quả cách 0.2s vào X địch, X-85, X+85 (vòng 55px, 1.0 Dame + chậm 30% 1.5s).',
+            desc: '"Đừng nhìn phía trước mặt... Hãy ngước nhìn bầu trời trên đầu ngươi kìa!" HP:5.5 | Dame:1.35 (Tâm nổ: 1.65) | Đạn:3 | Tốc:3.4. QUỸ ĐẠO VÒM TRỜI: mọi đạn cối rơi từ trên trời xuống làn địch — không bị chặn bởi Tường, Ụ súng, Búp bê, Khiên chắn, Trường Niệm Lực hay Vùng Điện Tích. HỒNG TÂM: rơi lệch tâm xe địch <= 18px -> +0.3 Dame & phá ngay 1 lớp Khiên. NHẤP: bắn 1 quả theo trục X hiện tại của bạn — Vòng Cảnh Báo đỏ 70px trên làn địch 0.85s rồi nổ 1.35 Dame & hất địch trượt ngang 50px. GIỮ 0.5s: MƯA PHÁO RẢI THẢM (hồi 10s, không tốn đạn) — 3 quả cách 0.2s vào X địch, X-85, X+85 (vòng 55px, 0.75 Dame + chậm 30% 1.5s).',
             type: 'body', role: ['Kiểm Soát', 'Đối Đầu'],
             size: { w: 32, h: 32 },
-            stats: { hp: 4.5, dmg: 1.7, ammo: 3, speedMult: 0.9714 }
+            stats: { hp: 4.5, dmg: 1.35, ammo: 3, speedMult: 0.9714 }
         },
         { id: 'fire_cannon', name: 'Pháo Lửa', desc: '"Băng làm chậm, lửa thiêu rụi." HP:4 | Dame:1 | Đạn:5 (Thiêu đốt). Đạn trúng địch gây ĐỐT 1.5s (0.05 dame mỗi 0.5s). Mỗi phát thứ 3 là HỎA CẦU bay nhanh, để lại VÙNG LỬA trên làn địch 3s (0.1 dame mỗi 0.5s, đứng trong lửa luôn bị Đốt). Evo 1: +1 Máu, vùng lửa to, lâu & nóng hơn, cứ 2 vùng có 1 vùng ĐẠI HỎA (rất to, 5s, dame x3). Evo 2: x1.4 dame lên địch đang cháy, Đốt cộng dồn 3 tầng; Hỏa Cầu trúng địch đang cháy KÍCH NỔ các tầng (0.35 dame/tầng). Full Evo: vùng lửa gần nhau hợp nhất thành TƯỜNG LỬA; mỗi 7s HỎA NGỤC dựng lửa dưới chân địch & Đốt tối đa.', type: 'body', role: ['Kiểm Soát', 'Đối Đầu'], size: { w: 30, h: 30 }, stats: { hp: 4, dmg: 1, ammo: 5 } },
     ],

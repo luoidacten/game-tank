@@ -17,6 +17,9 @@ const SW_FORMS = {
 };
 const SW_ROLE_FORM = { 'Đối Đầu': 'pha', 'Kiểm Soát': 'hu', 'Cơ Động': 'troc', 'Sinh Tồn': 'doc' };
 const SW_DARK = '#1a0b1f';
+const SW_FORM_ROLE = { pha: 'ĐỐI ĐẦU', hu: 'KIỂM SOÁT', troc: 'CƠ ĐỘNG', doc: 'SINH TỒN' };
+// Hiệu ứng khắc chế (chip chữ có giới hạn tần suất qua p.swChipT)
+function swCounterPop(p, s, c, sz, dy) { if (!(p.swChipT > 0)) { p.swChipT = 40; swTxt(p, s, c, sz || 11, dy || 14); } }
 
 function swE1(p) { return p.hasUpgrade('evo_skin_1'); }
 function swE2(p) { return p.hasUpgrade('evo_skin_2'); }
@@ -94,7 +97,7 @@ function swInitRound(p) {
     p.w = F.size; p.h = F.size;
     p.x = Math.max(0, Math.min(canvas.width - p.w, cx - p.w / 2));
     p.y = (p.id === 1) ? canvas.height - p.h - 22 : 20;
-    p.swMorphFx = 50;
+    p.swMorphFx = 50; p.swIntroT = 170; p.swShieldT = 0; p.swChipT = 0; p.swPopT = 0; p.swPopX = 0; p.swPopY = 0;
     swTxt(p, F.ic + ' ' + F.n + (p.swDup ? ' x2' : ''), F.c, 13, 10);
     if (p.swSub) swTxt(p, 'THAY DA: ' + SW_FORMS[p.swSub].ic + ' ' + SW_FORMS[p.swSub].n, SW_FORMS[p.swSub].c, 11, 26);
     else if (swE2(p) && !p.swDup) swTxt(p, 'KHÔNG CÓ DA PHỤ...', '#94a3b8', 10, 26);
@@ -207,6 +210,13 @@ BulletHooks.register('skinwalker', {
             if (pass) spawnSparkParticles(b.x, b.y, '#c084fc', 5);
             if (obj.hp <= 0 && !obj.swGone) {
                 obj.swGone = 1; obj.active = false;
+                if (main || o.swSub === 'hu') {   // khắc chế Kiểm Soát: nuốt triệu hồi / công trình
+                    o.swPopT = 24; o.swPopX = obj.x + (obj.w || 0) / 2; o.swPopY = obj.y + (obj.h || 0) / 2;
+                    swTxt(o, 'KHẮC CHẾ!', '#d8b4fe', 14, 30);
+                    if (typeof explosions !== 'undefined') explosions.push(new Explosion(o.swPopX, o.swPopY, 30, 'rgba(168,85,247,', 0, null));
+                    spawnSparkParticles(o.swPopX, o.swPopY, '#c084fc', 14); spawnSparkParticles(o.swPopX, o.swPopY, '#f5d0fe', 6);
+                    triggerScreenShake(3, 6);
+                }
                 const heal = swV(o, 'hu', 0.125, 0.25);
                 if (heal > 0 && o.hp > 0) { o.hp = Math.min(o.maxHp, o.hp + heal); if (main) o.ammo = Math.min(o.maxAmmo, o.ammo + 1); swTxt(o, '+' + heal.toFixed(2) + ' NUỐT', '#c084fc', 10, 14); }
             }
@@ -234,6 +244,10 @@ function swTick(p) {
     if (p.swRecoil > 0) p.swRecoil--;
     if (p.swMorphFx > 0) p.swMorphFx--;
     if (p.swShedT > 0) p.swShedT--;
+    if (p.swIntroT > 0) p.swIntroT--;
+    if (p.swShieldT > 0) p.swShieldT--;
+    if (p.swChipT > 0) p.swChipT--;
+    if (p.swPopT > 0) p.swPopT--;
     if (p.swReflCd > 0) p.swReflCd--;
     if (p.hp <= 0 || gameState.phase !== 'playing') return;
     if (!p.swInit) swInitRound(p);
@@ -314,7 +328,7 @@ CharHooks.register('skinwalker', {
         this.swInit = false; this.swForm = ''; this.swSub = ''; this.swSubK = 0; this.swDup = false;
         this.swPrevS = false; this.swRecoil = 0; this.swMorphFx = 0; this.swChase = 0; this.swShedUsed = false; this.swShedT = 0;
         this.swDashT = 0; this.swDashDir = 1; this.swReflCd = 0; this.swFacing = false; this.swLeech = 0; this.swT = 0;
-        this.swMorph = ''; this.swMorphT = 0; this.lastShot = 0; this.swSpdAdd = 0;
+        this.swMorph = ''; this.swMorphT = 0; this.swIntroT = 0; this.swShieldT = 0; this.swChipT = 0; this.swPopT = 0; this.lastShot = 0; this.swSpdAdd = 0;
     },
     speed(cur) { return !(cur > 0) ? cur : cur + ((this.swSpdAdd || 0) + (this.swChase || 0)) * (this.statusSpeedMult === undefined ? 1 : this.statusSpeedMult); },
     shoot(inp, now) {
@@ -346,8 +360,8 @@ CharHooks.register('skinwalker', {
         const o = options || {};
         if (swIs(this) && typeof amount === 'number' && this.swInit) {
             if (o.isEnvironmental) {
-                if (this.swForm === 'hu') return 0;
-                if (this.swSub === 'hu') amount *= Math.max(0, 1 - this.swSubK);
+                if (this.swForm === 'hu') { this.swShieldT = 20; swCounterPop(this, '◈ MIỄN VÙNG', '#d8b4fe', 10, 14); return 0; }
+                if (this.swSub === 'hu') { amount *= Math.max(0, 1 - this.swSubK); this.swShieldT = 14; }
             }
             if (attacker && attacker !== this && (attacker === p1 || attacker === p2)) {
                 const d = Math.hypot(attacker.x + attacker.w / 2 - (this.x + this.w / 2), attacker.y + attacker.h / 2 - (this.y + this.h / 2));
@@ -380,7 +394,7 @@ CharHooks.register('skinwalker', {
     if (typeof addStatusSlow !== 'function') return;
     const origS = addStatusSlow;
     addStatusSlow = function (p, mult) {
-        if (swIs(p) && p.swForm === 'hu' && mult < 1) mult = swE1(p) ? 1 : 1 - (1 - mult) * 0.5;
+        if (swIs(p) && p.swForm === 'hu' && mult < 1) { swCounterPop(p, 'KHÁNG CHẬM', '#c4b5fd', 10, 26); mult = swE1(p) ? 1 : 1 - (1 - mult) * 0.5; }
         return origS(p, mult);
     };
 })();

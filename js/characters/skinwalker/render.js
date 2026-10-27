@@ -139,11 +139,51 @@ function swDrawBullet(b) {
     ctx.restore();
 }
 
+// ---------- Phản hồi khắc chế: huy hiệu vai trò, banner đầu hiệp, khiên hư không, vụ nổ KHẮC CHẾ ----------
+function swDrawCounterUI(p) {
+    const F = SW_FORMS[p.swForm]; if (!F || !p.swInit) return;
+    const t = swNow(), cx = p.x + p.w / 2, up = p.id === 1 ? -1 : 1;
+    const by = p.id === 1 ? p.y - 12 : p.y + p.h + 12;
+    ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    // huy hiệu vai trò khắc chế (luôn hiện)
+    const txt = F.ic + ' \u2694 vs ' + SW_FORM_ROLE[p.swForm];
+    ctx.font = 'bold 9px sans-serif';
+    const w = ctx.measureText(txt).width + 12;
+    ctx.globalAlpha = 0.85; ctx.fillStyle = 'rgba(10,6,20,0.78)'; ctx.strokeStyle = F.c; ctx.lineWidth = 1; ctx.shadowBlur = 6; ctx.shadowColor = F.c;
+    ctx.beginPath(); ctx.roundRect(cx - w / 2, by - 8, w, 16, 8); ctx.fill(); ctx.stroke();
+    ctx.shadowBlur = 0; ctx.fillStyle = F.c; ctx.globalAlpha = 1; ctx.fillText(txt, cx, by + 0.5);
+    // khiên hư không khi đứng trong vùng địch / miễn môi trường
+    if (p.swShieldT > 0) {
+        const k = p.swShieldT / 20, R = p.w * 0.85 + 2 * Math.sin(t * 20);
+        ctx.strokeStyle = 'rgba(192,132,252,' + (0.25 + 0.6 * k) + ')'; ctx.lineWidth = 2; ctx.shadowBlur = 10; ctx.shadowColor = '#a855f7';
+        ctx.beginPath(); ctx.arc(cx, p.y + p.h / 2, R, 0, Math.PI * 2); ctx.stroke();
+        ctx.setLineDash([4, 6]); ctx.lineDashOffset = -t * 30; ctx.beginPath(); ctx.arc(cx, p.y + p.h / 2, R + 4, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+    }
+    // vỡ hư không khi KHẮC CHẾ
+    if (p.swPopT > 0) {
+        const k = 1 - p.swPopT / 24, R = 8 + k * 34;
+        ctx.strokeStyle = 'rgba(216,180,254,' + (1 - k) + ')'; ctx.lineWidth = 2; ctx.shadowBlur = 12; ctx.shadowColor = '#a855f7';
+        for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4 + 0.3; ctx.beginPath(); ctx.moveTo(p.swPopX + Math.cos(a) * R * 0.5, p.swPopY + Math.sin(a) * R * 0.5); ctx.lineTo(p.swPopX + Math.cos(a) * R, p.swPopY + Math.sin(a) * R); ctx.stroke(); }
+        ctx.beginPath(); ctx.arc(p.swPopX, p.swPopY, R, 0, Math.PI * 2); ctx.stroke();
+    }
+    // banner đầu hiệp
+    if (p.swIntroT > 0) {
+        const a = Math.min(1, p.swIntroT / 30, (170 - p.swIntroT) / 12), y = canvas.height / 2 + up * 70;
+        ctx.globalAlpha = a; ctx.shadowBlur = 0;
+        ctx.fillStyle = 'rgba(10,6,20,0.8)'; ctx.fillRect(0, y - 22, canvas.width, 44);
+        ctx.fillStyle = F.c; ctx.fillRect(0, y - 22, canvas.width, 1.5); ctx.fillRect(0, y + 20.5, canvas.width, 1.5);
+        ctx.shadowBlur = 8; ctx.shadowColor = F.c; ctx.font = 'bold 15px sans-serif'; ctx.fillText(F.ic + ' ' + F.n, canvas.width / 2, y - 6);
+        ctx.shadowBlur = 0; ctx.font = '11px sans-serif'; ctx.fillStyle = '#e9d5ff'; ctx.fillText('Khắc chế vai trò: ' + SW_FORM_ROLE[p.swForm], canvas.width / 2, y + 11);
+    }
+    ctx.restore();
+}
+
 // ---------- Ấn trên địch & áp lực đối diện ----------
 CharHooks.register('skinwalker', Object.assign(CharHooks.registry.skinwalker || {}, {
     drawUI() {
         const p = this;
         if (p.hp <= 0) return;
+        swDrawCounterUI(p);
         const e = swEnemy(p), t = swNow();
         if (!e || e.hp <= 0) return;
         const ex = e.x + e.w / 2, ey = e.y + e.h / 2;

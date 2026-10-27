@@ -3,12 +3,12 @@
 // ------------------------------------------
 // Nội tại Sky-Drop: mọi đạn cối là thực thể rơi từ trời (isAerialDrop = true), KHÔNG nằm trong owner.bullets
 //   -> không bị Tường / Ụ súng / Búp bê / Khiên chắn / Trường Niệm Lực / Vùng Điện Tích chặn hay bắt.
-//   Hồng Tâm: lệch trục X <= 18px -> +0.4 Dame & phá ngay 1 lớp Khiên.
-// Nhấp: 1 quả đạn cối theo X hiện tại của Mortar, Vòng Cảnh Báo 70px trên làn địch 0.75s -> nổ 1.7 + hất 50px.
-// Giữ 0.5s: Mưa Pháo Rải Thảm (CD 8s, không tốn đạn): 3 quả cách 0.2s vào X địch / X-85 / X+85,
-//   vòng 55px, 1.0 + chậm 30% 1.5s.
-// Evo 1: rơi 0.55s, +1 đạn, nạp nhanh 25%. Evo 2: Hố Đạn Nóng Đỏ 65px 2.5s (0.3 HP/s, chậm 25%), CD 5.5s.
-// FULL: mỗi phát thứ 3 = Đại Pháo Cối (90px, 2.2) nảy 2 Đạn Chùm ±70px (0.35s, 0.8);
+//   Hồng Tâm: lệch trục X <= 18px -> +0.3 Dame & phá ngay 1 lớp Khiên.
+// Nhấp: 1 quả đạn cối theo X hiện tại của Mortar, Vòng Cảnh Báo 70px trên làn địch 0.85s -> nổ 1.35 + hất 50px.
+// Giữ 0.5s: Mưa Pháo Rải Thảm (CD 10s, không tốn đạn): 3 quả cách 0.2s vào X địch / X-85 / X+85,
+//   vòng 55px, 0.75 + chậm 30% 1.5s.
+// Evo 1: rơi 0.65s, +1 đạn, nạp nhanh 25% (so với nạp gốc chậm). Evo 2: Hố Đạn Nóng Đỏ 65px 2.5s (0.2 HP/s, chậm 25%), CD 7s.
+// FULL: mỗi phát thứ 3 = Đại Pháo Cối (90px, 1.8) nảy 2 Đạn Chùm ±70px (0.35s, 0.6);
 //   Hồng Tâm -> +0.3 Giáp Trắng & -1s CD Rải Thảm.
 // Trạng thái: trường thuần trên player & thực thể trong bodyEffects (có trong NET_CLASSES).
 // ==========================================
@@ -23,8 +23,8 @@ function mrIs(p) { return p && p.weapon === 'mortar'; }
 function mrEnemy(p) { return p === p1 ? p2 : p1; }
 function mrSfx(n) { if (typeof soundSystem !== 'undefined' && soundSystem && !soundSystem.muted && soundSystem[n]) soundSystem[n](); }
 function mrTxt(p, s, c, sz) { addFloatingText(p.x + p.w / 2, p.y + (p.id === 1 ? -20 : p.h + 24), s, c, sz || 12); }
-function mrWarn(p) { return mrE1(p) ? 33 : 45; }            // 0.75s -> 0.55s
-function mrBarrageCD(p) { return mrE2(p) ? 330 : 480; }     // 8.0s -> 5.5s
+function mrWarn(p) { return mrE1(p) ? 39 : 51; }            // 0.85s -> 0.65s
+function mrBarrageCD(p) { return mrE2(p) ? 420 : 600; }     // 10s -> 7s
 function mrClampX(x) { return Math.max(12, Math.min(canvas.width - 12, x)); }
 
 // ---------- Đạn cối rơi từ trời ----------
@@ -35,7 +35,7 @@ class MrShell {
         this.x = mrClampX(x); this.y = y; this.kind = kind;
         this.ox = owner.x + owner.w / 2; this.oy = owner.y + owner.h / 2;
         this.r = kind === 'big' ? 45 : (kind === 'small' ? 27.5 : (kind === 'frag' ? 22 : 35));
-        this.dmg = kind === 'big' ? 2.2 : (kind === 'small' ? 1.0 : (kind === 'frag' ? 0.8 : 1.7));
+        this.dmg = kind === 'big' ? 1.8 : (kind === 'small' ? 0.75 : (kind === 'frag' ? 0.6 : 1.35));
         this.t = 0; this.dur = delay; this.boom = 0; this.active = true;
     }
     update() {
@@ -56,7 +56,7 @@ class MrShell {
             if (inLane && Math.abs(dx) <= this.r + e.w / 2 - 6) {
                 let dmg = this.dmg, bull = false;
                 if ((this.kind === 'main' || big) && Math.abs(dx) <= MR_BULL) {
-                    bull = true; dmg += 0.4;
+                    bull = true; dmg += 0.3;
                     if (e.shield > 0) { e.shield--; CharHooks.call(e, 'shieldBreak', p, { isAerialDrop: true }); addFloatingText(ex, e.y + (e.id === 1 ? -26 : e.h + 30), 'PHÁ KHIÊN!', MR_CYAN, 11); }
                     addFloatingText(ex, e.y + (e.id === 1 ? -12 : e.h + 16), '◎ HỒNG TÂM!', MR_GOLD, 13);
                     if (mrFull(p)) { p.gearWhiteShield = (p.gearWhiteShield || 0) + 0.3; p.mrCd = Math.max(0, (p.mrCd || 0) - 60); }
@@ -92,7 +92,7 @@ class MrCrater {
         if (!e || !(e.hp > 0)) return;
         if (Math.abs(e.y + e.h / 2 - this.y) < e.h / 2 + 22 && Math.abs(e.x + e.w / 2 - this.x) < this.r + e.w / 2 - 4) {
             addStatusSlow(e, 0.75);
-            this.acc += 0.3 / 60;
+            this.acc += 0.2 / 60;
             if (this.acc >= 0.1) { e.takeDamage(this.acc, p, { isDot: true }); this.acc = 0; }
         }
     }
@@ -120,6 +120,7 @@ function mrBarrage(p) {
 CharHooks.register('mortar', {
     setup() {
         if (mrE1(this)) { this.maxAmmo += 1; this.reloadTime *= 0.75; }
+        this.reloadTime *= 1.15; this.mrAmmoPrev = this.ammo; this.mrAddT = 0;
         this.ammo = this.maxAmmo;
         this.mrHold = 0; this.mrPrevS = false; this.mrHoldUsed = false; this.mrGcd = 0; this.mrCd = 0;
         this.mrQ = null; this.mrQT = 0; this.mrShots = 0; this.mrRecoil = 0; this.mrBullFx = 0;
@@ -130,8 +131,12 @@ CharHooks.register('mortar', {
         if (this.mrCd > 0) this.mrCd--;
         if (this.mrRecoil > 0) this.mrRecoil--;
         if (this.mrBullFx > 0) this.mrBullFx--;
-        // Evo 1: nạp nhanh 25% (nhịp hồi 1 quả 500ms -> 375ms)
-        if (mrE1(this) && this.ammo < this.maxAmmo && now - this.lastShot > this.reloadTime && now - this.lastReload > 375) { this.ammo++; this.lastReload = now; }
+        // Nạp chậm 15% (nhịp hồi 1 quả 500ms -> 575ms); Evo 1 nhanh 25% (-> 430ms)
+        const gap = mrE1(this) ? 430 : 575;
+        if (!mrE1(this) && this.ammo === this.mrAmmoPrev + 1 && now - this.mrAddT < gap) { this.ammo--; this.lastReload = this.mrAddT + gap - 501; }
+        else if (this.ammo > this.mrAmmoPrev) this.mrAddT = now;
+        if (mrE1(this) && this.ammo < this.maxAmmo && now - this.lastShot > this.reloadTime && now - this.lastReload > 430) { this.ammo++; this.lastReload = now; this.mrAddT = now; }
+        this.mrAmmoPrev = this.ammo;
         if (this.mrQ && this.mrQ.length) {
             const e = mrEnemy(this);
             while (this.mrQ.length && this.mrQ[0].t <= this.mrQT) {
