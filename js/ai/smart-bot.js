@@ -800,3 +800,22 @@ function botShopBuy(playerId) {
         return f.call(this, bot, enemy, aligned, inp);
     };
 })();
+
+// Hellrider: luôn giữ chạy để tích tốc (tự Drift ở tường), nhấp khi thẳng hàng, giữ 0.4s Rồ Ga Nitro (hlBotAction)
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon === 'hellrider' && typeof hlBotAction === 'function') {
+            if (!inp.l && !inp.r) {
+                if (!(this.hlT > 0)) { this.hlT = 50 + Math.floor(Math.random() * 60); this.hlD = Math.random() < 0.5; }
+                this.hlT--; inp.l = this.hlD; inp.r = !this.hlD;
+            }
+            if (this.hlB > 0) { this.hlB--; inp.s = this.hlB > 2; return; }
+            const a = hlBotAction(bot, enemy, aligned);
+            if (a === 'tap') { this.hlB = 5; inp.s = true; return; }
+            if (a === 'nitro') { this.hlB = HL_HOLD + 4; inp.s = true; return; }
+            inp.s = false; return;
+        }
+        return f.call(this, bot, enemy, aligned, inp);
+    };
+})();

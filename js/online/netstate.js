@@ -62,6 +62,7 @@ const NET_CLASSES = {
     TgFinisher,
     MrShell, MrCrater, MrFinisher,
     BtFinisher,
+    HlFinisher,
     FcZone, FcFinisher,
 };
 

@@ -849,5 +849,16 @@ const BODY_GUIDES = {
         passive: ['Home Run: đạn phản x2 tốc, +0.7 dame, hồi 0.3 HP', 'Vung trượt không mất máu, ra Bóng Vàng 1.4 dame'],
         evo: { e1: 'CD 3.0s, cung rộng, +20% tốc sau vung', e2: 'Đạn phản to x1.5, xuyên, Khiên 2s', full: 'Phản mọi đạn trong tầm, +$5 mỗi Home Run' },
         tips: ['Giữ nút ngay khi đạn địch sắp tới gần mũi xe']
+    },
+    hellrider: {
+        tag: 'Chạy càng nhanh đạn càng đau', diff: 1,
+        controls: [
+            { input: 'TAP', name: 'Bắn Xích Lửa', what: 'Mỗi 0.2 tốc vượt 3.0: +0.07 dame, +5% tốc đạn, +4% cỡ đạn' },
+            { input: 'HOLD 0.4s', name: 'Rồ Ga Nitro', what: '+30% tốc 2.5s (CD 5s), +1 đạn, phát sau xuyên vật cản' }
+        ],
+        passive: ['Giữ chạy ngang: tốc 3.0 -> 5.6; dừng 0.25s thì tụt dần', 'Chạm tường tự Drift đảo chiều giữ nguyên đà, +0.4 tốc 1.5s', 'Tốc >= 4.8 BỐC LỬA: giảm 25% sát thương, đạn Thiêu Đốt'],
+        evo: { e1: 'Gia tốc +50%, +0.09 dame/bậc, Drift +1 đạn +0.6 tốc', e2: 'Trần tốc 6.2, bốc lửa miễn Làm Chậm, giảm 35%', full: 'Drift/Nitro phun 2 Cầu Lửa; tốc >= 6.0 xuyên khiên 50%' },
+        tips: ['Đừng đứng yên: luôn giữ phím chạy và bắn lúc đang lướt', 'Bấm Nitro lúc đang chạy để đổi hướng mà không mất đà']
     }
 };
+

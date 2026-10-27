@@ -359,6 +359,10 @@ const EVOLUTIONS = {
         { id: 'evo_bat_1', name: 'Gậy Nhôm Siêu Nhẹ', desc: 'Hồi chiêu Vung Gậy 4.5s -> 3.0s, cung vung rộng hơn, +20% tốc chạy trong 1.5s sau khi vung.', cost: 160, type: 'evo' },
         { id: 'evo_bat_2', name: 'Grand Slam', desc: 'Home Run: đạn bay ngược to gấp rưỡi, xuyên vật cản, tặng Batter Khiên Bóng Chày 2s. FULL EVO: 1 cú vung phản TẤT CẢ đạn địch trong tầm và thưởng +$5 mỗi Home Run.', cost: 290, type: 'evo' },
     ],
+    hellrider: [
+        { id: 'evo_hell_1', name: 'Bộ Tăng Áp Vô Cấp', desc: 'Gia tốc khi chạy ngang nhanh hơn 50% (0.8s đạt tối đa). Mỗi 0.2 tốc vượt 3.0 cho +0.09 sát thương (thay vì +0.07). Mỗi lần Drift chạm tường: +1 đạn và +0.6 tốc bứt phá (1.5s).', cost: 160, type: 'evo' },
+        { id: 'evo_hell_2', name: 'Bánh Xe Bất Khuất', desc: 'Trần tốc chạy 5.6 -> 6.2 (Nitro vượt 7.5). Khi Bốc Lửa (tốc >= 4.8): MIỄN NHIỄM Làm Chậm, giảm sát thương nhận 25% -> 35%. FULL EVO (Ác Quỷ Tốc Độ): mỗi Drift chạm tường / mỗi Rồ Ga Nitro phun 2 Cầu Lửa ống xả (50% sát thương đạn); tốc >= 6.0 đạn xuyên khiên 50%.', cost: 290, type: 'evo' },
+    ],
 };
 
 // ==========================================
@@ -377,6 +381,7 @@ const FULL_EVO_GATE = {
     genius: 200,
     psychokinesis: 180,
     batter: 170,
+    hellrider: 170,
 };
 // MỌI body (trừ basic: dạng MAIN tự có Full Evo) đều phải mua thẻ FULL EVO
 for (const body in EVOLUTIONS) {

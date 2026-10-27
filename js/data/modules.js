@@ -530,6 +530,14 @@ const MODULES = {
             size: { w: 30, h: 30 },
             stats: { hp: 6.0, dmg: 1.1, ammo: 4, speedMult: 1.0857 }
         },
+        {
+            id: 'hellrider',
+            name: 'Hellrider — Chiến Xa Địa Ngục',
+            desc: '"Tốc độ chính là sát thương!" HP:5.5 | Dame:1.0 | Đạn:4 | Tốc:3.0 -> 5.8+. GIỮ CHẠY: tích gia tốc tới 5.6. Mỗi 0.2 tốc vượt 3.0 (cả đồ Shop/Nitro): đạn +0.07 dame, +5% tốc đạn, +4% cỡ đạn. Chạm tường biên tự Drift đảo chiều giữ nguyên đà (+0.4 tốc 1.5s). Tốc >= 4.8: BỐC LỬA (giảm 25% sát thương, đạn Thiêu Đốt 0.2 HP/s). GIỮ 0.4s: Rồ Ga Nitro (CD 5s) +30% tốc 2.5s, +1 đạn, phát sau là Đạn Xích Lửa xuyên vật cản. Kết liễu: HIGHWAY TO HELL.',
+            type: 'body', role: ['Cơ Động', 'Đối Đầu'],
+            size: { w: 30, h: 30 },
+            stats: { hp: 5.5, dmg: 1.0, ammo: 4, speedMult: 0.8571 }
+        },
     ],
     FEET: [
         { id: 'speed', name: 'Động Cơ', desc: 'Tăng tốc độ di chuyển. Tối đa 3 lần.', type: 'feet', cost: 35 },
