@@ -77,9 +77,10 @@ function dynTapVsRings(p) {
 CharHooks.register('dynamite', {
     setup() {
         if (dynE1(this)) this.maxAmmo += 1;
+        if (dynFull(this)) this.maxAmmo += 1;
         this.ammo = this.maxAmmo;
         this.dynHold = 0; this.dynHits = 0; this.dynChainSeq = 0;
-        const e = dynFoe(this); if (e) { e.dynKb = 0; e.dynLastChain = 0; }
+        const e = dynFoe(this); if (e) { e.dynKb = 0; e.dynChainT = 0; e.dynChainN = 0; }
         if (typeof bodyEffects !== 'undefined') bodyEffects = bodyEffects.filter(o => !((o instanceof DynBomb || o instanceof DynLob) && o.team === this.id));
     },
     update() {
@@ -90,6 +91,7 @@ CharHooks.register('dynamite', {
             e.dynKb *= 0.86;
             if (Math.abs(e.dynKb) < 0.3) e.dynKb = 0;
         }
+        if (e && e.dynChainT > 0) e.dynChainT--;
         dynTapVsRings(this);
     },
     shoot(inp, now) {

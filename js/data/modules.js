@@ -500,10 +500,10 @@ const MODULES = {
         {
             id: 'dynamite',
             name: 'Dynamite',
-            desc: '"Bùm! Hầm càng sâu, vàng càng sáng." HP:5 | Dame:1.5 (bom 1.8) | Đạn:3 bó TNT | Tốc:3.5. NHẤP: Ném Thẳng — nổ khi chạm xe địch / vật cản / vòng cảnh báo của bó đang nằm (1.5 dame; x3 lên mọi công trình, vật triệu hồi, thùng, xe tiền). GIỮ 0.5s THẢ: Ném Cao vòng cung trên không (không gì chặn được) rơi xuống làn địch tại vị trí X của bạn: nằm lại với vòng cảnh báo 55px, hoặc DÍNH vào xe địch nếu rơi trúng. Bó tự nổ sau 6s (1.8 dame + hất trượt ngang). Tối đa 2 bó. NỔ LAN: các bó trong 140px nối dây, 1 bó nổ kéo theo cả chuỗi. ĐÀO VÀNG: phá thùng / xe tiền bằng thuốc nổ +$10; mỗi 3 lần trúng địch +1 Cục Vàng $5.',
+            desc: '"Bùm! Hầm càng sâu, vàng càng sáng." HP:5 | Dame:1.5 (bom 1.8) | Đạn:1 bó TNT | Tốc:3.5. NHẤP: Ném Thẳng — nổ khi chạm xe địch / vật cản / vòng cảnh báo của bó đang nằm (1.5 dame; x3 lên mọi công trình, vật triệu hồi, thùng, xe tiền). GIỮ 0.5s THẢ: Ném Cao vòng cung trên không (không gì chặn được) rơi xuống làn địch tại vị trí X của bạn: nằm lại với vòng cảnh báo 55px, hoặc DÍNH vào xe địch nếu rơi trúng. Bó tự nổ sau 6s (1.8 dame + hất trượt ngang). Tối đa 2 bó. NỔ LAN: các bó trong 140px nối dây, 1 bó nổ kéo theo cả chuỗi — MỌI bó trúng địch đều gây sát thương nhưng giảm dần nếu trúng liên tiếp trong 0.6s (100% / 70% / 50% / 35%). ĐÀO VÀNG: phá thùng / xe tiền bằng thuốc nổ +$10; mỗi 3 lần trúng địch +1 Cục Vàng $5.',
             type: 'body', role: ['Kiểm Soát', 'Đối Đầu'],
             size: { w: 30, h: 30 },
-            stats: { hp: 5.0, dmg: 1.5, ammo: 3, speedMult: 1.0 }
+            stats: { hp: 5.0, dmg: 1.5, ammo: 1, speedMult: 1.0 }
         },
         {
             id: 'twin_gun',

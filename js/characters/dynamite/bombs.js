@@ -6,7 +6,8 @@
 const DYN_RING = 55;            // vòng cảnh báo / bán kính nổ của 1 bó
 const DYN_BOMB_DMG = 1.8;       // sát thương 1 bó nổ (tự nổ / bị kích)
 const DYN_EARLY_BONUS = 0.4;    // Evo 2: kích nổ sớm +0.4 (2.2)
-const DYN_EXTRA_IN_CHAIN = 0.3; // bó thứ 2+ trong cùng 1 chuỗi trúng địch: chỉ +0.3 mỗi bó
+const DYN_CHAIN_WIN = 36;       // cửa sổ 0.6s: bom trúng liên tiếp cùng 1 mục tiêu bị giảm dần
+const DYN_CHAIN_MULT = [1, 0.7, 0.5, 0.35]; // bom 1 / 2 / 3 / 4+
 const DYN_STUN = 36;            // Evo 2: bó dính người bị Nhấp Bắn kích sớm -> choáng 0.6s
 let dynUid = 1;
 
@@ -40,8 +41,9 @@ function dynAddGold(p, amt, x, y) {
 // ---------- Sát thương ----------
 function dynHurtEnemy(p, e, dmg, chain) {
     if (!dynAlive(e)) return 0;
-    if (chain && e.dynLastChain === chain) dmg = DYN_EXTRA_IN_CHAIN * dynScale(p);
-    else if (chain) e.dynLastChain = chain;
+    if (!(e.dynChainT > 0)) e.dynChainN = 0;
+    dmg *= DYN_CHAIN_MULT[Math.min(e.dynChainN | 0, DYN_CHAIN_MULT.length - 1)];
+    e.dynChainN = (e.dynChainN | 0) + 1; e.dynChainT = DYN_CHAIN_WIN;
     const r = e.takeDamage(dmg, p, {}) || 0;
     if (r > 0) dynOnHit(p, e);
     return r;

@@ -807,8 +807,8 @@ const BODY_GUIDES = {
             { input: 'TAP', name: 'Ném Thẳng', what: 'Nổ khi chạm địch / vật cản / vòng bom (1.5)' },
             { input: 'HOLD 0.5s', name: 'Ném Cao', what: 'Bay qua mọi vật cản, nằm lại làn địch hoặc DÍNH vào xe' }
         ],
-        passive: ['Bom trong 140px nổ lan cả chuỗi', 'x3 sát thương lên công trình / vật triệu hồi', 'Phá thùng/xe tiền +$10, mỗi 3 lần trúng +$5'],
-        evo: { e1: '4 bó, bom sống 9s, tối đa 3, nổ lan xa hơn', e2: 'Kích nổ sớm 2.2 dame, bom dính bị kích -> choáng', full: '5 bó, 12s, x5 công trình, vàng + khói chậm' },
+        passive: ['Bom trong 140px nổ lan cả chuỗi (trúng liên tiếp 0.6s: 100/70/50/35%)', 'x3 sát thương lên công trình / vật triệu hồi', 'Phá thùng/xe tiền +$10, mỗi 3 lần trúng +$5'],
+        evo: { e1: '2 bó, bom sống 9s, tối đa 3, nổ lan xa hơn', e2: 'Kích nổ sớm 2.2 dame, bom dính bị kích -> choáng', full: '3 bó, 12s, x5 công trình, vàng + khói chậm' },
         tips: ['Ném Cao rải bom trước, rồi Nhấp Bắn kích nổ cả chuỗi']
     },
     twin_gun: {
