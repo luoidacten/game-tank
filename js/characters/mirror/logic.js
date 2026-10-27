@@ -29,7 +29,7 @@ Object.assign(Player.prototype, {
             if (isFullEvo) {
                 const foe = (this.id === 1) ? p2 : p1;
                 if (foe) {
-                    if (!this.dynClone) this.dynClone = { active: true };
+                    if (!this.dynClone) this.dynClone = { active: true, invulnerable: true }; // bất tử: không có HP, không bao giờ vỡ
                     const d = this.dynClone;
                     d.w = foe.w; d.h = foe.h;
                     d.x = canvas.width - foe.x - foe.w;
