@@ -498,3 +498,10 @@ addPilotEvos("paradox",
     {"id": "evo_paradox_4", "name": "Quy Neo", "cost": 200, "desc": "Về Neo ngay, chưa có thì đặt Neo (CD 12s). +10 Nộ/lần tua, +4/Dư Âm trúng. VÒNG LẶP VÔ TẬN kéo địch về vị trí 5s trước, tái hiện loạt đạn 5s qua với trần ngân sách dame.", "skill": {"name": "Quy Neo", "cooldown": 12, "ultimateName": "VÒNG LẶP VÔ TẬN", "ultimateTicks": 30, "rageTime": 0.5, "rageDamage": 0}},
     {"1+3": {"desc": "Dấu Nhân Quả cũng tích Ấn Thời Gian."}, "2+4": {"desc": "Vòng Lặp tái hiện thêm bóng 3s."}, "1+2+3+4": {"desc": "Mọi Vết Nứt khai hỏa theo Vòng Lặp."}});
 // PILOT paradox END
+
+// PILOT prism BEGIN
+addPilotEvos("prism",
+    {"id": "evo_prism_3", "name": "Khúc Xạ Kép", "cost": 120, "desc": "Tia Khúc Xạ nảy thêm một lần; lần nảy đầu tách đôi (mỗi tia 50% dame)."},
+    {"id": "evo_prism_4", "name": "Lăng Kính Tức Thì", "cost": 170, "desc": "Bật Cửa Sổ Vàng 0.35s, không tiêu CD Mở Kính (CD Skill 10s). +10 Nộ/đòn phản, +20/phản vàng. VẠN KÍNH QUY QUANG: 4s phản x1.5, cuối chiêu hội tụ tia cảnh báo 0.4s; kết liễu ≤25%.", "skill": {"name": "Lăng Kính Tức Thì", "cooldown": 10, "ultimateName": "VẠN KÍNH QUY QUANG", "ultimateTicks": 264, "rageTime": 0.5, "rageDamage": 0}},
+    {"1+3": {"desc": "Hai tia tách đôi gây 70% dame mỗi tia."}, "2+4": {"desc": "Kết thúc Ultimate bắn thêm 5 mảnh kính."}, "1+2+3+4": {"desc": "Lăng Kính Tức Thì kéo dài 0.5s."}});
+// PILOT prism END

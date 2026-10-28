@@ -726,7 +726,7 @@ const BODY_GUIDES = {
             { input: 'HOLD 0.4s', name: 'Mở Kính', what: '1.5s phản đòn, 0.25s đầu miễn st' }
         ],
         passive: ['Mọi khiên thành Khiên Kính phản đạn', 'Phản đòn bị trừ 0.5 HP mỗi đợt'],
-        evo: { e1: 'Phản 70%, Kính 2.5s, hồi 7s', e2: 'Sẵn 1 Khiên Kính, kính vỡ bắn mảnh', full: 'Phản 100%, không mất máu' },
+        evo: { e3: "Khúc Xạ Kép: Tia Khúc Xạ nảy thêm một lần; lần nảy đầu tách đôi (mỗi tia 50% dame).", e4: "Lăng Kính Tức Thì: Bật Cửa Sổ Vàng 0.35s, không tiêu CD Mở Kính (CD Skill 10s). +10 Nộ/đòn phản, +20/phản vàng. VẠN KÍNH QUY QUANG: 4s phản x1.5, cuối chiêu hội tụ tia cảnh báo 0.4s; kết liễu ≤25%.", e1: 'Phản 70%, Kính 2.5s, hồi 7s', e2: 'Sẵn 1 Khiên Kính, kính vỡ bắn mảnh', full: 'Phản 100%, không mất máu' },
         tips: ['Mở Kính đúng lúc đạn sắp chạm']
     },
     the_adapter: {
