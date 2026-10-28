@@ -76,8 +76,49 @@ const TourneyNet = {
     online(name) {
         if (!name) return false;
         if (name === this.me && this.role === 'host') return true;
+        if (this.role === 'host') { const i = this.idxOf(name); if (i >= 0 && this.st().players[i].bot) return true; } // bot sống trên máy chủ giải
         const c = this.conns[name];
         return !!(c && c.open);
+    },
+    // ================= BOT (sống trên máy chủ giải) =================
+    addBot() {
+        const st = this.st();
+        if (this.role !== 'host' || !st || st.status !== 'lobby' || st.players.length >= st.max) return;
+        let n = st.players.filter(p => p.bot).length + 1, name;
+        do { name = 'Bot ' + n++; } while (this.idxOf(name) >= 0);
+        st.players.push({ name, color: TOURNEY_COLORS[st.players.length % TOURNEY_COLORS.length], bot: { lv: 3, body: 'random' } });
+        this.sysChat('🤖 Đã thêm ' + name);
+        this.push();
+    },
+    setBot(i, k, v) {
+        const st = this.st(), p = st && st.players[i];
+        if (this.role !== 'host' || !p || !p.bot || st.status !== 'lobby') return;
+        if (k === 'blv') p.bot.lv = Math.max(1, Math.min(5, +v || 3));
+        else if (k === 'bbody') p.bot.body = String(v || 'random');
+        else if (k === 'bname') {
+            const nm = String(v || '').trim().slice(0, 14);
+            if (nm && (this.idxOf(nm) < 0 || this.idxOf(nm) === i)) p.name = nm;
+        }
+        this.push();
+    },
+    isBotIdx(i) { const st = this.st(); return !!(st && st.players[i] && st.players[i].bot); },
+    // Máy chủ giải đang bận (đang đấu / mô phỏng / vừa gọi trận cần máy này)
+    devBusy() {
+        return !!(this.cur || TourneyBot.simBusy || TOURNEY.active || Date.now() - (this._claimAt || 0) < 1500);
+    },
+    // Trận cần máy chủ giải: chủ giải đấu, hoặc có bot
+    needsDev(x) {
+        const st = this.st();
+        return st.players[x.a].name === this.me || st.players[x.b].name === this.me || this.isBotIdx(x.a) || this.isBotIdx(x.b);
+    },
+    // Hết bận -> gọi trận đang xếp hàng
+    runQueue() {
+        const st = this.st();
+        if (this.role !== 'host' || !st || st.status !== 'running' || this.devBusy()) return;
+        if (typeof onlineManager !== 'undefined' && onlineManager.isOnline) return;
+        const r = this.curRound(); if (r < 0) return;
+        const m = st.rounds[r].findIndex((x, k) => !x.res && st.live[r + '-' + k] && st.live[r + '-' + k].st === 'queue');
+        if (m >= 0) this.call(r, m);
     },
     idxOf(name) { const st = this.st(); return st ? st.players.findIndex(p => p.name.toLowerCase() === String(name).toLowerCase()) : -1; },
     hostData(c, m) {
@@ -99,7 +140,7 @@ const TourneyNet = {
                 const i = this.idxOf(name);
                 if (i >= 0) {
                     const old = this.conns[st.players[i].name];
-                    if (st.players[i].name === this.me || (old && old.open && old !== c)) return deny('⚠️ Tên "' + name + '" đang được dùng trong giải. Đổi tên khác!');
+                    if (st.players[i].name === this.me || st.players[i].bot || (old && old.open && old !== c)) return deny('⚠️ Tên "' + name + '" đang được dùng trong giải. Đổi tên khác!');
                 } else if (st.status !== 'lobby') return deny('⛔ Giải đã bắt đầu — chỉ người đã đăng ký (đúng tên) mới vào lại được.');
                 else if (st.players.length >= st.max) return deny('⚠️ Giải đã đủ ' + st.max + ' người!');
                 else st.players.push({ name, color: TOURNEY_COLORS[st.players.length % TOURNEY_COLORS.length] });
@@ -170,9 +211,12 @@ const TourneyNet = {
         if (r < 0) return;
         const seq = st.sched === 'seq';
         if (seq) st.autoSeq = true;
-        st.rounds[r].forEach((x, m) => {
-            const L = st.live[r + '-' + m];
-            if (x.b === null || x.res || (L && L.st !== 'issue')) return;
+        // Trận giữa 2 thành viên trước, trận cần máy chủ giải (chủ giải / bot) sau -> xếp hàng nếu máy bận
+        const order = st.rounds[r].map((x, m) => m).filter(m => st.rounds[r][m].b !== null)
+            .sort((p, q) => this.needsDev(st.rounds[r][p]) - this.needsDev(st.rounds[r][q]));
+        order.forEach((m) => {
+            const x = st.rounds[r][m], L = st.live[r + '-' + m];
+            if (x.res || (L && L.st !== 'issue')) return;
             if (seq && this.busy()) return;
             if (this.online(st.players[x.a].name) && this.online(st.players[x.b].name)) this.call(r, m, true);
         });
@@ -196,12 +240,32 @@ const TourneyNet = {
         if (!x || x.b === null || x.res) return;
         const key = r + '-' + m, A = st.players[x.a].name, B = st.players[x.b].name;
         const gen = ((st.live[key] && st.live[key].gen) || 0) + 1;
+        const botA = this.isBotIdx(x.a), botB = this.isBotIdx(x.b);
+        if (this.needsDev(x)) {
+            // Máy chủ giải bận (đang đấu / mô phỏng) -> xếp hàng, tự gọi khi rảnh
+            if (this.devBusy() || (typeof onlineManager !== 'undefined' && onlineManager.isOnline)) {
+                st.live[key] = { st: 'queue', gen: gen - 1, rep: {}, note: '⏳ Chờ máy chủ giải rảnh' };
+                if (!quiet) this.push();
+                return;
+            }
+            if (typeof NetSpec !== 'undefined' && NetSpec.watching) NetSpec.stop(true);
+            this.noAuto = null;
+            // Bot vs bot: mô phỏng nhanh trên máy chủ giải
+            if (botA && botB) { this.sysChat(`⚡ Mô phỏng: ${A} vs ${B}`); TOURNEY.quickSim({ r, m }); return; }
+            // Chủ giải vs bot: đấu ngay trên máy này (chủ giải ở dưới, bot ở trên)
+            if ((botA || botB) && (A === this.me || B === this.me)) { this.sysChat(`📣 Gọi trận: ${A} vs ${B}`); TOURNEY.startMatch({ r, m }); return; }
+            this._claimAt = Date.now();
+        }
         const code = 'T' + this.rnd(6), pw = this.rnd(6);
-        st.live[key] = { st: 'live', gen, rep: {}, note: '' };
+        st.live[key] = { st: 'live', gen, rep: {}, note: (botA || botB) ? '🤖 Bot đấu trên máy chủ giải' : '' };
         this.sec[key] = { code, pw };
         const base = { t: 'TCALL', key, gen, code, pw, winScore: st.winScore, classic: !!st.classic, title: st.title };
-        this.sendTo(A, Object.assign({ create: true, opp: B }, base));
-        this.sendTo(B, Object.assign({ create: false, opp: A }, base));
+        // Thành viên vs bot: máy chủ giải làm máy chủ trận, bot điều khiển xe phía máy chủ
+        const botOf = (i) => Object.assign({ name: st.players[i].name }, TourneyBot.resolve(st.players[i]));
+        if (botA) this.sendTo(this.me, Object.assign({ create: true, opp: B, bot: botOf(x.a) }, base));
+        else this.sendTo(A, Object.assign({ create: !botB, opp: B }, base));
+        if (botB) this.sendTo(this.me, Object.assign({ create: true, opp: A, bot: botOf(x.b) }, base));
+        else this.sendTo(B, Object.assign({ create: false, opp: A }, base));
         this.sysChat(`📣 Gọi trận: ${A} vs ${B}`);
         if (!quiet) this.push();
     },
@@ -324,7 +388,7 @@ const TourneyNet = {
     report(extra) {
         const c = this.cur; if (!c) return;
         const msg = Object.assign({ t: 'TREPORT', key: c.key, gen: c.gen }, extra);
-        if (this.role === 'host') this.onReport(this.me, msg);
+        if (this.role === 'host') this.onReport(c.bot ? c.bot.name : this.me, msg);
         else if (this.hostConn && this.hostConn.open) { try { this.hostConn.send(msg); } catch (e) {} }
     },
 
@@ -335,7 +399,8 @@ const TourneyNet = {
         if (typeof NetSpec !== 'undefined' && NetSpec.watching) NetSpec.stop(true); // đang xem trận khác -> vào trận của mình
         if (this.cur && this.cur.phase === 'playing' && om.matchActive) return; // đang đấu trận khác
         if (this.cur) this.dropRoom();
-        this.cur = { key: m.key, gen: m.gen, code: m.code, pw: m.pw, create: !!m.create, opp: m.opp, winScore: m.winScore, classic: !!m.classic, title: m.title || '', phase: 'connecting', tries: 0, at: Date.now(), next: 0 };
+        this.cur = { key: m.key, gen: m.gen, code: m.code, pw: m.pw, create: !!m.create, opp: m.opp, winScore: m.winScore, classic: !!m.classic, title: m.title || '', phase: 'connecting', tries: 0, at: Date.now(), next: 0,
+            bot: (this.role === 'host' && m.bot) ? m.bot : null }; // bot: máy chủ giải cho bot điều khiển xe của mình
         this.savedWin = this.savedWin || { winScore: gameState.winScore, classic: gameState.classicMode };
         const md = document.getElementById('onlineModal'); if (md) { md.style.display = 'none'; md.classList.remove('active'); }
         const mm = document.getElementById('mainMenu'); if (mm) mm.style.display = 'none';
@@ -353,10 +418,11 @@ const TourneyNet = {
     },
     tick() {
         const c = this.cur, om = typeof onlineManager !== 'undefined' ? onlineManager : null;
+        if (this.role === 'host') this.runQueue();
         if (!c && om) this.autoWatch();
         if (!c || !om) return;
         if (c.phase === 'playing' && om.role === 'host' && om.matchActive && !c.spec && typeof NetSpec !== 'undefined') {
-            c.spec = NetSpec.serve(c.code, { n1: this.me, n2: c.opp, key: c.key }); // máy chủ trận: mở kênh xem
+            c.spec = NetSpec.serve(c.code, { n1: c.bot ? '🤖 ' + c.bot.name : this.me, n2: c.opp, key: c.key }); // máy chủ trận: mở kênh xem
             if (c.spec) this.report({ spec: c.spec });
         }
         if (c.phase === 'connecting') {
@@ -366,7 +432,11 @@ const TourneyNet = {
                 if (typeof OnlineSocial !== 'undefined') OnlineSocial.applySettings(OnlineSocial.settings.map, c.winScore, c.classic);
                 gameState.winScore = c.winScore; gameState.classicMode = c.classic;
                 if (om.role === 'host' && !c.startAt) c.startAt = Date.now() + 600; // chờ bầu máy chủ / cài đặt sảnh lắng xuống
-                if (om.role === 'host' && c.startAt && Date.now() >= c.startAt) { c.startAt = 0; om.hostStartMatch(); }
+                if (om.role === 'host' && c.startAt && Date.now() >= c.startAt) {
+                    c.startAt = 0;
+                    if (c.bot && typeof TourneyBot !== 'undefined') TourneyBot.begin(c.bot, null, 1); // bot điều khiển xe máy chủ (p1)
+                    om.hostStartMatch();
+                }
             } else c.startAt = 0;
             // Người vào phòng: chưa vào được (phòng chưa mở / lỗi) -> thử lại
             if (!c.create && !om.isOnline && Date.now() > c.next && c.tries < 8) this.connectMatch();
@@ -385,7 +455,8 @@ const TourneyNet = {
             if (this.cur !== c) return;
             const fw = TOURNEY.el('finalWinner'), fs = TOURNEY.el('finalScoreSummary');
             if (fw) fw.innerText = my > opp ? 'BẠN THẮNG!' : my < opp ? 'BẠN THUA!' : 'HOÀ!';
-            if (fs) fs.innerText = `${this.me} ${my} - ${opp} ${c.opp} · đã gửi kết quả cho chủ giải`;
+            if (fw && c.bot) fw.innerText = my > opp ? `🤖 ${c.bot.name} THẮNG!` : my < opp ? `${c.opp} THẮNG!` : 'HOÀ!';
+            if (fs) fs.innerText = `${c.bot ? '🤖 ' + c.bot.name : this.me} ${my} - ${opp} ${c.opp} · đã gửi kết quả cho chủ giải`;
             ['restartBtn', 'backToMenuFromEndBtn'].forEach(id => { const e = TOURNEY.el(id); if (e) e.style.display = 'none'; });
             const tb = TOURNEY.el('tourneyBackBtn'); if (tb) tb.style.display = '';
             const es = TOURNEY.el('endScreen'); if (es) es.style.display = 'block';
@@ -421,6 +492,7 @@ const TourneyNet = {
     backToHub(note) {
         this.dropRoom();
         this.cur = null;
+        if (typeof TourneyBot !== 'undefined') TourneyBot.end();
         if (this.savedWin) { gameState.winScore = this.savedWin.winScore; gameState.classicMode = this.savedWin.classic; this.savedWin = null; }
         TOURNEY.restoreHud();
         ['endScreen', 'upgradeScreen', 'pauseMenuModal', 'mainMenu', 'onlineModal'].forEach(id => { const e = TOURNEY.el(id); if (e) e.style.display = 'none'; });
@@ -471,7 +543,8 @@ const TourneyNet = {
         TOURNEY.view = 'match';
         TOURNEY.render(`<div class="tf-card">
             <div class="tf-head"><span class="tf-cake">⚔️</span><h2>TRẬN GIẢI ĐẤU</h2></div>
-            <div class="tf-vsline"><b class="tf-name big">${this.esc(this.me)}</b><span class="tf-vsbig">VS</span><b class="tf-name big">${this.esc(c.opp)}</b></div>
+            <div class="tf-vsline"><b class="tf-name big">${c.bot ? '🤖 ' + this.esc(c.bot.name) : this.esc(this.me)}</b><span class="tf-vsbig">VS</span><b class="tf-name big">${this.esc(c.opp)}</b></div>
+            ${c.bot ? `<p class="tf-note">🤖 Bot ${this.esc(TourneyBot.lvName(c.bot.lv))} · ${this.esc(TourneyBot.bodyName(c.bot.body))} — máy này làm máy chủ trận, bot điều khiển xe.</p>` : ''}
             <p class="tf-note">⏳ Đang kết nối trực tiếp với đối thủ (phòng riêng ${this.esc(c.code)})… Trận tự bắt đầu khi 2 bên vào phòng.</p>
             <p class="tf-note">Chạm ${c.winScore} · ${c.classic ? 'CỔ ĐIỂN' : 'G.E.A.R'}</p>
             <button class="glow-btn btn-dark tf-btn" data-act="tn-cancel">✖ HUỶ, VỀ BẢNG GIẢI</button></div>`);
@@ -512,22 +585,24 @@ const TourneyNet = {
         TOURNEY.setTheme(st.theme);
         const rows = st.players.map((p, i) => `<div class="tf-prow tn-prow">
             <span class="tf-pnum">${i + 1}</span>${this.dot(i)}
-            <b class="tf-name" style="--pc:${p.color}">${this.esc(p.name)}</b>${p.name === st.host ? ' 👑' : ''}${p.name === this.me ? ' <small>(bạn)</small>' : ''}
-            ${host && i > 0 ? `<button class="tf-x" data-act="tn-kick" data-i="${i}" title="Loại">✕</button>` : ''}</div>`).join('');
+            ${p.bot && host ? `<input class="tf-in" data-k="bname" data-i="${i}" maxlength="14" value="${this.esc(p.name)}" title="Tên bot">` : `<b class="tf-name" style="--pc:${p.color}">${TOURNEY.dname(p)}</b>`}${p.name === st.host ? ' 👑' : ''}${p.name === this.me ? ' <small>(bạn)</small>' : ''}
+            ${p.bot && !host ? `<small>${this.esc(TourneyBot.lvName(p.bot.lv))}</small>` : ''}
+            ${host && i > 0 ? `<button class="tf-x" data-act="tn-kick" data-i="${i}" title="Loại">✕</button>` : ''}</div>${p.bot && host ? TOURNEY.botCfgHtml(p.bot, i) : ''}`).join('');
         TOURNEY.render(`<div class="tf-card">
             ${TOURNEY.headHtml()}${this.codeHtml()}${this.noteHtml()}
             <p class="tf-note">Chạm ${st.winScore} · ${st.classic ? 'CỔ ĐIỂN' : 'G.E.A.R'} · Thắng ${st.pts.win} / Hoà ${st.pts.draw} / Thua ${st.pts.loss}</p>
             <label class="tf-lbl">NGƯỜI CHƠI (${st.players.length}/${st.max})</label>
             <div class="tf-plist">${rows}</div>
             ${this.schedHtml()}
-            ${host ? `<button class="glow-btn btn-primary tf-btn" data-act="tn-start" ${st.players.length < 3 ? 'disabled' : ''}>🏁 BẮT ĐẦU GIẢI (${st.players.length} người)</button>
-                <p class="tf-note">Giải hiện trong danh sách phòng online (🏆). Cần ít nhất 3 người.</p>`
+            ${host ? `<button class="glow-btn btn-dark tf-btn" data-act="tn-addbot" ${st.players.length >= st.max ? 'disabled' : ''}>＋ 🤖 THÊM BOT</button>
+                <button class="glow-btn btn-primary tf-btn" data-act="tn-start" ${st.players.length < 3 ? 'disabled' : ''}>🏁 BẮT ĐẦU GIẢI (${st.players.length} người)</button>
+                <p class="tf-note">Giải hiện trong danh sách phòng online (🏆). Cần ít nhất 3 người (tính cả bot). 🤖 Bot chạy trên máy chủ giải: trận thành viên vs bot dùng máy này làm máy chủ trận; bot vs bot mô phỏng nhanh.</p>`
                 : '<p class="tf-note">⏳ Chờ chủ giải bắt đầu...</p>'}
             <div class="tf-actions">${this.actsHtml(true)}</div></div>`);
     },
     liveLabel(L) {
         if (!L) return '';
-        return L.st === 'live' ? '⚔️ ĐANG ĐẤU' : L.st === 'wait' ? '⏳ CHỜ XÁC NHẬN' : L.st === 'dispute' ? '⚠️ LỆCH KẾT QUẢ' : '🔌 SỰ CỐ';
+        return L.st === 'live' ? '⚔️ ĐANG ĐẤU' : L.st === 'queue' ? '⏳ XẾP HÀNG' : L.st === 'wait' ? '⏳ CHỜ XÁC NHẬN' : L.st === 'dispute' ? '⚠️ LỆCH KẾT QUẢ' : '🔌 SỰ CỐ';
     },
     // Thẻ "vòng hiện tại" thay cho thẻ trận tiếp theo của bản offline
     liveHtml() {
@@ -538,7 +613,8 @@ const TourneyNet = {
             const key = r + '-' + m, L = st.live && st.live[key];
             const res = x.res ? `<span class="tf-score">${x.res.sa} - ${x.res.sb}</span>` : `<span class="tf-vs">${L ? this.liveLabel(L) : 'chờ gọi'}</span>`;
             const btns = host && !x.res ? `<div class="tn-mbtns">
-                ${(!L || L.st === 'issue') && !(st.sched === 'seq' && this.busy()) ? `<button class="glow-btn btn-primary tn-sbtn" data-act="tn-call" data-k="${key}">📣 GỌI</button>` : ''}
+                ${(!L || L.st === 'issue') && !(st.sched === 'seq' && this.busy()) ? `<button class="glow-btn btn-primary tn-sbtn" data-act="tn-call" data-k="${key}">${this.isBotIdx(x.a) && this.isBotIdx(x.b) ? '⚡ MÔ PHỎNG' : '📣 GỌI'}</button>` : ''}
+                ${(!L || L.st === 'issue') && this.isBotIdx(x.a) && this.isBotIdx(x.b) && !this.devBusy() ? `<button class="glow-btn btn-secondary tn-sbtn" data-act="tn-bwatch" data-k="${key}">👁 XEM</button><button class="glow-btn btn-secondary tn-sbtn" data-act="tn-bwatch" data-k="${key}" data-v="2">👁 x2</button>` : ''}
                 <button class="glow-btn btn-dark tn-sbtn" data-act="tn-res" data-k="${key}">⚖️ XỬ</button></div>` : '';
             const mine = !x.res && (st.players[x.a].name === this.me || st.players[x.b].name === this.me) ? ' tn-mine' : '';
             const canW = !x.res && !mine && L && L.st === 'live' && L.w;
@@ -585,6 +661,15 @@ const TourneyNet = {
         const st = this.st(), host = this.role === 'host';
         switch (act) {
             case 'tn-start': if (host) this.startTourney(); break;
+            case 'tn-addbot': if (host) this.addBot(); break;
+            case 'tn-bwatch': { // chủ giải xem trận bot vs bot ngay trên máy mình
+                if (!host || this.devBusy()) break;
+                const [r, m] = b.dataset.k.split('-').map(Number);
+                if (typeof NetSpec !== 'undefined' && NetSpec.watching) NetSpec.stop(true);
+                this.sysChat(`👁 Chủ giải xem trận bot: ${st.players[st.rounds[r][m].a].name} vs ${st.players[st.rounds[r][m].b].name}`);
+                TOURNEY.startMatch({ r, m }, +b.dataset.v || 1);
+                break;
+            }
             case 'tn-callall': if (host) this.callRound(); break;
             case 'tn-call': if (host) { this.call(...b.dataset.k.split('-').map(Number)); this.showMain(); } break;
             case 'tn-res': if (host) this.showResolve(b.dataset.k); break;

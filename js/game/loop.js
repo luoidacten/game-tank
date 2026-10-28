@@ -65,10 +65,12 @@ function gameLoop(timestamp) {
     if (dt > 250) dt = 250;
     if (dt < 0) dt = 0;
 
-    fixedPhysicsAccumulator += dt;
+    // Xem trận bot giải đấu ở tốc độ x2
+    const simSpeed = (typeof TourneyBot !== 'undefined' && TourneyBot.on && !isOnlineMatch) ? TourneyBot.speed : 1;
+    fixedPhysicsAccumulator += dt * simSpeed;
 
     let ticksRan = 0;
-    while (fixedPhysicsAccumulator >= TICK_TIME && ticksRan < 5) {
+    while (fixedPhysicsAccumulator >= TICK_TIME && ticksRan < 5 * simSpeed) {
         tickPhysics();
         fixedPhysicsAccumulator -= TICK_TIME;
         ticksRan++;

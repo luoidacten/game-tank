@@ -321,6 +321,7 @@ function tickPhysics() {
     if (typeof botAI !== 'undefined' && botAI.enabled) {
         botAI.update(p2, p1);
     }
+    if (typeof TourneyBot !== 'undefined' && TourneyBot.on) TourneyBot.update(); // bot giải đấu ở xe dưới (p1)
     if (typeof onlineManager !== 'undefined' && onlineManager.isOnline) {
         onlineManager.onGameLoopTick();
     }

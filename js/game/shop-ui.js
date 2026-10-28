@@ -135,6 +135,7 @@ function showUpgradeScreen() {
                 renderStandardCards('p2', MODULES.BODY);
             } else {
                 renderStandardCards('p1', MODULES.BODY);
+                if (typeof TourneyBot !== 'undefined') TourneyBot.onPick('p1'); // giải đấu: bot ở máy chủ trận
             }
             return;
         }
@@ -144,6 +145,7 @@ function showUpgradeScreen() {
             showGearSelectionIfNeeded(myPid, () => {
                 updateShopTitle();
                 renderShop(myPid);
+                if (typeof TourneyBot !== 'undefined') TourneyBot.onShop(myPid);
             });
         } else {
             updateShopTitle();
@@ -157,6 +159,8 @@ function showUpgradeScreen() {
         renderStandardCards('p1', MODULES.BODY);
         renderStandardCards('p2', MODULES.BODY);
 
+        // Giải đấu có bot: bot tự chọn body + G.E.A.R
+        if (typeof TourneyBot !== 'undefined' && TourneyBot.on) { TourneyBot.onPick('p1'); TourneyBot.onPick('p2'); return; }
         // Giải Đấu PVE: bot chọn đúng body của vòng
         if (typeof PVE !== 'undefined' && PVE.active) {
             setTimeout(() => { if (gameState.phase === 'upgrade' && !gameState.p2Ready) PVE.botPickBody(); }, 300);
@@ -179,10 +183,11 @@ function showUpgradeScreen() {
     }
 
     updateShopTitle();
-    const openP1Shop = () => { updateShopTitle(); renderShop('p1'); };
+    const openP1Shop = () => { updateShopTitle(); renderShop('p1'); if (typeof TourneyBot !== 'undefined') TourneyBot.onShop('p1'); };
     const openP2Shop = () => {
         updateShopTitle();
         renderShop('p2');
+        if (typeof TourneyBot !== 'undefined' && TourneyBot.onShop('p2')) return;
         // Giải Đấu PVE: bot tự mua đồ rồi sẵn sàng
         if (typeof PVE !== 'undefined' && PVE.active) {
             setTimeout(() => { if (gameState.phase === 'upgrade' && !gameState.p2Ready) PVE.botShop(); }, 400);

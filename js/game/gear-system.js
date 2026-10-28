@@ -567,7 +567,8 @@ function renderGearSelection(playerId, milestoneIdx, onComplete) {
     state.justRerolledSlot = -1;
 
     // Tự động chọn G.E.A.R cho Bot (Practice hoặc PVE) nếu đây là p2
-    if (playerId === 'p2' && ((typeof botAI !== 'undefined' && botAI.enabled) || (typeof PVE !== 'undefined' && PVE.active))) {
+    if ((playerId === 'p2' && ((typeof botAI !== 'undefined' && botAI.enabled) || (typeof PVE !== 'undefined' && PVE.active)))
+        || (typeof TourneyBot !== 'undefined' && TourneyBot.isBot(playerId))) {
         setTimeout(() => {
             if (gameState.phase === 'upgrade' && !player.gearPickedMilestones.includes(milestoneIdx)) {
                 const cards = container.querySelectorAll('.gear-card');
