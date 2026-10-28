@@ -30,7 +30,7 @@ const BODY_GUIDES = {
         tag: 'Đạn băng làm chậm địch', diff: 1,
         controls: [{ input: 'TAP', name: 'Đạn Băng', what: 'Trúng địch là làm chậm' }],
         passive: ['Địch bị chậm dễ trúng đạn hơn'],
-        evo: { e1: 'Mỗi 3 lần trúng: vùng Băng Cực Đại', e2: 'x1.5 dame lên địch bị chậm', full: 'Vùng băng gây sát thương' },
+        evo: { e3: "Hơi Thở Băng Giá: Giữ 1s, nhả bắn mũi băng xuyên và tạo làn băng trượt 4s.", e4: "Đông Cứng Tức Thì: Đóng băng địch đang chậm 0.8s (CD 12s). Nộ: +10/lần chậm mới, +20/Bão Tuyết. Tuyệt Kỹ ĐỘ KHÔNG TUYỆT ĐỐI: băng 2s rồi vỡ (tối đa 3 dame); kết liễu địch đóng băng ≤20%.", e1: 'Mỗi 3 lần trúng: vùng Băng Cực Đại', e2: 'x1.5 dame lên địch bị chậm', full: 'Vùng băng gây sát thương' },
         tips: ['Bắn liên tục để địch luôn bị chậm']
     },
     big_bullet: {

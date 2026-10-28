@@ -484,3 +484,10 @@ addPilotEvos('tank',
     { id: 'evo_tank_4', name: 'Xả Khiên Dự Phòng', cost: 150, desc: 'Skill: +1 khiên và đẩy đạn quanh xe (CD 12s). Nộ từ húc trúng/nhận dame khi lao. Tuyệt Kỹ XE ỦI: lao xuyên sân, ép địch; kết liễu khi địch ≤20%.', skill: { name: 'Xả Khiên Dự Phòng', cooldown: 12, ultimateName: 'XE ỦI', ultimateTicks: 180, rageTime: 0.5, rageDamage: 0 } },
     { '1+3': { desc: 'Thủy Lực không mất tốc khi bẻ lái.' }, '2+4': { desc: 'Khiên Skill nổ kèm vùng băng.' }, '1+2+3+4': { desc: 'Xe Ủi để lại hai vệt băng.' } });
 // PILOT tank END
+
+// PILOT ice BEGIN
+addPilotEvos("ice",
+    {"id": "evo_ice_3", "name": "Hơi Thở Băng Giá", "cost": 100, "desc": "Giữ 1s, nhả bắn mũi băng xuyên và tạo làn băng trượt 4s."},
+    {"id": "evo_ice_4", "name": "Đông Cứng Tức Thì", "cost": 140, "desc": "Đóng băng địch đang chậm 0.8s (CD 12s). Nộ: +10/lần chậm mới, +20/Bão Tuyết. Tuyệt Kỹ ĐỘ KHÔNG TUYỆT ĐỐI: băng 2s rồi vỡ (tối đa 3 dame); kết liễu địch đóng băng ≤20%.", "skill": {"name": "Đông Cứng Tức Thì", "cooldown": 12, "ultimateName": "ĐỘ KHÔNG TUYỆT ĐỐI", "ultimateTicks": 120, "rageTime": 0.5, "rageDamage": 0}},
+    {"1+3": {"desc": "Bão Tuyết nở dọc làn băng."}, "2+4": {"desc": "Hàn Băng tăng 50% dame lên địch đóng băng."}, "1+2+3+4": {"desc": "Ultimate đóng băng mọi đạn địch đang bay."}});
+// PILOT ice END

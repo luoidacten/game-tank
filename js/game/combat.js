@@ -678,7 +678,7 @@ function checkHits(attacker, victim) {
                 if (attacker.hasUpgrade('evo_ice_2')) finalDmg *= 1.5;
                 if (attacker.hasUpgrade('evo_ice_1')) {
                     victim.coldStack += 25;
-                    let isFullEvo = hasFullEvo(attacker, 'ice');
+                    let isFullEvo = hasLegacyFullEvo(attacker, 'ice');
                     if (isFullEvo && victim.speed > 1.75) {
                         victim.speed = Math.max(1.75, victim.speed - 0.05);
                     }
