@@ -5,6 +5,7 @@
 > Phiên mới: đọc `docs/HANDOVER.md` trước (công cụ test ở `tools/`).
 
 ## 0. Chỉnh sửa gấp (làm TRƯỚC mục 1)
+- [x] Issue #1: khung ô Evo 2/3/4, tổ hợp Full Evo, Skill/Nộ, hai lõi Lăng Kính và body mẫu `big_bullet`; xem `docs/EVO_FRAMEWORK.md`. Nội dung MAIN và các body thí điểm còn lại làm ở giai đoạn sau.
 - [x] Hệ thống 150 Lõi Công Nghệ G.E.A.R (`#1 – #150`), lọc theo giai đoạn (`EARLY`, `EARLY_MID`, `MID_LATE`, `ALL`), khóa dòng (`familyId`), khóa chéo (`incompatibleWith`), nút Đổi lại (`🔄 ĐỔI LẠI`) từng ô nâng cấp và chặn bấm Bắn bỏ qua chọn G.E.A.R (chi tiết: `NOTE_Antigravity.md`).
 - [x] Nâng cấp Phòng Tập (Sandbox 2.0): Hệ thống Test Box & Xe Bản Đồ (`#sandboxBoxModal` với đủ 16 loại thùng Gacha + 9 loại xe/vật thể, 5 chế độ thả/kích nổ tức thì), bộ lọc Hệ/Vai trò + Tìm kiếm + Preset Evo cho 67 Body, nút Đổi Evo nhanh trên sân, Đổi Map trực tiếp, Khóa thùng tự nhiên, Bạn Bất Tử, Vô Hạn Đạn, Test Kết Liễu, Mở Shop, Dọn Sân (chi tiết: `NOTE_Antigravity.md`).
 - [x] Cân bằng Kinh Tế & Phân Tầng Giá Tiến Hóa (`js/data/evolutions.js`, `js/game/shop-ui.js`, `js/game/round.js`, `js/game/combat.js`, `js/ai/smart-bot.js`): Phân 4 bậc giá Evo (`$60–$140` Đầu trận / `$150–$270` Chiến thuật / `$280–$360` Cuối trận / `$380–$480` Phá game), nâng cấp Lợi Tức kèm Lãi Tiết Kiệm (+15% tiền giữ trong ví/tầng), tăng thưởng Thùng Xu (`$35`) & Xe Tiền (`$50`), và dạy AI Bot tiết kiệm tiền mua Evo (chi tiết: `NOTE_Antigravity.md`).

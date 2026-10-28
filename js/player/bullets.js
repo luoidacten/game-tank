@@ -347,7 +347,7 @@ Object.assign(Player.prototype, {
             }
             if (b.x <= 0 || b.x >= canvas.width) {
                 // Check đạn lớn
-                if (this.hasUpgrade('evo_big_2') && !b.bigFinal && b.bounceCount < bigMaxBounce(this)) {
+                if ((this.hasUpgrade('evo_big_2') || b.bigExtraBounce > 0) && !b.bigFinal && b.bounceCount < bigMaxBounce(this, b)) {
                     b.vx = -b.vx;
                     b.bounceCount++;
                     bigOnBounce(b, this); // Đạn Lớn: phình to mỗi lần nảy; nảy đủ số lần -> tự nổ ở giữa sân; Full Evo: từ lần nảy 2 hóa Xuyên Thấu
@@ -363,7 +363,7 @@ Object.assign(Player.prototype, {
                 } else hitWall = true;
             }
             if (b.y <= 0 || b.y >= canvas.height) {
-                if (this.hasUpgrade('evo_big_2') && !b.bigFinal && b.bounceCount < bigMaxBounce(this)) {
+                if ((this.hasUpgrade('evo_big_2') || b.bigExtraBounce > 0) && !b.bigFinal && b.bounceCount < bigMaxBounce(this, b)) {
                     b.vy = -b.vy;
                     b.bounceCount++;
                     bigOnBounce(b, this); // Đạn Lớn: phình to mỗi lần nảy; nảy đủ số lần -> tự nổ ở giữa sân; Full Evo: từ lần nảy 2 hóa Xuyên Thấu

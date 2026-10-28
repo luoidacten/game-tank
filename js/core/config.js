@@ -30,8 +30,8 @@ let gameState = {
 function gearsEnabled() { return !(typeof gameState !== 'undefined' && gameState.classicMode); }
 
 const inputs = {
-    p1: { l: false, r: false, s: false },
-    p2: { l: false, r: false, s: false }
+    p1: { l: false, r: false, s: false, k: false },
+    p2: { l: false, r: false, s: false, k: false }
 };
 
 // --- CỐ ĐỊNH LOGIC LOOP Ở 60 TICK/GIÂY (FIXED TIMESTEP ACCUMULATOR) ---

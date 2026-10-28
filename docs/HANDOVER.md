@@ -40,3 +40,7 @@ Chromium: `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`, Playwright: `req
 
 ## Việc kế tiếp
 Xem `docs/TODO.md`. Đang chờ người dùng chơi thử các mục ở phần "Ghi chú / cần xác nhận"; hệ thống G.E.A.R mới cần kiểm tra lỗi & bổ sung hình ảnh hiệu ứng.
+
+## Khung Evo 3/4 (issue #1)
+
+Xem `docs/EVO_FRAMEWORK.md` và comment mới nhất của issue. Body mẫu là `big_bullet`; `basic` không được thêm Evo 3/4 trong giai đoạn này. Khung nằm ở `js/game/evo-system.js`, API dữ liệu/tổ hợp ở `js/data/evolutions.js`. Nút Skill sát Bắn thành cặp đối xứng với hai nút di chuyển.

@@ -219,16 +219,20 @@ HP:5 | Dame:1 | Đạn:5 (Làm chậm)
 
 ### 5. Đạn Lớn (`big_bullet`)
 
-HP:5 | Dame:2 | Đạn:2. Quả cầu đạn khổng lồ (gấp đôi cỡ cũ, Evo 1 & Full Evo càng to hơn). Full Evo: nảy 1 lần hóa Xuyên Thấu, tan ở giữa sân & nổ 360° mảnh đạn.
+HP:5 | Dame:2 | Đạn:2. Quả cầu đạn khổng lồ (gấp đôi cỡ cũ, Evo 1 & Full Evo càng to hơn). Full Evo 1+2: từ lần nảy thứ 2 xuyên thấu và nổ mảnh. Evo 3 Ôm Bóng; Evo 4 Cú Sút Bẻ Lái / HÀNH TINH.
 
 - **Chỉ số thực đầu hiệp:** HP 5 · Sát thương 2 · Đạn 2 · Tốc độ 3.5 · Kích thước 30×30
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
   |---|---:|---|
-  | To Hơn Nữa (`evo_big_1`) | $20 | Đạn siêu to khổng lồ (gấp đôi: 32px). Full Evo: từ lần nảy thứ 2 đạn hóa Xuyên Thấu (xuyên mọi vật cản, vẫn trúng địch) và vẫn nảy tiếp |
-  | Bóng Cao Su (`evo_big_2`) | $100 | Đạn nảy tường tối đa 7 lần (Full Evo 9), càng nảy càng to; nảy đủ thì tự nổ khi tới giữa sân. Full Evo: đạn kết thúc/bị phá sẽ nổ thành vòng mảnh đạn 360° (chỉ hại địch) |
+  | To Hơn Nữa (`evo_big_1`) | $150 | Đạn siêu to khổng lồ (gấp đôi: 32px). Full Evo: từ lần nảy thứ 2 đạn hóa Xuyên Thấu (xuyên mọi vật cản, vẫn trúng địch) và vẫn nảy tiếp |
+  | Bóng Cao Su (`evo_big_2`) | $290 | Đạn nảy tường tối đa 7 lần (Full Evo 9), càng nảy càng to; nảy đủ thì tự nổ khi tới giữa sân. Full Evo: đạn kết thúc/bị phá sẽ nổ thành vòng mảnh đạn 360° (chỉ hại địch) |
 
+  | Ôm Bóng (`evo_big_3`) | $140 | Giữ Bắn ôm cầu nuốt đạn; nhả để sút. |
+  | Cú Sút Bẻ Lái (`evo_big_4`) | $150 | Nút Skill bẻ cầu về địch (CD 9s); đầy Nộ tung HÀNH TINH. |
+
+- **Khung ô Evo / tổ hợp / Nộ:** xem [EVO_FRAMEWORK.md](EVO_FRAMEWORK.md).
 - **Mã nguồn:** `js/characters/big_bullet/logic.js`
 
 ### 6. Shotgun (`shotgun`)

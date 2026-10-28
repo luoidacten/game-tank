@@ -1157,3 +1157,17 @@ const SB_DTAP = [true, true, true, false, false, true, true, true, false, false]
         return f.call(this, bot, enemy, aligned, inp);
     };
 })();
+
+// Khung Skill/Nộ: một lần nhấn, sau đó nhả; host mô phỏng như phím người chơi.
+(function () {
+    const fire = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        const result = fire.apply(this, arguments);
+        if (typeof EvoSystem !== 'undefined' && EvoSystem.config(bot)) {
+            const ultimate = (bot.rage || 0) >= 100;
+            inp.k = !inp.k && (this.t % 24 === 0) && (ultimate ? EvoSystem.ready(bot) : (!(bot.skillCd > 0) && aligned));
+            if (bot.weapon === 'big_bullet' && bot.hasUpgrade('evo_big_3')) inp.s = this.t % 100 < 65;
+        } else inp.k = false;
+        return result;
+    };
+})();

@@ -14,6 +14,9 @@
 //       beforeLethal(dmg, attacker)      // sắp về 0 HP: trả về true nếu đã tự cứu
 //       damaged(dmg, attacker)           // sau khi trừ máu
 //       roundEnd(result)                 // result: 'win' | 'lose' | 'draw'
+//       skill(p) / ultimate(p)           // trả false để huỷ, framework tự lo CD/Nộ
+//       ultimateReady(p)                // false: Nộ đầy nhưng chưa đủ điều kiện tung
+//       rageGain(p, kind, amount)       // trả lượng Nộ thay thế; undefined dùng mặc định
 //       shopButtons(container, playerId) // thêm nút riêng vào shop
 //   });
 //

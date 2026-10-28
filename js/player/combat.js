@@ -381,7 +381,7 @@ Object.assign(Player.prototype, {
         if (this.weapon === 'big_bullet') size = 20;
         if (this.hasUpgrade('evo_big_1')) size = 32;
         // FULL EVO BIG BULLET: Siêu to
-        let isFullEvoBig = (this.weapon === 'big_bullet' && hasFullEvo(this, 'big_bullet'));
+        let isFullEvoBig = (this.weapon === 'big_bullet' && bigIsFullEvo(this));
         if (isFullEvoBig) size = 44;
         if (this.weapon === 'big_bullet') hSize = size; // quả cầu tròn: hitbox vuông
         if (this.weapon === 'overload') size += (multiplier * 1.5);

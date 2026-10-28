@@ -922,5 +922,9 @@ const GEARS = [
     }
 ];
 
+if (FEATURE_EVO34) GEARS.push(
+    { num: 151, id: 'gear_evo_again_p', name: 'Tiến Hóa Lần Nữa', tier: 'PRISMATIC', stage: 'MID_LATE', familyId: 'fam_evo_slot', excludeBodies: ['basic'], desc: 'Mở ô Evo thứ 3. Full Evo giữ tổ hợp của hai Evo mua đầu tiên.' },
+    { num: 152, id: 'gear_evo_path_p', name: 'Con Đường Tiến Hóa', tier: 'PRISMATIC', stage: 'MID_LATE', familyId: 'fam_evo_slot', excludeBodies: ['basic'], desc: 'Mở 4 ô Evo, đủ 4 mở tổ hợp Full Evo riêng. Mỗi Evo +12% dame, −4% sát thương nhận, +3% tốc, −7% khống chế. Max HP theo mốc +3/+5/+6/+10. Cấm mua FEET trừ Lợi Tức; đối thủ +$200 và 1 lượt chọn lõi Vàng.' }
+);
 const GEAR_BY_ID = {};
 GEARS.forEach(g => { GEAR_BY_ID[g.id] = g; });

@@ -421,11 +421,11 @@ function renderShop(playerId, keepItems = false) {
 
     // Smart Shop: Caching & Cơ chế Bảo Hiểm (Pity System)
     if (!keepItems || !player.currentShopItems) {
-        let poolFeet = MODULES.FEET.filter(f => !feetMaxed(player, f.id));
+        let poolFeet = MODULES.FEET.filter(f => !feetMaxed(player, f.id) && !(FEATURE_EVO34 && player.hasGear('gear_evo_path_p') && f.id !== 'interest'));
         let availableEvos = [];
         const weaponEvos = EVOLUTIONS[player.weapon];
         if (weaponEvos) {
-            availableEvos = weaponEvos.filter(e => !player.upgrades.includes(e.id) && evoShopAvailable(player, e)); // thẻ FULL EVO chỉ khi đủ 2 Evo
+            availableEvos = weaponEvos.filter(e => !player.upgrades.includes(e.id) && (e.fullEvoGate ? evoShopAvailable(player, e) : (FEATURE_EVO34 || e.evoSlot <= 2))); // thẻ FULL EVO chỉ khi đủ 2 Evo
         }
 
         let shopItems = [];
@@ -491,15 +491,15 @@ function renderShop(playerId, keepItems = false) {
                 extra = item.fullEvoGate ? `<br><span style="color:#facc15;font-weight:bold;">[★ MỞ KHOÁ FULL EVO]</span>` : `<br>${tierBadge}`;
             }
             const priceLabel = price === 0 ? 'MIỄN PHÍ' : ('$' + price);
-            card.innerHTML = `<h4>${item.name}${lvlTxt}</h4><p>${item.desc}${extra}</p><p style="color:#f1c40f; font-weight:bold">${priceLabel}</p>`;
+            card.innerHTML = `<h4>${item.name}${lvlTxt}</h4><p>${fullEvoDescription(player, item)}${extra}</p><p style="color:#f1c40f; font-weight:bold">${priceLabel}</p>`;
             card.dataset.icon = SHOP_ICON[item.id] || (item.fullEvoGate ? '👑' : (item.type === 'evo' ? '🧬' : ''));
             if (item.fullEvoGate) card.style.border = '2px solid #facc15';
             // Điều kiện mua Evo riêng của body (vd. Idol cần đủ Fan): trả về chữ -> khoá thẻ
-            const evoLock = item.type === 'evo' ? (evoShopAvailable(player, item) ? CharHooks.call(player, 'evoLock', item) : 'Cần có đủ Evo 1 + Evo 2') : null;
+            const evoLock = item.type === 'evo' ? (evoPurchaseLock(player, item) || CharHooks.call(player, 'evoLock', item)) : null;
             if (evoLock) { card.className = 'card sold'; card.innerHTML += `<p style="color:#f472b6;font-weight:bold">🔒 ${evoLock}</p>`; }
             else card.onclick = () => {
                 const currentCoin = (playerId === 'p1') ? gameState.p1Coins : gameState.p2Coins;
-                if (currentCoin >= price) {
+                if (currentCoin >= price && !(item.type === 'evo' && evoPurchaseLock(player, item))) {
                     const wasFreeFoot = (item.type === 'feet' && price === 0 && player._gearFreeFootAvailable);
                     if (!player.addUpgrade(item.id)) return; // Động Cơ đã đủ giới hạn
                     if (wasFreeFoot) {

@@ -558,6 +558,7 @@ class OnlineMultiplayerManager {
 
     handleHostReceivedData(peerId, data, tid) {
         if (!data || !data.type) return;
+        if (typeof EvoSystem !== 'undefined' && EvoSystem.receive(this, data)) return;
 
         switch(data.type) {
             case 'JOIN_LOBBY':
@@ -629,6 +630,7 @@ class OnlineMultiplayerManager {
                     inputs.p2.l = !!data.input.l;
                     inputs.p2.r = !!data.input.r;
                     inputs.p2.s = !!data.input.s;
+                    inputs.p2.k = !!data.input.k;
                 }
                 break;
 
@@ -660,6 +662,7 @@ class OnlineMultiplayerManager {
 
     handleClientReceivedData(data) {
         if (!data || !data.type) return;
+        if (typeof EvoSystem !== 'undefined' && EvoSystem.receive(this, data)) return;
 
         switch(data.type) {
             case 'JOIN_ACCEPT':
@@ -1133,12 +1136,12 @@ class OnlineMultiplayerManager {
         // Gửi lại phím định kỳ (phòng mất gói) + khi có thay đổi
         const pid = this.myPid();
         const inp = inputs[pid];
-        const key = (inp.l ? 'L' : '') + (inp.r ? 'R' : '') + (inp.s ? 'S' : '');
+        const key = (inp.l ? 'L' : '') + (inp.r ? 'R' : '') + (inp.s ? 'S' : '') + (inp.k ? 'K' : '');
         if (key !== this.lastInputSent) this.inSeq++;
         if (key !== this.lastInputSent || this.netTick - this.lastInputSentTick >= 15) {
             this.lastInputSent = key;
             this.lastInputSentTick = this.netTick;
-            this.sendNetworkMessage({ type: this.role === 'guest' ? 'INPUT' : 'HOST_INPUT', input: { l: inp.l, r: inp.r, s: inp.s }, seq: this.inSeq });
+            this.sendNetworkMessage({ type: this.role === 'guest' ? 'INPUT' : 'HOST_INPUT', input: { l: inp.l, r: inp.r, s: inp.s, k: !!inp.k }, seq: this.inSeq });
         }
         // Host: số tick đã mô phỏng với phím hiện tại của guest (gửi kèm ảnh chụp qua p2.netInSeq / netInTicks)
         if (this.role === 'host' && p2) { this.p2InTicks++; p2.netInSeq = this.p2InSeq; p2.netInTicks = this.p2InTicks; }

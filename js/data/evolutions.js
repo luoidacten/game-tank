@@ -402,24 +402,66 @@ for (const body in EVOLUTIONS) {
 for (const body in FULL_EVO_GATE) {
     if (!EVOLUTIONS[body]) continue;
     // Mô tả Evo có nhắc Full Evo -> ghi chú cần thẻ FULL EVO
-    EVOLUTIONS[body].forEach(e => { if (/full\s*evo/i.test(e.desc)) e.desc += ' (🔒 Full Evo cần mua thêm thẻ ★ FULL EVO ★ — chỉ bày bán khi đã có Evo 1 + Evo 2)'; });
+    EVOLUTIONS[body].forEach(e => { if (/full\s*evo/i.test(e.desc)) e.desc += ' (🔒 Full Evo cần mua thêm thẻ ★ FULL EVO ★ — chỉ bày bán khi đã có bất kỳ 2 Evo)'; });
     EVOLUTIONS[body].push({
         id: 'evo_' + body + '_full', name: '★ FULL EVO ★', cost: FULL_EVO_GATE[body], type: 'evo', fullEvoGate: true,
         desc: 'Mở khoá sức mạnh FULL EVO của body này (có Evo 1 + Evo 2 vẫn CHƯA đủ — phải mua thêm thẻ này mới kích hoạt Full Evo).'
     });
 }
-// id thẻ FULL EVO của body (null nếu body không bị khoá)
-function fullEvoGateId(body) { return FULL_EVO_GATE[body] ? 'evo_' + body + '_full' : null; }
-// Đã có Full Evo chưa: đủ Evo 1 + Evo 2 (+ thẻ FULL EVO nếu body bị khoá). body mặc định = p.weapon
-function hasFullEvo(p, body) {
-    body = body || (p && p.weapon);
-    const list = EVOLUTIONS[body];
-    if (!p || !list || list.length < 2 || typeof p.hasUpgrade !== 'function') return false;
-    return list.every(e => p.hasUpgrade(e.id));
+// Khung Evo 3/4: chỉ body đã khai báo mới có thêm thẻ; basic được dành riêng cho MAIN ở giai đoạn sau.
+const FEATURE_EVO34 = window.FEATURE_EVO34 !== false;
+const FULL_EVO_COMBOS = {};
+const EVO_PATH_CONFIG = { damagePerEvo: 0.12, hpTotals: [0, 3, 5, 6, 10], reductionPerEvo: 0.04, speedPerEvo: 0.03, ccPerEvo: 0.07 };
+const MAIN_EVO_RESERVED = { body: 'basic', slots: [1, 2, 3, 4], combo: '1+2+3+4', specialSlots: ['main_1', 'main_2'] };
+for (const body in EVOLUTIONS) {
+    EVOLUTIONS[body].filter(e => !e.fullEvoGate).forEach((e, i) => { e.evoSlot = i + 1; });
 }
-// Thẻ Evo có được bày trong Shop chưa (thẻ FULL EVO chỉ hiện khi đã có 2 Evo thường)
-function evoShopAvailable(p, e) {
-    if (!e || !e.fullEvoGate) return true;
-    const list = EVOLUTIONS[p.weapon] || [];
-    return list.filter(x => !x.fullEvoGate).every(x => p.hasUpgrade(x.id));
+if (FEATURE_EVO34) {
+    const list = EVOLUTIONS.big_bullet;
+    list.splice(list.findIndex(e => e.fullEvoGate), 0,
+        { id: 'evo_big_3', evoSlot: 3, name: 'Ôm Bóng', desc: 'Giữ Bắn: ôm cầu trước mũi xe để nuốt đạn địch, cầu lớn dần. Nhả Bắn: sút cầu đi; tốn 1 đạn.', cost: 140, type: 'evo' },
+        { id: 'evo_big_4', evoSlot: 4, name: 'Cú Sút Bẻ Lái', desc: 'Mở nút Skill: bẻ mọi cầu đang bay về phía địch, thêm 1 lần nảy (CD 9s). Đầy Nộ: HÀNH TINH lăn qua làn địch, ăn đạn và nổ mảnh khi chạm biên.', cost: 150, type: 'evo',
+          skill: { name: 'Cú Sút Bẻ Lái', cooldown: 9, ultimateName: 'HÀNH TINH', ultimateTicks: 240, rageTime: 0.5, rageDamage: 0 } });
+    FULL_EVO_COMBOS.big_bullet = {
+        '1+2': { legacy: true, desc: 'Xuyên thấu sau lần nảy thứ 2 và nổ mảnh 360°.' },
+        '1+3': { desc: 'Cầu đang ôm lớn gấp rưỡi.', holdSize: 1.5 },
+        '2+3': { desc: 'Mỗi đạn nuốt cho cầu thêm 1 lần nảy.' },
+        '1+2+3+4': { legacy: true, desc: 'Hành Tinh nảy 3 lần giữa hai biên.', planetBounces: 3 }
+    };
+}
+function fullEvoGateId(body) { return FULL_EVO_GATE[body] ? 'evo_' + body + '_full' : null; }
+function bodyEvos(body) { return (EVOLUTIONS[body] || []).filter(e => !e.fullEvoGate && (!FEATURE_EVO34 || body !== 'basic' || e.evoSlot <= 2)); }
+function ownedEvos(p, body = p && p.weapon) { return p ? bodyEvos(body).filter(e => typeof p.hasUpgrade === 'function' ? p.hasUpgrade(e.id) : (p.upgrades || []).includes(e.id)) : []; }
+function evoSlots(p) {
+    if (!FEATURE_EVO34) return 4;
+    if (p.hasGear && p.hasGear('gear_evo_path_p')) return 4;
+    return p.hasGear && p.hasGear('gear_evo_again_p') ? 3 : 2;
+}
+function fullEvoCombo(p, body = p && p.weapon) {
+    if (!p) return null;
+    const owned = ownedEvos(p, body);
+    if (owned.length < 2) return null;
+    if (FEATURE_EVO34 && owned.length >= 4 && p.hasGear && p.hasGear('gear_evo_path_p')) return '1+2+3+4';
+    const ids = owned.map(e => e.id);
+    const order = [...new Set([...(p.evoOrder || []), ...(p.upgrades || []), ...ids])].filter(id => ids.includes(id));
+    return order.slice(0, 2).map(id => owned.find(e => e.id === id).evoSlot).sort((a,b) => a-b).join('+');
+}
+function hasFullEvo(p, body = p && p.weapon) {
+    if (!p || typeof p.hasUpgrade !== 'function' || ownedEvos(p, body).length < 2) return false;
+    const gate = fullEvoGateId(body);
+    return !gate || p.hasUpgrade(gate);
+}
+function evoPurchaseLock(p, e) {
+    if (!e) return null;
+    if (!FEATURE_EVO34 && e.evoSlot > 2) return 'Chưa bật Evo 3/4';
+    if (p.weapon === 'basic' && e.evoSlot > 2) return 'Dành riêng cho MAIN (giai đoạn sau)';
+    if (e.fullEvoGate) return ownedEvos(p).length >= 2 ? null : 'Cần có bất kỳ 2 Evo';
+    if (FEATURE_EVO34 && !p.hasUpgrade(e.id) && ownedEvos(p).length >= evoSlots(p)) return 'Hết ô Evo — cần G.E.A.R Lăng Kính';
+    return null;
+}
+function evoShopAvailable(p, e) { return !evoPurchaseLock(p, e); }
+function fullEvoDescription(p, e) {
+    if (!e.fullEvoGate) return e.desc;
+    const key = fullEvoCombo(p), combo = (FULL_EVO_COMBOS[p.weapon] || {})[key];
+    return `Tổ hợp ${key || '?'}: ${combo ? combo.desc : (key === '1+2' ? 'Sức mạnh Full Evo nguyên bản.' : '+1 Max HP, +10% sát thương và 1 khiên đầu hiệp.')}`;
 }

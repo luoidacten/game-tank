@@ -3190,3 +3190,25 @@ body.online-active .ns-hud-btn { display: flex !important; }
 .ns-prep-name.p2 { color: #ff4d7d; border-color: rgba(255, 0, 85, 0.6); }
 @keyframes nsEmoPop { 0% { opacity: 0; transform: scale(0.3); } 10% { opacity: 1; transform: scale(1.25); } 20% { transform: scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: translateY(-14px); } }
 .ns-float { z-index: 115; }
+
+/* Skill Evo 4: tách khỏi nút Bắn; vòng ngoài là Nộ, vòng trong là CD. */
+.evo-skill[hidden], .evo-banner[hidden] { display: none !important; }
+.evo-skill {
+    position: relative; flex: 0 0 56px; order: 3; margin-left: auto; width: 56px; height: 56px;
+    border: 4px solid #38bdf8; border-radius: 50%; color: white; z-index: 30;
+    background: conic-gradient(from 180deg, #fb923c var(--rage, 0deg), #172033 0);
+    box-shadow: 0 0 12px #38bdf888; touch-action: none; cursor: pointer;
+}
+.evo-skill::before { content: ''; position: absolute; inset: 3px; border-radius: 50%; background: conic-gradient(#64748b var(--cooldown, 0deg), #071426 0); }
+.evo-skill span { position: relative; font: bold 11px Arial, sans-serif; }
+.evo-skill.evo-ultimate { border-color: #facc15; box-shadow: 0 0 18px #f97316; animation: evo-pulse .7s infinite alternate; }
+.evo-skill.evo-blocked { border-color: #94a3b8; box-shadow: none; animation: none; }
+.evo-banner { position: absolute; left: 10%; right: 10%; height: 38px; text-align: center; padding-top: 8px; pointer-events: none; z-index: 25; font: 900 19px Arial, sans-serif; color: #fff7d6; background: linear-gradient(90deg, transparent, #075985ed, transparent); text-shadow: 0 0 10px #38bdf8; }
+.evo-banner-1 { bottom: 0; } .evo-banner-2 { top: 0; transform: rotate(180deg); background: linear-gradient(90deg, transparent, #991b1bed, transparent); }
+.evo-gold-title { color: #facc15; font-weight: bold; }
+@keyframes evo-pulse { to { filter: brightness(1.25); } }
+@media (prefers-reduced-motion: reduce) { .evo-skill.evo-ultimate { animation: none; } }
+
+.btn-group:has(.evo-skill:not([hidden])) { gap: 8px; padding-left: 10px; padding-right: 10px; }
+.btn-group:has(.evo-skill:not([hidden])) > .btn { flex: 0 0 auto; width: clamp(44px, 14vw, 64px) !important; min-width: 0; }
+.btn-group:has(.evo-skill:not([hidden])) > .btn-shoot { order: 4; margin-left: 0 !important; width: clamp(56px, 18vw, 72px) !important; }

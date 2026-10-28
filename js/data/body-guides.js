@@ -38,7 +38,7 @@ const BODY_GUIDES = {
         controls: [{ input: 'TAP', name: 'Đạn Lớn', what: 'Cầu đạn to 2 dame, khó né' }],
         passive: ['Chỉ 2 viên — mỗi phát phải giá trị'],
         evo: { e1: 'Đạn to gấp đôi nữa', e2: 'Nảy tường tới 7 lần, càng nảy càng to', full: 'Xuyên thấu + nổ 360° mảnh đạn' },
-        tips: ['Bắn khi địch kẹt sát tường']
+        tips: ['Bắn khi địch kẹt sát tường', 'Evo 3: giữ Bắn ôm cầu nuốt đạn; nhả để sút. Evo 4: Q hoặc / để bẻ cầu về địch, mỗi lần nảy +8 Nộ, nuốt đạn +15. Đầy Nộ: HÀNH TINH.']
     },
     shotgun: {
         tag: 'Mỗi phát tỏa 5 viên', diff: 1,
