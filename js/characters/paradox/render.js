@@ -20,7 +20,7 @@ class PdxRift {
         const o = this.owner;
         if (!o || o.weapon !== 'paradox') { this.active = false; return; }
         if (this.fireIn > 0 && --this.fireIn === 0 && o.hp > 0) {
-            const full = hasFullEvo(o, 'paradox');
+            const full = hasLegacyFullEvo(o, 'paradox');
             const dirY = o.id === 1 ? -1 : 1;
             o.bullets.push({
                 type: 'normal', x: this.x - 2.5, y: this.y + dirY * 18 - 2.5, w: 5, h: 5,
@@ -91,7 +91,7 @@ Object.assign(Player.prototype, {
                 ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]); ctx.stroke(); ctx.restore();
             };
             const enemy = (this.id === 1) ? p2 : p1;
-            let isFullEvo = hasFullEvo(this, 'paradox');
+            let isFullEvo = hasLegacyFullEvo(this, 'paradox');
 
             // 1. VẼ BÓNG BẢN THÂN (3 GIÂY TRƯỚC)
             if (this.paradoxHistory && this.paradoxHistory.length > 0) {
@@ -182,7 +182,7 @@ Object.assign(Player.prototype, {
 
             // 3. VẼ BÓNG 5 GIÂY CỦA ĐỊCH (FULL EVO)
             // Chỉ vẽ dây nối nếu Địch chưa bị dính Bóng Đứng Yên (ưu tiên Bóng Đứng Yên)
-            if (hasFullEvo(this, 'paradox') && this.enemyHistory && this.enemyHistory.length > 0) {
+            if (hasLegacyFullEvo(this, 'paradox') && this.enemyHistory && this.enemyHistory.length > 0) {
                 let eShadow = this.enemyHistory[0];
 
                 ctx.save();

@@ -33,7 +33,7 @@ const BERS_HEAT_WARN = 70, BERS_OH_END = 40;
 
 function bersE1(p) { return p.hasUpgrade('evo_bers_1'); }
 function bersE2(p) { return p.hasUpgrade('evo_bers_2'); }
-function bersFull(p) { return bersE1(p) && bersE2(p) && hasFullEvo(p, 'berserker'); }
+function bersFull(p) { return bersE1(p) && bersE2(p) && hasLegacyFullEvo(p, 'berserker'); }
 function bersEnemy(p) { return p === p1 ? p2 : p1; }
 function bersSfx(name) { if (typeof soundSystem !== 'undefined' && soundSystem && !soundSystem.muted && soundSystem[name]) soundSystem[name](); }
 function bersHpFrac(p) { return p.maxHp > 0 ? p.hp / p.maxHp : 1; }

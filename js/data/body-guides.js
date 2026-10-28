@@ -22,22 +22,22 @@ const BODY_GUIDES = {
     tank: {
         tag: 'Lao húc cận chiến, tự hồi khiên', diff: 1,
         controls: [{ input: 'TAP', name: 'Lao Húc', what: 'Lao lên húc địch, hồi chiêu 2s' }],
-        passive: ['Khi lao chỉ nhận 35% sát thương', 'Tự hồi 1 khiên mỗi 6s'],
-        evo: { e1: 'Húc x1.5 dame, chỉ nhận 20% st', e2: 'Húc nổ lan + băng, hồi khiên 4s', full: 'Hồi khiên 2s, +15 HP' },
+        passive: ['Khi lao chỉ nhận 65% sát thương', 'Tự hồi mỗi 6s, nội tại tối đa 1 khiên'],
+        evo: { e3: "Cần Lái Thủy Lực: giữ Bắn húc 1.5s, trái/phải để bẻ lái; giảm 3.5 Max HP.", e4: "Xả Khiên Dự Phòng (CD 12s); Nộ từ húc/nhận dame khi lao; XE ỦI kết liễu địch ≤20%.", e1: 'Húc x1.5 dame, chỉ nhận 40% st', e2: 'Húc nổ lan + băng, hồi khiên 5s, nội tại tối đa 1', full: '1+2: hồi khiên 4s, +6 HP trước cân bằng, húc hồi 5s' },
         tips: ['Canh lúc địch vừa bắn xong rồi mới lao']
     },
     ice: {
         tag: 'Đạn băng làm chậm địch', diff: 1,
         controls: [{ input: 'TAP', name: 'Đạn Băng', what: 'Trúng địch là làm chậm' }],
         passive: ['Địch bị chậm dễ trúng đạn hơn'],
-        evo: { e1: 'Mỗi 3 lần trúng: vùng Băng Cực Đại', e2: 'x1.5 dame lên địch bị chậm', full: 'Vùng băng gây sát thương' },
+        evo: { e3: "Hơi Thở Băng Giá: Giữ 1s, nhả bắn mũi băng xuyên và tạo làn băng trượt 4s.", e4: "Đông Cứng Tức Thì: Đóng băng địch đang chậm 0.8s (CD 12s). Nộ: +10/lần chậm mới, +20/Bão Tuyết. Tuyệt Kỹ ĐỘ KHÔNG TUYỆT ĐỐI: băng 2s rồi vỡ (tối đa 3 dame); kết liễu địch đóng băng ≤20%.", e1: 'Mỗi 3 lần trúng: vùng Băng Cực Đại', e2: 'x1.5 dame lên địch bị chậm', full: 'Vùng băng gây sát thương' },
         tips: ['Bắn liên tục để địch luôn bị chậm']
     },
     big_bullet: {
         tag: 'Quả cầu đạn khổng lồ', diff: 1,
         controls: [{ input: 'TAP', name: 'Đạn Lớn', what: 'Cầu đạn to 2 dame, khó né' }],
         passive: ['Chỉ 2 viên — mỗi phát phải giá trị'],
-        evo: { e1: 'Đạn to gấp đôi nữa', e2: 'Nảy tường tới 7 lần, càng nảy càng to', full: 'Xuyên thấu + nổ 360° mảnh đạn' },
+        evo: { e3: "Ôm Bóng: giữ nuốt đạn rồi nhả sút; Full Evo 1+3 tăng cỡ, 2+3 tăng nảy.", e4: "Bẻ Lái/Hành Tinh; Full Evo 3+4 sút cầu đã nuốt đạn giảm CD Skill tối đa 1.5s; 1234 Hành Tinh nảy 3 lần.", e1: 'Đạn to gấp đôi nữa', e2: 'Nảy tường tới 7 lần, càng nảy càng to', full: 'Xuyên thấu + nổ 360° mảnh đạn' },
         tips: ['Bắn khi địch kẹt sát tường', 'Evo 3: giữ Bắn ôm cầu nuốt đạn; nhả để sút. Evo 4: Q hoặc / để bẻ cầu về địch, mỗi lần nảy +8 Nộ, nuốt đạn +15. Đầy Nộ: HÀNH TINH.']
     },
     shotgun: {
@@ -133,7 +133,7 @@ const BODY_GUIDES = {
             { input: 'HOLD 2s', name: 'Quá Tải', what: '(Evo 2) Ụ bắn tia mạnh, -1 Max HP' }
         ],
         passive: ['Ụ sống quá 10s tự mất máu dần'],
-        evo: { e1: 'Ụ VIP, tối đa 3 ụ thông minh xuyên', e2: 'Mạng LAN hồi máu, mở Quá Tải', full: 'Trận địa ụ súng' },
+        evo: { e3: "Ụ Gắn Nóc: Nhấp đúp gắn/thả ụ nóc, bắn khi di chuyển ở 60% tốc độ; giảm 1.5 Max HP.", e4: "Đồng Loạt Khai Hỏa: Mọi ụ bắn ngay loạt x2 dame và hồi 30% HP (CD 10s). Nộ: +6/Phụ Tùng, +1/s/ụ. PHÁO ĐÀI cần ≥3 ụ: hợp thể 6s bắn tia cảnh báo mỗi 0.6s rồi tách lại đầy máu.", e1: 'Ụ VIP, tối đa 3 ụ thông minh xuyên', e2: 'Mạng LAN hồi máu, mở Quá Tải', full: 'Trận địa ụ súng' },
         tips: ['Đặt ụ ở góc khó bị bắn']
     },
     ghost: {
@@ -226,7 +226,7 @@ const BODY_GUIDES = {
             { input: 'HOLD', name: 'Dựng Tường', what: 'Tường chặn mọi đòn địch 5s' }
         ],
         passive: ['Đạn mình bay xuyên tường mình', 'Hết đạn nạp cả băng'],
-        evo: { e1: 'Tường HP x5, đạn qua không giảm dame', e2: '25% đạn thành tia Raycast', full: 'Tường không mục, cứng x7' },
+        evo: { e3: "Lỗ Châu Mai: Đạn qua tường mình +40% dame, +30% tốc; chỉ nhận buff một lần.", e4: "Dời Tường: Dời tường gần nhất về trục xe (CD 6s). +12 Nộ/phát trúng, +6/đòn tường chặn. ĐIỂM ĐẦU cần trúng ≥2 lần: khóa ngắm 2.5s rồi tia xuyên tường; kết liễu khi ≤40%.", e1: 'Tường HP x5, đạn qua không giảm dame', e2: '25% đạn thành tia Raycast', full: 'Tường không mục, cứng x7' },
         tips: ['Dựng tường trước rồi bắn từ sau']
     },
     cung: {
@@ -270,7 +270,7 @@ const BODY_GUIDES = {
             { input: 'HOLD', name: 'Neo Thời Không', what: 'Giữ tới mốc cuối: đặt Neo 10s' }
         ],
         passive: ['Bóng 3s đi sau tái hiện phát bắn', 'Tua ngược để lại Vết Nứt khai hỏa'],
-        evo: { e1: 'Tích ấn -> Bóng Đứng + choáng', e2: 'Tua hồi 5.5s, kéo địch gây chậm', full: 'Vết nứt & bóng mạnh hơn nhiều' },
+        evo: { e3: "Dấu Nhân Quả: Dư Âm trúng khắc tối đa 4 Dấu; lần tua/về neo kế tiếp nổ 0.3 dame mỗi Dấu.", e4: "Quy Neo: Về Neo ngay, chưa có thì đặt Neo (CD 12s). +10 Nộ/lần tua, +4/Dư Âm trúng. VÒNG LẶP VÔ TẬN kéo địch về vị trí 5s trước, tái hiện loạt đạn 5s qua với trần ngân sách dame.", e1: 'Tích ấn -> Bóng Đứng + choáng', e2: 'Tua hồi 5.5s, kéo địch gây chậm', full: 'Vết nứt & bóng mạnh hơn nhiều' },
         tips: ['Đặt Neo khi đầy máu, tua về khi sắp chết']
     },
     magician: {
@@ -500,7 +500,7 @@ const BODY_GUIDES = {
             { input: 'AUTO', name: 'Đạn Cường Hóa', what: 'Đầy Năng Lượng: phát nổ lan mạnh' }
         ],
         passive: ['3s không mất máu: +0.5 HP'],
-        evo: { e1: 'Máu dư thành Giáp Trắng', e2: 'Mỗi lần hồi bắn Tia Xung', full: 'Cướp máu hồi của địch' },
+        evo: { e3: "Kim Đảo Mệnh: +2 Max HP dự trữ máu. Giữ 0.5s, nhả: đổi 0.5 HP thành kim 1 dame xuyên khiên; không tự hạ dưới 1 HP.", e4: "Truyền Máu Khẩn: Hồi ngay 1 HP (CD 16s); Năng Lượng Sinh Mệnh ≥50% thì nạp đầy. +10 Nộ/0.5 HP hồi thực. SINH TỬ ĐẢO NGƯỢC: 4s hồi máu địch thành dame, dame địch nhận hồi bạn 50%.", e1: 'Máu dư thành Giáp Trắng', e2: 'Mỗi lần hồi bắn Tia Xung', full: 'Cướp máu hồi của địch' },
         tips: ['Né đòn để kích hoạt hồi máu']
     },
     chrononeo: {
@@ -541,7 +541,7 @@ const BODY_GUIDES = {
             { input: 'HOLD', name: 'Sấy Liên Thanh', what: '≤50% HP: giữ bắn càng lâu càng nhanh' }
         ],
         passive: ['≤75% / ≤50% / ≤25% HP: mạnh dần', 'Huyết Chiến đầy: không chết khi nhận đòn chí tử'],
-        evo: { e1: 'Cuồng Chiến x1.5, tản nhiệt nhanh', e2: 'Huyết Chiến dựng tường nhốt địch', full: 'Tàn Hơi: 2 lần không chết/hiệp' },
+        evo: { e3: "Tự Rạch: Nhấp đúp (hồi 1s): mất 0.5 HP, không dưới 1; +12 Huyết Chiến và chuẩn bị Huyết Đạn.", e4: "Gào Thét: Hưởng buff mốc ≤25% trong 4s (CD 18s). Nộ từ dame nhận x1.5 và dame gây. CUỒNG HUYẾT VÔ TẬN cần HP≤50%: vào Huyết Chiến, giữ thanh 100 bốn giây, mỗi hit hồi 0.1 HP; Huyết Đạn kết liễu ≤20%.", e1: 'Cuồng Chiến x1.5, tản nhiệt nhanh', e2: 'Huyết Chiến dựng tường nhốt địch', full: 'Tàn Hơi: 2 lần không chết/hiệp' },
         tips: ['Sấy 3-4s là quá nhiệt — nhả nút nghỉ']
     },
     kazuki: {
@@ -635,7 +635,7 @@ const BODY_GUIDES = {
             { input: 'HOLD 1.25s', name: 'Đấm Nghiêm Túc', what: 'Thú Vị ≥65%: hitscan 1.8 xuyên tường (hồi 17s)' }
         ],
         passive: ['Bị đánh tích Thú Vị: tăng tốc, giảm st', '6s không bị đánh: Thú Vị hồi máu'],
-        evo: { e1: 'Nạp 2.0s, đấm bồi 4 luồng', e2: 'Khi tụ: ←/→ bật nhảy ngang', full: 'DEATH PUNCH: kết liễu ≤20% máu' },
+        evo: { e3: "Chạy Bộ Mỗi Ngày: Di chuyển liên tục 3s tăng 5% Thú Vị; giảm 2 Max HP.", e4: "Né Bình Thường: Bước ngang né 0.25s, +10% Thú Vị (CD 6s). +1 Nộ/1% Thú Vị tăng. ĐẤM NGHIÊM TÚC: CHẾT ĐI cần Thú Vị 100%, cảnh báo 0.8s rồi tia rộng 1/3 sân xuyên tường; kết liễu ≤50%, còn lại 3 dame.", e1: 'Nạp 2.0s, đấm bồi 4 luồng', e2: 'Khi tụ: ←/→ bật nhảy ngang', full: 'DEATH PUNCH: kết liễu ≤20% máu' },
         tips: ['Ăn vài đòn để có Thú Vị rồi Đấm Nghiêm Túc']
     },
     boomerang: {
@@ -726,7 +726,7 @@ const BODY_GUIDES = {
             { input: 'HOLD 0.4s', name: 'Mở Kính', what: '1.5s phản đòn, 0.25s đầu miễn st' }
         ],
         passive: ['Mọi khiên thành Khiên Kính phản đạn', 'Phản đòn bị trừ 0.5 HP mỗi đợt'],
-        evo: { e1: 'Phản 70%, Kính 2.5s, hồi 7s', e2: 'Sẵn 1 Khiên Kính, kính vỡ bắn mảnh', full: 'Phản 100%, không mất máu' },
+        evo: { e3: "Khúc Xạ Kép: Tia Khúc Xạ nảy thêm một lần; lần nảy đầu tách đôi (mỗi tia 50% dame).", e4: "Lăng Kính Tức Thì: Bật Cửa Sổ Vàng 0.35s, không tiêu CD Mở Kính (CD Skill 10s). +10 Nộ/đòn phản, +20/phản vàng. VẠN KÍNH QUY QUANG: 4s phản x1.5, cuối chiêu hội tụ tia cảnh báo 0.4s; kết liễu ≤25%.", e1: 'Phản 70%, Kính 2.5s, hồi 7s', e2: 'Sẵn 1 Khiên Kính, kính vỡ bắn mảnh', full: 'Phản 100%, không mất máu' },
         tips: ['Mở Kính đúng lúc đạn sắp chạm']
     },
     the_adapter: {

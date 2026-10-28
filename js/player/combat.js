@@ -180,9 +180,9 @@ Object.assign(Player.prototype, {
             }
         }
 
-        // Xe TANK: đang lao húc -> giảm mạnh sát thương nhận (65%, Evo 1: 80%)
+        // Xe TANK: đang lao húc -> giảm sát thương nhận (35%, Evo 1: 60%)
         if (this.weapon === 'tank' && this.dashState > 0) {
-            amount *= this.hasUpgrade('evo_tank_1') ? 0.2 : 0.35;
+            amount *= this.hasUpgrade('evo_tank_1') ? 0.4 : 0.65;
         }
 
         if (this.permanentVulnerability) {
@@ -565,7 +565,7 @@ Object.assign(Player.prototype, {
 
         if (isSniperBullet) {
             isPiercing = true; // Mặc định xuyên vật thể
-            let isFullEvo = hasFullEvo(this, 'sniper');
+            let isFullEvo = hasLegacyFullEvo(this, 'sniper');
 
             // Raycast RNG
             let rayChance = isFullEvo ? 0.5 : (this.hasUpgrade('evo_sniper_2') ? 0.25 : 0);

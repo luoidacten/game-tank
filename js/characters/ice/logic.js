@@ -5,7 +5,7 @@
 Object.assign(Player.prototype, {
     // [update] Pháo Băng
     updateIce() {
-        if (this.weapon === 'ice' && hasFullEvo(this, 'ice')) {
+        if (this.weapon === 'ice' && hasLegacyFullEvo(this, 'ice')) {
             this.iceAutoFreezeTimer++;
 
             // 10 giây = 600 frames (vì game chạy 60fps)

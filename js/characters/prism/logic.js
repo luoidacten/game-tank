@@ -20,7 +20,7 @@ const PR_HOLD = 24, PR_GOLDEN = 15, PR_GLASS = 72;
 
 function prE1(p) { return p.hasUpgrade('evo_prism_1'); }
 function prE2(p) { return p.hasUpgrade('evo_prism_2'); }
-function prFull(p) { return prE1(p) && prE2(p) && hasFullEvo(p, 'prism'); }
+function prFull(p) { return prE1(p) && prE2(p) && hasLegacyFullEvo(p, 'prism'); }
 function prIs(p) { return !!p && p.weapon === 'prism'; }
 function prEnemy(p) { return p === p1 ? p2 : p1; }
 function prDir(p) { return p.id === 1 ? -1 : 1; }

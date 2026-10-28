@@ -216,6 +216,9 @@ function openBodyGuide(id, team, flip) {
     const evoTxt = [g.evo && g.evo.e1, g.evo && g.evo.e2, g.evo && g.evo.full];
     const evoHtml = evoNames.map((n, i) => `<div class="bg-ev${i === 2 ? ' full' : ''}"><canvas width="88" height="88" data-evo="${i + 1}"></canvas><b>${i < 2 ? 'EVO ' + (i + 1) + ' · ' + guideEsc(n) : '★ FULL EVO'}</b>${guideEsc(evoTxt[i] || '—')}</div>`).join('');
 
+    const pilotEvos = evoList.filter(e => e.evoSlot > 2 && !e.fullEvoGate);
+    const pilotHtml = pilotEvos.length ? `<div class="bg-sec"><h5>⬆ EVO 3 / SKILL & NỘ</h5><div class="bg-evo">${pilotEvos.map(e => `<div class="bg-ev"><b>EVO ${e.evoSlot} · ${guideEsc(e.name)}</b>${guideEsc((g.evo || {})['e' + e.evoSlot] || e.desc)}</div>`).join('')}</div><p class="bg-txt">Skill: Q (P1) / / (P2), hoặc chạm nút cạnh Bắn. Đầy vòng Nộ: Tuyệt Kỹ; cần đủ điều kiện riêng.</p></div>` : '';
+
     const statHtml = `<div class="bg-stats"><div class="bg-stat">❤️ HP<b>${st.hp != null ? st.hp : '?'}</b></div><div class="bg-stat">💥 Dame<b>${st.dmg != null ? st.dmg : '?'}</b></div><div class="bg-stat">🔫 Đạn<b>${st.ammo == null ? '?' : (st.ammo >= 999 ? '∞' : (st.ammo === 0 ? '—' : st.ammo))}</b></div></div>`;
 
     const wrap = document.createElement('div');
@@ -232,6 +235,7 @@ function openBodyGuide(id, team, flip) {
         ${tlHtml}
         ${g.passive && g.passive.length ? `<div class="bg-sec"><h5>✨ NỘI TẠI</h5><div class="bg-pas">${g.passive.map(p => `<div>${guideEsc(p)}</div>`).join('')}</div></div>` : ''}
         <div class="bg-sec"><h5>⬆ TIẾN HÓA</h5><div class="bg-evo">${evoHtml}</div></div>
+        ${pilotHtml}
         ${g.tips && g.tips.length ? `<div class="bg-sec"><h5>MẸO</h5><div class="bg-tips">${g.tips.map(t => `<div>${guideEsc(t)}</div>`).join('')}</div></div>` : ''}
         <div class="bg-sec"><h5>📜 MÔ TẢ ĐẦY ĐỦ</h5><div class="bg-desc">${guideEsc(mod.desc)}${typeof collabBonusOf === 'function' && collabBonusOf(id) ? `<div class="bg-collab">★ Tướng COLLAB: đối thủ được bù +$${collabBonusOf(id)} đầu trận</div>` : ''}${typeof GAMBLER_BODIES !== 'undefined' && GAMBLER_BODIES.includes(id) ? '<div class="bg-collab">🎲 Cờ Bạc: Reroll đầu tiên mỗi hiệp miễn phí, +1 ô lựa chọn shop &amp; G.E.A.R</div>' : ''}</div></div>
         ${g.auto ? '<div class="bg-auto">(tự tóm tắt từ mô tả)</div>' : ''}
