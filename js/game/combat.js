@@ -14,7 +14,7 @@ function checkHits(attacker, victim) {
         // =======================================================
         // [SNIPER LOGIC] - TÍNH TOÁN SÁT THƯƠNG ĐÃ GIẢM KHI XUYÊN
         // =======================================================
-        let isFullEvoSniper = (b.owner && b.owner.weapon === 'sniper' && hasFullEvo(b.owner, 'sniper'));
+        let isFullEvoSniper = (b.owner && b.owner.weapon === 'sniper' && hasLegacyFullEvo(b.owner, 'sniper'));
         let dmgReduc = 1;
         if (b.isSniperBullet && b.hitIds && b.hitIds.length > 0 && !isFullEvoSniper) dmgReduc = 0.5;
         let currentFinalDmg = b.dmg * dmgReduc;

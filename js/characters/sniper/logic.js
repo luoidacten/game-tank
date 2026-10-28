@@ -8,7 +8,7 @@ function sniperAimAngle(p) {
     const startY = (p.id === 1) ? p.y - 16 : p.y + p.h;
     const enemy = (p.id === 1) ? p2 : p1;
     if (!enemy) return null;
-    const isFullEvo = hasFullEvo(p, 'sniper');
+    const isFullEvo = hasLegacyFullEvo(p, 'sniper');
     const targetAngle = Math.atan2((enemy.y + enemy.h / 2) - startY, (enemy.x + enemy.w / 2) - startX);
     const baseAngle = (p.id === 1) ? -Math.PI / 2 : Math.PI / 2;
     let diff = targetAngle - baseAngle;
@@ -51,7 +51,7 @@ Object.assign(Player.prototype, {
     // [update] Sniper — trả về currentSpeed mới
     updateSniper2(now, effectiveInp, currentSpeed) {
         if (this.weapon === 'sniper') {
-            let isFullEvo = hasFullEvo(this, 'sniper');
+            let isFullEvo = hasLegacyFullEvo(this, 'sniper');
 
             // Trừ dần thời gian hồi chiêu của Tường
             if (this.sniperWallCooldown > 0) this.sniperWallCooldown--;

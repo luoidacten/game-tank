@@ -226,7 +226,7 @@ const BODY_GUIDES = {
             { input: 'HOLD', name: 'Dựng Tường', what: 'Tường chặn mọi đòn địch 5s' }
         ],
         passive: ['Đạn mình bay xuyên tường mình', 'Hết đạn nạp cả băng'],
-        evo: { e1: 'Tường HP x5, đạn qua không giảm dame', e2: '25% đạn thành tia Raycast', full: 'Tường không mục, cứng x7' },
+        evo: { e3: "Lỗ Châu Mai: Đạn qua tường mình +40% dame, +30% tốc; chỉ nhận buff một lần.", e4: "Dời Tường: Dời tường gần nhất về trục xe (CD 6s). +12 Nộ/phát trúng, +6/đòn tường chặn. ĐIỂM ĐẦU cần trúng ≥2 lần: khóa ngắm 2.5s rồi tia xuyên tường; kết liễu khi ≤40%.", e1: 'Tường HP x5, đạn qua không giảm dame', e2: '25% đạn thành tia Raycast', full: 'Tường không mục, cứng x7' },
         tips: ['Dựng tường trước rồi bắn từ sau']
     },
     cung: {

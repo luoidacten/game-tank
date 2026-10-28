@@ -565,7 +565,7 @@ Object.assign(Player.prototype, {
 
         if (isSniperBullet) {
             isPiercing = true; // Mặc định xuyên vật thể
-            let isFullEvo = hasFullEvo(this, 'sniper');
+            let isFullEvo = hasLegacyFullEvo(this, 'sniper');
 
             // Raycast RNG
             let rayChance = isFullEvo ? 0.5 : (this.hasUpgrade('evo_sniper_2') ? 0.25 : 0);

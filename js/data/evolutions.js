@@ -512,3 +512,10 @@ addPilotEvos("engineer",
     {"id": "evo_eng_4", "name": "Đồng Loạt Khai Hỏa", "cost": 160, "desc": "Mọi ụ bắn ngay loạt x2 dame và hồi 30% HP (CD 10s). Nộ: +6/Phụ Tùng, +1/s/ụ. PHÁO ĐÀI cần ≥3 ụ: hợp thể 6s bắn tia cảnh báo mỗi 0.6s rồi tách lại đầy máu.", "skill": {"name": "Đồng Loạt Khai Hỏa", "cooldown": 10, "ultimateName": "PHÁO ĐÀI", "ultimateTicks": 360, "rageTime": 0.5, "rageDamage": 0}},
     {"1+3": {"desc": "Ụ gắn nóc bắn đủ 100% tốc độ."}, "2+4": {"desc": "Siêu Pháo có vòng LAN hồi máu chủ."}, "1+2+3+4": {"desc": "Tia Siêu Pháo xuyên tường."}});
 // PILOT engineer END
+
+// PILOT sniper BEGIN
+addPilotEvos("sniper",
+    {"id": "evo_sniper_3", "name": "Lỗ Châu Mai", "cost": 130, "desc": "Đạn qua tường mình +40% dame, +30% tốc; chỉ nhận buff một lần."},
+    {"id": "evo_sniper_4", "name": "Dời Tường", "cost": 150, "desc": "Dời tường gần nhất về trục xe (CD 6s). +12 Nộ/phát trúng, +6/đòn tường chặn. ĐIỂM ĐẦU cần trúng ≥2 lần: khóa ngắm 2.5s rồi tia xuyên tường; kết liễu khi ≤40%.", "skill": {"name": "Dời Tường", "cooldown": 6, "ultimateName": "ĐIỂM ĐẦU", "ultimateTicks": 150, "rageTime": 0.5, "rageDamage": 0}},
+    {"1+3": {"desc": "Lỗ Châu Mai tăng 60% dame."}, "2+3": {"desc": "Đạn qua tường thành raycast có cảnh báo."}, "1+2+3+4": {"desc": "Điểm Đầu bắn hai phát, chia cùng ngân sách dame."}});
+// PILOT sniper END
