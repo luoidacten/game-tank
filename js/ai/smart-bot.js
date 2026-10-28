@@ -56,6 +56,38 @@ class SmartBot {
         this.lastHp = null;
         this.shotIdx = 0;
         this.shotOffset = 0;
+        this.dodgeBias = 0;      // >0: địch hay né về phía giữa sân, <0: né về phía tường (học dần)
+        this.threats = [];
+        this.dangerT = 999;      // tick tới mối nguy gần nhất trúng chỗ bot đang đứng
+        this.punish = false;     // địch bị choáng / kẹt góc -> thời điểm tung đòn có cảnh báo
+    }
+
+    // ---- Tình trạng của địch: kẹt góc / bị khống chế (dùng cho đòn có cảnh báo, combo) ----
+    static enemyStunned(e) {
+        return !!e && ((e.freezeTimer || 0) > 6 || (e.stunTimer || 0) > 6 || (e.rootTimer || 0) > 6 || (e.idolCharmT || 0) > 20
+            || (e.statusSpeedMult !== undefined && e.statusSpeedMult < 0.55));
+    }
+    // "Tường" = mép sân hoặc mép Bo (Đột Tử) đang thu hẹp
+    static bounds() {
+        const z = (typeof getZoneState === 'function' && gameState.roundStartTime) ? getZoneState(Date.now() - gameState.roundStartTime) : null;
+        return z ? { x0: z.x0, x1: z.x1 } : { x0: 0, x1: canvas.width };
+    }
+    static wallGap(e) { const b = SmartBot.bounds(), ecx = e.x + e.w / 2; return Math.min(ecx - b.x0, b.x1 - ecx) - e.w / 2; }
+    // Địch hết chỗ né (Bo cuối hẹp) -> mọi phát bắn thẳng
+    static enemyTrapped(e) { const b = SmartBot.bounds(); return !!e && b.x1 - b.x0 < e.w * 3.6; }
+    static enemyCornered(e) { return !!e && SmartBot.wallGap(e) < 46; }
+    // Theo dõi hướng né của địch khi đạn của bot bay sát -> đoán khe thoát cho phát kế tiếp
+    learnDodge(bot, enemy) {
+        const vx = enemy._vx || 0;
+        const ecx0 = enemy.x + enemy.w / 2, ecy0 = enemy.y + enemy.h / 2;
+        const close = (bot.bullets || []).some(b => b && b.active !== false && Math.abs((b.y || 0) - ecy0) < 90 && Math.abs((b.x || 0) + (b.w || 6) / 2 - ecx0) < enemy.w);
+        if (close) this.dodgeAct = (this.dodgeAct === undefined ? 0.5 : this.dodgeAct) * 0.97 + (Math.abs(vx) > 0.5 ? 0.03 : 0);
+        if (Math.abs(vx) < 0.5) return;
+        const ecx = enemy.x + enemy.w / 2, ecy = enemy.y + enemy.h / 2;
+        const near = (bot.bullets || []).some(b => b && b.active !== false && Math.abs((b.y || 0) - ecy) < 130 && Math.abs((b.x || 0) + (b.w || 6) / 2 - ecx) < enemy.w * 1.6);
+        if (!near) return;
+        const toCenter = ecx < canvas.width / 2 ? 1 : -1;
+        this.dodgeBias = this.dodgeBias * 0.96 + Math.sign(vx) * toCenter * 0.04;
     }
 
     // ---- Nhìn thấy & quyết định có né vật thể này không ----
@@ -155,11 +187,20 @@ class SmartBot {
         if (this.t % 40 === 0) this.aimNoise = (Math.random() * 2 - 1) * L.aimErr;
 
         // Đón đầu theo vận tốc hiện tại của đối thủ
-        let attackX = ecx + (enemy._vx || 0) * flight * L.lead + this.aimNoise;
+        // Vận tốc làm mượt: địch lắc qua lại để né thì không đón đầu quá đà theo cú lắc tức thời
+        this.evx = (this.evx || 0) * 0.85 + (enemy._vx || 0) * 0.15;
+        const vLead = Math.abs(this.evx) < Math.abs(enemy._vx || 0) ? this.evx : (enemy._vx || 0);
+        let attackX = ecx + vLead * flight * L.lead + this.aimNoise;
+        // Địch kẹt sát tường: không thể chạy tiếp về phía tường -> kẹp điểm đón đầu trong sân
+        { const lo = enemy.w / 2, hi = W - enemy.w / 2; attackX = Math.max(lo - 2, Math.min(hi + 2, attackX)); }
+        if (SmartBot.enemyStunned(enemy)) attackX = ecx + this.aimNoise * 0.3;
 
         // Ép góc: mỗi phát bắn chọn 1 điểm trong "lưới" [xe, khe né phía giữa sân, khe né phía tường].
         // Đối thủ né phát này thì dính phát sau; khi đã sát tường chỉ còn 1 khe thoát -> bắn chặn khe đó.
+        // Điểm lệch chỉ có hiệu lực ngắn: lâu không bắn được (điểm ngắm ngoài tầm / ngoài Bo) -> quay về bắn thẳng, tránh kẹt không bắn
+        if (SmartBot.enemyTrapped(enemy) || this.t - (this.lastShotT || 0) > 24) this.shotOffset = 0;
         attackX += this.shotOffset * (enemy.w * 1.4 + 6);
+        { const zb = SmartBot.bounds(); attackX = Math.max(zb.x0 + bot.w / 2, Math.min(zb.x1 - bot.w / 2, attackX)); }
         let goal = { x: attackX, kind: 'enemy', tol: enemy.w / 2 + 2 };
         // Boomerang: chạy ra đón chiếc Thẳng đang bay về
         if (bot.weapon === 'boomerang' && typeof boomBotCatchX === 'function') { const bx = boomBotCatchX(bot); if (bx !== null) return { x: bx, kind: 'catch', tol: 5 }; }
@@ -168,7 +209,9 @@ class SmartBot {
         // Thùng tiếp tế / xe tiền đáng bắn
         // Chỉ đi bắn thùng khi gần, hoặc khi đang hết đạn (không bắn địch được)
         const outOfAmmo = bot.maxAmmo > 0 && bot.maxAmmo < 900 && bot.ammo <= 0;
-        const crateMult = outOfAmmo ? 1.2 : 0.6;
+        // Đang vào Bo: chỉ nhặt thùng nằm trong vùng an toàn (đứng ngoài Bo để bắn thùng = tự sát), ưu tiên đấu súng
+        const zb = SmartBot.bounds(), inZone = zb.x0 > 0 || zb.x1 < W;
+        const crateMult = (outOfAmmo ? 1.2 : 0.6) * (inZone ? 0.4 : 1);
         let best = null, bestScore = 0.3;
         const cx = bot.x + bot.w / 2;
         for (const c of crates) {
@@ -180,6 +223,7 @@ class SmartBot {
             const left = 1 - (Date.now() - c.spawnTime) / c.lifeTime;
             if (left < 0.12) continue;
             const ccx = c.x + c.w / 2;
+            if (inZone && (ccx < zb.x0 + bot.w || ccx > zb.x1 - bot.w)) continue;
             const score = v * L.crate * crateMult - Math.abs(ccx - cx) / W * 1.1;
             if (score > bestScore) { bestScore = score; best = { x: ccx, kind: 'crate', tol: c.w / 2 - 2 }; }
         }
@@ -188,7 +232,7 @@ class SmartBot {
             const tdy = Math.abs((t.y + t.h / 2) - (bot.y + bot.h / 2));
             const tf = tdy / Math.max(2, C.bulletSpeed);
             const px = t.x + t.w / 2 + t.speed * t.dir * tf;
-            if (px < 10 || px > W - 10) continue;
+            if (px < 10 || px > W - 10 || (inZone && (px < zb.x0 + bot.w || px > zb.x1 - bot.w))) continue;
             const score = 0.55 * L.crate * crateMult - Math.abs(px - cx) / W * 1.1;
             if (score > bestScore) { bestScore = score; best = { x: px, kind: 'truck', tol: t.w / 2 - 4 }; }
         }
@@ -219,6 +263,11 @@ class SmartBot {
             // Tránh tự dồn mình vào góc
             const edge = Math.min(X - minX, maxX - X);
             if (edge < 50) cost += (50 - edge) / 50 * 0.35 * this.L.wall;
+            // Kiểm soát làn: địch sát tường -> ưu tiên đứng lệch về phía giữa sân so với địch (chặn đường thoát, ép góc)
+            if (this.enemyX !== undefined && this.L.pressure > 0) {
+                const bd = SmartBot.bounds(), ex = this.enemyX, toC = ex < (bd.x0 + bd.x1) / 2 ? 1 : -1, gap = Math.min(ex - bd.x0, bd.x1 - ex);
+                if (gap < 120 && (X - ex) * toC < -4) cost += 0.06 * this.L.pressure * (120 - gap) / 120;
+            }
             const dir = Math.sign(X - cx), dist = Math.abs(X - cx);
             for (const th of threats) {
                 const pos = cx + dir * Math.min(dist, speed * th.t);
@@ -237,17 +286,31 @@ class SmartBot {
         // Vùng an toàn tại thời điểm dự đoán (bo 2 giai đoạn, vùng cuối dời trái/phải)
         const cur = getZoneState(tp) || z;
         let x0 = cur.x0, x1 = cur.x1;
+        // Giao với Bo HIỆN TẠI (Bo đang dời: đứng sẵn chỗ an toàn tương lai mà vẫn trong Bo bây giờ, không ăn sát thương Bo)
+        const now = getZoneState(Date.now() - gameState.roundStartTime);
+        if (now) { const a = Math.max(x0, now.x0), b = Math.min(x1, now.x1); if (b - a > 34) { x0 = a; x1 = b; } }
         return { x0, x1 };
     }
 
     // Gọi mỗi khi bot vừa bắn 1 phát -> chọn điểm ngắm cho phát kế tiếp
     nextShot(enemy) {
         this.shotIdx++;
-        const W = canvas.width, ecx = enemy.x + enemy.w / 2;
-        const toCenter = ecx < W / 2 ? 1 : -1;
-        const cornered = Math.min(ecx, W - ecx) < 95;
-        const pattern = cornered ? [0, toCenter, 0, toCenter * 0.5] : [0, toCenter, -toCenter, 0];
-        this.shotOffset = Math.random() < this.L.pressure ? pattern[this.shotIdx % pattern.length] : 0;
+        this.lastShotT = this.t;
+        const ecx = enemy.x + enemy.w / 2, bd = SmartBot.bounds();
+        const toCenter = ecx < (bd.x0 + bd.x1) / 2 ? 1 : -1;
+        const cornered = Math.min(ecx - bd.x0, bd.x1 - ecx) < 95;
+        if (SmartBot.enemyTrapped(enemy)) { this.shotOffset = 0; return; }
+        // Bị choáng / đứng im -> bắn thẳng vào xe
+        if (SmartBot.enemyStunned(enemy) || Math.abs(enemy._vx || 0) < 0.2 && this.shotIdx % 3 === 0) { this.shotOffset = 0; return; }
+        // Khe thoát dự đoán: địch hay né về phía giữa (dodgeBias > 0) hay về phía tường
+        const esc = this.dodgeBias >= 0 ? toCenter : -toCenter;
+        // Không kẹt góc: phát "lùa" lệch về phía giữa sân -> địch né về phía tường; phát sau chặn khe thoát dự đoán
+        // Kẹt góc: chỉ còn khe phía giữa -> thay phiên bắn xe và bịt khe đó
+        const pattern = cornered ? [0, toCenter, 0, toCenter * 0.6, toCenter]
+            : [toCenter * 0.55, esc, 0, toCenter * 0.55, -esc * 0.5];
+        // Địch ít né (đứng yên khi đạn tới) -> bắn thẳng, không phí đạn vào khe
+        const act = this.dodgeAct === undefined ? 0.5 : this.dodgeAct;
+        this.shotOffset = Math.random() < this.L.pressure * Math.min(1, act * 1.6) ? pattern[this.shotIdx % pattern.length] : 0;
     }
 
     // ---- Bắn theo kiểu của body ----
@@ -349,6 +412,13 @@ class SmartBot {
             if (v > 1 && !this.seen.has(b)) { this.seen.set(b, this.t); this.bulletSpeed = this.bulletSpeed ? this.bulletSpeed * 0.8 + v * 0.2 : v; }
         }
         const threats = this.collectThreats(bot, enemy);
+        this.threats = threats;
+        this.enemyX = enemy.x + enemy.w / 2;
+        this.learnDodge(bot, enemy);
+        // "Tỉnh táo" theo cấp: mỗi 1s gieo lại, cấp cao gần như luôn dùng combo / đổi thế hợp lý, cấp thấp thường bấm theo bản năng
+        if (this.t % 60 === 1 || this.wise === undefined) this.wise = Math.random() < Math.max(0.15, this.L.pressure);
+        this.punish = SmartBot.enemyStunned(enemy) || ((SmartBot.enemyCornered(enemy) || SmartBot.enemyTrapped(enemy)) && this.L.pressure >= 0.3);
+        { const bcx = bot.x + bot.w / 2; let m = 999; for (const th of threats) if (Math.abs(bcx - th.x) < th.half && th.t < m) m = th.t; this.dangerT = m; }
         const goal = this.chooseGoal(bot, enemy);
         const urgent = threats.some(th => th.t < 25);
         if (this.moveX === null || this.t % this.L.think === 0 || urgent) this.moveX = this.planMove(bot, threats, goal.x);
@@ -856,4 +926,234 @@ function botShopBuy(playerId) {
             return g.apply(this, arguments);
         };
     }
+})();
+
+// ==========================================
+// Hàng đợi thao tác nút bắn (chuỗi true/false theo từng tick) dùng cho các combo bên dưới
+// ==========================================
+SmartBot.prototype.qRun = function (inp) { if (this.xq && this.xq.length) { inp.s = this.xq.shift(); return true; } return false; };
+SmartBot.prototype.qSet = function (arr, inp) { this.xq = arr.slice(1); inp.s = arr[0]; };
+const SB_TAP = [true, true, true, false, false];
+const SB_HOLD = (n) => Array(n).fill(true).concat([false, false]);
+const SB_DTAP = [true, true, true, false, false, true, true, true, false, false]; // nhấp đúp nhanh (Hắc Thiểm)
+
+// Sukuna: Giải khi hết hồi 0.7s; Evo 1 đủ Chú Lực -> giữ Fuga, nhả khi thẳng hàng / địch kẹt góc rồi nhấp đúp Hắc Thiểm (choáng giữ chân cho Fuga);
+// máu thấp & an toàn -> giữ Phản Chuyển
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon !== 'sukuna') return f.call(this, bot, enemy, aligned, inp);
+        if (this.qRun(inp)) return;
+        const ce = bot.cursedEnergy || 0, e1 = bot.hasUpgrade('evo_sukuna_1');
+        if (this.skF > 0) { // đang giữ Fuga
+            this.skF++;
+            const ready = this.skF >= 92;
+            if ((ready && (aligned || this.punish)) || this.skF > 260 || bot.skBroken || (!ready && this.dangerT < 6)) {
+                this.skF = 0; inp.s = false;
+                if (ready && !(bot.jjkBfCd > 0) && ce - 60 >= 15) this.xq = [false, false].concat(SB_DTAP);
+                return;
+            }
+            inp.s = true; return;
+        }
+        if (e1 && ce >= 60 && aligned && this.dangerT > 30) { this.skF = 1; inp.s = true; return; }
+        if (bot.hp < bot.maxHp * 0.55 && ce >= 30 && !(e1 && ce >= 60) && this.dangerT > 100) { this.qSet(SB_HOLD(130), inp); return; }
+        if (aligned && !(bot.jjkBfCd > 0) && ce >= 15 && !(e1 && ce >= 60) && this.punish) { this.qSet(SB_DTAP, inp); return; }
+        if (aligned && ce >= 10 && !(e1 && ce >= 60) && Date.now() - (bot.lastShot || 0) > 700) { this.qSet(SB_TAP, inp); this.nextShot(enemy); return; }
+        inp.s = false;
+    };
+})();
+
+// Kẻ Mạnh Nhất: giữ Chú Lực làm Vô Hạn; Xanh khi thẳng hàng, Hắc Thiểm khi hết hồi; Đỏ (cảnh báo 0.5s) chỉ khi địch bị choáng / kẹt góc / trong Lãnh Địa;
+// Evo 1: đủ Chú Lực & an toàn -> giữ 5s Bành Trướng Lãnh Địa rồi Đỏ + Xanh -> Tím
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon !== 'the_strongest') return f.call(this, bot, enemy, aligned, inp);
+        if (this.qRun(inp)) return;
+        const cl = bot.chuLuc || 0, mx = bot.maxChuLuc || 100, keep = 22;
+        const dx = Math.abs(enemy.x + enemy.w / 2 - (bot.x + bot.w / 2));
+        if (this.gjD > 0) { // đang niệm Lãnh Địa
+            this.gjD++;
+            if (this.gjD >= 304 || (bot.gojoChargeTimer === 0 && this.gjD > 3)) { this.gjD = 0; inp.s = false; return; }
+            inp.s = true; return;
+        }
+        const purple = bot.hasUpgrade('evo_strongest_1');
+        if (purple && !(bot.gojoDomainTimer > 0) && cl >= mx * 0.75 + keep && this.dangerT > 200 && this.wise && this.t % 30 === 0) { this.gjD = 1; inp.s = true; return; }
+        const window_ = this.punish || bot.gojoDomainTimer > 0 || (enemy.silenceTimer || 0) > 40;
+        if (window_ && cl >= 50 + keep && !(bot.gojoCd > 0) && dx < enemy.w) { this.qSet(SB_HOLD(64), inp); return; }
+        if (aligned && !(bot.jjkBfCd > 0) && cl >= 20 + keep) { this.qSet(SB_DTAP, inp); this.nextShot(enemy); return; }
+        if (aligned && cl >= 15 + keep && !(bot.gojoCd > 0)) { this.qSet(SB_TAP, inp); this.nextShot(enemy); return; }
+        inp.s = false;
+    };
+})();
+
+// Kazuki: chọn trước chuỗi 2 nhịp theo tình huống -> Kiếm Thế Quyết: địch choáng/kẹt góc -> A B (Đột Kích Điểm Huyệt có cảnh báo),
+// đạn dày -> A A (lốc xoá đạn), còn lại xen kẽ B B (lướt xuyên choáng) / B A (Thập Tự chảy máu). Đạn sắp trúng -> giữ 0.6s Nghịch Trảm
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon !== 'kazuki') return f.call(this, bot, enemy, aligned, inp);
+        if (this.qRun(inp)) return;
+        inp.s = false;
+        if (bot.kazMode !== 'idle' || bot.kazStagger > 0 || bot.kazParryT > 0) return;
+        if (!(bot.kazParryCD > 0) && this.dangerT >= 2 && this.dangerT <= 9) { this.qSet(SB_HOLD(38), inp); return; }
+        if (bot.kazGCD > 0) return;
+        const marks = bot.kazMarks || '', mul = bot.hasUpgrade('evo_kaz_1') ? 0.75 : 1, yn = bot.kazYN || 0;
+        if (marks.length >= 2 || bot.kazFree) {
+            if (yn >= 25 * mul && (aligned || (marks === 'AA' && this.dangerT < 30))) this.qSet(SB_TAP, inp);
+            return;
+        }
+        if (!marks) {
+            this.kzN = (this.kzN || 0) + 1;
+            this.kzPlan = this.punish ? 'AB' : (this.dangerT < 40 ? 'AA' : (this.kzN % 2 ? 'BB' : 'BA'));
+            if (!this.wise) this.kzPlan = Math.random() < 0.5 ? 'AA' : 'BB';
+        }
+        const k = (this.kzPlan || 'AA')[marks.length] || 'A';
+        if (yn < (k === 'A' ? 10 : 15) * mul + 25 * mul * (marks.length === 1 ? 1 : 0)) return; // giữ đủ Ý Niệm cho đòn kết
+        if (aligned || (k === 'A' && this.dangerT < 20)) { this.qSet(k === 'A' ? SB_TAP : SB_HOLD(21), inp); this.nextShot(enemy); }
+    };
+})();
+
+// Huyết Tổ: chọn dạng theo tình huống rồi giữ 0.25s đổi từng dạng; Bể Máu >= 50% -> Huyết Cầu lớn -> Bóng Ma Màn Đêm (bay lái vòng về phía địch);
+// địch bị choáng/kẹt góc -> Huyết Tiễn (tia); đạn sắp trúng -> Huyết Phá (dơi bất tử lao tới)
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon !== 'blood_lord' || typeof bdHpOk !== 'function') return f.call(this, bot, enemy, aligned, inp);
+        bot.bdSmart = true; // bot thông minh tự chọn dạng (tắt chọn ngẫu nhiên trong logic.js)
+        if (bot.bdMode === 'sky' && bot.bdCircle) {
+            const c = bot.bdCircle, dx = enemy.x + enemy.w / 2 + (enemy._vx || 0) * 20 - c.x;
+            inp.l = dx < -4; inp.r = dx > 4;
+            if (this.qRun(inp)) return;
+            if (!c.landing && c.t > 50 && Math.abs(dx) < 12) { this.qSet(SB_TAP, inp); return; }
+            inp.s = false; return;
+        }
+        if (this.qRun(inp)) return;
+        inp.s = false;
+        if (bot.bdMode !== 'idle') return;
+        if (bot.bdNight) { if (!(bot.bdCd > 0)) this.qSet(SB_TAP, inp); return; }
+        if (this.t % 20 === 0 || this.bdWant === undefined) {
+            const half = (bot.bdPool || 0) >= bdPoolMax(bot) * 0.5;
+            this.bdWant = (half && bot.ammo >= 2) ? 3
+                : (bot.ammo >= 3 && bdHpOk(bot) && (this.punish || bot.hp > bot.maxHp * 0.6) && this.wise) ? 2
+                : (bot.ammo >= 2 && bdHpOk(bot) && this.dangerT < 40) ? 1 : 0;
+        }
+        if ((bot.bdForm || 0) !== this.bdWant) { this.qSet(SB_HOLD(BD_HOLD_TICKS + 2), inp); return; }
+        if (bot.bdCd > 0 || bot.ammo < BD_AMMO[bot.bdForm || 0]) return;
+        if (aligned || (bot.bdForm === 1 && this.dangerT < 25)) { this.qSet(SB_TAP, inp); this.nextShot(enemy); }
+    };
+})();
+
+// Nam Châm: địch mang Ấn Từ CÙNG cực với mình -> giữ đổi cực để Lướt Cực Tính (hai xe hút nhau va chạm) ngay sau đó
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon === 'magnet') {
+            if (this.qRun(inp)) return;
+            const dx = Math.abs(enemy.x + enemy.w / 2 - (bot.x + bot.w / 2));
+            if (!bot.isPolarDashing && !(bot.polarDashCd > 0) && enemy.magSealTimer > 45 && enemy.magSealPol && enemy.magSealPol === bot.magnetPolarity
+                && !enemy.magPullPhase && dx <= (typeof MAG_DASH_RANGE === 'number' ? MAG_DASH_RANGE : 170) - 10 && this.wise) {
+                this.qSet(SB_HOLD(27), inp); this.tapCool = 0; return;
+            }
+        }
+        return f.call(this, bot, enemy, aligned, inp);
+    };
+})();
+
+// Song Tử: (cả 2 phía) gục / máu thấp / hết đạn mà Bản Sao khoẻ hơn -> giữ 0.4s Chuyển Giao Ý Thức; bắn khi thẳng hàng
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon !== 'gemini' || typeof gmTwinOf !== 'function') return f.call(this, bot, enemy, aligned, inp);
+        if (this.qRun(inp)) return;
+        const tw = gmTwinOf(bot);
+        if (!(bot.gmSwCd > 0) && tw && !tw.gmDown && tw.hp > 0 && (bot.gmDown || (bot.hp < bot.maxHp * 0.35 && tw.hp > bot.hp + bot.maxHp * 0.3)
+            || (bot.ammo <= 0 && (tw.ammo || 0) >= 2 && this.t % 30 === 0))) { this.qSet(SB_HOLD(GM_HOLD + 2), inp); return; }
+        if (bot.gmDown) { inp.s = false; return; }
+        if (aligned && bot.ammo > 0 && !(bot.gmCd > 2)) { this.qSet(SB_TAP, inp); this.nextShot(enemy); return; }
+        inp.s = false;
+    };
+})();
+
+// Chrono-Neo: (cả 2 phía) băng cạn mà băng kia còn đạn -> giữ 0.4s đổi thế; đạn sắp trúng & máu thấp ở Neo -> vào Chrono (sóng đẩy + giảm st);
+// Thời Khắc đầy -> nhấp ngay (Chrono radar tự tìm không cần thẳng hàng; Neo chờ thẳng hàng hoặc địch kẹt góc)
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon !== 'chrononeo' || typeof cnGlassMax !== 'function') return f.call(this, bot, enemy, aligned, inp);
+        if (this.qRun(inp)) return;
+        inp.s = false;
+        if (!(bot.cnSwCd > 0) && !(bot.cnBurst > 0) && ((bot.ammo <= 0 && (bot.cnOther || 0) > 1)
+            || (bot.cnSt === 'neo' && this.dangerT < 16 && bot.hp < bot.maxHp * 0.5 && (bot.cnOther || 0) > 0))) { this.qSet(SB_HOLD(CN_HOLD + 2), inp); return; }
+        if (bot.cnFireCd > 0) return;
+        if ((bot.cnGlass || 0) >= cnGlassMax(bot)) { if (bot.cnSt === 'chrono' || aligned || this.punish) this.qSet(SB_TAP, inp); return; }
+        if (aligned && bot.ammo > 0) { this.qSet(SB_TAP, inp); this.nextShot(enemy); }
+    };
+})();
+
+// Diệp Thanh Phong — combo Vòng Trời + Phong Vũ: đang bay Cửu Thiên mà vòng đã ở trên đầu địch -> giữ 0.35s để lại Vòng Cảnh Báo tự nuôi,
+// về nhà đổi sang Thuận Phong Vũ rồi nhấp PHONG VŨ (Nghịch Phong) lướt tới quạt địch văng vào vòng
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon !== 'diep_thanh_phong' || typeof dtpZone !== 'function' || this.dtpB > 0) return f.call(this, bot, enemy, aligned, inp);
+        if (this.qRun(inp)) { if (bot.dtpMode === 'sky') { const dx = enemy.x + enemy.w / 2 - bot.dtpSkyX; inp.l = dx < -3; inp.r = dx > 3; } return; }
+        if (!this.wise) return f.call(this, bot, enemy, aligned, inp);
+        const ring = bodyEffects.some(e => e && e.active && e instanceof DtpSkyZone && e.team === bot.id);
+        const ecx = enemy.x + enemy.w / 2;
+        if (bot.dtpMode === 'sky' && !ring && (bot.dtpSkyT || 0) > 50 && Math.abs(bot.dtpSkyX - ecx) < 22) {
+            this.qSet(SB_HOLD(DTP_SKY_HOLD + 3), inp); this.dtpKnockT = 220; return;
+        }
+        if (this.dtpKnockT > 0) {
+            this.dtpKnockT--;
+            if (!ring || dtpZone(bot) !== 2) this.dtpKnockT = 0;
+            else if (bot.dtpMode === 'idle' && !bot.dtpCh) {
+                if (bot.dtpStance !== 0) { this.qSet(SB_HOLD(dtpSwitchN(bot) + 4), inp); return; }
+                if (bot.ammo >= 14 && Math.abs(bot.x + bot.w / 2 - ecx) < 70) { this.qSet(SB_TAP, inp); this.dtpKnockT = 0; return; }
+                inp.s = false; return;
+            }
+        }
+        // Thế Nghịch ở Nghịch Phong, đủ Gió -> chủ động bay Cửu Thiên mở combo
+        if (bot.dtpMode === 'idle' && !bot.dtpCh && bot.dtpStance === 1 && dtpZone(bot) === 2 && bot.ammo >= 50 && !ring && this.t % 20 === 0) { this.qSet(SB_TAP, inp); return; }
+        return f.call(this, bot, enemy, aligned, inp);
+    };
+})();
+
+// Idol — combo Mê Hoặc: ưu tiên QUYẾN RŨ (Trái Tim) khi sẵn; địch bị mê hoặc / choáng / kẹt góc -> đổi sang TÂM ĐIỂM (Lazer cảnh báo 0.7s)
+// nếu kịp (Evo 1 đổi nhanh), không thì VŨ ĐẠO (lướt nổ vòng choáng)
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon !== 'idol' || typeof idolHoldSwap !== 'function' || (this.idQ && this.idQ.length) || bot.idolSel || bot.idolLM) return f.call(this, bot, enemy, aligned, inp);
+        if (this.qRun(inp)) return;
+        if (!this.wise) return f.call(this, bot, enemy, aligned, inp);
+        const i = bot.idolStyle || 0, cd = bot.idolCd || [0, 0, 0];
+        const ready = j => !(cd[j] > 0) && bot.ammo >= IDOL_STYLES[j].cost;
+        const dx = Math.abs(enemy.x + enemy.w / 2 - (bot.x + bot.w / 2));
+        const swap = () => this.qSet(SB_HOLD(idolHoldSwap(bot) + 2), inp);
+        const fast = typeof idolE1 === 'function' && idolE1(bot);
+        if ((enemy.idolCharmT || 0) > 0 || this.punish) {
+            if (i === 1 && ready(1)) { if (dx < enemy.w) { this.qSet(SB_TAP, inp); return; } return f.call(this, bot, enemy, aligned, inp); }
+            if (i === 0 && ready(0) && dx < 60 && !(ready(1) && fast)) { this.qSet(SB_TAP, inp); return; }
+            if (ready(1) && (i === 0 || fast)) { swap(); return; }
+            if (i === 2 && ready(0)) { swap(); return; }
+        } else if (ready(2) && i !== 2 && !ready(i) && this.t % 10 === 0) { swap(); return; }
+        else if (i === 2 && ready(2) && aligned) { this.qSet(SB_TAP, inp); return; }
+        return f.call(this, bot, enemy, aligned, inp);
+    };
+})();
+
+// Dynamite: bom đầu đã dính địch -> gài thêm bó thứ 2 trước rồi mới nhấp Ném Thẳng kích nổ chuỗi (nổ dây chuyền mạnh hơn)
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon === 'dynamite' && !(this.dynB > 0) && typeof dynBombs === 'function' && this.wise) {
+            const bx = bot.x + bot.w / 2, dx = Math.abs(bx - (enemy.x + enemy.w / 2));
+            const stuck = dynBombs(bot.id).filter(o => o.stuck || dynRectDist(o.x, o.y, enemy) < DYN_RING * 0.8).length;
+            if (stuck === 1 && dynCount(bot.id) < Math.min(2, dynMax(bot)) && bot.ammo >= 2 && dx < 22 && !SmartBot.enemyStunned(enemy) && this.dangerT > 30) {
+                this.dynB = DYN_HOLD + 6; inp.s = true; return;
+            }
+        }
+        return f.call(this, bot, enemy, aligned, inp);
+    };
 })();

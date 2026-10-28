@@ -525,7 +525,7 @@ CharHooks.register('blood_lord', {
         else if (this.bdMode === 'swarm') { if (--this.bdSwarmT <= 0) bdReturn(this, this.bdHomeX); }
         else if (this.bdMode === 'sky') bdSkyUpdate(this, effInp || inp);
         // Bot phòng tập: tự chọn dạng bắn
-        if (bdIsBot(this) && this.bdMode === 'idle' && this.bdHold === 0 && this.bdTick % 30 === 0) {
+        if (bdIsBot(this) && !this.bdSmart && this.bdMode === 'idle' && this.bdHold === 0 && this.bdTick % 30 === 0) {
             const r = Math.random(), half = this.bdPool >= bdPoolMax(this) * 0.5;
             this.bdForm = (half && r < 0.4) ? 3 : ((this.ammo >= 3 && r < 0.6) ? 2 : ((this.ammo >= 2 && r < 0.8) ? 1 : 0));
         }
