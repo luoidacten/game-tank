@@ -369,7 +369,7 @@
     // LAZER XUYÊN PHÁ (lazer_charge) — nòng dài mảnh, thanh tụ lực chạy dọc thân
     // ==========================================
     registerTankArt('lazer_charge', (p, k) => {
-        const c = Math.min(1, (p.chargeLevel || 0) / 7);
+        const c = Math.min(1, Math.max((p.chargeLevel || 0) / 7, p.lcAuto ? (p.lcEnergy || 0) / 100 : 0)); // thanh tụ lực = năng lượng Tự Nạp (hoặc thanh giữ đổi chế độ)
         const az = '#5aa9ff';
         // cánh đẩy hai bên (silhouette mũi tên)
         H.poly([-9, -6, -15.5, 5, -15.5, 12, -9, 9]);
@@ -447,9 +447,10 @@
             ctx.save();
             ctx.globalAlpha *= fade;
             // quầng ngoài theo màu đội
-            ctx.fillStyle = H.lin(cx - W, 0, cx + W, 0, [[0, 'rgba(0,0,0,0)'], [0.3, team], [0.5, team], [0.7, team], [1, 'rgba(0,0,0,0)']]);
+            const HW = W * 0.62; // quầng chỉ rộng hơn vùng trúng một chút (hitbox = this.w)
+            ctx.fillStyle = H.lin(cx - HW, 0, cx + HW, 0, [[0, 'rgba(0,0,0,0)'], [0.3, team], [0.5, team], [0.7, team], [1, 'rgba(0,0,0,0)']]);
             ctx.globalAlpha *= 0.45;
-            ctx.fillRect(cx - W + jit, this.y, W * 2, this.h);
+            ctx.fillRect(cx - HW + jit, this.y, HW * 2, this.h);
             ctx.globalAlpha /= 0.45;
             // thân tia xanh lam sáng
             ctx.shadowBlur = 20; ctx.shadowColor = '#5aa9ff';
@@ -466,7 +467,7 @@
             const off = ((t / 4) % gap) * dir;
             ctx.strokeStyle = 'rgba(255,255,255,0.75)'; ctx.lineWidth = 2;
             for (let y = this.y + ((off % gap) + gap) % gap; y < this.y + this.h; y += gap) {
-                ctx.beginPath(); ctx.ellipse(cx + jit, y, W * 0.75, W * 0.18, 0, 0, PI2); ctx.stroke();
+                ctx.beginPath(); ctx.ellipse(cx + jit, y, W * 0.55, W * 0.16, 0, 0, PI2); ctx.stroke();
             }
             // tia sét viền (Evo)
             if (this.isEvo) {
