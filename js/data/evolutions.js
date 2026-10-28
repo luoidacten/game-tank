@@ -526,3 +526,10 @@ addPilotEvos("berserker",
     {"id": "evo_bers_4", "name": "Gào Thét", "cost": 170, "desc": "Hưởng buff mốc ≤25% trong 4s (CD 18s). Nộ từ dame nhận x1.5 và dame gây. CUỒNG HUYẾT VÔ TẬN cần HP≤50%: vào Huyết Chiến, giữ thanh 100 bốn giây, mỗi hit hồi 0.1 HP; Huyết Đạn kết liễu ≤20%.", "skill": {"name": "Gào Thét", "cooldown": 18, "ultimateName": "CUỒNG HUYẾT VÔ TẬN", "ultimateTicks": 240, "rageTime": 0.5, "rageDamage": 12}},
     {"1+3": {"desc": "Tự Rạch còn +10% tốc bắn trong 3s."}, "2+4": {"desc": "Ultimate dựng Đấu Trường Huyết Địa bản mạnh."}, "1+2+3+4": {"desc": "Gào Thét không CD trong Ultimate."}});
 // PILOT berserker END
+
+// PILOT healer BEGIN
+addPilotEvos("healer",
+    {"id": "evo_heal_3", "name": "Kim Đảo Mệnh", "cost": 120, "desc": "+2 Max HP dự trữ máu. Giữ 0.5s, nhả: đổi 0.5 HP thành kim 1 dame xuyên khiên; không tự hạ dưới 1 HP."},
+    {"id": "evo_heal_4", "name": "Truyền Máu Khẩn", "cost": 160, "desc": "Hồi ngay 1 HP (CD 16s); Năng Lượng Sinh Mệnh ≥50% thì nạp đầy. +10 Nộ/0.5 HP hồi thực. SINH TỬ ĐẢO NGƯỢC: 4s hồi máu địch thành dame, dame địch nhận hồi bạn 50%.", "skill": {"name": "Truyền Máu Khẩn", "cooldown": 16, "ultimateName": "SINH TỬ ĐẢO NGƯỢC", "ultimateTicks": 240, "rageTime": 0.5, "rageDamage": 0}},
+    {"1+3": {"desc": "Kim Đảo Mệnh trả Giáp Trắng trước khi trả HP."}, "2+4": {"desc": "Lượng hồi từ Ultimate tạo Tia Xung."}, "3+4": {"desc": "Kim trúng hoàn lại 0.5 HP; giữ thưởng chung +1 HP, +10% dame, 1 khiên."}, "1+2+3+4": {"desc": "Ultimate kéo dài 6s."}});
+// PILOT healer END

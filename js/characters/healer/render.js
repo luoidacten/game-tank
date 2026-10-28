@@ -160,7 +160,7 @@ Object.assign(CharHooks.registry.healer, {
             ctx.shadowBlur = 0;
         }
         // Tái Tạo: chữ thập nhỏ bên trái xe, đầy dần theo thời gian không mất máu
-        const every = hlFull(p) ? HL_REGEN_FULL : HL_REGEN;
+        const every = healFull(p) ? HL_REGEN_FULL : HL_REGEN;
         const k = Math.min(1, (p.hlCalm || 0) / every);
         const ix = p.x - 9, iy = p.y + p.h / 2;
         ctx.fillStyle = 'rgba(255,255,255,0.18)'; hlCross(ix, iy, 5, 2.6); ctx.fill();

@@ -500,7 +500,7 @@ const BODY_GUIDES = {
             { input: 'AUTO', name: 'Đạn Cường Hóa', what: 'Đầy Năng Lượng: phát nổ lan mạnh' }
         ],
         passive: ['3s không mất máu: +0.5 HP'],
-        evo: { e1: 'Máu dư thành Giáp Trắng', e2: 'Mỗi lần hồi bắn Tia Xung', full: 'Cướp máu hồi của địch' },
+        evo: { e3: "Kim Đảo Mệnh: +2 Max HP dự trữ máu. Giữ 0.5s, nhả: đổi 0.5 HP thành kim 1 dame xuyên khiên; không tự hạ dưới 1 HP.", e4: "Truyền Máu Khẩn: Hồi ngay 1 HP (CD 16s); Năng Lượng Sinh Mệnh ≥50% thì nạp đầy. +10 Nộ/0.5 HP hồi thực. SINH TỬ ĐẢO NGƯỢC: 4s hồi máu địch thành dame, dame địch nhận hồi bạn 50%.", e1: 'Máu dư thành Giáp Trắng', e2: 'Mỗi lần hồi bắn Tia Xung', full: 'Cướp máu hồi của địch' },
         tips: ['Né đòn để kích hoạt hồi máu']
     },
     chrononeo: {

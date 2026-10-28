@@ -259,7 +259,7 @@ const MODULES = {
         {
             id: 'healer',
             name: 'Y Sư',
-            desc: 'HP:3.5 | Dame:0.75 | Đạn:4 | Tốc: 3.5. "Hồi Phục": 3s không mất máu +0.5 HP. Đạn Hấp Huyết +0.25 HP (hồi 20s). Mọi lượng máu được hồi nạp Năng Lượng Sinh Mệnh -> đầy: phát kế tiếp là Đạn Cường Hóa (50% MaxHP + dame, nổ lan).',
+            desc: 'HP:3.5 | Dame:0.75 | Đạn:4 | Tốc: 3.5. "Hồi Phục": 3s không mất máu +0.5 HP. Đạn Hấp Huyết +0.25 HP (hồi 20s). Mọi lượng máu được hồi nạp Năng Lượng Sinh Mệnh -> đầy: phát kế tiếp là Đạn Cường Hóa (50% MaxHP + dame, nổ lan). Evo 3: Kim Đảo Mệnh, +2 Max HP dự trữ, giữ đổi HP thành kim xuyên khiên. Evo 4: Truyền Máu Khẩn, đầy Nộ đảo hồi máu của địch thành dame.',
             type: 'body', role: ['Sinh Tồn', 'Kiểm Soát'],
             size: { w: 30, h: 30 },
             stats: { hp: 3.5, dmg: 0.75, ammo: 4, speedMult: 1.0 }
