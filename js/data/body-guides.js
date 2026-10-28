@@ -37,7 +37,7 @@ const BODY_GUIDES = {
         tag: 'Quả cầu đạn khổng lồ', diff: 1,
         controls: [{ input: 'TAP', name: 'Đạn Lớn', what: 'Cầu đạn to 2 dame, khó né' }],
         passive: ['Chỉ 2 viên — mỗi phát phải giá trị'],
-        evo: { e1: 'Đạn to gấp đôi nữa', e2: 'Nảy tường tới 7 lần, càng nảy càng to', full: 'Xuyên thấu + nổ 360° mảnh đạn' },
+        evo: { e3: "Ôm Bóng: giữ nuốt đạn rồi nhả sút; Full Evo 1+3 tăng cỡ, 2+3 tăng nảy.", e4: "Bẻ Lái/Hành Tinh; Full Evo 3+4 sút cầu đã nuốt đạn giảm CD Skill tối đa 1.5s; 1234 Hành Tinh nảy 3 lần.", e1: 'Đạn to gấp đôi nữa', e2: 'Nảy tường tới 7 lần, càng nảy càng to', full: 'Xuyên thấu + nổ 360° mảnh đạn' },
         tips: ['Bắn khi địch kẹt sát tường', 'Evo 3: giữ Bắn ôm cầu nuốt đạn; nhả để sút. Evo 4: Q hoặc / để bẻ cầu về địch, mỗi lần nảy +8 Nộ, nuốt đạn +15. Đầy Nộ: HÀNH TINH.']
     },
     shotgun: {

@@ -44,3 +44,7 @@ Xem `docs/TODO.md`. Đang chờ người dùng chơi thử các mục ở phần
 ## Khung Evo 3/4 (issue #1)
 
 Xem `docs/EVO_FRAMEWORK.md` và comment mới nhất của issue. Body mẫu là `big_bullet`; `basic` không được thêm Evo 3/4 trong giai đoạn này. Khung nằm ở `js/game/evo-system.js`, API dữ liệu/tổ hợp ở `js/data/evolutions.js`. Nút Skill sát Bắn thành cặp đối xứng với hai nút di chuyển.
+
+## Thí điểm Evo 3/4 (issue #2)
+
+Đã triển khai đúng 10 body trong comment cập nhật. Xem [báo cáo, số liệu và giới hạn kiểm chứng](EVO_PILOT_RESULTS.md). API body thí điểm: `js/game/evo-body-kit.js`; module riêng: `js/characters/<body>/evo.js`. Chơi thử thêm các matchup hồi máu/phản đòn và mạng WebRTC giữa hai máy.

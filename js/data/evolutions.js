@@ -540,3 +540,10 @@ addPilotEvos("one_punch",
     {"id": "evo_punch_4", "name": "Né Bình Thường", "cost": 150, "desc": "Bước ngang né 0.25s, +10% Thú Vị (CD 6s). +1 Nộ/1% Thú Vị tăng. ĐẤM NGHIÊM TÚC: CHẾT ĐI cần Thú Vị 100%, cảnh báo 0.8s rồi tia rộng 1/3 sân xuyên tường; kết liễu ≤50%, còn lại 3 dame.", "skill": {"name": "Né Bình Thường", "cooldown": 6, "ultimateName": "ĐẤM NGHIÊM TÚC: CHẾT ĐI", "ultimateTicks": 48, "rageTime": 0.5, "rageDamage": 0}},
     {"1+3": {"desc": "Chạy bộ tăng 8% Thú Vị."}, "2+4": {"desc": "Bật ngang trước khi khóa cảnh báo Ultimate."}, "1+2+3+4": {"desc": "Điều kiện Ultimate giảm còn 80% Thú Vị."}});
 // PILOT one_punch END
+
+// PILOT big_bullet BEGIN
+if (FEATURE_EVO34) {
+    FULL_EVO_COMBOS.big_bullet['3+4'] = { desc: 'Sút cầu đã nuốt đạn giảm 0.5s CD Skill mỗi đạn, tối đa 1.5s/lần sút.' };
+    EVOLUTIONS.big_bullet.find(e => e.evoSlot === 4).desc += ' Full Evo 3+4: sút cầu đã nuốt đạn giảm CD Skill (tối đa 1.5s).';
+}
+// PILOT big_bullet END
