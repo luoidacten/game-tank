@@ -541,7 +541,7 @@ const BODY_GUIDES = {
             { input: 'HOLD', name: 'Sấy Liên Thanh', what: '≤50% HP: giữ bắn càng lâu càng nhanh' }
         ],
         passive: ['≤75% / ≤50% / ≤25% HP: mạnh dần', 'Huyết Chiến đầy: không chết khi nhận đòn chí tử'],
-        evo: { e1: 'Cuồng Chiến x1.5, tản nhiệt nhanh', e2: 'Huyết Chiến dựng tường nhốt địch', full: 'Tàn Hơi: 2 lần không chết/hiệp' },
+        evo: { e3: "Tự Rạch: Nhấp đúp (hồi 1s): mất 0.5 HP, không dưới 1; +12 Huyết Chiến và chuẩn bị Huyết Đạn.", e4: "Gào Thét: Hưởng buff mốc ≤25% trong 4s (CD 18s). Nộ từ dame nhận x1.5 và dame gây. CUỒNG HUYẾT VÔ TẬN cần HP≤50%: vào Huyết Chiến, giữ thanh 100 bốn giây, mỗi hit hồi 0.1 HP; Huyết Đạn kết liễu ≤20%.", e1: 'Cuồng Chiến x1.5, tản nhiệt nhanh', e2: 'Huyết Chiến dựng tường nhốt địch', full: 'Tàn Hơi: 2 lần không chết/hiệp' },
         tips: ['Sấy 3-4s là quá nhiệt — nhả nút nghỉ']
     },
     kazuki: {

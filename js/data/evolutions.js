@@ -519,3 +519,10 @@ addPilotEvos("sniper",
     {"id": "evo_sniper_4", "name": "Dời Tường", "cost": 150, "desc": "Dời tường gần nhất về trục xe (CD 6s). +12 Nộ/phát trúng, +6/đòn tường chặn. ĐIỂM ĐẦU cần trúng ≥2 lần: khóa ngắm 2.5s rồi tia xuyên tường; kết liễu khi ≤40%.", "skill": {"name": "Dời Tường", "cooldown": 6, "ultimateName": "ĐIỂM ĐẦU", "ultimateTicks": 150, "rageTime": 0.5, "rageDamage": 0}},
     {"1+3": {"desc": "Lỗ Châu Mai tăng 60% dame."}, "2+3": {"desc": "Đạn qua tường thành raycast có cảnh báo."}, "1+2+3+4": {"desc": "Điểm Đầu bắn hai phát, chia cùng ngân sách dame."}});
 // PILOT sniper END
+
+// PILOT berserker BEGIN
+addPilotEvos("berserker",
+    {"id": "evo_bers_3", "name": "Tự Rạch", "cost": 110, "desc": "Nhấp đúp (hồi 1s): mất 0.5 HP, không dưới 1; +12 Huyết Chiến và chuẩn bị Huyết Đạn."},
+    {"id": "evo_bers_4", "name": "Gào Thét", "cost": 170, "desc": "Hưởng buff mốc ≤25% trong 4s (CD 18s). Nộ từ dame nhận x1.5 và dame gây. CUỒNG HUYẾT VÔ TẬN cần HP≤50%: vào Huyết Chiến, giữ thanh 100 bốn giây, mỗi hit hồi 0.1 HP; Huyết Đạn kết liễu ≤20%.", "skill": {"name": "Gào Thét", "cooldown": 18, "ultimateName": "CUỒNG HUYẾT VÔ TẬN", "ultimateTicks": 240, "rageTime": 0.5, "rageDamage": 12}},
+    {"1+3": {"desc": "Tự Rạch còn +10% tốc bắn trong 3s."}, "2+4": {"desc": "Ultimate dựng Đấu Trường Huyết Địa bản mạnh."}, "1+2+3+4": {"desc": "Gào Thét không CD trong Ultimate."}});
+// PILOT berserker END
