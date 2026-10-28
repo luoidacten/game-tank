@@ -133,7 +133,7 @@ const BODY_GUIDES = {
             { input: 'HOLD 2s', name: 'Quá Tải', what: '(Evo 2) Ụ bắn tia mạnh, -1 Max HP' }
         ],
         passive: ['Ụ sống quá 10s tự mất máu dần'],
-        evo: { e1: 'Ụ VIP, tối đa 3 ụ thông minh xuyên', e2: 'Mạng LAN hồi máu, mở Quá Tải', full: 'Trận địa ụ súng' },
+        evo: { e3: "Ụ Gắn Nóc: Nhấp đúp gắn/thả ụ nóc, bắn khi di chuyển ở 60% tốc độ; giảm 1.5 Max HP.", e4: "Đồng Loạt Khai Hỏa: Mọi ụ bắn ngay loạt x2 dame và hồi 30% HP (CD 10s). Nộ: +6/Phụ Tùng, +1/s/ụ. PHÁO ĐÀI cần ≥3 ụ: hợp thể 6s bắn tia cảnh báo mỗi 0.6s rồi tách lại đầy máu.", e1: 'Ụ VIP, tối đa 3 ụ thông minh xuyên', e2: 'Mạng LAN hồi máu, mở Quá Tải', full: 'Trận địa ụ súng' },
         tips: ['Đặt ụ ở góc khó bị bắn']
     },
     ghost: {

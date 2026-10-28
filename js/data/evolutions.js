@@ -505,3 +505,10 @@ addPilotEvos("prism",
     {"id": "evo_prism_4", "name": "Lăng Kính Tức Thì", "cost": 170, "desc": "Bật Cửa Sổ Vàng 0.35s, không tiêu CD Mở Kính (CD Skill 10s). +10 Nộ/đòn phản, +20/phản vàng. VẠN KÍNH QUY QUANG: 4s phản x1.5, cuối chiêu hội tụ tia cảnh báo 0.4s; kết liễu ≤25%.", "skill": {"name": "Lăng Kính Tức Thì", "cooldown": 10, "ultimateName": "VẠN KÍNH QUY QUANG", "ultimateTicks": 264, "rageTime": 0.5, "rageDamage": 0}},
     {"1+3": {"desc": "Hai tia tách đôi gây 70% dame mỗi tia."}, "2+4": {"desc": "Kết thúc Ultimate bắn thêm 5 mảnh kính."}, "1+2+3+4": {"desc": "Lăng Kính Tức Thì kéo dài 0.5s."}});
 // PILOT prism END
+
+// PILOT engineer BEGIN
+addPilotEvos("engineer",
+    {"id": "evo_eng_3", "name": "Ụ Gắn Nóc", "cost": 150, "desc": "Nhấp đúp để gắn/thả ụ thông minh gần nhất lên nóc; bắn khi di chuyển ở 60% tốc độ; xe mang ụ giảm 1.5 Max HP."},
+    {"id": "evo_eng_4", "name": "Đồng Loạt Khai Hỏa", "cost": 160, "desc": "Mọi ụ bắn ngay loạt x2 dame và hồi 30% HP (CD 10s). Nộ: +6/Phụ Tùng, +1/s/ụ. PHÁO ĐÀI cần ≥3 ụ: hợp thể 6s bắn tia cảnh báo mỗi 0.6s rồi tách lại đầy máu.", "skill": {"name": "Đồng Loạt Khai Hỏa", "cooldown": 10, "ultimateName": "PHÁO ĐÀI", "ultimateTicks": 360, "rageTime": 0.5, "rageDamage": 0}},
+    {"1+3": {"desc": "Ụ gắn nóc bắn đủ 100% tốc độ."}, "2+4": {"desc": "Siêu Pháo có vòng LAN hồi máu chủ."}, "1+2+3+4": {"desc": "Tia Siêu Pháo xuyên tường."}});
+// PILOT engineer END
