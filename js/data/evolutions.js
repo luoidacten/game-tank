@@ -491,3 +491,10 @@ addPilotEvos("ice",
     {"id": "evo_ice_4", "name": "Đông Cứng Tức Thì", "cost": 140, "desc": "Đóng băng địch đang chậm 0.8s (CD 12s). Nộ: +10/lần chậm mới, +20/Bão Tuyết. Tuyệt Kỹ ĐỘ KHÔNG TUYỆT ĐỐI: băng 2s rồi vỡ (tối đa 3 dame); kết liễu địch đóng băng ≤20%.", "skill": {"name": "Đông Cứng Tức Thì", "cooldown": 12, "ultimateName": "ĐỘ KHÔNG TUYỆT ĐỐI", "ultimateTicks": 120, "rageTime": 0.5, "rageDamage": 0}},
     {"1+3": {"desc": "Bão Tuyết nở dọc làn băng."}, "2+4": {"desc": "Hàn Băng tăng 50% dame lên địch đóng băng."}, "1+2+3+4": {"desc": "Ultimate đóng băng mọi đạn địch đang bay."}});
 // PILOT ice END
+
+// PILOT paradox BEGIN
+addPilotEvos("paradox",
+    {"id": "evo_paradox_3", "name": "Dấu Nhân Quả", "cost": 160, "desc": "Dư Âm trúng khắc tối đa 4 Dấu; lần tua/về neo kế tiếp nổ 0.3 dame mỗi Dấu."},
+    {"id": "evo_paradox_4", "name": "Quy Neo", "cost": 200, "desc": "Về Neo ngay, chưa có thì đặt Neo (CD 12s). +10 Nộ/lần tua, +4/Dư Âm trúng. VÒNG LẶP VÔ TẬN kéo địch về vị trí 5s trước, tái hiện loạt đạn 5s qua với trần ngân sách dame.", "skill": {"name": "Quy Neo", "cooldown": 12, "ultimateName": "VÒNG LẶP VÔ TẬN", "ultimateTicks": 30, "rageTime": 0.5, "rageDamage": 0}},
+    {"1+3": {"desc": "Dấu Nhân Quả cũng tích Ấn Thời Gian."}, "2+4": {"desc": "Vòng Lặp tái hiện thêm bóng 3s."}, "1+2+3+4": {"desc": "Mọi Vết Nứt khai hỏa theo Vòng Lặp."}});
+// PILOT paradox END

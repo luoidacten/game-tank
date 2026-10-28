@@ -60,7 +60,7 @@ const MODULES = {
         {
             id: 'paradox',
             name: 'Paradox',
-            desc: 'HP:7 | Dame:1.35 | Đạn:5 | Nhịp bắn 0.4s. DƯ ÂM: mỗi phát bắn được thời gian lặp lại 1 lần sau 0.33s từ đúng chỗ đã bắn (40% dame; Evo 2: 50%; Full: 60%). Có bóng đi sau 3s. Giữ 0.2s tua ngược & tự xả đạn lặp lại (CD: 9s/5.5s); tua ngược / về neo = NGOÀI DÒNG THỜI GIAN: giải mọi hiệu ứng xấu + miễn nhiễm 0.6s. Giữ tới mốc trống cuối: đặt Neo Thời Không (10s, CD 20s) - lần tua tới về neo (vị trí, máu, đạn). Mỗi lần tua ngược/về neo để lại 1 Vết Nứt Thời Gian (10s, tối đa 3): khi đặt neo, tua ngược hoặc bóng 3s tái hiện phát bắn, mọi vết nứt cùng khai hoả (tụ sáng 0.2s, 35% dame; Full Evo 60%).',
+            desc: 'HP:7 | Dame:1.35 | Đạn:5 | Nhịp bắn 0.4s. DƯ ÂM: mỗi phát bắn được thời gian lặp lại 1 lần sau 0.33s từ đúng chỗ đã bắn (40% dame; Evo 2: 50%; Full: 60%). Có bóng đi sau 3s. Giữ 0.2s tua ngược & tự xả đạn lặp lại (CD: 9s/5.5s); tua ngược / về neo = NGOÀI DÒNG THỜI GIAN: giải mọi hiệu ứng xấu + miễn nhiễm 0.6s. Giữ tới mốc trống cuối: đặt Neo Thời Không (10s, CD 20s) - lần tua tới về neo (vị trí, máu, đạn). Mỗi lần tua ngược/về neo để lại 1 Vết Nứt Thời Gian (10s, tối đa 3): khi đặt neo, tua ngược hoặc bóng 3s tái hiện phát bắn, mọi vết nứt cùng khai hoả (tụ sáng 0.2s, 35% dame; Full Evo 60%). Evo 3: Dấu Nhân Quả: Dư Âm trúng khắc tối đa 4 Dấu; lần tua/về neo kế tiếp nổ 0.3 dame mỗi Dấu. Evo 4: Quy Neo: Về Neo ngay, chưa có thì đặt Neo (CD 12s). +10 Nộ/lần tua, +4/Dư Âm trúng. VÒNG LẶP VÔ TẬN kéo địch về vị trí 5s trước, tái hiện loạt đạn 5s qua với trần ngân sách dame.',
             type: 'body', role: ['Sinh Tồn', 'Cơ Động', 'Kiểm Soát'],
             size: { w: 30, h: 30 },
             stats: { hp: 7, dmg: 1.35, ammo: 5 }

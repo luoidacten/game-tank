@@ -270,7 +270,7 @@ const BODY_GUIDES = {
             { input: 'HOLD', name: 'Neo Thời Không', what: 'Giữ tới mốc cuối: đặt Neo 10s' }
         ],
         passive: ['Bóng 3s đi sau tái hiện phát bắn', 'Tua ngược để lại Vết Nứt khai hỏa'],
-        evo: { e1: 'Tích ấn -> Bóng Đứng + choáng', e2: 'Tua hồi 5.5s, kéo địch gây chậm', full: 'Vết nứt & bóng mạnh hơn nhiều' },
+        evo: { e3: "Dấu Nhân Quả: Dư Âm trúng khắc tối đa 4 Dấu; lần tua/về neo kế tiếp nổ 0.3 dame mỗi Dấu.", e4: "Quy Neo: Về Neo ngay, chưa có thì đặt Neo (CD 12s). +10 Nộ/lần tua, +4/Dư Âm trúng. VÒNG LẶP VÔ TẬN kéo địch về vị trí 5s trước, tái hiện loạt đạn 5s qua với trần ngân sách dame.", e1: 'Tích ấn -> Bóng Đứng + choáng', e2: 'Tua hồi 5.5s, kéo địch gây chậm', full: 'Vết nứt & bóng mạnh hơn nhiều' },
         tips: ['Đặt Neo khi đầy máu, tua về khi sắp chết']
     },
     magician: {
