@@ -22,8 +22,8 @@ const BODY_GUIDES = {
     tank: {
         tag: 'Lao húc cận chiến, tự hồi khiên', diff: 1,
         controls: [{ input: 'TAP', name: 'Lao Húc', what: 'Lao lên húc địch, hồi chiêu 2s' }],
-        passive: ['Khi lao chỉ nhận 35% sát thương', 'Tự hồi 1 khiên mỗi 6s'],
-        evo: { e1: 'Húc x1.5 dame, chỉ nhận 20% st', e2: 'Húc nổ lan + băng, hồi khiên 4s', full: 'Hồi khiên 2s, +15 HP' },
+        passive: ['Khi lao chỉ nhận 65% sát thương', 'Tự hồi mỗi 6s, nội tại tối đa 1 khiên'],
+        evo: { e3: "Cần Lái Thủy Lực: giữ Bắn húc 1.5s, trái/phải để bẻ lái; giảm 3.5 Max HP.", e4: "Xả Khiên Dự Phòng (CD 12s); Nộ từ húc/nhận dame khi lao; XE ỦI kết liễu địch ≤20%.", e1: 'Húc x1.5 dame, chỉ nhận 40% st', e2: 'Húc nổ lan + băng, hồi khiên 5s, nội tại tối đa 1', full: '1+2: hồi khiên 4s, +6 HP trước cân bằng, húc hồi 5s' },
         tips: ['Canh lúc địch vừa bắn xong rồi mới lao']
     },
     ice: {

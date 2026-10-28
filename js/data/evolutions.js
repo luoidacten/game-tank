@@ -14,8 +14,8 @@ const EVOLUTIONS = {
         { id: 'evo_money_2', name: 'Sức Mạnh Đồng Tiền', desc: 'Mọi nâng cấp giảm 25%. Mỗi 100$ tiêu (tối đa 2500$, tính từ lúc mua) nhận 1 mốc thưởng vĩnh viễn: HP, Dame, Đạn, Tốc, Khiên. FULL EVO: mọi mặt hàng giảm 50%, thêm xe tiền trên sân, mỗi 5s phóng 3 xe tấn công LẦN LƯỢT (cách nhau 1s, mỗi xe 1 cột ngẫu nhiên, đều cảnh báo 2s, mạnh hơn).', cost: 480, type: 'evo' }
     ],
     tank: [
-        { id: 'evo_tank_1', name: 'Không Thể Cản Phá', desc: 'Lao húc x1.5 dame, không bị phản chấn khi tông tường/vật thể, khi lao chỉ nhận 20% sát thương', cost: 170, type: 'evo' },
-        { id: 'evo_tank_2', name: 'Tàn Phá!!!', desc: 'Húc nổ lan + băng (khi còn khiên) + Hồi khiên nội tại nhanh hơn (6s -> 4s, Full Evo 2s, +15 HP)', cost: 280, type: 'evo' }
+        { id: 'evo_tank_1', name: 'Không Thể Cản Phá', desc: 'Lao húc x1.5 dame, không bị phản chấn khi tông tường/vật thể, khi lao chỉ nhận 40% sát thương', cost: 170, type: 'evo' },
+        { id: 'evo_tank_2', name: 'Tàn Phá!!!', desc: 'Húc nổ 0.5×dame + băng khi còn khiên. Hồi khiên 6s -> 5s, tối đa 1 khiên nội tại. Full Evo 1+2: hồi khiên 4s, +6 HP trước hệ số cân bằng. Cặp 1+2 hồi húc 5s.', cost: 280, type: 'evo' }
     ],
     ice: [
         { id: 'evo_ice_1', name: 'Bão Tuyết', desc: 'Mỗi 3 lần kích hoạt -> Tạo vùng Băng Cực Đại', cost: 230, type: 'evo' },
@@ -463,5 +463,24 @@ function evoShopAvailable(p, e) { return !evoPurchaseLock(p, e); }
 function fullEvoDescription(p, e) {
     if (!e.fullEvoGate) return e.desc;
     const key = fullEvoCombo(p), combo = (FULL_EVO_COMBOS[p.weapon] || {})[key];
-    return `Tổ hợp ${key || '?'}: ${combo ? combo.desc : (key === '1+2' ? 'Sức mạnh Full Evo nguyên bản.' : '+1 Max HP, +10% sát thương và 1 khiên đầu hiệp.')}`;
+    const budget = typeof EvoBodyKit !== 'undefined' && EvoBodyKit.bodies[p.weapon] && EvoBodyKit.bodies[p.weapon].balance && (EvoBodyKit.bodies[p.weapon].balance[key] || (key === '1+2+3+4' ? EvoBodyKit.bodies[p.weapon].balance['1+2'] : null));
+    const tuning = budget ? ' Lối ghép: ' + [budget.hp && `HP ×${budget.hp}`, budget.damage && `dame ×${budget.damage}`, budget.taken && `sát thương nhận ×${budget.taken}`].filter(Boolean).join(', ') + '.' : '';
+    return `Tổ hợp ${key || '?'}: ${combo ? combo.desc : (key === '1+2' ? 'Sức mạnh Full Evo nguyên bản.' : '+1 Max HP, +10% sát thương và 1 khiên đầu hiệp.')}${tuning}`;
 }
+
+// API đăng ký Evo 3/4 và hiệu ứng Full Evo theo cặp mua đầu.
+function addPilotEvos(body, evo3, evo4, combos) {
+    if (!FEATURE_EVO34) return;
+    const list = EVOLUTIONS[body], index = list.findIndex(e => e.fullEvoGate);
+    list.splice(index < 0 ? list.length : index, 0, { ...evo3, type: 'evo', evoSlot: 3 }, { ...evo4, type: 'evo', evoSlot: 4 });
+    FULL_EVO_COMBOS[body] = { '1+2': { legacy: true, desc: 'Full Evo nguyên bản.' }, ...combos };
+}
+function hasLegacyFullEvo(p, body = p && p.weapon) {
+    return hasFullEvo(p, body) && ['1+2', '1+2+3+4'].includes(fullEvoCombo(p, body));
+}
+// PILOT tank BEGIN
+addPilotEvos('tank',
+    { id: 'evo_tank_3', name: 'Cần Lái Thủy Lực', cost: 130, desc: 'Giữ Bắn để húc tối đa 1.5s, bẻ lái bằng trái/phải; nhả để trở về làn. Đổi lại −3.5 Max HP.' },
+    { id: 'evo_tank_4', name: 'Xả Khiên Dự Phòng', cost: 150, desc: 'Skill: +1 khiên và đẩy đạn quanh xe (CD 12s). Nộ từ húc trúng/nhận dame khi lao. Tuyệt Kỹ XE ỦI: lao xuyên sân, ép địch; kết liễu khi địch ≤20%.', skill: { name: 'Xả Khiên Dự Phòng', cooldown: 12, ultimateName: 'XE ỦI', ultimateTicks: 180, rageTime: 0.5, rageDamage: 0 } },
+    { '1+3': { desc: 'Thủy Lực không mất tốc khi bẻ lái.' }, '2+4': { desc: 'Khiên Skill nổ kèm vùng băng.' }, '1+2+3+4': { desc: 'Xe Ủi để lại hai vệt băng.' } });
+// PILOT tank END

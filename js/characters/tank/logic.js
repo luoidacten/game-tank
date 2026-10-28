@@ -98,7 +98,7 @@ Object.assign(Player.prototype, {
                         }
                     }
                     if (c.type === 'ammo') this.onCollectAmmoCrate(c);
-                    if (c.type === 'shield') this.shield++;
+                    if (c.type === 'shield') this.shield = Math.max(this.shield, 1);
                     if (c.type === 'dmg') this.dmgBuff++;
                     if (this.weapon === 'evolution') this.onEvolutionCrateEat(c.type);
                     if (c.type === 'coin') {
@@ -182,7 +182,7 @@ Object.assign(Player.prototype, {
         // 3. Xử lý phản chấn sau va chạm (Địch hoặc Vật thể)
         if (hitSomething) {
             if (this.hasUpgrade('evo_tank_2') && this.shield > 0) {
-                explosions.push(new Explosion(this.x + this.w / 2, this.y + this.h / 2, 80, 'rgba(255,0,0,', 2, this));
+                explosions.push(new Explosion(this.x + this.w / 2, this.y + this.h / 2, 80, 'rgba(255,0,0,', this.damage * .5, this));
                 iceZones.push(new IceZone(this.x + this.w / 2, this.y + this.h / 2, 60, 300, this));
             }
 
@@ -199,7 +199,7 @@ Object.assign(Player.prototype, {
 
     // Thời gian hồi 1 khiên nội tại (tick)
     tankShieldLimit() {
-        return hasFullEvo(this, 'tank') ? 120 : (this.hasUpgrade('evo_tank_2') ? 240 : 360);
+        return hasLegacyFullEvo(this, 'tank') ? 240 : (this.hasUpgrade('evo_tank_2') ? 300 : 360);
     },
 
     // [setupForNewRound] Xe TANK
@@ -214,8 +214,8 @@ Object.assign(Player.prototype, {
             this.dashSpeed = 16 + (this.speed - (C.baseSpeed * 0.95)) * 2;
 
             // Full Evo Tank Bonus
-            if (hasFullEvo(this, 'tank')) {
-                this.maxHp += 15;
+            if (hasLegacyFullEvo(this, 'tank')) {
+                this.maxHp += 6;
                 this.dashSpeed += 8;
             }
         }
@@ -228,7 +228,7 @@ Object.assign(Player.prototype, {
             this.passiveShieldTimer++;
             let shieldLimit = this.tankShieldLimit();
             if (this.passiveShieldTimer >= shieldLimit) {
-                this.shield++;
+                this.shield = Math.max(this.shield, 1);
                 this.passiveShieldTimer = 0;
             }
 
@@ -241,7 +241,7 @@ Object.assign(Player.prototype, {
                 if (this.y < 0 || this.y > canvas.height - this.h) {
                     if (this.hasUpgrade('evo_tank_2') && this.shield > 0) {
                         let wallY = (this.y < 0) ? 0 : canvas.height - this.h;
-                        explosions.push(new Explosion(this.x + this.w / 2, wallY + this.h / 2, 80, 'rgba(255,0,0,', 2, this));
+                        explosions.push(new Explosion(this.x + this.w / 2, wallY + this.h / 2, 80, 'rgba(255,0,0,', this.damage * .5, this));
                         iceZones.push(new IceZone(this.x + this.w / 2, wallY + this.h / 2, 60, 300, this));
                     }
 
@@ -260,7 +260,7 @@ Object.assign(Player.prototype, {
                 if ((this.id === 1 && this.y >= this.dashStartY) || (this.id === 2 && this.y <= this.dashStartY)) {
                     this.y = this.dashStartY;
                     this.dashState = 0;
-                    this.tankDashCooldown = 120; // [CÂN BẰNG] hồi chiêu 2s (hòm đạn reset ngay)
+                    this.tankDashCooldown = (this.hasUpgrade('evo_tank_1') && this.hasUpgrade('evo_tank_2')) ? 300 : 120; // Cặp 1+2 húc mạnh nhưng nghỉ 5s; các cặp khác 2s.
                 }
                 return true;
             }
