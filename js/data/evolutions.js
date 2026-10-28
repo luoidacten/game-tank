@@ -533,3 +533,10 @@ addPilotEvos("healer",
     {"id": "evo_heal_4", "name": "Truyền Máu Khẩn", "cost": 160, "desc": "Hồi ngay 1 HP (CD 16s); Năng Lượng Sinh Mệnh ≥50% thì nạp đầy. +10 Nộ/0.5 HP hồi thực. SINH TỬ ĐẢO NGƯỢC: 4s hồi máu địch thành dame, dame địch nhận hồi bạn 50%.", "skill": {"name": "Truyền Máu Khẩn", "cooldown": 16, "ultimateName": "SINH TỬ ĐẢO NGƯỢC", "ultimateTicks": 240, "rageTime": 0.5, "rageDamage": 0}},
     {"1+3": {"desc": "Kim Đảo Mệnh trả Giáp Trắng trước khi trả HP."}, "2+4": {"desc": "Lượng hồi từ Ultimate tạo Tia Xung."}, "3+4": {"desc": "Kim trúng hoàn lại 0.5 HP; giữ thưởng chung +1 HP, +10% dame, 1 khiên."}, "1+2+3+4": {"desc": "Ultimate kéo dài 6s."}});
 // PILOT healer END
+
+// PILOT one_punch BEGIN
+addPilotEvos("one_punch",
+    {"id": "evo_punch_3", "name": "Chạy Bộ Mỗi Ngày", "cost": 110, "desc": "Di chuyển liên tục 3s tăng 5% Thú Vị; đổi lại giảm 2 Max HP."},
+    {"id": "evo_punch_4", "name": "Né Bình Thường", "cost": 150, "desc": "Bước ngang né 0.25s, +10% Thú Vị (CD 6s). +1 Nộ/1% Thú Vị tăng. ĐẤM NGHIÊM TÚC: CHẾT ĐI cần Thú Vị 100%, cảnh báo 0.8s rồi tia rộng 1/3 sân xuyên tường; kết liễu ≤50%, còn lại 3 dame.", "skill": {"name": "Né Bình Thường", "cooldown": 6, "ultimateName": "ĐẤM NGHIÊM TÚC: CHẾT ĐI", "ultimateTicks": 48, "rageTime": 0.5, "rageDamage": 0}},
+    {"1+3": {"desc": "Chạy bộ tăng 8% Thú Vị."}, "2+4": {"desc": "Bật ngang trước khi khóa cảnh báo Ultimate."}, "1+2+3+4": {"desc": "Điều kiện Ultimate giảm còn 80% Thú Vị."}});
+// PILOT one_punch END

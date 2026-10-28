@@ -635,7 +635,7 @@ const BODY_GUIDES = {
             { input: 'HOLD 1.25s', name: 'Đấm Nghiêm Túc', what: 'Thú Vị ≥65%: hitscan 1.8 xuyên tường (hồi 17s)' }
         ],
         passive: ['Bị đánh tích Thú Vị: tăng tốc, giảm st', '6s không bị đánh: Thú Vị hồi máu'],
-        evo: { e1: 'Nạp 2.0s, đấm bồi 4 luồng', e2: 'Khi tụ: ←/→ bật nhảy ngang', full: 'DEATH PUNCH: kết liễu ≤20% máu' },
+        evo: { e3: "Chạy Bộ Mỗi Ngày: Di chuyển liên tục 3s tăng 5% Thú Vị; giảm 2 Max HP.", e4: "Né Bình Thường: Bước ngang né 0.25s, +10% Thú Vị (CD 6s). +1 Nộ/1% Thú Vị tăng. ĐẤM NGHIÊM TÚC: CHẾT ĐI cần Thú Vị 100%, cảnh báo 0.8s rồi tia rộng 1/3 sân xuyên tường; kết liễu ≤50%, còn lại 3 dame.", e1: 'Nạp 2.0s, đấm bồi 4 luồng', e2: 'Khi tụ: ←/→ bật nhảy ngang', full: 'DEATH PUNCH: kết liễu ≤20% máu' },
         tips: ['Ăn vài đòn để có Thú Vị rồi Đấm Nghiêm Túc']
     },
     boomerang: {
