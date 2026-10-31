@@ -167,7 +167,7 @@ const NetSpec = {
         const w = this.watching;
         if (!w) { clearInterval(this._iv); this._iv = null; return; }
         const now = Date.now();
-        if (w.phase === 'connecting' && now - w.at > 12000) return this.end('❌ Không vào xem được trận (máy chủ trận không trả lời).');
+        if (w.phase === 'connecting' && now - w.at > 25000) return this.end('❌ Không vào xem được trận (máy chủ trận không trả lời).');
         if (w.phase === 'final' && now - w.finalAt > 5000) return this.end('');
         if (w.phase !== 'connecting' && !w.final && now - w.heard > 15000) return this.end('🔌 Mất tín hiệu trận đang xem.');
         this.showUi();

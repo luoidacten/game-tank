@@ -316,7 +316,7 @@ const TourneyNet = {
             if (om) om.showJoinError(msg); else alert(msg);
         };
         let done = false, p;
-        const t = setTimeout(() => fail('❌ Không kết nối được tới giải "' + code + '".'), 10000);
+        const t = setTimeout(() => fail('❌ Không kết nối được tới giải "' + code + '".'), 25000); // khác mạng qua TURN cần thời gian thương lượng
         try { p = makeNetPeer(); } catch (e) { return fail('❌ Lỗi mạng.'); }
         this.peer = p; this.code = code; this.pw = String(pw || '').trim(); this._left = false;
         p.on('open', () => {
@@ -414,7 +414,7 @@ const TourneyNet = {
         if (!c) return;
         c.tries++;
         if (c.create) om.createRoom({ code: c.code, pw: c.pw, name: '🏆 ' + (c.title || 'Giải đấu').slice(0, 20), winScore: c.winScore });
-        else { c.next = Date.now() + 9000; setTimeout(() => { if (this.cur === c && c.phase === 'connecting') om.joinRoom(c.code, c.pw); }, c.tries === 1 ? 1200 : 0); }
+        else { c.next = Date.now() + 22000; setTimeout(() => { if (this.cur === c && c.phase === 'connecting') om.joinRoom(c.code, c.pw); }, c.tries === 1 ? 1200 : 0); }
     },
     tick() {
         const c = this.cur, om = typeof onlineManager !== 'undefined' ? onlineManager : null;

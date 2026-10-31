@@ -8,7 +8,7 @@
 // - LocalPeer: giả lập API PeerJS bằng BroadcastChannel (chơi/thử nghiệm nhiều tab cùng máy, hoặc khi
 //   không có thư viện PeerJS). Bật bắt buộc bằng window.CY_NET = 'local' hoặc ?net=local.
 
-const LOBBY = { prefix: 'cytank-v1-lobby-', slots: 5, ttl: 20000, beat: 5000, connectMs: 4000, reqMs: 3000 };
+const LOBBY = { prefix: 'cytank-v1-lobby-', slots: 5, ttl: 20000, beat: 5000, connectMs: 10000, reqMs: 3000 };
 
 // ---------- Sổ phòng thuần (không I/O) -> kiểm thử được độc lập ----------
 class RoomRegistry {
