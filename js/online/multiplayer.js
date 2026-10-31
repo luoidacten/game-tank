@@ -43,6 +43,19 @@ async function setCustomTurn(text) {
     PEER_CONFIG.config.iceServers = list.concat(DEFAULT_ICE);
     return list.length;
 }
+// Kiểm tra máy này lấy được đường chuyển tiếp TURN không (chỉ dùng relay) -> số đường relay tìm được
+function testTurnRelay(ms = 10000) {
+    return new Promise((res) => {
+        let n = 0, pc;
+        const done = () => { try { pc.close(); } catch (e) {} res(n); };
+        try { pc = new RTCPeerConnection({ iceServers: PEER_CONFIG.config.iceServers, iceTransportPolicy: 'relay' }); }
+        catch (e) { res(-1); return; }
+        pc.createDataChannel('t');
+        pc.onicecandidate = (e) => { if (!e.candidate) done(); else if (/ typ relay/.test(e.candidate.candidate)) n++; };
+        pc.createOffer().then(o => pc.setLocalDescription(o)).catch(() => done());
+        setTimeout(done, ms);
+    });
+}
 
 class OnlineMultiplayerManager {
     constructor() {
@@ -1465,6 +1478,13 @@ class OnlineMultiplayerManager {
             if (turnSt) turnSt.textContent = '⏳ Đang kiểm tra...';
             try { turnShow(await setCustomTurn(turnIn ? turnIn.value : '')); if (turnIn) turnIn.value = ''; }
             catch (e) { if (turnSt) turnSt.textContent = '❌ Không đọc được: ' + (e.message || e); }
+        });
+        const turnTest = document.getElementById('onlineTurnTest');
+        if (turnTest) turnTest.addEventListener('click', async () => {
+            if (turnSt) turnSt.textContent = '⏳ Đang thử TURN (tối đa 10s)...';
+            const n = await testTurnRelay();
+            if (turnSt) turnSt.textContent = n > 0 ? `✅ TURN hoạt động (${n} đường) — khác mạng sẽ nối được`
+                : '❌ TURN KHÔNG hoạt động trên máy này — chơi khác mạng sẽ hỏng. Hãy dán TURN riêng (metered.ca).';
         });
         const pub = document.getElementById('visPublicBtn'), pri = document.getElementById('visPrivateBtn');
         const pw = document.getElementById('createRoomPassword');
