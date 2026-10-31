@@ -3212,3 +3212,9 @@ body.online-active .ns-hud-btn { display: flex !important; }
 .btn-group:has(.evo-skill:not([hidden])) { gap: 8px; padding-left: 10px; padding-right: 10px; }
 .btn-group:has(.evo-skill:not([hidden])) > .btn { flex: 0 0 auto; width: clamp(44px, 14vw, 64px) !important; min-width: 0; }
 .btn-group:has(.evo-skill:not([hidden])) > .btn-shoot { order: 4; margin-left: 0 !important; width: clamp(56px, 18vw, 72px) !important; }
+
+.online-turn-row { margin: 6px 0 10px; font-size: 12px; color: #9ca3af; }
+.online-turn-row summary { cursor: pointer; color: #67e8f9; }
+.online-turn-row .turn-help { margin: 6px 0; line-height: 1.4; }
+.online-turn-row .online-input { width: 100%; box-sizing: border-box; margin-bottom: 6px; }
+.online-turn-row .turn-status { margin-left: 8px; }

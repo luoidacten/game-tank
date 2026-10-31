@@ -7,17 +7,42 @@
 // ============================================================================
 // ONLINE MULTIPLAYER MANAGER (WEBRTC PEERJS P2P & .IO MATCHMAKING ARCHITECTURE)
 // ============================================================================
+// STUN chỉ đủ khi 2 máy cùng mạng / NAT dễ. Khác mạng (4G, wifi công ty, NAT đối xứng)
+// cần máy chủ TURN chuyển tiếp. Mặc định dùng TURN miễn phí công khai; có thể cài TURN riêng
+// (vd tài khoản miễn phí metered.ca) trong ô "🛰️ TURN" ở bảng Online -> lưu localStorage 'cy_turn'.
+const DEFAULT_ICE = [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:global.stun.twilio.com:3478' },
+    { urls: 'stun:stun.relay.metered.ca:80' },
+    { urls: ['turn:openrelay.metered.ca:80', 'turn:openrelay.metered.ca:443', 'turn:openrelay.metered.ca:443?transport=tcp', 'turns:openrelay.metered.ca:443?transport=tcp'],
+      username: 'openrelayproject', credential: 'openrelayproject' }
+];
+function loadCustomIce() {
+    try { const a = JSON.parse(localStorage.getItem('cy_turn') || 'null'); return Array.isArray(a) ? a : []; } catch (e) { return []; }
+}
 const PEER_CONFIG = {
     debug: 1,
-    config: {
-        iceServers: [
-            { urls: 'stun:stun.l.google.com:19302' },
-            { urls: 'stun:global.stun.twilio.com:3478' },
-            { urls: 'stun:stun1.l.google.com:19302' },
-            { urls: 'stun:stun2.l.google.com:19302' }
-        ]
-    }
+    config: { iceServers: loadCustomIce().concat(DEFAULT_ICE) }
 };
+// Cài TURN riêng: dán link API của metered.ca (…/api/v1/turn/credentials?apiKey=…) hoặc JSON iceServers
+async function setCustomTurn(text) {
+    text = (text || '').trim();
+    let list = [];
+    if (text) {
+        if (/^https?:\/\//i.test(text)) {
+            const r = await fetch(text);
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            list = await r.json();
+        } else list = JSON.parse(text);
+        if (!Array.isArray(list)) list = list.iceServers || [list];
+        list = list.filter(x => x && x.urls);
+        if (!list.length) throw new Error('Không có máy chủ hợp lệ');
+    }
+    try { if (list.length) localStorage.setItem('cy_turn', JSON.stringify(list)); else localStorage.removeItem('cy_turn'); } catch (e) {}
+    PEER_CONFIG.config.iceServers = list.concat(DEFAULT_ICE);
+    return list.length;
+}
 
 class OnlineMultiplayerManager {
     constructor() {
@@ -453,6 +478,7 @@ class OnlineMultiplayerManager {
     }
 
     joinRoom(rawCode, pw) {
+        this.joinSignalOk = false;
         this.cleanup();
         this.joinPw = String(pw || '').trim();
         let codeInput = (rawCode || '').trim().toUpperCase();
@@ -489,10 +515,12 @@ class OnlineMultiplayerManager {
         // 2. Set timeout of 6 seconds
         this.joinTimeoutTimer = setTimeout(() => {
             if (!this.isJoinedSuccess) {
-                this.showJoinError(`❌ Không tìm thấy phòng "${cleanCode}"! Phòng không tồn tại hoặc Chủ phòng chưa mở.`);
+                this.showJoinError(this.joinSignalOk
+                    ? `❌ Đã thấy phòng "${cleanCode}" nhưng không nối được (khác mạng / NAT chặn). Thử lại, đổi wifi ↔ 4G, hoặc cài TURN riêng (ô 🛰️ TURN).`
+                    : `❌ Không tìm thấy phòng "${cleanCode}"! Phòng không tồn tại hoặc Chủ phòng chưa mở.`);
                 this.cleanup(true);
             }
-        }, 6000);
+        }, 20000); // khác mạng qua TURN cần vài giây thương lượng ICE
 
         // 3. Connect via PeerJS WebRTC (for cross-device online play)
         try {
@@ -505,6 +533,7 @@ class OnlineMultiplayerManager {
                 try {
                     let isWebRTCOpen = false;
                     this.hostConn = this.peer.connect(targetHostPeerId, { reliable: true });
+                    this.joinSignalOk = true;
 
                     this.hostConn.on('open', () => {
                         isWebRTCOpen = true;
@@ -1428,6 +1457,15 @@ class OnlineMultiplayerManager {
             nickEl.value = this.nick;
             nickEl.addEventListener('change', () => { this.saveNick(nickEl.value); nickEl.value = this.nick; });
         }
+        const turnIn = document.getElementById('onlineTurnInput'), turnBtn = document.getElementById('onlineTurnSave');
+        const turnSt = document.getElementById('onlineTurnStatus');
+        const turnShow = (n) => { if (turnSt) turnSt.textContent = n ? `✅ Đang dùng ${n} TURN riêng` : 'Đang dùng TURN mặc định'; };
+        turnShow(loadCustomIce().length);
+        if (turnBtn) turnBtn.addEventListener('click', async () => {
+            if (turnSt) turnSt.textContent = '⏳ Đang kiểm tra...';
+            try { turnShow(await setCustomTurn(turnIn ? turnIn.value : '')); if (turnIn) turnIn.value = ''; }
+            catch (e) { if (turnSt) turnSt.textContent = '❌ Không đọc được: ' + (e.message || e); }
+        });
         const pub = document.getElementById('visPublicBtn'), pri = document.getElementById('visPrivateBtn');
         const pw = document.getElementById('createRoomPassword');
         const setVis = (v) => {

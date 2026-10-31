@@ -286,6 +286,13 @@
                         <label for="onlineNickInput">👤 TÊN:</label>
                         <input type="text" id="onlineNickInput" class="online-input" maxlength="16" placeholder="Tên hiển thị">
                     </div>
+                    <details class="online-turn-row">
+                        <summary>🛰️ TURN (chơi khác mạng không vào được? bấm đây)</summary>
+                        <div class="turn-help">Game đã có TURN miễn phí công khai nhưng hay quá tải. Muốn ổn định: đăng ký miễn phí ở <b>metered.ca</b> → TURN Server → copy link <i>…/api/v1/turn/credentials?apiKey=…</i> và dán vào đây. <b>Cả 2 người</b> đều nên dán (hoặc ít nhất chủ phòng).</div>
+                        <input type="text" id="onlineTurnInput" class="online-input" placeholder="Link API metered.ca hoặc JSON iceServers (để trống = mặc định)">
+                        <button id="onlineTurnSave" class="online-tab-btn">💾 LƯU TURN</button>
+                        <span id="onlineTurnStatus" class="turn-status"></span>
+                    </details>
                     <!-- MODE TABS: CREATE / JOIN / QUICK MATCH -->
                     <div class="online-tabs">
                         <button id="tabCreateRoom" class="online-tab-btn active">🏠 TẠO PHÒNG (HOST)</button>
