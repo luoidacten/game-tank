@@ -37,6 +37,7 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
 
 // Máy chủ MQTT qua WebSocket (thử lần lượt; mọi máy cùng thứ tự nên thường gặp nhau ở máy chủ đầu)
 const RELAY_BROKERS = [
+    'wss://demo.tbmq.io:443/mqtt|demo',   // cổng 443: đi qua cả mạng chặn cổng lạ (trường học, công ty)
     'wss://broker.emqx.io:8084/mqtt',
     'wss://broker.hivemq.com:8884/mqtt',
     'wss://test.mosquitto.org:8081/mqtt'
@@ -49,7 +50,7 @@ function relayBrokers() {
 
 // ---------- MQTT 3.1.1 tối giản qua WebSocket (QoS 0) ----------
 class MiniMqtt {
-    constructor(url) { this.url = url; this.subs = {}; this.pid = 1; this.buf = new Uint8Array(0); this.onMessage = null; this.onClose = null; this.closed = false; }
+    constructor(url, user) { this.url = url; this.user = user || ''; this.subs = {}; this.pid = 1; this.buf = new Uint8Array(0); this.onMessage = null; this.onClose = null; this.closed = false; }
     static str(s) { const b = new TextEncoder().encode(s); return [b.length >> 8, b.length & 255, ...b]; }
     static pkt(head, body) {
         const len = []; let n = body.length;
@@ -66,7 +67,8 @@ class MiniMqtt {
             try { this.ws = new WebSocket(this.url, ['mqtt']); } catch (e) { fin(false, e); return; }
             this.ws.binaryType = 'arraybuffer';
             this.ws.onopen = () => {
-                const body = [...MiniMqtt.str('MQTT'), 4, 0x02, 0, 60, ...MiniMqtt.str(clientId)];
+                const body = [...MiniMqtt.str('MQTT'), 4, this.user ? 0x82 : 0x02, 0, 60, ...MiniMqtt.str(clientId)];
+                if (this.user) body.push(...MiniMqtt.str(this.user));
                 this._send(MiniMqtt.pkt(0x10, body));
             };
             this._onConnack = (rc) => fin(rc === 0, new Error('connack ' + rc));
@@ -121,7 +123,8 @@ class MiniMqtt {
 async function relayConnect(clientId) {
     let last;
     for (const url of relayBrokers()) {
-        try { return await new MiniMqtt(url).connect(clientId); } catch (e) { last = e; }
+        const [u, user] = String(url).split('|'); // 'wss://...|tên đăng nhập' cho máy chủ cần username
+        try { return await new MiniMqtt(u, user).connect(clientId); } catch (e) { last = e; }
     }
     throw last || new Error('no broker');
 }
