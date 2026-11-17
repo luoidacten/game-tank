@@ -3213,8 +3213,9 @@ body.online-active .ns-hud-btn { display: flex !important; }
 .btn-group:has(.evo-skill:not([hidden])) > .btn { flex: 0 0 auto; width: clamp(44px, 14vw, 64px) !important; min-width: 0; }
 .btn-group:has(.evo-skill:not([hidden])) > .btn-shoot { order: 4; margin-left: 0 !important; width: clamp(56px, 18vw, 72px) !important; }
 
-.online-turn-row { margin: 6px 0 10px; font-size: 12px; color: #9ca3af; }
-.online-turn-row summary { cursor: pointer; color: #67e8f9; }
-.online-turn-row .turn-help { margin: 6px 0; line-height: 1.4; }
-.online-turn-row .online-input { width: 100%; box-sizing: border-box; margin-bottom: 6px; }
-.online-turn-row .turn-status { margin-left: 8px; }
+
+.netmode-row { margin: 6px 0 8px; }
+.netmode-btns { display: flex; gap: 6px; }
+.netmode-btn { flex: 1; padding: 8px 4px; border-radius: 8px; border: 2px solid #334155; background: #0f172a; color: #94a3b8; font-weight: 800; font-size: 12px; cursor: pointer; }
+.netmode-btn.active { border-color: #22d3ee; color: #e0f2fe; background: #0e3a4a; box-shadow: 0 0 10px rgba(34, 211, 238, .35); }
+.netmode-hint { font-size: 11px; color: #94a3b8; margin-top: 4px; line-height: 1.35; }

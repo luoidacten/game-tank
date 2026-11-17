@@ -62,18 +62,26 @@ class LocalPeer {
         this.h = {}; this.conns = {}; this.open = false; this.destroyed = false; this._lost = false;
         this.nonce = Math.random();
         LocalPeerAll.add(this);
+        this._claimMs = 160; this._connMs = 900;
+        this._initTransport();
+    }
+    // Kênh truyền: BroadcastChannel (cùng máy). RelayPeer (relay.js) thay bằng máy chủ MQTT công cộng.
+    _initTransport() {
         try {
             this.bc = new BroadcastChannel(LP_CHANNEL);
             this.bc.onmessage = (e) => this._on(e.data);
         } catch (e) { this.bc = null; }
         setTimeout(() => {
             if (!this.bc) { this._fail('network', 'BroadcastChannel unavailable'); return; }
-            this._post({ t: 'claim', id: this.id, n: this.nonce });
-            this._claimT = setTimeout(() => {
-                if (this.destroyed || this._lost) return;
-                this.open = true; this._emit('open', this.id);
-            }, 160);
+            this._claim();
         }, 0);
+    }
+    _claim() {
+        this._post({ t: 'claim', id: this.id, n: this.nonce });
+        this._claimT = setTimeout(() => {
+            if (this.destroyed || this._lost) return;
+            this.open = true; this._emit('open', this.id);
+        }, this._claimMs);
     }
     on(ev, fn) { (this.h[ev] = this.h[ev] || []).push(fn); return this; }
     _emit(ev, ...a) { (this.h[ev] || []).forEach(f => { try { f(...a); } catch (e) { console.warn('LocalPeer', ev, e); } }); }
@@ -126,16 +134,17 @@ class LocalPeer {
             if (c.open || c.closed || this.destroyed) return;
             delete this.conns[cid]; c.closed = true;
             this._emit('error', { type: 'peer-unavailable', message: 'Could not connect to peer ' + id });
-        }, 900);
+        }, this._connMs);
         return c;
     }
+    _closeTransport() { try { this.bc && this.bc.close(); } catch (e) {} }
     destroy() {
         if (this.destroyed) return;
         Object.values(this.conns).forEach(c => { try { c.close(); } catch (e) {} });
         this.destroyed = true; this.open = false;
         clearTimeout(this._claimT);
         LocalPeerAll.delete(this);
-        try { this.bc && this.bc.close(); } catch (e) {}
+        this._closeTransport();
         this._emit('close');
     }
 }
@@ -151,6 +160,8 @@ function netUsesLocalPeer() {
 function makeNetPeer(id) {
     if (netUsesLocalPeer()) return new LocalPeer(id);
     const cfg = Object.assign({}, typeof PEER_CONFIG !== 'undefined' ? PEER_CONFIG : {}, window.CY_PEER_SERVER || {});
+    // Kiểu mạng (relay.js): ONLINE = chuyển tiếp WebSocket (khác mạng được), LAN = P2P PeerJS
+    if (typeof netMode === 'function' && netMode() === 'online') return new RelayPeer(id);
     return id ? new Peer(id, cfg) : new Peer(cfg);
 }
 
@@ -180,7 +191,7 @@ class LobbyDirectory {
         this._peerP = new Promise((res) => {
             let p;
             try { p = makeNetPeer(); } catch (e) { this._peerP = null; res(null); return; }
-            const t = setTimeout(() => { this._peerP = null; try { p.destroy(); } catch (e) {} res(null); }, 6000);
+            const t = setTimeout(() => { this._peerP = null; try { p.destroy(); } catch (e) {} res(null); }, 15000); // ONLINE: nối máy chủ chuyển tiếp mất vài giây
             p.on('open', () => { clearTimeout(t); this.peer = p; this._peerP = null; res(p); });
             p.on('error', (err) => {
                 if (err && err.type === 'peer-unavailable') { // lỗi của peer, không phải của kết nối -> khớp theo ID trong thông báo

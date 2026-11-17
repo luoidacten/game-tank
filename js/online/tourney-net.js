@@ -43,7 +43,7 @@ const TourneyNet = {
         err('⏳ Đang mở giải online...');
         let p;
         try { p = makeNetPeer(code); } catch (e) { return err('❌ Không mở được kết nối mạng.'); }
-        const t = setTimeout(() => { try { p.destroy(); } catch (e) {} err('❌ Máy chủ PeerJS không trả lời, thử lại.'); }, 8000);
+        const t = setTimeout(() => { try { p.destroy(); } catch (e) {} err('❌ Máy chủ mạng không trả lời, thử lại.'); }, 18000);
         p.on('open', () => {
             clearTimeout(t);
             this.role = 'host'; this.code = code; this.pw = String(d.pw || '').trim(); this.peer = p; this.me = nick;
@@ -316,7 +316,7 @@ const TourneyNet = {
             if (om) om.showJoinError(msg); else alert(msg);
         };
         let done = false, p;
-        const t = setTimeout(() => fail('❌ Không kết nối được tới giải "' + code + '".'), 25000); // khác mạng qua TURN cần thời gian thương lượng
+        const t = setTimeout(() => fail('❌ Không kết nối được tới giải "' + code + '".'), 25000); // ONLINE (chuyển tiếp) cần vài giây nối máy chủ
         try { p = makeNetPeer(); } catch (e) { return fail('❌ Lỗi mạng.'); }
         this.peer = p; this.code = code; this.pw = String(pw || '').trim(); this._left = false;
         p.on('open', () => {

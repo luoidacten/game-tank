@@ -286,14 +286,7 @@
                         <label for="onlineNickInput">👤 TÊN:</label>
                         <input type="text" id="onlineNickInput" class="online-input" maxlength="16" placeholder="Tên hiển thị">
                     </div>
-                    <details class="online-turn-row">
-                        <summary>🛰️ TURN (chơi khác mạng không vào được? bấm đây)</summary>
-                        <div class="turn-help">Game đã có TURN miễn phí công khai nhưng hay quá tải. Muốn ổn định: đăng ký miễn phí ở <b>metered.ca</b> → TURN Server → copy link <i>…/api/v1/turn/credentials?apiKey=…</i> và dán vào đây. <b>Cả 2 người</b> đều nên dán (hoặc ít nhất chủ phòng).</div>
-                        <input type="text" id="onlineTurnInput" class="online-input" placeholder="Link API metered.ca hoặc JSON iceServers (để trống = mặc định)">
-                        <button id="onlineTurnSave" class="online-tab-btn">💾 LƯU TURN</button>
-                        <button id="onlineTurnTest" class="online-tab-btn">🔍 KIỂM TRA TURN</button>
-                        <span id="onlineTurnStatus" class="turn-status"></span>
-                    </details>
+                    <div class="netmode-row"></div>
                     <!-- MODE TABS: CREATE / JOIN / QUICK MATCH -->
                     <div class="online-tabs">
                         <button id="tabCreateRoom" class="online-tab-btn active">🏠 TẠO PHÒNG (HOST)</button>
@@ -303,7 +296,7 @@
 
                     <!-- VIEW: CREATE ROOM -->
                     <div id="createRoomView" class="online-subview">
-                        <p class="online-desc">Tạo phòng P2P WebRTC. Phòng <b>Công khai</b> hiện trong danh sách tìm phòng; phòng <b>Riêng tư</b> chỉ vào được bằng mã + mật khẩu. Máy mạnh hơn sẽ tự làm máy chủ.</p>
+                        <p class="online-desc">Tạo phòng (kiểu kết nối chọn ở trên). Phòng <b>Công khai</b> hiện trong danh sách tìm phòng; phòng <b>Riêng tư</b> chỉ vào được bằng mã + mật khẩu. Máy mạnh hơn sẽ tự làm máy chủ.</p>
                         <input type="text" id="createRoomName" class="online-input" maxlength="24" placeholder="Tên phòng (tuỳ chọn)">
                         <div class="room-vis-toggle">
                             <button id="visPublicBtn" class="room-vis-btn active" type="button">🌐 CÔNG KHAI</button>
@@ -896,6 +889,7 @@
     <script src="js/game/tourney-bots.js" charset="utf-8"></script>
     <script src="js/online/netstate.js" charset="utf-8"></script>
     <script src="js/online/lobby.js" charset="utf-8"></script>
+    <script src="js/online/relay.js" charset="utf-8"></script>
     <script src="js/online/election.js" charset="utf-8"></script>
     <script src="js/online/multiplayer.js" charset="utf-8"></script>
     <script src="js/online/social.js" charset="utf-8"></script>

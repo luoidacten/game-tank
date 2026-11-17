@@ -246,6 +246,8 @@ const TOURNEY = {
                 <label class="tf-lbl">TÊN GIẢI</label>
                 <input class="tf-in tf-wide" data-k="title" maxlength="40" value="${this.esc(d.title)}">
                 ${d.net ? `
+                <label class="tf-lbl">KIỂU KẾT NỐI (mọi người phải chọn giống nhau)</label>
+                <div class="netmode-row"></div>
                 <label class="tf-lbl">TÊN CỦA BẠN (CHỦ GIẢI)</label>
                 <input class="tf-in tf-wide" data-k="nick" maxlength="16" value="${this.esc(typeof onlineManager !== 'undefined' ? onlineManager.nick : '')}">
                 <label class="tf-lbl">MẬT KHẨU (TUỲ CHỌN)</label>
@@ -271,6 +273,7 @@ const TOURNEY = {
                 <button class="glow-btn btn-dark tf-btn" data-act="menu">← MENU CHÍNH</button>
                 <p class="tf-note">${d.net ? 'Giải hiện trong danh sách phòng online (🏆). Người chơi vào từ máy của họ; mỗi trận 2 máy tự nối với nhau, đấu xong cả 2 báo kết quả cho chủ giải.' : 'Mỗi trận chơi trên máy này (2 người cùng máy). Người vs 🤖 Bot: bạn ở dưới, bot ở trên. Bot vs Bot: xem hoặc mô phỏng nhanh.'}</p>
             </div>`);
+        if (typeof initNetModeUI === 'function') initNetModeUI();
     },
     // Ô chỉnh bot: cấp AI 1-5 + body (ngẫu nhiên / cố định)
     botCfgHtml(b, i) {

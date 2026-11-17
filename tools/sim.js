@@ -88,7 +88,7 @@ const RUN = (cfg) => {
 };
 
 (async () => {
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+  const browser = await chromium.launch();
   const pages = [];
   for (let w = 0; w < WORKERS; w++) {
     const pg = await browser.newPage({ viewport: { width: 420, height: 860 } });
