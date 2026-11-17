@@ -39,3 +39,7 @@
 - Phi Công thắng ~68-72% trong mô phỏng bot (hơi mạnh) — cần chơi thử, có thể giảm sát thương tự ngắm của Phi Ảnh / tần suất ném bom.
 - Online: đã sửa xe P2 bên khách bị giật/nhảy (dự đoán đầu vào), mốc thời gian, thanh máu đỏ, vòng HUD lệch khi rung màn hình — cần chơi thử thật 2 máy. Xe P1 bên khách còn hơi bước nhảy (~30 lần/s).
 ## 4. Y Cầu Cân bằng/chỉnh sửa
+
+## Thí điểm Evo 3/4 (issue #2)
+
+Đã triển khai đúng 10 body trong comment cập nhật. Xem [báo cáo, số liệu và giới hạn kiểm chứng](EVO_PILOT_RESULTS.md). API body thí điểm: `js/game/evo-body-kit.js`; module riêng: `js/characters/<body>/evo.js`. Chơi thử thêm các matchup hồi máu/phản đòn và mạng WebRTC giữa hai máy.

@@ -14,8 +14,8 @@ const EVOLUTIONS = {
         { id: 'evo_money_2', name: 'Sức Mạnh Đồng Tiền', desc: 'Mọi nâng cấp giảm 25%. Mỗi 100$ tiêu (tối đa 2500$, tính từ lúc mua) nhận 1 mốc thưởng vĩnh viễn: HP, Dame, Đạn, Tốc, Khiên. FULL EVO: mọi mặt hàng giảm 50%, thêm xe tiền trên sân, mỗi 5s phóng 3 xe tấn công LẦN LƯỢT (cách nhau 1s, mỗi xe 1 cột ngẫu nhiên, đều cảnh báo 2s, mạnh hơn).', cost: 480, type: 'evo' }
     ],
     tank: [
-        { id: 'evo_tank_1', name: 'Không Thể Cản Phá', desc: 'Lao húc x1.5 dame, không bị phản chấn khi tông tường/vật thể, khi lao chỉ nhận 20% sát thương', cost: 170, type: 'evo' },
-        { id: 'evo_tank_2', name: 'Tàn Phá!!!', desc: 'Húc nổ lan + băng (khi còn khiên) + Hồi khiên nội tại nhanh hơn (6s -> 4s, Full Evo 2s, +15 HP)', cost: 280, type: 'evo' }
+        { id: 'evo_tank_1', name: 'Không Thể Cản Phá', desc: 'Lao húc x1.5 dame, không bị phản chấn khi tông tường/vật thể, khi lao chỉ nhận 40% sát thương', cost: 170, type: 'evo' },
+        { id: 'evo_tank_2', name: 'Tàn Phá!!!', desc: 'Húc nổ 0.5×dame + băng khi còn khiên. Hồi khiên 6s -> 5s, tối đa 1 khiên nội tại. Full Evo 1+2: hồi khiên 4s, +6 HP trước hệ số cân bằng. Cặp 1+2 hồi húc 5s.', cost: 280, type: 'evo' }
     ],
     ice: [
         { id: 'evo_ice_1', name: 'Bão Tuyết', desc: 'Mỗi 3 lần kích hoạt -> Tạo vùng Băng Cực Đại', cost: 230, type: 'evo' },
@@ -463,5 +463,87 @@ function evoShopAvailable(p, e) { return !evoPurchaseLock(p, e); }
 function fullEvoDescription(p, e) {
     if (!e.fullEvoGate) return e.desc;
     const key = fullEvoCombo(p), combo = (FULL_EVO_COMBOS[p.weapon] || {})[key];
-    return `Tổ hợp ${key || '?'}: ${combo ? combo.desc : (key === '1+2' ? 'Sức mạnh Full Evo nguyên bản.' : '+1 Max HP, +10% sát thương và 1 khiên đầu hiệp.')}`;
+    const budget = typeof EvoBodyKit !== 'undefined' && EvoBodyKit.bodies[p.weapon] && EvoBodyKit.bodies[p.weapon].balance && (EvoBodyKit.bodies[p.weapon].balance[key] || (key === '1+2+3+4' ? EvoBodyKit.bodies[p.weapon].balance['1+2'] : null));
+    const tuning = budget ? ' Lối ghép: ' + [budget.hp && `HP ×${budget.hp}`, budget.damage && `dame ×${budget.damage}`, budget.taken && `sát thương nhận ×${budget.taken}`].filter(Boolean).join(', ') + '.' : '';
+    return `Tổ hợp ${key || '?'}: ${combo ? combo.desc : (key === '1+2' ? 'Sức mạnh Full Evo nguyên bản.' : '+1 Max HP, +10% sát thương và 1 khiên đầu hiệp.')}${tuning}`;
 }
+
+// API đăng ký Evo 3/4 và hiệu ứng Full Evo theo cặp mua đầu.
+function addPilotEvos(body, evo3, evo4, combos) {
+    if (!FEATURE_EVO34) return;
+    const list = EVOLUTIONS[body], index = list.findIndex(e => e.fullEvoGate);
+    list.splice(index < 0 ? list.length : index, 0, { ...evo3, type: 'evo', evoSlot: 3 }, { ...evo4, type: 'evo', evoSlot: 4 });
+    FULL_EVO_COMBOS[body] = { '1+2': { legacy: true, desc: 'Full Evo nguyên bản.' }, ...combos };
+}
+function hasLegacyFullEvo(p, body = p && p.weapon) {
+    return hasFullEvo(p, body) && ['1+2', '1+2+3+4'].includes(fullEvoCombo(p, body));
+}
+// PILOT tank BEGIN
+addPilotEvos('tank',
+    { id: 'evo_tank_3', name: 'Cần Lái Thủy Lực', cost: 130, desc: 'Giữ Bắn để húc tối đa 1.5s, bẻ lái bằng trái/phải; nhả để trở về làn. Đổi lại −3.5 Max HP.' },
+    { id: 'evo_tank_4', name: 'Xả Khiên Dự Phòng', cost: 150, desc: 'Skill: +1 khiên và đẩy đạn quanh xe (CD 12s). Nộ từ húc trúng/nhận dame khi lao. Tuyệt Kỹ XE ỦI: lao xuyên sân, ép địch; kết liễu khi địch ≤20%.', skill: { name: 'Xả Khiên Dự Phòng', cooldown: 12, ultimateName: 'XE ỦI', ultimateTicks: 180, rageTime: 0.5, rageDamage: 0 } },
+    { '1+3': { desc: 'Thủy Lực không mất tốc khi bẻ lái.' }, '2+4': { desc: 'Khiên Skill nổ kèm vùng băng.' }, '1+2+3+4': { desc: 'Xe Ủi để lại hai vệt băng.' } });
+// PILOT tank END
+
+// PILOT ice BEGIN
+addPilotEvos("ice",
+    {"id": "evo_ice_3", "name": "Hơi Thở Băng Giá", "cost": 100, "desc": "Giữ 1s, nhả bắn mũi băng xuyên và tạo làn băng trượt 4s."},
+    {"id": "evo_ice_4", "name": "Đông Cứng Tức Thì", "cost": 140, "desc": "Đóng băng địch đang chậm 0.8s (CD 12s). Nộ: +10/lần chậm mới, +20/Bão Tuyết. Tuyệt Kỹ ĐỘ KHÔNG TUYỆT ĐỐI: băng 2s rồi vỡ (tối đa 3 dame); kết liễu địch đóng băng ≤20%.", "skill": {"name": "Đông Cứng Tức Thì", "cooldown": 12, "ultimateName": "ĐỘ KHÔNG TUYỆT ĐỐI", "ultimateTicks": 120, "rageTime": 0.5, "rageDamage": 0}},
+    {"1+3": {"desc": "Bão Tuyết nở dọc làn băng."}, "2+4": {"desc": "Hàn Băng tăng 50% dame lên địch đóng băng."}, "1+2+3+4": {"desc": "Ultimate đóng băng mọi đạn địch đang bay."}});
+// PILOT ice END
+
+// PILOT paradox BEGIN
+addPilotEvos("paradox",
+    {"id": "evo_paradox_3", "name": "Dấu Nhân Quả", "cost": 160, "desc": "Dư Âm trúng khắc tối đa 4 Dấu; lần tua/về neo kế tiếp nổ 0.3 dame mỗi Dấu."},
+    {"id": "evo_paradox_4", "name": "Quy Neo", "cost": 200, "desc": "Về Neo ngay, chưa có thì đặt Neo (CD 12s). +10 Nộ/lần tua, +4/Dư Âm trúng. VÒNG LẶP VÔ TẬN kéo địch về vị trí 5s trước, tái hiện loạt đạn 5s qua với trần ngân sách dame.", "skill": {"name": "Quy Neo", "cooldown": 12, "ultimateName": "VÒNG LẶP VÔ TẬN", "ultimateTicks": 30, "rageTime": 0.5, "rageDamage": 0}},
+    {"1+3": {"desc": "Dấu Nhân Quả cũng tích Ấn Thời Gian."}, "2+4": {"desc": "Vòng Lặp tái hiện thêm bóng 3s."}, "1+2+3+4": {"desc": "Mọi Vết Nứt khai hỏa theo Vòng Lặp."}});
+// PILOT paradox END
+
+// PILOT prism BEGIN
+addPilotEvos("prism",
+    {"id": "evo_prism_3", "name": "Khúc Xạ Kép", "cost": 120, "desc": "Tia Khúc Xạ nảy thêm một lần; lần nảy đầu tách đôi (mỗi tia 50% dame)."},
+    {"id": "evo_prism_4", "name": "Lăng Kính Tức Thì", "cost": 170, "desc": "Bật Cửa Sổ Vàng 0.35s, không tiêu CD Mở Kính (CD Skill 10s). +10 Nộ/đòn phản, +20/phản vàng. VẠN KÍNH QUY QUANG: 4s phản x1.5, cuối chiêu hội tụ tia cảnh báo 0.4s; kết liễu ≤25%.", "skill": {"name": "Lăng Kính Tức Thì", "cooldown": 10, "ultimateName": "VẠN KÍNH QUY QUANG", "ultimateTicks": 264, "rageTime": 0.5, "rageDamage": 0}},
+    {"1+3": {"desc": "Hai tia tách đôi gây 70% dame mỗi tia."}, "2+4": {"desc": "Kết thúc Ultimate bắn thêm 5 mảnh kính."}, "1+2+3+4": {"desc": "Lăng Kính Tức Thì kéo dài 0.5s."}});
+// PILOT prism END
+
+// PILOT engineer BEGIN
+addPilotEvos("engineer",
+    {"id": "evo_eng_3", "name": "Ụ Gắn Nóc", "cost": 150, "desc": "Nhấp đúp để gắn/thả ụ thông minh gần nhất lên nóc; bắn khi di chuyển ở 60% tốc độ; xe mang ụ giảm 1.5 Max HP."},
+    {"id": "evo_eng_4", "name": "Đồng Loạt Khai Hỏa", "cost": 160, "desc": "Mọi ụ bắn ngay loạt x2 dame và hồi 30% HP (CD 10s). Nộ: +6/Phụ Tùng, +1/s/ụ. PHÁO ĐÀI cần ≥3 ụ: hợp thể 6s bắn tia cảnh báo mỗi 0.6s rồi tách lại đầy máu.", "skill": {"name": "Đồng Loạt Khai Hỏa", "cooldown": 10, "ultimateName": "PHÁO ĐÀI", "ultimateTicks": 360, "rageTime": 0.5, "rageDamage": 0}},
+    {"1+3": {"desc": "Ụ gắn nóc bắn đủ 100% tốc độ."}, "2+4": {"desc": "Siêu Pháo có vòng LAN hồi máu chủ."}, "1+2+3+4": {"desc": "Tia Siêu Pháo xuyên tường."}});
+// PILOT engineer END
+
+// PILOT sniper BEGIN
+addPilotEvos("sniper",
+    {"id": "evo_sniper_3", "name": "Lỗ Châu Mai", "cost": 130, "desc": "Đạn qua tường mình +40% dame, +30% tốc; chỉ nhận buff một lần."},
+    {"id": "evo_sniper_4", "name": "Dời Tường", "cost": 150, "desc": "Dời tường gần nhất về trục xe (CD 6s). +12 Nộ/phát trúng, +6/đòn tường chặn. ĐIỂM ĐẦU cần trúng ≥2 lần: khóa ngắm 2.5s rồi tia xuyên tường; kết liễu khi ≤40%.", "skill": {"name": "Dời Tường", "cooldown": 6, "ultimateName": "ĐIỂM ĐẦU", "ultimateTicks": 150, "rageTime": 0.5, "rageDamage": 0}},
+    {"1+3": {"desc": "Lỗ Châu Mai tăng 60% dame."}, "2+3": {"desc": "Đạn qua tường thành raycast có cảnh báo."}, "1+2+3+4": {"desc": "Điểm Đầu bắn hai phát, chia cùng ngân sách dame."}});
+// PILOT sniper END
+
+// PILOT berserker BEGIN
+addPilotEvos("berserker",
+    {"id": "evo_bers_3", "name": "Tự Rạch", "cost": 110, "desc": "Nhấp đúp (hồi 1s): mất 0.5 HP, không dưới 1; +12 Huyết Chiến và chuẩn bị Huyết Đạn."},
+    {"id": "evo_bers_4", "name": "Gào Thét", "cost": 170, "desc": "Hưởng buff mốc ≤25% trong 4s (CD 18s). Nộ từ dame nhận x1.5 và dame gây. CUỒNG HUYẾT VÔ TẬN cần HP≤50%: vào Huyết Chiến, giữ thanh 100 bốn giây, mỗi hit hồi 0.1 HP; Huyết Đạn kết liễu ≤20%.", "skill": {"name": "Gào Thét", "cooldown": 18, "ultimateName": "CUỒNG HUYẾT VÔ TẬN", "ultimateTicks": 240, "rageTime": 0.5, "rageDamage": 12}},
+    {"1+3": {"desc": "Tự Rạch còn +10% tốc bắn trong 3s."}, "2+4": {"desc": "Ultimate dựng Đấu Trường Huyết Địa bản mạnh."}, "1+2+3+4": {"desc": "Gào Thét không CD trong Ultimate."}});
+// PILOT berserker END
+
+// PILOT healer BEGIN
+addPilotEvos("healer",
+    {"id": "evo_heal_3", "name": "Kim Đảo Mệnh", "cost": 120, "desc": "+2 Max HP dự trữ máu. Giữ 0.5s, nhả: đổi 0.5 HP thành kim 1 dame xuyên khiên; không tự hạ dưới 1 HP."},
+    {"id": "evo_heal_4", "name": "Truyền Máu Khẩn", "cost": 160, "desc": "Hồi ngay 1 HP (CD 16s); Năng Lượng Sinh Mệnh ≥50% thì nạp đầy. +10 Nộ/0.5 HP hồi thực. SINH TỬ ĐẢO NGƯỢC: 4s hồi máu địch thành dame, dame địch nhận hồi bạn 50%.", "skill": {"name": "Truyền Máu Khẩn", "cooldown": 16, "ultimateName": "SINH TỬ ĐẢO NGƯỢC", "ultimateTicks": 240, "rageTime": 0.5, "rageDamage": 0}},
+    {"1+3": {"desc": "Kim Đảo Mệnh trả Giáp Trắng trước khi trả HP."}, "2+4": {"desc": "Lượng hồi từ Ultimate tạo Tia Xung."}, "3+4": {"desc": "Kim trúng hoàn lại 0.5 HP; giữ thưởng chung +1 HP, +10% dame, 1 khiên."}, "1+2+3+4": {"desc": "Ultimate kéo dài 6s."}});
+// PILOT healer END
+
+// PILOT one_punch BEGIN
+addPilotEvos("one_punch",
+    {"id": "evo_punch_3", "name": "Chạy Bộ Mỗi Ngày", "cost": 110, "desc": "Di chuyển liên tục 3s tăng 5% Thú Vị; đổi lại giảm 2 Max HP."},
+    {"id": "evo_punch_4", "name": "Né Bình Thường", "cost": 150, "desc": "Bước ngang né 0.25s, +10% Thú Vị (CD 6s). +1 Nộ/1% Thú Vị tăng. ĐẤM NGHIÊM TÚC: CHẾT ĐI cần Thú Vị 100%, cảnh báo 0.8s rồi tia rộng 1/3 sân xuyên tường; kết liễu ≤50%, còn lại 3 dame.", "skill": {"name": "Né Bình Thường", "cooldown": 6, "ultimateName": "ĐẤM NGHIÊM TÚC: CHẾT ĐI", "ultimateTicks": 48, "rageTime": 0.5, "rageDamage": 0}},
+    {"1+3": {"desc": "Chạy bộ tăng 8% Thú Vị."}, "2+4": {"desc": "Bật ngang trước khi khóa cảnh báo Ultimate."}, "1+2+3+4": {"desc": "Điều kiện Ultimate giảm còn 80% Thú Vị."}});
+// PILOT one_punch END
+
+// PILOT big_bullet BEGIN
+if (FEATURE_EVO34) {
+    FULL_EVO_COMBOS.big_bullet['3+4'] = { desc: 'Sút cầu đã nuốt đạn giảm 0.5s CD Skill mỗi đạn, tối đa 1.5s/lần sút.' };
+    EVOLUTIONS.big_bullet.find(e => e.evoSlot === 4).desc += ' Full Evo 3+4: sút cầu đã nuốt đạn giảm CD Skill (tối đa 1.5s).';
+}
+// PILOT big_bullet END

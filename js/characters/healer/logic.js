@@ -18,11 +18,11 @@ const HL_REGEN = 180, HL_REGEN_FULL = 90;
 const HL_LS_CD = 1200;          // 20s
 const HL_MARK = 300;            // 5s ấn Kháng Hồi Phục
 
-function hlE1(p) { return p.hasUpgrade('evo_heal_1'); }
-function hlE2(p) { return p.hasUpgrade('evo_heal_2'); }
-function hlFull(p) { return hlE1(p) && hlE2(p) && hasFullEvo(p, 'healer'); }
+function healE1(p) { return p.hasUpgrade('evo_heal_1'); }
+function healE2(p) { return p.hasUpgrade('evo_heal_2'); }
+function healFull(p) { return healE1(p) && healE2(p) && hasLegacyFullEvo(p, 'healer'); }
 function hlEnemy(p) { return p === p1 ? p2 : p1; }
-function hlLifeReq(p) { return hlFull(p) ? 1.5 : (hlE2(p) ? 1.25 : 2); }
+function hlLifeReq(p) { return healFull(p) ? 1.5 : (healE2(p) ? 1.25 : 2); }
 function hlOverMax(p) { return 4 + 0.5 * p.maxHp; }
 // Trần máu hiện tại (Trọng Thương của Raven khóa một phần máu)
 function hlHpCap(p) {
@@ -49,7 +49,7 @@ function hlHeal(p, amt, src) {
     return eff;
 }
 function hlAddOver(p, over) {
-    if (!(over > 0) || !hlE1(p)) return;
+    if (!(over > 0) || !healE1(p)) return;
     p.hlOver = Math.min(hlOverMax(p), (p.hlOver || 0) + over);
 }
 
@@ -63,7 +63,7 @@ function hlOnHealed(p, amt, src) {
         if (p.hlLife >= req - 1e-6) { p.hlReady = true; addFloatingText(p.x + p.w / 2, p.y - 22, '✚ CƯỜNG HÓA', HL_GOLD, 13); }
     }
     // Evo2: Tia Xung tự ngắm, dame = lượng vừa hồi
-    if (hlE2(p)) hlPulse(p, amt);
+    if (healE2(p)) hlPulse(p, amt);
 }
 
 function hlPulse(p, amt) {
@@ -82,12 +82,12 @@ function hlFire(p) {
     const dirY = p.id === 1 ? -1 : 1;
     const base = p.damage + (p.dmgBuff || 0);
     if (p.hlReady) {
-        const ratio = hlFull(p) ? 1 : (hlE1(p) ? 0.65 : 0.5);
+        const ratio = healFull(p) ? 1 : (healE1(p) ? 0.65 : 0.5);
         const dmg = ratio * p.maxHp + base;
         spawnBullet(p, {
             x: p.x + p.w / 2 - 7, y: dirY < 0 ? p.y - 14 : p.y + p.h, w: 14, h: 14,
             vy: dirY * C.bulletSpeed * 1.1, dmg, hook: 'healer', hlKind: 'emp',
-            hlAoe: base * (hlE1(p) ? 0.3 : 0.15),
+            hlAoe: base * (healE1(p) ? 0.3 : 0.15),
         });
         p.hlReady = false; p.hlLife = 0;
         p.hlLsCd = Math.max(0, (p.hlLsCd || 0) - 600);
@@ -111,7 +111,7 @@ function hlOnImpact(b, owner, victim, x, y, isStructure) {
         hlHeal(owner, 0.25, 'lifesteal');
         spawnSparkParticles(x, y, HL_GREEN, 6);
     }
-    if (victim && hlFull(owner)) {
+    if (victim && healFull(owner)) {
         owner.hlMarkT = HL_MARK;
         owner.hlEnemyLast = victim.hp;
     }
@@ -170,7 +170,7 @@ CharHooks.register('healer', {
         if (this.hlRegenFx > 0) this.hlRegenFx--;
         if (this.hlStealFx > 0) this.hlStealFx--;
         this.hlCalm++;
-        const every = hlFull(this) ? HL_REGEN_FULL : HL_REGEN;
+        const every = healFull(this) ? HL_REGEN_FULL : HL_REGEN;
         if (this.hlCalm >= every) {
             this.hlCalm = 0;
             const amt = 0.5;
@@ -186,7 +186,7 @@ CharHooks.register('healer', {
         // 3) Full Evo: cướp máu kẻ địch mang ấn Kháng Hồi Phục
         const e = hlEnemy(this);
         if (e) {
-            if (this.hlMarkT > 0 && hlFull(this) && e.hp > 0 && this.hlEnemyLast != null) {
+            if (this.hlMarkT > 0 && healFull(this) && e.hp > 0 && this.hlEnemyLast != null) {
                 const gain = e.hp - this.hlEnemyLast;
                 if (gain > 1e-4 && gain <= 2.5) { // bỏ qua hồi sinh / reset hiệp (tăng vọt)
                     e.hp -= gain;

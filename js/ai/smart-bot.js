@@ -1171,3 +1171,13 @@ const SB_DTAP = [true, true, true, false, false, true, true, true, false, false]
         return result;
     };
 })();
+
+// Body thí điểm đọc chung input Skill và giữ/nhả; đăng ký sau khi nạp đủ module.
+window.addEventListener('load', () => {
+    const fire = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (p, enemy, aligned, inp) {
+        const result = fire.apply(this, arguments);
+        EvoBodyKit.bot(p, enemy, aligned, inp, this.t);
+        return result;
+    };
+});

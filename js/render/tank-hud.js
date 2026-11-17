@@ -343,7 +343,7 @@ function drawTankHUD(p) {
     if (!nearBody && p.maxAmmo > 0 && p.maxAmmo < 100) {
         const reloading = (p.weapon === 'sniper' && p.sniperReloading) || p.smgReloading;
         if (reloading) {
-            const reloadMax = p.sniperReloadMax || ((hasFullEvo(p, 'sniper')) ? 150 : 180);
+            const reloadMax = p.sniperReloadMax || ((hasLegacyFullEvo(p, 'sniper')) ? 150 : 180);
             const rk = Math.max(0, Math.min(1, p.smgReloading ? 1 - (p.smgReloadT || 0) / Math.max(1, p.smgReloadMax || 1) : 1 - p.sniperReloadTimer / reloadMax));
             ctx.fillStyle = 'rgba(255,255,255,0.12)'; hudFill(F, bx, dAm, BW, amH);
             ctx.fillStyle = '#ff9f1a'; ctx.shadowBlur = 5; ctx.shadowColor = '#ff9f1a';
