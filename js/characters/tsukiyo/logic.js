@@ -3,8 +3,11 @@
 // ------------------------------------------
 // Nội Năng (chakra) + 3 phong cách (giữ Bắn 0.75s để đổi): Kỹ Thuật (phi tiêu, hồi Nội Năng) /
 // Bí Thuật (kết ấn Hỏa Cầu) / Tất Sát (lướt chém).
-// Nhẫn Đạo: đủ mốc Tốc Độ / Sát Thương / Máu (cấp Động Cơ / Bánh Xích / Giáp Thép, Evo 2 & Full Evo
-// tính thêm 1 cấp) -> chọn 1 trong 3 nhánh ở shop (lưu vào p.upgrades: 'tsu_s1'..'tsu_h3').
+// Nhẫn Đạo: MỌI món module chân (FEET) đều tính 1 cấp mỗi lần mua; LOẠI món quyết định mốc nào được cộng:
+// TỐC (Động Cơ) / CÔNG (Bánh Xích, Phá Công Trình) / THỦ (Giáp Thép, Giáp Gia Cố, Khiên Khởi Đầu, Giảm Sát Thương,
+// Tự Hồi Máu, Kháng Khống Chế); Lợi Tức = "linh hoạt" cộng vào mốc đang thấp nhất. Evo 2 & Full Evo tính thêm 1 cấp
+// mỗi mốc -> đủ mốc thì chọn 1 trong 3 nhánh ở shop (lưu vào p.upgrades: 'tsu_s1'..'tsu_h3').
+// Đổi phong cách có thưởng: đòn kế tiếp +30% dame & hoàn 30% Nội Năng (p.tsRot / p.tsAmp).
 // Kết liễu "NGUYỆT TRẢM" khi đòn của Tsukiyo hạ gục đối thủ.
 // Toàn bộ trạng thái là trường thuần trên player / entity trong bodyEffects -> đồng bộ online.
 // ==========================================
@@ -13,7 +16,6 @@ const TS_CYAN = '#22d3ee', TS_FIRE = '#fb923c', TS_VIO = '#c084fc', TS_MOON = '#
 const TS_STYLE_C = [TS_CYAN, TS_FIRE, TS_VIO];
 const TS_STYLE_N = ['KỸ THUẬT', 'BÍ THUẬT', 'TẤT SÁT'];
 const TS_STYLE_I = ['✦', '🔥', '⚔'];
-const TS_MOD = { s: 'speed', d: 'damage', h: 'armor' };
 const TS_BR_NAME = {
     s: ['Ảo Ảnh Phi Tiêu', 'Phân Thân Chi Thuật', 'Loạn Trảm Tuyệt Kỹ'],
     d: ['Tam Tinh Tiêu', 'Tam Cấp Kết Ấn & Hắc Nguyệt', 'Cực Tốc Trảm'],
@@ -35,13 +37,39 @@ function tsSfx(n) { if (typeof soundSystem !== 'undefined' && soundSystem && !so
 function tsLane(p) { return p.id === 1 ? canvas.height - p.h - 22 : 20; }
 function tsHideY(p) { return p.id === 1 ? canvas.height + 300 : -300 - p.h; }
 function tsBr(p, k) { for (let i = 1; i <= 3; i++) if (p.hasUpgrade('tsu_' + k + i)) return i; return 0; }
-function tsLevel(p, k) { return p.upgrades.filter(u => u === TS_MOD[k]).length + (tsE2(p) ? 1 : 0) + (tsFull(p) ? 1 : 0); }
+// Phân loại module chân -> mốc Nhẫn Đạo (s = Tốc, d = Công, h = Thủ); 'interest' (Lợi Tức) là linh hoạt
+const TS_FEET_CAT = {
+    speed: 's',
+    damage: 'd', breaker: 'd',
+    armor: 'h', ccres: 'h', regen: 'h', plate: 'h', startshield: 'h', dmgcut: 'h',
+};
+const TS_FEET_WILD = 'interest';
+function tsLevels(p) {
+    const L = { s: 0, d: 0, h: 0 };
+    const bonus = (tsE2(p) ? 1 : 0) + (tsFull(p) ? 1 : 0);
+    L.s += bonus; L.d += bonus; L.h += bonus;
+    let wild = 0;
+    for (const u of (p.upgrades || [])) {
+        if (TS_FEET_CAT[u]) L[TS_FEET_CAT[u]]++;
+        else if (u === TS_FEET_WILD) wild++;
+    }
+    while (wild-- > 0) { // Lợi Tức: cộng vào mốc đang thấp nhất (hòa -> Tốc, Công, Thủ)
+        const k = ['s', 'd', 'h'].reduce((a, b) => (L[b] < L[a] ? b : a));
+        L[k]++;
+    }
+    return L;
+}
+function tsLevel(p, k) { return tsLevels(p)[k]; }
 function tsNeed(p) { return tsE2(p) ? 1 : 2; }
-function tsUnlocked(p, k) { return tsLevel(p, k) >= tsNeed(p); }
+function tsUnlocked(p, k) { return tsLevels(p)[k] >= tsNeed(p); }
 function tsMaxNN(p) { return tsFull(p) ? 200 : (tsE1(p) ? 150 : 100); }
 function tsCost(p, base) { return base * (tsE1(p) ? 0.75 : 1); }
 function tsSwitchT(p) { return tsE1(p) ? 30 : 45; }
-function tsPow(p) { return tsFull(p) ? 1.3 : (tsE2(p) ? 1.15 : 1); } // Evo 2 / Full: cường hóa các nhánh Nhẫn Đạo
+function tsEvoPow(p) { return tsFull(p) ? 1.3 : (tsE2(p) ? 1.15 : 1); }
+function tsPow(p) { return tsEvoPow(p) * tsAmp(p); } // Evo 2 / Full: cường hóa các nhánh Nhẫn Đạo (x thưởng đổi phong cách)
+// Thưởng đổi phong cách: đòn kế tiếp +30% dame (p.tsAmp giữ suốt đòn đó, p.tsRot = đang chờ đòn)
+const TS_ROT_AMP = 1.3, TS_ROT_REFUND = 0.3, TS_ROT_TIME = 600;
+function tsAmp(p) { return p.tsAmp > 1 ? p.tsAmp : 1; }
 function tsGain(p, n) { p.tsNN = Math.min(tsMaxNN(p), (p.tsNN || 0) + n); }
 function tsHitGain(p) { return tsFull(p) ? 15 : (tsE2(p) ? 12 : 8); }
 function tsMissGain(p) { return tsFull(p) ? 4 : (tsE1(p) ? 2 : 0); }
@@ -83,6 +111,7 @@ class TsShade {
     constructor(owner, x, y, delay, auto) {
         this.owner = owner; this.x = x; this.y = y;
         this.delay = delay; this.auto = auto; this.t = 0; this.fired = false; this.active = true;
+        this.amp = tsAmp(owner);
     }
     update() {
         if (!this.active) return;
@@ -90,7 +119,7 @@ class TsShade {
         const o = this.owner, e = tsEnemy(o);
         if (!this.fired && this.t >= this.delay) {
             this.fired = true;
-            const dir = tsDir(o), sy = this.y + dir * 14, dmg = 0.5 * o.damage * tsPow(o);
+            const dir = tsDir(o), sy = this.y + dir * 14, dmg = 0.5 * o.damage * tsEvoPow(o) * this.amp;
             if (this.auto && e && tsAlive(e)) {
                 for (const off of [-7, 7]) {
                     const v = aimVelocity(this.x + off, sy, e, 10, true);
@@ -152,9 +181,9 @@ function tsCloneCopy(p, style) {
     const c = tsCloneOf(p);
     if (!c || c.away > 0) return;
     const k = tsFull(p) ? 0.8 : 0.5, dir = tsDir(p), cx = c.x + c.w / 2, fy = dir < 0 ? c.y - 8 : c.y + c.h + 2;
-    if (style === 0) spawnBullet(p, { x: cx - 4, y: fy, w: 8, h: 8, vx: 0, vy: dir * 9, dmg: p.damage * k, hook: 'tsukiyo', ts: 'cln' });
-    else if (style === 1) spawnBullet(p, { x: cx - 7, y: fy, w: 14, h: 14, vx: 0, vy: dir * 6, dmg: p.damage * k, hook: 'tsukiyo', ts: 'fire', tier: 0, boomK: k });
-    else spawnBullet(p, { x: cx - 13, y: fy, w: 26, h: 10, vx: 0, vy: dir * 10, dmg: 2.5 * p.damage * k, hook: 'tsukiyo', ts: 'cres' });
+    if (style === 0) spawnBullet(p, { x: cx - 4, y: fy, w: 8, h: 8, vx: 0, vy: dir * 9, dmg: p.damage * k * tsAmp(p), hook: 'tsukiyo', ts: 'cln' });
+    else if (style === 1) spawnBullet(p, { x: cx - 7, y: fy, w: 14, h: 14, vx: 0, vy: dir * 6, dmg: p.damage * k * tsAmp(p), hook: 'tsukiyo', ts: 'fire', tier: 0, boomK: k, amp: tsAmp(p) });
+    else spawnBullet(p, { x: cx - 13, y: fy, w: 26, h: 10, vx: 0, vy: dir * 10, dmg: 2.5 * p.damage * k * tsAmp(p), hook: 'tsukiyo', ts: 'cres' });
     spawnSparkParticles(cx, c.y + c.h / 2, TS_STYLE_C[style], 4);
 }
 
@@ -225,7 +254,7 @@ class TsRush {
         this.vy = tsDir(owner) * 8.5;
         this.isStone = !this.inv;                      // phân thân phụ có thể bị bắn hạ trên đường lao
         this.maxHp = tsFull(owner) ? 2 : 1; this.hp = this.maxHp; // Full Evo: thêm 1 lớp khiên
-        this.t = 0; this.done = false; this.active = true;
+        this.t = 0; this.done = false; this.active = true; this.amp = tsAmp(owner);
     }
     update() {
         const o = this.owner;
@@ -236,7 +265,7 @@ class TsRush {
         const far = this.vy < 0 ? this.y <= 4 : this.y >= canvas.height - this.h - 4;
         if (far || (e && tsAlive(e) && rectIntersect(this.x, this.y, this.w, this.h, e.x, e.y, e.w, e.h))) {
             this.done = true; this.active = false;
-            explosions.push(new Explosion(cx, cy, 52, 'rgba(251, 146, 60,', 1.2 * o.damage * tsPow(o), o));
+            explosions.push(new Explosion(cx, cy, 52, 'rgba(251, 146, 60,', 1.2 * o.damage * tsEvoPow(o) * this.amp, o));
             triggerScreenShake(4, 8);
             tsSfx('playExplosion');
         }
@@ -278,7 +307,7 @@ class TsLoan {
         this.r = big ? 74 : 54; this.big = big; // vùng tròn, lớn hơn
         this.life = 240; this.t = 0; this.hits = 0; this.total = 30; this.stunned = stunNow; // chém 4s
         this.pull = big && tsFull(owner);
-        this.seed = Math.round(Math.random() * 600) / 100; this.final = 0; this.active = true;
+        this.seed = Math.round(Math.random() * 600) / 100; this.final = 0; this.active = true; this.amp = tsAmp(owner);
     }
     update() {
         if (!this.active) return;
@@ -291,7 +320,7 @@ class TsLoan {
         }
         if (this.t % 8 === 0) {
             if (inside) {
-                e.takeDamage(0.06 * o.damage * tsPow(o), o); // 4s: giữ tổng sát thương như cũ (2s x 0.12)
+                e.takeDamage(0.06 * o.damage * tsEvoPow(o) * this.amp, o); // 4s: giữ tổng sát thương như cũ (2s x 0.12)
                 this.hits++;
                 fxSlashHit(e.x + e.w / 2 + (Math.random() - 0.5) * 16, e.y + e.h / 2 + (Math.random() - 0.5) * 10, this.big ? '#e9d5ff' : TS_VIO, 16);
                 const need = Math.ceil(this.total * (tsFull(o) ? 0.35 : 0.5));
@@ -308,7 +337,7 @@ class TsLoan {
             this.final = 1;
             const f = tsFull(o);
             if (e && tsAlive(e) && f && tsOverlap(this.x, this.y, this.r * 1.3, this.r, e)) e.shield = 0;
-            explosions.push(new Explosion(this.x, this.y, this.r * 1.35, 'rgba(192, 132, 252,', 1.5 * o.damage * tsPow(o) * (f ? 1.5 : 1), o));
+            explosions.push(new Explosion(this.x, this.y, this.r * 1.35, 'rgba(192, 132, 252,', 1.5 * o.damage * tsEvoPow(o) * this.amp * (f ? 1.5 : 1), o));
             bodyEffects.push(new TsStreak(this.x, this.y, o.x + o.w / 2, o.y + o.h / 2, 14, 1));
             fxSweep(this.x, this.y, this.r * 1.2, -0.6, Math.PI - 0.6, '#ffffff', 16, 10);
             if (f) fxSweep(this.x, this.y, this.r * 1.2, 0.6, Math.PI + 0.6, TS_MOON, 16, 10);
@@ -399,13 +428,13 @@ function tsThrow(p, wave) {
     if (!wave && p.tsBigNext) { tsThrowBig(p); return; }
     const n = d1 ? (full ? 5 : 3) : 1;
     const spd = 9 * (d1 ? 1.2 : 1) * (full ? 1.4 : 1);
-    const dmg = p.damage * (d1 ? 1.1 * tsPow(p) : 1) * (wave ? 0.3 : 1);
+    const dmg = p.damage * (d1 ? 1.1 * tsPow(p) : tsAmp(p)) * (wave ? 0.3 : 1);
     for (let i = 0; i < n; i++) {
         const a = n > 1 ? (i - (n - 1) / 2) * 0.17 : 0;
         const edge = n === 5 && (i === 0 || i === 4);
         spawnBullet(p, {
             x: cx - 4.5, y: fy, w: 9, h: 9, vx: Math.sin(a) * spd, vy: dir * Math.cos(a) * spd, dmg,
-            hook: 'tsukiyo', ts: wave ? 'shw' : 'shu', isPiercing: full, tsPierce: 1, tsBounce: edge ? 1 : 0, tsHit: false,
+            hook: 'tsukiyo', ts: wave ? 'shw' : 'shu', amp: tsAmp(p), isPiercing: full, tsPierce: 1, tsBounce: edge ? 1 : 0, tsHit: false,
         });
     }
     if (wave) return;
@@ -469,7 +498,7 @@ function tsFireball(p, tier) {
     const w = tier >= 1 ? 32 : (d2 ? 20 : 15);
     spawnBullet(p, {
         x: cx - w / 2, y: dir < 0 ? p.y - w : p.y + p.h, w, h: w, vx: 0, vy: dir * 6 * (full ? 1.35 : 1),
-        dmg: p.damage * (tier >= 1 ? 1.5 : 1), hook: 'tsukiyo', ts: 'fire', tier, boomK: 1,
+        dmg: p.damage * (tier >= 1 ? 1.5 : 1) * tsAmp(p), hook: 'tsukiyo', ts: 'fire', tier, boomK: 1, amp: tsAmp(p),
     });
     tsSfx('playShoot');
 }
@@ -478,7 +507,7 @@ function tsFireBoom(b, owner, x, y) {
     b.boomed = true;
     const full = tsFull(owner), d2 = tsBr(owner, 'd') === 2;
     const k = b.boomK || 1;
-    let R = b.tier >= 1 ? 76 : (d2 ? 50 : 40), dmg = (b.tier >= 1 ? 2.6 : 2) * owner.damage * k * (d2 ? 1.15 * tsPow(owner) : 1);
+    let R = b.tier >= 1 ? 76 : (d2 ? 50 : 40), dmg = (b.tier >= 1 ? 2.9 : 2.2) * owner.damage * k * (b.amp || 1) * (d2 ? 1.15 * tsEvoPow(owner) : 1);
     if (full) R *= 1.3;
     explosions.push(new Explosion(x, y, R, 'rgba(251, 146, 60,', dmg, owner));
     if (full && k >= 1) bodyEffects.push(new TsFirePool(owner, x, y, R * 0.6));
@@ -513,7 +542,7 @@ function tsStartDash(p, kind) {
 function tsStartMoon(p) { tsStartDash(p, 'moon'); }
 function tsSwordHit(p, e) {
     const full = tsFull(p), d3 = tsBr(p, 'd') === 3;
-    let dmg = 3 * p.damage * (d3 ? (full ? 1.8 : 1.4) : 1);
+    let dmg = 3.5 * p.damage * tsAmp(p) * (d3 ? (full ? 1.8 : 1.4) : 1);
     if (d3 && full && e.hp < e.maxHp * 0.25) { dmg *= 1.5; addFloatingText(e.x + e.w / 2, e.y - 26, 'NHẤT KÍCH TẤT SÁT!', '#fde047', 13); }
     if (full && e.shield > 0) { e.takeDamage(dmg * 0.5, p); if (tsAlive(e)) e.takeDamage(dmg * 0.5, p, { bypassShield: true }); }
     else e.takeDamage(dmg, p);
@@ -588,6 +617,7 @@ function tsCast(p) {
         return;
     }
     p.tsNN -= cost; p.tsRegenWait = 60;
+    tsRotBonus(p, cost);
     if (style === 0) { tsThrow(p, false); p.tsGcd = 20; tsSfx('playShoot'); }
     else if (style === 1) {
         p.tsMode = 'seal'; p.tsT = tsFull(p) ? 15 : 30; p.tsSealMax = p.tsT; p.tsGcd = 20;
@@ -597,8 +627,20 @@ function tsCast(p) {
     tsCloneCopy(p, style);
 }
 
+// Thưởng xoay vòng: đòn kế tiếp sau khi đổi phong cách +30% dame & hoàn 30% Nội Năng (hết hạn sau 10s)
+function tsRotBonus(p, cost) {
+    if (!(p.tsRot > 0)) return;
+    p.tsRot = 0; p.tsAmp = TS_ROT_AMP; p.tsRotFx = 24;
+    tsGain(p, cost * TS_ROT_REFUND);
+    const c = TS_STYLE_C[p.tsStyle || 0];
+    addFloatingText(p.x + p.w / 2, p.y - 30, 'XOAY PHONG CÁCH +30%', c, 12);
+    spawnSparkParticles(p.x + p.w / 2, p.y + p.h / 2, c, 12);
+    tsSfx('playPowerup');
+}
+
 function tsSwitch(p) {
     p.tsStyle = ((p.tsStyle || 0) + 1) % 3;
+    p.tsRot = TS_ROT_TIME; p.tsAmp = 1;
     p.tsAlert = false; p.tsStill = 0; p.tsSwitchFx = 20;
     addFloatingText(p.x + p.w / 2, p.y - 18, TS_STYLE_I[p.tsStyle] + ' ' + TS_STYLE_N[p.tsStyle], TS_STYLE_C[p.tsStyle], 12);
     spawnSparkParticles(p.x + p.w / 2, p.y + p.h / 2, TS_STYLE_C[p.tsStyle], 8);
@@ -654,6 +696,7 @@ CharHooks.register('tsukiyo', {
         this.tsStill = 0; this.tsAlert = false; this.tsFocus = 0; this.tsAlertCd = 0;
         this.tsCloneT = tsBr(this, 's') === 2 ? 1 : 0;
         this.tsSideFx = 0; this.tsSideFrom = 0; this.tsSwitchFx = 0; this.tsTick = 0;
+        this.tsRot = 0; this.tsAmp = 1; this.tsRotFx = 0;
     },
     update() {
         this.tsTick++;
@@ -662,6 +705,9 @@ CharHooks.register('tsukiyo', {
         if (this.tsDodgeCd > 0) this.tsDodgeCd--;
         if (this.tsSideFx > 0) this.tsSideFx--;
         if (this.tsSwitchFx > 0) this.tsSwitchFx--;
+        if (this.tsRotFx > 0) this.tsRotFx--;
+        if (this.tsRot > 0) this.tsRot--;
+        if (this.tsAmp > 1 && this.tsMode === 'idle' && this.tsGcd <= 0 && !this.tsWaves.length) this.tsAmp = 1;
         if (this.tsRegenWait > 0) this.tsRegenWait--;
         else tsGain(this, (tsFull(this) ? 6 : 4) / 60);
         // Phân Thân: triệu hồi đầu hiệp / hồi sinh
@@ -768,42 +814,48 @@ CharHooks.register('tsukiyo', {
         return false;
     },
     shopButtons(container, playerId) {
-        const st = ['s', 'd', 'h'].map(k => tsBr(this, k) ? '✔' : (tsUnlocked(this, k) ? '★' : '🔒')).join(' ');
+        const L = tsLevels(this);
+        const st = ['s', 'd', 'h'].map(k => tsBr(this, k) ? '✔' : (L[k] >= tsNeed(this) ? '★' : '🔒' + Math.min(L[k], tsNeed(this)) + '/' + tsNeed(this))).join(' ');
         const btn = document.createElement('div');
         btn.className = 'card';
         btn.style.border = '2px solid #c084fc';
         btn.style.background = '#170f2b';
-        btn.innerHTML = `<h4 style="color:#c084fc">🥷 NHẪN ĐẠO</h4><p>💨 Tốc / 💥 Dame / 🛡️ Máu</p><p style="color:#e9d5ff">${st}</p>`;
+        btn.innerHTML = `<h4 style="color:#c084fc">🥷 NHẪN ĐẠO</h4><p>💨 Tốc / 💥 Công / 🛡️ Thủ (mọi món chân đều tính)</p><p style="color:#e9d5ff">${st}</p>`;
         btn.onclick = () => tsRenderPanel(playerId);
         container.appendChild(btn);
     },
 });
 
 // Bảng chọn nhánh Nhẫn Đạo (trong shop)
+const TS_HEAD = {
+    s: ['💨 MỐC TỐC ĐỘ', 'Chân TỐC: Động Cơ'],
+    d: ['💥 MỐC SÁT THƯƠNG', 'Chân CÔNG: Bánh Xích, Phá Công Trình'],
+    h: ['🛡️ MỐC THỦ', 'Chân THỦ: Giáp Thép, Giáp Gia Cố, Khiên Khởi Đầu, Giảm Sát Thương, Tự Hồi Máu, Kháng Khống Chế'],
+};
 function tsRenderPanel(playerId) {
     const container = document.getElementById(`${playerId}-upgrades`);
     if (!container) return;
     const p = playerId === 'p1' ? p1 : p2;
     container.innerHTML = '';
     const title = document.getElementById('roundTitleText');
-    if (title) title.innerText = `NHẪN ĐẠO — mỗi mốc cần ${tsNeed(p)} cấp (Evo 2 giảm 50%)`;
+    if (title) title.innerText = `NHẪN ĐẠO — mỗi mốc cần ${tsNeed(p)} cấp chân cùng loại (Evo 2 giảm 50%; Lợi Tức tính vào mốc thấp nhất)`;
     const back = document.createElement('div');
     back.className = 'card';
     back.style.border = '2px solid #e74c3c';
     back.innerHTML = '<h4 style="color:#ff6b6b">QUAY LẠI</h4><p>Về cửa hàng</p><p>🔙</p>';
     back.onclick = () => { updateShopTitle(); renderShop(playerId, true); };
     container.appendChild(back);
-    const HEAD = { s: ['💨 MỐC TỐC ĐỘ', 'Động Cơ'], d: ['💥 MỐC SÁT THƯƠNG', 'Bánh Xích'], h: ['🛡️ MỐC MÁU', 'Giáp Thép'] };
+    const L = tsLevels(p);
     for (const k of ['s', 'd', 'h']) {
-        const lv = tsLevel(p, k), open = tsUnlocked(p, k), chosen = tsBr(p, k);
+        const lv = L[k], open = lv >= tsNeed(p), chosen = tsBr(p, k);
         for (let i = 1; i <= 3; i++) {
             const card = document.createElement('div');
             const mine = chosen === i;
             card.className = 'card' + (mine ? ' evo-card' : ((!open || chosen) ? ' sold' : ''));
             const c = TS_STYLE_C[i - 1];
-            card.innerHTML = `<h4 style="color:${c}">${HEAD[k][0]} · ${TS_STYLE_I[i - 1]} ${TS_BR_NAME[k][i - 1]}</h4>` +
+            card.innerHTML = `<h4 style="color:${c}">${TS_HEAD[k][0]} · ${TS_STYLE_I[i - 1]} ${TS_BR_NAME[k][i - 1]}</h4>` +
                 `<p>${TS_BR_DESC[k][i - 1]}</p>` +
-                `<p style="color:${mine ? '#4ade80' : (open && !chosen ? c : '#94a3b8')}">${mine ? 'ĐÃ CHỌN' : (chosen ? '—' : (open ? 'CHỌN' : `🔒 ${HEAD[k][1]} ${Math.min(lv, tsNeed(p))}/${tsNeed(p)}`))}</p>`;
+                `<p style="color:${mine ? '#4ade80' : (open && !chosen ? c : '#94a3b8')}">${mine ? 'ĐÃ CHỌN' : (chosen ? '—' : (open ? 'CHỌN' : `🔒 ${TS_HEAD[k][1]} ${Math.min(lv, tsNeed(p))}/${tsNeed(p)}`))}</p>`;
             card.onclick = () => {
                 if (!open || tsBr(p, k)) return;
                 p.upgrades.push('tsu_' + k + i);

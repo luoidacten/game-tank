@@ -245,7 +245,7 @@ const EVOLUTIONS = {
     ],
     tsukiyo: [
         { id: 'evo_tsu_1', name: 'Thích Ứng Sắc Bén', desc: 'Nội Năng tối đa 150, mọi kỹ năng tốn ít hơn 25%, đổi phong cách chỉ cần giữ 0.5s, Phi Tiêu ném trượt vẫn hồi +2 Nội Năng.', cost: 220, type: 'evo' },
-        { id: 'evo_tsu_2', name: 'Nhẫn Đạo Hoàn Chỉnh', desc: 'Yêu cầu Nhẫn Đạo giảm 50% (1 cấp mỗi loại, bản thân Evo cũng tính 1 cấp), +1 Max HP, +0.25 Tốc, +25% Dame, Phi Tiêu trúng hồi +12 Nội Năng, mọi nhánh Nhẫn Đạo mạnh hơn. FULL EVO (Đỉnh Cao Nhẫn Giả): Nội Năng 200, thêm 1 bậc chỉ số; Phi Tiêu +40% tốc, xuyên 1 mục tiêu, trúng +15 / trượt +4; Kết Ấn 0.25s, Hỏa Cầu nhanh +35%, nổ rộng +30% & Vũng Lửa 2.5s; lướt nhanh +50%, chém vỡ đạn, Chảy Máu 3s & xuyên 50% Khiên; 9 nhánh Nhẫn Đạo lên bản Tuyệt Đỉnh.', cost: 480, type: 'evo' },
+        { id: 'evo_tsu_2', name: 'Nhẫn Đạo Hoàn Chỉnh', desc: 'Yêu cầu Nhẫn Đạo giảm 50% (mỗi mốc Tốc / Công / Thủ chỉ cần 1 cấp chân cùng loại, bản thân Evo cũng tính 1 cấp cho mỗi mốc), +1 Max HP, +0.25 Tốc, +25% Dame, Phi Tiêu trúng hồi +12 Nội Năng, mọi nhánh Nhẫn Đạo mạnh hơn. FULL EVO (Đỉnh Cao Nhẫn Giả): Nội Năng 200, thêm 1 bậc chỉ số; Phi Tiêu +40% tốc, xuyên 1 mục tiêu, trúng +15 / trượt +4; Kết Ấn 0.25s, Hỏa Cầu nhanh +35%, nổ rộng +30% & Vũng Lửa 2.5s; lướt nhanh +50%, chém vỡ đạn, Chảy Máu 3s & xuyên 50% Khiên; 9 nhánh Nhẫn Đạo lên bản Tuyệt Đỉnh.', cost: 480, type: 'evo' },
     ],
     joker: [
         { id: 'evo_joker_1', name: 'Gian Lận Tinh Vi', desc: 'Tay bài 10 lá, mỗi lần ném 2 lá liên tiếp (mỗi lá 0.6 dame). Joker hóa JOKER ĐỎ (nổ lớn + hồi +0.5 HP + choáng 0.5s) hoặc JOKER ĐEN (Câm Lặng 1s + vùng câm lặng 2s). 5 lần ném không ra Joker -> lần kế chắc chắn Joker. Tráo Bài rút thêm 2 lá & Tàng Hình 0.5s.', cost: 210, type: 'evo' },

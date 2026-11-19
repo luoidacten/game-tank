@@ -561,9 +561,9 @@ const BODY_GUIDES = {
             { input: 'TAP', name: 'Ra Chiêu', what: 'Phi Tiêu / Hỏa Cầu / Lướt Chém' },
             { input: 'HOLD 0.75s', name: 'Đổi Phong Cách', what: 'Kỹ Thuật → Bí Thuật → Tất Sát' }
         ],
-        passive: ['Phi tiêu trúng hồi Nội Năng', 'Nâng chân xe -> chọn nhánh Nhẫn Đạo'],
+        passive: ['Phi tiêu trúng hồi Nội Năng', 'Mọi món chân đều tính: Tốc / Công / Thủ -> mở nhánh Nhẫn Đạo', 'Đổi phong cách: đòn kế tiếp +30% dame, hoàn 30% Nội Năng'],
         evo: { e1: 'NN 150, rẻ 25%, đổi 0.5s', e2: 'Nhẫn Đạo dễ, +HP +dame', full: 'Đỉnh Cao Nhẫn Giả' },
-        tips: ['Phi tiêu trúng để nuôi Nội Năng']
+        tips: ['Phi tiêu trúng để nuôi Nội Năng', 'Xoay Kỹ Thuật -> Bí Thuật -> Tất Sát liên tục để luôn có đòn +30%', 'Mua chân Thủ/Công/Tốc đủ loại để mở sớm cả 3 mốc Nhẫn Đạo']
     },
     joker: {
         tag: 'Ném bài may rủi, 5% JOKER', diff: 3,

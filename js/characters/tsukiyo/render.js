@@ -196,6 +196,25 @@ Object.assign(CharHooks.registry.tsukiyo, {
             ctx.strokeStyle = TS_STYLE_C[nx]; ctx.shadowColor = TS_STYLE_C[nx]; ctx.shadowBlur = 8; ctx.lineWidth = 2;
             ctx.beginPath(); ctx.arc(cx, cy, this.w * 0.8, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.min(1, h / tsSwitchT(this))); ctx.stroke();
         }
+        // Thưởng xoay phong cách: hào quang xoay quanh xe tới khi tung đòn kế tiếp (nháy mạnh khi tung đòn)
+        if (this.tsRot > 0) {
+            const rc = TS_STYLE_C[this.tsStyle || 0], R = this.w * 0.95;
+            const fade = this.tsRot < 90 ? (0.4 + 0.6 * Math.abs(Math.sin(t * 10))) : 1;
+            ctx.globalAlpha = 0.85 * fade; ctx.fillStyle = rc; ctx.shadowBlur = 10; ctx.shadowColor = rc;
+            for (let i = 0; i < 4; i++) {
+                const a = t * 4 + i * Math.PI / 2;
+                ctx.beginPath(); ctx.arc(cx + Math.cos(a) * R, cy + Math.sin(a) * R * 0.7, 2.2, 0, Math.PI * 2); ctx.fill();
+            }
+            ctx.globalAlpha = 0.5 * fade; ctx.strokeStyle = rc; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.ellipse(cx, cy, R, R * 0.7, 0, 0, Math.PI * 2); ctx.stroke();
+            ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+        }
+        if (this.tsRotFx > 0) {
+            const a = this.tsRotFx / 24, rc = TS_STYLE_C[this.tsStyle || 0];
+            ctx.globalAlpha = a; ctx.strokeStyle = '#ffffff'; ctx.shadowBlur = 14; ctx.shadowColor = rc; ctx.lineWidth = 2.5;
+            ctx.beginPath(); ctx.arc(cx, cy, this.w * (0.7 + (1 - a) * 1.1), 0, Math.PI * 2); ctx.stroke();
+            ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+        }
         if (this.tsSwitchFx > 0) {
             const a = this.tsSwitchFx / 20;
             ctx.strokeStyle = TS_STYLE_C[this.tsStyle || 0]; ctx.globalAlpha = a; ctx.lineWidth = 2;
@@ -243,6 +262,11 @@ Object.assign(CharHooks.registry.tsukiyo, {
 function tsDrawBullet(b) {
     const cx = b.x + b.w / 2, cy = b.y + b.h / 2, t = tsNow();
     ctx.save();
+    if (b.amp > 1) { // đòn được thưởng xoay phong cách: quầng sáng trắng
+        ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = 'rgba(255,255,255,0.28)';
+        ctx.beginPath(); ctx.arc(cx, cy, Math.max(b.w, b.h) * 1.1 + 3, 0, Math.PI * 2); ctx.fill();
+        ctx.globalCompositeOperation = 'source-over';
+    }
     if (b.ts === 'shu' || b.ts === 'shw' || b.ts === 'cln') {
         const c = b.ts === 'cln' ? TS_MOON : TS_CYAN;
         // vệt
@@ -652,6 +676,7 @@ function tsRegisterHUD() {
         }
         if (p.tsBigNext && st === 0) return { pct: 1, ready: true, color: TS_CYAN, label: 'ĐẠI PHI TIÊU', btnIcon: '✦', idle: true };
         const cost = tsCost(p, [3, 25, 30][st]);
+        if (p.tsRot > 0) return { idle: true, pct: Math.min(1, (p.tsNN || 0) / tsMaxNN(p)), ready: (p.tsNN || 0) >= cost, color: TS_STYLE_C[st], label: TS_STYLE_N[st] + ' +30%', btnIcon: TS_STYLE_I[st] };
         return { idle: true, pct: Math.min(1, (p.tsNN || 0) / tsMaxNN(p)), ready: false, color: TS_STYLE_C[st], label: TS_STYLE_N[st], btnIcon: TS_STYLE_I[st], dim: (p.tsNN || 0) < cost };
     });
 }

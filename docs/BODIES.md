@@ -80,7 +80,7 @@
 | 57 | **Huyết Ma** | `blood_lord` | 3 | 0.25 | 6 | 4 | 28×28 |  | — |
 | 58 | **Cuồng Chiến Binh** | `berserker` | 6 | 0.25 | ∞ | 4.2 | 30×30 |  | — |
 | 59 | **Kazuki** | `kazuki` | 5 | 1 | — (năng lượng riêng) | 3.8 | 28×28 |  | — |
-| 60 | **Tsukiyo** | `tsukiyo` | 4 | 0.25 | — (năng lượng riêng) | 3.4 | 26×26 |  | — |
+| 60 | **Tsukiyo** | `tsukiyo` | 4 | 0.4 | — (năng lượng riêng) | 3.4 | 26×26 |  | — |
 | 61 | **Joker** | `joker` | 3.5 | 1 | — (năng lượng riêng) | 4.4 | 26×26 |  | — |
 | 62 | **Juggernaut** | `juggernaut` | 8.5 | 1.2 | 4 | 3.4 | 36×36 |  | — |
 | 63 | **Pháo Phân Mảnh** | `cluster_gun` | 5 | 1.5 | 2 | 3.5 | 30×30 |  | — |
@@ -1016,15 +1016,15 @@ HP:3.5 | Dame:0.75 | Đạn:4 | Tốc: 3.5. "Hồi Phục": 3s không mất máu
 
 ### 60. Tsukiyo (`tsukiyo`)
 
-"Nhận Lệnh!" Nhẫn Giả Thích Ứng. HP:4 | Dame:0.25 | Nội Năng 100 (tự hồi chậm) | Tốc: 3.4. Giữ Bắn 0.75s: đổi 3 PHONG CÁCH. ✦ KỸ THUẬT: nhấp ném Phi Tiêu (3 NN, trúng +8 NN, trượt 0). 🔥 BÍ THUẬT: nhấp (25 NN) đứng yên 0.5s Kết Ấn rồi phun Hỏa Cầu nổ lớn. ⚔ TẤT SÁT: nhấp (30 NN) lướt vút lên chém xuyên mục tiêu (Bất Tử khi lướt). NHẪN ĐẠO: đủ 2 cấp Động Cơ / Bánh Xích / Giáp Thép (Evo 2: 1 cấp; Evo 2 & Full Evo tính thêm 1 cấp mỗi loại) -> chọn 1 trong 3 nhánh (Kỹ Thuật / Bí Thuật / Tất Sát) cho mốc đó trong nút NHẪN ĐẠO ở shop. Hạ gục địch -> kết liễu NGUYỆT TRẢM.
+"Nhận Lệnh!" Nhẫn Giả Thích Ứng. HP:4 | Dame:0.4 | Nội Năng 100 (tự hồi chậm) | Tốc: 3.4. Giữ Bắn 0.75s: đổi 3 PHONG CÁCH (đổi có thưởng: đòn kế tiếp trong 10s +30% dame & hoàn 30% Nội Năng). ✦ KỸ THUẬT: nhấp ném Phi Tiêu (3 NN, trúng +8 NN, trượt 0). 🔥 BÍ THUẬT: nhấp (25 NN) đứng yên 0.5s Kết Ấn rồi phun Hỏa Cầu nổ lớn. ⚔ TẤT SÁT: nhấp (30 NN) lướt vút lên chém xuyên mục tiêu (Bất Tử khi lướt). NHẪN ĐẠO: mọi module chân đều tính 1 cấp, loại chân quyết định mốc TỐC (Động Cơ) / CÔNG (Bánh Xích, Phá Công Trình) / THỦ (Giáp Thép, Giáp Gia Cố, Khiên Khởi Đầu, Giảm Sát Thương, Tự Hồi Máu, Kháng Khống Chế), Lợi Tức tính vào mốc thấp nhất; mỗi mốc đủ 2 cấp (Evo 2: 1 cấp; Evo 2 & Full Evo tính thêm 1 cấp mỗi mốc) -> chọn 1 trong 3 nhánh (Kỹ Thuật / Bí Thuật / Tất Sát) cho mốc đó trong nút NHẪN ĐẠO ở shop. Hạ gục địch -> kết liễu NGUYỆT TRẢM.
 
-- **Chỉ số thực đầu hiệp:** HP 4 · Sát thương 0.25 · Đạn — (năng lượng riêng) · Tốc độ 3.4 · Kích thước 26×26
+- **Chỉ số thực đầu hiệp:** HP 4 · Sát thương 0.4 · Đạn — (năng lượng riêng) · Tốc độ 3.4 · Kích thước 26×26
 - **Tiến hoá:**
 
   | Evo | Giá | Hiệu ứng |
   |---|---:|---|
   | Thích Ứng Sắc Bén (`evo_tsu_1`) | $100 | Nội Năng tối đa 150, mọi kỹ năng tốn ít hơn 25%, đổi phong cách chỉ cần giữ 0.5s, Phi Tiêu ném trượt vẫn hồi +2 Nội Năng. |
-  | Nhẫn Đạo Hoàn Chỉnh (`evo_tsu_2`) | $180 | Yêu cầu Nhẫn Đạo giảm 50% (1 cấp mỗi loại, bản thân Evo cũng tính 1 cấp), +1 Max HP, +0.25 Tốc, +25% Dame, Phi Tiêu trúng hồi +12 Nội Năng, mọi nhánh Nhẫn Đạo mạnh hơn. FULL EVO (Đỉnh Cao Nhẫn Giả): Nội Năng 200, thêm 1 bậc chỉ số; Phi Tiêu +40% tốc, xuyên 1 mục tiêu, trúng +15 / trượt +4; Kết Ấn 0.25s, Hỏa Cầu nhanh +35%, nổ rộng +30% & Vũng Lửa 2.5s; lướt nhanh +50%, chém vỡ đạn, Chảy Máu 3s & xuyên 50% Khiên; 9 nhánh Nhẫn Đạo lên bản Tuyệt Đỉnh. |
+  | Nhẫn Đạo Hoàn Chỉnh (`evo_tsu_2`) | $180 | Yêu cầu Nhẫn Đạo giảm 50% (mỗi mốc Tốc / Công / Thủ chỉ cần 1 cấp chân cùng loại, bản thân Evo cũng tính 1 cấp cho mỗi mốc), +1 Max HP, +0.25 Tốc, +25% Dame, Phi Tiêu trúng hồi +12 Nội Năng, mọi nhánh Nhẫn Đạo mạnh hơn. FULL EVO (Đỉnh Cao Nhẫn Giả): Nội Năng 200, thêm 1 bậc chỉ số; Phi Tiêu +40% tốc, xuyên 1 mục tiêu, trúng +15 / trượt +4; Kết Ấn 0.25s, Hỏa Cầu nhanh +35%, nổ rộng +30% & Vũng Lửa 2.5s; lướt nhanh +50%, chém vỡ đạn, Chảy Máu 3s & xuyên 50% Khiên; 9 nhánh Nhẫn Đạo lên bản Tuyệt Đỉnh. |
 
 - **Mã nguồn:** `js/characters/tsukiyo/logic.js`, `js/characters/tsukiyo/render.js`
 
