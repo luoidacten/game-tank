@@ -19,6 +19,7 @@ const DTP_ZONE_HOLD = 42;   // giữ 0.7s: Đổi Khí Áp
 const DTP_SKY_HOLD = 21;    // trên không: giữ 0.35s để lại Vòng Cảnh Báo
 const DTP_SKY_LOCK = 40;    // Luật 11: vòng KHÓA 0.67s trước khi giáng
 const DTP_IMMUNE_MODES = ['sky', 'skylock', 'cyc_go', 'cyc_dance', 'cyc_back'];
+const DTP_MISS_T = 45;      // bản thể lướt / đáp mà 0.75s không có địch trong tầm -> HỤT, về làn (không hoàn gì)
 
 function dtpE1(p) { return !!p && p.hasUpgrade('evo_dtp_1'); }
 function dtpE2(p) { return !!p && p.hasUpgrade('evo_dtp_2'); }
@@ -412,7 +413,20 @@ function dtpTap(p) {
     if (p.dtpMode !== 'idle') return;
     if (p.dtpStance === 0) dtpStrike(p); else dtpSustain(p);
 }
-function dtpGoHome(p, mode) { p.dtpMode = mode || 'return'; p.dtpModeT = 0; }
+function dtpGoHome(p, mode) { p.dtpMode = mode || 'return'; p.dtpModeT = 0; p.dtpMissT = 0; }
+// Bản thể đánh hụt -> về làn ngay (Sa Lầy giữ lại thì thôi)
+function dtpMissHome(p, mode) {
+    if (isGrounded(p)) return false;
+    dtpTxt(p, 'HỤT — VỀ LÀN', '#94a3b8', 11);
+    dtpGoHome(p, mode);
+    return true;
+}
+// Phong Vũ: điểm dừng có mục tiêu trong tầm quạt không (địch / vật thể)
+function dtpWarnHasTarget(p, R) {
+    const e = dtpEnemy(p), cx = dtpCx(p), cy = dtpCy(p);
+    return (dtpAlive(e) && dtpInR(cx, cy, R, e)) || dtpTouchObj(p, cx, cy, R);
+}
+function dtpWarnR(p) { return 50 * (p.dtpHpPow > 1 ? 1.2 : 1); }
 
 // ---------- Máy trạng thái lướt / bay / đáp ----------
 function dtpModeStep(p) {
@@ -458,13 +472,18 @@ function dtpModeStep(p) {
                 if (dir < 0) p.y = Math.max(p.y, e.y + e.h + 2);
                 if (dir > 0) p.y = Math.min(p.y, e.y - p.h - 2);
             }
-            p.dtpMode = 'warn'; p.dtpModeT = 0; p.dtpWarnN = dtpE1(p) ? 60 : 84;
+            p.dtpMode = 'warn'; p.dtpModeT = 0; p.dtpWarnN = dtpE1(p) ? 60 : 84; p.dtpMissT = 0;
+            // Lướt hụt (không có địch / vật thể trong tầm quạt) -> về làn ngay, không đứng lại sân địch
+            if (!dtpWarnHasTarget(p, dtpWarnR(p) + 20)) dtpMissHome(p);
         }
         return;
     }
     if (m === 'warn') {
+        // Địch đã ra khỏi tầm quạt 0.75s -> hụt, về làn
+        p.dtpMissT = dtpWarnHasTarget(p, dtpWarnR(p)) ? 0 : (p.dtpMissT || 0) + 1;
+        if (p.dtpMissT >= DTP_MISS_T && T < p.dtpWarnN && dtpMissHome(p)) return;
         if (T >= p.dtpWarnN) {
-            const cx = dtpCx(p), cy = dtpCy(p), R = 50 * (p.dtpHpPow > 1 ? 1.2 : 1);
+            const cx = dtpCx(p), cy = dtpCy(p), R = dtpWarnR(p);
             p.dtpWarnR = R;
             if (dtpAlive(e) && dtpInR(cx, cy, R, e)) {
                 dtpHit(p, e, 0.95, {}, 12 * dtpCostMul(p));
@@ -501,6 +520,9 @@ function dtpModeStep(p) {
         dtpReflect(p, cx, cy, 40);
         if (dtpAlive(e) && Math.abs(dtpCx(e) - cx) < 85) dtpPull(e, cx, 0.45);
         if (T % 24 === 0 && dtpAlive(e) && dtpInR(cx, cy, 50, e)) { dtpHit(p, e, 0.22, {}, 0); spawnSparkParticles(dtpCx(e), dtpCy(e), DTP_JADE, 5); }
+        // Bão Quạt trống (địch ngoài tầm hút) 0.75s -> tan, về làn (không chém kết)
+        p.dtpMissT = (dtpAlive(e) && Math.abs(dtpCx(e) - cx) < 85) ? 0 : (p.dtpMissT || 0) + 1;
+        if (p.dtpMissT >= DTP_MISS_T && T < 150) { dtpCycEnd(p, 'HỤT — VỀ LÀN'); return; }
         if (T >= 150) {
             if (dtpAlive(e) && Math.abs(dtpCx(e) - cx) < 66 && Math.abs(dtpCy(e) - cy) < 56) dtpHit(p, e, 1.2, {}, 0);
             p.dtpSlashFx = 26; p.dtpSlashX = cx; p.dtpSlashY = cy;
@@ -524,6 +546,14 @@ function dtpModeStep(p) {
         return;
     }
     p.dtpMode = 'idle';
+}
+
+// Kết thúc sớm Bão Quạt Tuyệt Vũ (trống 0.75s / nhấp Bắn lần nữa): không chém kết, không hoàn gì, về làn
+function dtpCycEnd(p, txt) {
+    if (p.dtpMode !== 'cyc_dance') return;
+    explosions.push(new Explosion(dtpCx(p), dtpCy(p), 40, 'rgba(139, 92, 246,', 0, null));
+    dtpTxt(p, txt || 'TAN BÃO — VỀ LÀN', '#c4b5fd', 11);
+    dtpGoHome(p, 'cyc_back');
 }
 
 // ---------- Tick chính (chạy cả khi bị choáng) ----------
@@ -632,7 +662,7 @@ CharHooks.register('diep_thanh_phong', {
         this.dtpP = 50; this.dtpStance = 0; this.dtpBeats = 0; this.dtpHold = 0; this.dtpPrevS = false; this.dtpUsed = false; this.dtpValid = false;
         this.dtpZoneCd = 0; this.dtpCarryT = 0; this.dtpCarryZ = 0; this.dtpTpT = 0; this.dtpNgT = 0; this.dtpLpT = 0;
         this.dtpBuffs = []; this.dtpMode = 'idle'; this.dtpModeT = 0; this.dtpHomeX = this.x; this.dtpCh = ''; this.dtpChUid = 0; this.dtpChT = 0;
-        this.dtpSkyX = 0; this.dtpSkyY = 0; this.dtpSkyT = 0; this.dtpStay = 0; this.dtpBigLand = false; this.dtpWarnN = 72;
+        this.dtpSkyX = 0; this.dtpSkyY = 0; this.dtpSkyT = 0; this.dtpStay = 0; this.dtpBigLand = false; this.dtpWarnN = 72; this.dtpMissT = 0;
         this.dtpDashT = 0; this.dtpDashDir = 1; this.dtpLastDir = 0; this.dtpBurstR = 110;
         this.dtpHpS = 0; this.dtpHpT = 0; this.dtpHpLast = -1; this.dtpHpRep = 0; this.dtpHpEmp = false; this.dtpHpPow = 1; this.dtpKbT = 0; this.groundLunge = false;
         for (const k of ['dtpCastFx', 'dtpSwFx', 'dtpZoneFx', 'dtpLpFx', 'dtpBurstFx', 'dtpSpinFx', 'dtpSlashFx', 'dtpArriveFx', 'dtpNoWindT', 'dtpImmTxt', 'dtpHpFx', 'dtpRepFx']) this[k] = 0;
@@ -654,6 +684,8 @@ CharHooks.register('diep_thanh_phong', {
         if (inp.l && !inp.r) this.dtpLastDir = -1; else if (inp.r && !inp.l) this.dtpLastDir = 1;
         const m = this.dtpMode;
         if (pressed) { this.dtpHold = 0; this.dtpUsed = false; this.dtpValid = true; }
+        // Đang Bão Quạt (miễn nhiễm, không thể bị chọn): nhấp Bắn lần nữa -> kết thúc sớm, về làn
+        if (m === 'cyc_dance' && pressed) dtpCycEnd(this);
         if (m !== 'idle' && m !== 'sky') { this.dtpHold = 0; this.dtpValid = false; return true; }
         if (s && this.dtpValid) {
             this.dtpHold++;

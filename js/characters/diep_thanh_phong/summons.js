@@ -207,6 +207,12 @@ class DtpStorm {
                 dtpBreakCrates(o, this.x, this.y, R);
             }
         }
+        // Bản thể đáp xuống (Múa Quạt / Bão Vũ) mà 0.75s không có địch trong vùng -> vùng tan, bản thể về làn
+        if (this.body && !this.phantom && this.kind !== 'sweep' && o.dtpMode === 'land') {
+            const near = dtpAlive(e) && Math.hypot(dtpCx(e) - this.x, dtpCy(e) - this.y) < R * 1.15 + e.w / 2;
+            this.emptyT = near ? 0 : (this.emptyT || 0) + 1;
+            if (this.emptyT >= DTP_MISS_T && this.t < this.dur && typeof dtpMissHome === 'function' && dtpMissHome(o)) { this.active = false; return; }
+        }
         if (this.t >= this.dur) this.active = false;
     }
     draw() { if (typeof dtpDrawStorm === 'function') dtpDrawStorm(this); }

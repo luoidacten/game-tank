@@ -766,9 +766,10 @@ const BODY_GUIDES = {
             { input: 'TAP', name: 'Chiêu Quạt', what: 'Theo Thế Quạt đang dùng' },
             { input: 'HOLD 0.3s', name: 'Đổi Thế', what: 'Thuận Phong Vũ ↔ Nghịch Phong Vũ' },
             { input: 'HOLD 0.7s', name: 'Đổi Khí Áp', what: 'Sang vùng Khí Áp kế, +20 Gió' },
-            { input: '←/→', name: 'Cửu Thiên', what: 'Bay lên lái vòng, nhấp để giáng' }
+            { input: '←/→', name: 'Cửu Thiên', what: 'Bay lên lái vòng, nhấp để giáng' },
+            { input: 'TAP lại', name: 'Tan Bão Quạt', what: 'Đang Bão Quạt Tuyệt Vũ: nhấp để kết thúc sớm, về làn' }
         ],
-        passive: ['Khí Áp: Thuận (nhanh) / Bão Hòa / Nghịch (mạnh)', 'Xen kẽ 2 Thế -> Hợp Phong +dame'],
+        passive: ['Khí Áp: Thuận (nhanh) / Bão Hòa / Nghịch (mạnh)', 'Xen kẽ 2 Thế -> Hợp Phong +dame', 'Bản thể lướt / đáp hụt (0.75s không có địch trong tầm) -> về làn'],
         evo: { e1: 'Gió 130, đổi Thế 0.18s, +Khiên', e2: 'Mỗi vùng Khí Áp mạnh hơn', full: 'Bão Hòa nhận cả 2 nội tại' },
         tips: ['Đổi Thế liên tục, đừng lặp 1 Thế 3 lần']
     },
