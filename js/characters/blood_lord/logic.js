@@ -19,7 +19,7 @@ const BD_LAND_LOCK = 30;    // Bóng Ma Màn Đêm: vòng khóa 0.5s trước kh
 const BD_LAND_FINAL = 15;   // 0.25s cuối vòng khóa đứng yên (trước đó bám địch)
 const BD_LAND_TRACK = 2.4;  // tốc bám địch khi đang khóa (px/tick, chậm hơn xe địch)
 const BD_LAND_EDGE = 26;    // sát mép vòng: vẫn ăn 40% dame
-const BD_FEAST_EMPTY = 45;  // Đại Tiệc Máu: 0.75s không ai trong vùng -> tan sớm, Huyết Ma về
+const BD_FEAST_EMPTY = 45;  // Bầy Dơi / Đại Tiệc: 0.75s không ai trong vùng -> tan sớm, Huyết Ma về
 const BD_HP_FLOOR = 0.5;    // kỹ năng tự trừ máu không làm HP tụt dưới 0.5
 
 function bdEvo1(p) { return p.hasUpgrade('evo_bd_1'); }
@@ -221,13 +221,11 @@ class BdBatZone {
             // Kẻ địch đứng trong Bầy Dơi đủ 2s -> Huyết Ma hồi 2 HP
             if (!this.feast && o && this.ticksTotal > 0 && this.stayHits >= this.ticksTotal) bdHeal(o, 1.5, 'HUYẾT YẾN 🦇');
         }
-        if (this.feast) {
-            this.emptyT = anyIn ? 0 : (this.emptyT || 0) + 1;
-            if (this.emptyT >= BD_FEAST_EMPTY && this.life > 1) {
-                this.life = 1;
-                if (o && o.bdMode === 'swarm') o.bdSwarmT = 1;
-                if (o && !o.bdFeastHit) { o.bdPool = Math.min(bdPoolMax(o), (o.bdPool || 0) + bdPoolMax(o) * 0.3); addFloatingText(this.x, this.y - 20, 'HOÀN MÁU 🩸', '#fda4af', 12); }
-            }
+        // Bầy Dơi / Đại Tiệc: 0.75s không ai trong vùng -> tan sớm, Huyết Ma về làn (không hoàn gì)
+        this.emptyT = anyIn ? 0 : (this.emptyT || 0) + 1;
+        if (this.emptyT >= BD_FEAST_EMPTY && this.life > 1) {
+            this.life = 1;
+            if (o && o.bdMode === 'swarm') o.bdSwarmT = 1;
         }
     }
     draw() { if (typeof bdDrawBatZone === 'function') bdDrawBatZone(this); }
@@ -427,6 +425,11 @@ function bdDashUpdate(p) {
     p.y = p.id === 1 ? canvas.height + 300 : -300 - p.h;
 }
 
+// Kết thúc sớm dạng dơi: tan mọi vùng của mình rồi về làn
+function bdEndSwarm(p) {
+    for (const z of bodyEffects) if (z && z.isBdZone && z.owner === p && z.active) z.life = Math.min(z.life, 1);
+    p.bdSwarmT = 1;
+}
 function bdReturn(p, x) {
     p.bdMode = 'idle';
     p.bdCircle = null;
@@ -491,18 +494,16 @@ function bdSkyLand(p) {
 function bdSkyImpact(p) {
     const c = p.bdCircle;
     const pw = bdDmgMult(p);
-    let hitAny = false;
     for (const e of bdFoes(p)) {
         const dist = Math.hypot(e.x + e.w / 2 - c.x, e.y + e.h / 2 - c.y);
         if (dist < c.r + e.w / 2) {
-            bdHit(p, e, 1.3 * pw, undefined, 0.2); hitAny = true;
+            bdHit(p, e, 1.3 * pw, undefined, 0.2);
             addFloatingText(e.x + e.w / 2, e.y - 16, 'ĐẠI TIỆC MÁU! 🦇', BD_RED, 14);
         } else if (dist < c.r + e.w / 2 + BD_LAND_EDGE) {
-            bdHit(p, e, 1.3 * pw * 0.4, undefined, 0.2); hitAny = true; // sát mép: 40%
+            bdHit(p, e, 1.3 * pw * 0.4, undefined, 0.2); // sát mép: 40%
             addFloatingText(e.x + e.w / 2, e.y - 16, 'sượt qua 🦇', '#fda4af', 11);
         }
     }
-    p.bdFeastHit = hitAny;
     for (const ob of bdObjects(p)) if (Math.hypot(ob.x + ob.w / 2 - c.x, ob.y + ob.h / 2 - c.y) < c.r + ob.w / 2) bdHitObject(p, ob, 1.3 * pw);
     bodyEffects.push(new BdBatZone(p, c.x, c.y, c.r, 180, { feast: true, dmg: 0.2 * pw }));
     explosions.push(new Explosion(c.x, c.y, c.r + 16, 'rgba(255, 31, 75,', 0, p));
@@ -571,6 +572,8 @@ CharHooks.register('blood_lord', {
             this.bdHoldValid = false; this.bdHold = 0;
             return true;
         }
+        // Đang hóa dơi / Đại Tiệc (không thể bị nhắm): nhấp Bắn lần nữa -> kết thúc sớm, về làn
+        if (this.bdMode === 'swarm' && pressed) bdEndSwarm(this);
         if (this.bdMode !== 'idle') { this.bdHoldValid = false; this.bdHold = 0; return true; }
         if (pressed) { this.bdHoldValid = true; this.bdHold = 0; this.bdSwitched = false; }
         if (s && this.bdHoldValid) {
