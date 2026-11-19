@@ -11,6 +11,7 @@ const ST_TIER = [
     { kind: 'thunder', dur: 240, r: 78, mult: 0.3, pull: 1.0, slow: 0.35, cut: 1.8, name: 'LÔI BÃO ⚡', col: '#a78bfa' },
 ];
 
+const ST_STORM_EMPTY = 45;   // Gió Lốc / Lôi Bão: 0.75s không có địch trong tầm hút -> tan sớm, về làn
 function stFull(p) { return hasFullEvo(p, 'storm'); }
 function stEnemy(p) { return p.id === 1 ? p2 : p1; }
 function stSfx(n) { if (typeof soundSystem !== 'undefined' && soundSystem && !soundSystem.muted && soundSystem[n]) soundSystem[n](); }
@@ -47,6 +48,17 @@ function stEndStorm(p, tor) {
     addFloatingText(tor.x, tor.y - tor.r * 0.6, tor.kind === 'thunder' ? 'LÔI BÃO TRẢM!' : 'PHONG TRẢM!', tier.col, 15);
     triggerScreenShake(tor.kind === 'thunder' ? 12 : 8, 14);
     stSfx('playExplosion');
+    stReturn(p);
+}
+
+// Kết thúc sớm Gió Lốc / Lôi Bão (lốc trống 0.75s hoặc nhấp Bắn lần nữa): tan lốc, KHÔNG chém kết, lướt về làn
+function stEndStormEarly(p, tor) {
+    if (!p || p.stMode !== 'storm') return;
+    for (const e of bodyEffects) if (e instanceof StTornado && e.active && e.team === p.id && e.kind !== 'mini') { tor = tor || e; e.active = false; }
+    if (tor) {
+        explosions.push(new Explosion(tor.x, tor.y, tor.r * 0.6, tor.kind === 'thunder' ? 'rgba(167, 139, 250,' : 'rgba(94, 234, 212,', 0, p));
+        addFloatingText(tor.x, tor.y - tor.r * 0.5, 'TAN LỐC 💨', '#99f6e4', 12);
+    }
     stReturn(p);
 }
 
@@ -134,6 +146,10 @@ Object.assign(Player.prototype, {
         // Đang trong Gió Lốc / Lôi Bão: xe ẩn, đứng yên (cơn lốc tự điều khiển dòng thời gian)
         if (this.stMode === 'storm') {
             this.freezeTimer = 0;
+            // Nhấp Bắn lần nữa -> kết thúc sớm, về làn (handleShooting không chạy khi đang ẩn nên bắt nhấp ở đây)
+            const s = !!(inp && inp.s), pressed = s && !this.stormHeld;
+            this.stormHeld = s;
+            if (pressed) { stEndStormEarly(this); return true; }
             if (!bodyEffects.some(e => e instanceof StTornado && e.active && e.team === this.id && e.kind !== 'mini')) stReturn(this, true); // an toàn
             return true;
         }

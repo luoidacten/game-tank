@@ -109,9 +109,10 @@ const BODY_GUIDES = {
         controls: [
             { input: 'HOLD <1.75s', name: 'Chém', what: 'Nhả sớm (<50%): lao lên chém' },
             { input: 'HOLD 1.75s', name: 'Gió Lốc', what: 'Nhả ở 50%: lốc xoáy 2s' },
-            { input: 'HOLD 3.5s', name: 'Lôi Bão', what: 'Đầy 100%: ẩn, bất tử 4s rồi chém' }
+            { input: 'HOLD 3.5s', name: 'Lôi Bão', what: 'Đầy 100%: ẩn, bất tử 4s rồi chém' },
+            { input: 'TAP lại', name: 'Tan Lốc', what: 'Đang ẩn trong lốc: nhấp Bắn để kết thúc sớm, về làn' }
         ],
-        passive: ['Khi lao phản đạn địch'],
+        passive: ['Khi lao phản đạn địch', 'Lốc trống 0.75s (địch ngoài tầm) tự tan, về làn'],
         evo: { e1: 'Tụ >50% xóa đạn quanh người, +khiên', e2: 'Phân thân tự lao chém mỗi 3-8s', full: 'Tụ chỉ 2.5s, phân thân dày hơn' },
         tips: ['Tụ đầy Lôi Bão để né đòn nguy hiểm']
     },

@@ -1181,3 +1181,12 @@ window.addEventListener('load', () => {
         return result;
     };
 });
+
+// Cuồng Phong: đang ẩn trong Gió Lốc / Lôi Bão -> không nhấp Bắn (nhấp = kết thúc sớm); lốc trống tự tan
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        if (bot.weapon === 'storm' && bot.stMode === 'storm') { this.hold = 0; this.stHoldN = 0; this.tapCool = 0; inp.s = false; return; }
+        return f.call(this, bot, enemy, aligned, inp);
+    };
+})();
