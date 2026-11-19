@@ -16,6 +16,10 @@ const BD_RGBA = ['rgba(255, 45, 85,', 'rgba(255, 140, 26,', 'rgba(255, 79, 216,'
 const BD_HOLD_TICKS = 15;   // giữ 0.25s để đổi dạng (mỗi lần giữ chỉ đổi 1 dạng, phải THẢ nút mới đổi tiếp)
 const BD_BASE_HP = 3;       // HP gốc (Huyết Tế tính phần Max HP thưởng vượt mức này)
 const BD_LAND_LOCK = 30;    // Bóng Ma Màn Đêm: vòng khóa 0.5s trước khi đáp
+const BD_LAND_FINAL = 15;   // 0.25s cuối vòng khóa đứng yên (trước đó bám địch)
+const BD_LAND_TRACK = 2.4;  // tốc bám địch khi đang khóa (px/tick, chậm hơn xe địch)
+const BD_LAND_EDGE = 26;    // sát mép vòng: vẫn ăn 40% dame
+const BD_FEAST_EMPTY = 45;  // Đại Tiệc Máu: 0.75s không ai trong vùng -> tan sớm, Huyết Ma về
 const BD_HP_FLOOR = 0.5;    // kỹ năng tự trừ máu không làm HP tụt dưới 0.5
 
 function bdEvo1(p) { return p.hasUpgrade('evo_bd_1'); }
@@ -217,7 +221,14 @@ class BdBatZone {
             // Kẻ địch đứng trong Bầy Dơi đủ 2s -> Huyết Ma hồi 2 HP
             if (!this.feast && o && this.ticksTotal > 0 && this.stayHits >= this.ticksTotal) bdHeal(o, 1.5, 'HUYẾT YẾN 🦇');
         }
-        void anyIn;
+        if (this.feast) {
+            this.emptyT = anyIn ? 0 : (this.emptyT || 0) + 1;
+            if (this.emptyT >= BD_FEAST_EMPTY && this.life > 1) {
+                this.life = 1;
+                if (o && o.bdMode === 'swarm') o.bdSwarmT = 1;
+                if (o && !o.bdFeastHit) { o.bdPool = Math.min(bdPoolMax(o), (o.bdPool || 0) + bdPoolMax(o) * 0.3); addFloatingText(this.x, this.y - 20, 'HOÀN MÁU 🩸', '#fda4af', 12); }
+            }
+        }
     }
     draw() { if (typeof bdDrawBatZone === 'function') bdDrawBatZone(this); }
 }
@@ -440,14 +451,25 @@ function bdSkyStart(p) {
 function bdSkyUpdate(p, inp) {
     const c = p.bdCircle;
     if (!c) { bdReturn(p, p.bdHomeX); return; }
-    if (c.landing > 0) { if (--c.landing === 0) bdSkyImpact(p); return; }
+    if (c.landing > 0) {
+        // Bám địch (chậm hơn tốc xe địch) tới 0.25s cuối mới khóa hẳn -> phản xạ tốt vẫn né được
+        const te = bdEnemy(p);
+        if (te && c.landing > BD_LAND_FINAL) {
+            const dx = te.x + te.w / 2 - c.x;
+            c.x += Math.max(-BD_LAND_TRACK, Math.min(BD_LAND_TRACK, dx));
+            c.x = Math.max(c.r * 0.5, Math.min(canvas.width - c.r * 0.5, c.x));
+        }
+        if (--c.landing === 0) bdSkyImpact(p);
+        return;
+    }
     c.t++;
     const e = bdEnemy(p);
     let l = inp.l, r = inp.r;
     if (bdIsBot(p) && e) {
         const dx = e.x + e.w / 2 - c.x;
         l = dx < -4; r = dx > 4;
-        if (c.t > 50 && Math.abs(dx) < 12) bdSkyLand(p);
+        const ly = bdLaneY(e) + e.h / 2;
+        if (c.t > 50 && Math.abs(dx) < 12 && Math.abs(c.y - ly) < 6) bdSkyLand(p); // chỉ đáp khi vòng đã tới làn địch
     }
     if (l) c.x -= 4.2;
     if (r) c.x += 4.2;
@@ -460,18 +482,27 @@ function bdSkyUpdate(p, inp) {
 function bdSkyLand(p) {
     const c = p.bdCircle;
     if (!c || c.landing > 0) return;
-    c.landing = BD_LAND_LOCK; c.landMax = BD_LAND_LOCK;
+    // Combo khống chế: địch đang choáng / đóng băng -> đáp gần như ngay
+    const e = bdEnemy(p);
+    const lock = (e && ((e.stunTimer || 0) > 0 || (e.freezeTimer || 0) > 0)) ? BD_LAND_FINAL : BD_LAND_LOCK;
+    c.landing = lock; c.landMax = lock;
     bdSfx('playDash');
 }
 function bdSkyImpact(p) {
     const c = p.bdCircle;
     const pw = bdDmgMult(p);
+    let hitAny = false;
     for (const e of bdFoes(p)) {
-        if (Math.hypot(e.x + e.w / 2 - c.x, e.y + e.h / 2 - c.y) < c.r + e.w / 2) {
-            bdHit(p, e, 1.3 * pw, undefined, 0.2);
+        const dist = Math.hypot(e.x + e.w / 2 - c.x, e.y + e.h / 2 - c.y);
+        if (dist < c.r + e.w / 2) {
+            bdHit(p, e, 1.3 * pw, undefined, 0.2); hitAny = true;
             addFloatingText(e.x + e.w / 2, e.y - 16, 'ĐẠI TIỆC MÁU! 🦇', BD_RED, 14);
+        } else if (dist < c.r + e.w / 2 + BD_LAND_EDGE) {
+            bdHit(p, e, 1.3 * pw * 0.4, undefined, 0.2); hitAny = true; // sát mép: 40%
+            addFloatingText(e.x + e.w / 2, e.y - 16, 'sượt qua 🦇', '#fda4af', 11);
         }
     }
+    p.bdFeastHit = hitAny;
     for (const ob of bdObjects(p)) if (Math.hypot(ob.x + ob.w / 2 - c.x, ob.y + ob.h / 2 - c.y) < c.r + ob.w / 2) bdHitObject(p, ob, 1.3 * pw);
     bodyEffects.push(new BdBatZone(p, c.x, c.y, c.r, 180, { feast: true, dmg: 0.2 * pw }));
     explosions.push(new Explosion(c.x, c.y, c.r + 16, 'rgba(255, 31, 75,', 0, p));
