@@ -696,7 +696,7 @@ const BODY_GUIDES = {
             { input: 'TAP', name: 'Ra Đòn', what: 'Trảm / Khóa / Linh tùy phong cách' },
             { input: 'HOLD 0.5s', name: 'Đổi Phong Cách', what: '⚔ Trảm → ⛓ Khóa → 🌀 Linh' }
         ],
-        passive: ['Hút máu 35%, mọi đòn gây Chảy Máu', 'Máu thấp: hút máu -> Giáp Trắng cực mạnh', 'Giáp chỉ tụt sau 2s không nhận giáp & không bị đánh', 'HP chỉ 3 — dễ vỡ'],
+        passive: ['Hút máu 35%, mọi đòn gây Chảy Máu', 'Máu thấp: hút máu -> Giáp Trắng cực mạnh', 'Giáp chỉ tụt sau 2s không nhận giáp & không bị đánh', 'Linh lướt hụt / vòng trống 0.75s -> về làn ngay', 'HP chỉ 3 — dễ vỡ'],
         evo: { e1: 'Hút máu 65%, tích nhanh', e2: 'Cuồng Huyết mạnh, Linh giảm st', full: 'Hút 120%, Tam Thức Hợp Nhất' },
         tips: ['Nghỉ 2-3s để tích Sát Ý rồi ra đòn']
     },
