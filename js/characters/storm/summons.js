@@ -245,6 +245,9 @@ class StTornado {
         }
         if (!o || o.stMode !== 'storm' || o.hp <= 0) { this.active = false; return; }
         const thunder = this.kind === 'thunder';
+        // Lốc trống (địch ngoài tầm hút) 0.75s -> tan sớm, Cuồng Phong về làn (không chém kết, không hoàn gì)
+        this.emptyT = this.inside(e, 1.5) ? 0 : (this.emptyT || 0) + 1;
+        if (this.emptyT >= ST_STORM_EMPTY) { this.active = false; stEndStormEarly(o, this); return; }
         // Hút nhẹ theo trục X về tâm + Làm Chậm + dame mỗi 0.4s
         if (this.inside(e, 1.5)) {
             const dx = this.x - (e.x + e.w / 2), pull = thunder ? 1.0 : 0.55;

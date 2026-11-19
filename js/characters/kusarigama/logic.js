@@ -300,10 +300,15 @@ function kgLinhStep(p) {
             p.y = Math.max(0, Math.min(canvas.height - p.h, p.y));
             if (kgAlive(e) && dir < 0) p.y = Math.max(p.y, e.y + e.h + 2);
             if (kgAlive(e) && dir > 0) p.y = Math.min(p.y, e.y - p.h - 2);
-            p.kgMode = 'warn'; p.kgModeT = 0; p.kgWarnN = p.kgBers ? 30 : 60;
+            p.kgMode = 'warn'; p.kgModeT = 0; p.kgWarnN = p.kgBers ? 30 : 60; p.kgMissT = 0;
+            // Lướt hụt: địch ngoài tầm xoay -> về làn ngay, không đứng lại sân địch (không hoàn gì)
+            if (!(kgAlive(e) && kgInR(kgCx(p), kgCy(p), p.kgLinhR + 20, e))) kgLinhMiss(p);
         }
     } else if (p.kgMode === 'warn') {
         if (kgE2(p)) kgCleanse(p);
+        // Địch ra khỏi Vòng Cảnh Báo 0.75s -> hụt, về làn
+        p.kgMissT = (kgAlive(e) && kgInR(kgCx(p), kgCy(p), p.kgLinhR, e)) ? 0 : (p.kgMissT || 0) + 1;
+        if (p.kgMissT >= KG_MISS_T && p.kgModeT < p.kgWarnN) { kgLinhMiss(p); return; }
         if (p.kgModeT >= p.kgWarnN) { p.kgMode = 'spin'; p.kgModeT = 0; kgSpinStart(p, e); }
     } else if (p.kgMode === 'spin') {
         if (p.kgModeT % 6 === 1 && p.kgModeT <= 19 && kgAlive(e) && kgInR(kgCx(p), kgCy(p), p.kgLinhR, e)) {
@@ -317,6 +322,11 @@ function kgLinhStep(p) {
         if (L <= sp || p.kgModeT > 60) { kgBack(p, true); return; }
         p.x += dx / L * sp; p.y += dy / L * sp;
     } else kgBack(p, true);
+}
+const KG_MISS_T = 45;   // Linh: Vòng Cảnh Báo trống 0.75s -> về làn
+function kgLinhMiss(p) {
+    kgTxt(p, 'HỤT — VỀ LÀN', '#94a3b8', 11);
+    kgBack(p);
 }
 function kgSpinStart(p, e) {
     const cx = kgCx(p), cy = kgCy(p);

@@ -109,9 +109,10 @@ const BODY_GUIDES = {
         controls: [
             { input: 'HOLD <1.75s', name: 'Chém', what: 'Nhả sớm (<50%): lao lên chém' },
             { input: 'HOLD 1.75s', name: 'Gió Lốc', what: 'Nhả ở 50%: lốc xoáy 2s' },
-            { input: 'HOLD 3.5s', name: 'Lôi Bão', what: 'Đầy 100%: ẩn, bất tử 4s rồi chém' }
+            { input: 'HOLD 3.5s', name: 'Lôi Bão', what: 'Đầy 100%: ẩn, bất tử 4s rồi chém' },
+            { input: 'TAP lại', name: 'Tan Lốc', what: 'Đang ẩn trong lốc: nhấp Bắn để kết thúc sớm, về làn' }
         ],
-        passive: ['Khi lao phản đạn địch'],
+        passive: ['Khi lao phản đạn địch', 'Lốc trống 0.75s (địch ngoài tầm) tự tan, về làn'],
         evo: { e1: 'Tụ >50% xóa đạn quanh người, +khiên', e2: 'Phân thân tự lao chém mỗi 3-8s', full: 'Tụ chỉ 2.5s, phân thân dày hơn' },
         tips: ['Tụ đầy Lôi Bão để né đòn nguy hiểm']
     },
@@ -695,7 +696,7 @@ const BODY_GUIDES = {
             { input: 'TAP', name: 'Ra Đòn', what: 'Trảm / Khóa / Linh tùy phong cách' },
             { input: 'HOLD 0.5s', name: 'Đổi Phong Cách', what: '⚔ Trảm → ⛓ Khóa → 🌀 Linh' }
         ],
-        passive: ['Hút máu 35%, mọi đòn gây Chảy Máu', 'Máu thấp: hút máu -> Giáp Trắng cực mạnh', 'Giáp chỉ tụt sau 2s không nhận giáp & không bị đánh', 'HP chỉ 3 — dễ vỡ'],
+        passive: ['Hút máu 35%, mọi đòn gây Chảy Máu', 'Máu thấp: hút máu -> Giáp Trắng cực mạnh', 'Giáp chỉ tụt sau 2s không nhận giáp & không bị đánh', 'Linh lướt hụt / vòng trống 0.75s -> về làn ngay', 'HP chỉ 3 — dễ vỡ'],
         evo: { e1: 'Hút máu 65%, tích nhanh', e2: 'Cuồng Huyết mạnh, Linh giảm st', full: 'Hút 120%, Tam Thức Hợp Nhất' },
         tips: ['Nghỉ 2-3s để tích Sát Ý rồi ra đòn']
     },
@@ -765,9 +766,10 @@ const BODY_GUIDES = {
             { input: 'TAP', name: 'Chiêu Quạt', what: 'Theo Thế Quạt đang dùng' },
             { input: 'HOLD 0.3s', name: 'Đổi Thế', what: 'Thuận Phong Vũ ↔ Nghịch Phong Vũ' },
             { input: 'HOLD 0.7s', name: 'Đổi Khí Áp', what: 'Sang vùng Khí Áp kế, +20 Gió' },
-            { input: '←/→', name: 'Cửu Thiên', what: 'Bay lên lái vòng, nhấp để giáng' }
+            { input: '←/→', name: 'Cửu Thiên', what: 'Bay lên lái vòng, nhấp để giáng' },
+            { input: 'TAP lại', name: 'Tan Bão Quạt', what: 'Đang Bão Quạt Tuyệt Vũ: nhấp để kết thúc sớm, về làn' }
         ],
-        passive: ['Khí Áp: Thuận (nhanh) / Bão Hòa / Nghịch (mạnh)', 'Xen kẽ 2 Thế -> Hợp Phong +dame'],
+        passive: ['Khí Áp: Thuận (nhanh) / Bão Hòa / Nghịch (mạnh)', 'Xen kẽ 2 Thế -> Hợp Phong +dame', 'Bản thể lướt / đáp hụt (0.75s không có địch trong tầm) -> về làn'],
         evo: { e1: 'Gió 130, đổi Thế 0.18s, +Khiên', e2: 'Mỗi vùng Khí Áp mạnh hơn', full: 'Bão Hòa nhận cả 2 nội tại' },
         tips: ['Đổi Thế liên tục, đừng lặp 1 Thế 3 lần']
     },
