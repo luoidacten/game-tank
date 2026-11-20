@@ -122,30 +122,9 @@ const EvoSystem = {
             box.appendChild(card);
         });
     },
+    // Vẽ nút Skill / vòng Nộ / băng tên: js/render/evo-fx.js (EvoFx.ui)
     ui() {
-        for (const side of [1, 2]) {
-            const btn = document.getElementById(`evo-skill-${side}`);
-            if (!btn) continue;
-            const online = onlineManager.isOnline;
-            const p = online && onlineManager.role === 'guest' ? (side === 1 ? p2 : p1) : (side === 1 ? p1 : p2);
-            const cfg = this.config(p), active = gameState.phase === 'playing';
-            btn.hidden = !cfg || !active || (online && side === 2);
-            const banner = document.getElementById(`evo-banner-${side}`);
-            banner.hidden = !FEATURE_EVO34 || !active || !(p && p.ultBannerTicks > 0);
-            banner.textContent = p && p.ultBannerName || '';
-            if (btn.hidden) continue;
-            const rage = p.rage || 0, full = rage >= 100, ready = !full || this.ready(p);
-            btn.classList.toggle('evo-ultimate', full);
-            btn.classList.toggle('evo-blocked', !ready);
-            btn.style.setProperty('--rage', `${rage * 3.6}deg`);
-            btn.style.setProperty('--cooldown', `${Math.min(360, (p.skillCd || 0) / ((cfg.cooldown || 10) * 60) * 360)}deg`);
-            btn.querySelector('span').textContent = p.ultActiveTicks > 0 ? Math.ceil(p.ultActiveTicks / 60) : full ? (ready ? 'NỘ' : '🔒') : (p.skillCd > 0 ? (p.skillCd < 180 ? (p.skillCd / 60).toFixed(1) : Math.ceil(p.skillCd / 60)) : 'SKILL');
-            btn.title = full ? `${cfg.ultimateName}${ready ? '' : ' — Chưa đủ điều kiện'}` : cfg.name;
-            btn.setAttribute('aria-label', btn.title);
-            if (full && btn.dataset.full !== 'true' && navigator.vibrate) navigator.vibrate(10);
-            btn.dataset.full = String(full);
-            banner.textContent = p.ultBannerName || '';
-        }
+        if (typeof EvoFx !== 'undefined') EvoFx.ui();
     }
 };
 
@@ -237,10 +216,10 @@ const EvoSystem = {
     window.addEventListener('load', () => {
         for (const side of [1, 2]) {
             const area = document.getElementById(`p${side}-controls`), button = document.createElement('button');
-            button.id = `evo-skill-${side}`; button.className = 'evo-skill'; button.hidden = true; button.innerHTML = '<span>SKILL</span>';
+            button.id = `evo-skill-${side}`; button.className = 'evo-skill'; button.hidden = true;
             area.querySelector('.btn-group').insertBefore(button, area.querySelector('.btn-shoot'));
             const banner = document.createElement('div'); banner.id = `evo-banner-${side}`; banner.className = `evo-banner evo-banner-${side}`; banner.hidden = true;
-            document.getElementById('gameContainer').appendChild(banner);
+            document.body.appendChild(banner);
             const press = down => {
                 const pid = onlineManager.isOnline ? onlineManager.myPid() : `p${side}`;
                 inputs[pid].k = down;

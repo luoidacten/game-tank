@@ -233,6 +233,8 @@ function renderFrame() {
     });
     ctx.restore();
 
+    // Màn mở Tuyệt Kỹ Evo 4: tối nền dưới hiệu ứng / xe - js/render/evo-fx.js
+    if (typeof evoFxUnder === 'function') evoFxUnder();
     bodyEffects.forEach(e => e.draw());
     confinementCages.forEach(c => c.draw());
     creatorTurrets.forEach(t => t.draw());
@@ -254,6 +256,8 @@ function renderFrame() {
 
     // Lớp phủ Lãnh địa & ấn Ràng Buộc - js/render/tank-art/curse.js
     if (typeof curseFxOver === 'function') curseFxOver();
+    // Màn mở Tuyệt Kỹ Evo 4: vạch tập trung, sóng xung kích - js/render/evo-fx.js
+    if (typeof evoFxOver === 'function') evoFxOver();
     // Lớp phủ kết liễu Hoa Ảnh (chớp màn hình, nhát chém ngang) - js/characters/flower_shadow/render.js
     if (typeof fsFxOver === 'function') fsFxOver();
     // Lớp phủ kết liễu Tsukiyo (Nguyệt Trảm) - js/characters/tsukiyo/render.js
