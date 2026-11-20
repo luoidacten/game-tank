@@ -3,7 +3,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
   const b = await chromium.launch();
   const page = await b.newPage({ viewport: { width: 420, height: 860 } });
   const errs=[]; page.on('pageerror', e => errs.push(e.message));
-  await page.goto('file:///home/user/game-tank/index.html');
+  await page.goto('file://' + (process.argv[2] || require('path').resolve(__dirname, '..')) + '/index.html');
   await page.waitForTimeout(400);
   const bodies = await page.evaluate(() => MODULES.BODY.map(m => m.id));
   for (const id of bodies) {
