@@ -66,6 +66,7 @@ const NET_CLASSES = {
     ColHolo, ColFinisher,
     TadFinisher, TadClone, TadWall, TadPhantom, TadMark,
     FcZone, FcFinisher,
+    TrainBoss, TrainShell, TrainMinion, TrainDash,
 };
 
 // Biến toàn cục cần đồng bộ: [tên, getter, setter]

@@ -1,0 +1,134 @@
+/* ==========================================
+   MẢNH KÝ ỨC 1 — THE TRAIN (sảnh, thẻ Ký Ức, kết quả)
+   ========================================== */
+.mode-card-train { border-color: rgba(255, 90, 60, 0.6); background: linear-gradient(135deg, #2a0909 0%, #120406 100%); }
+.mode-card-train b { color: #ffd0c4; }
+.mode-card-train:hover { border-color: #ff5a3c; box-shadow: 0 0 18px rgba(255, 80, 50, 0.45); }
+
+.train-overlay {
+    position: absolute; inset: 0; z-index: 700;
+    display: flex; align-items: center; justify-content: center; flex-direction: column;
+    background: radial-gradient(ellipse at 50% 30%, rgba(70, 10, 14, 0.92), rgba(4, 3, 10, 0.97) 70%);
+    padding: 14px 12px; box-sizing: border-box; overflow-y: auto;
+    font-family: 'Rajdhani', 'Be Vietnam Pro', sans-serif; color: #f1f5f9;
+}
+.train-panel {
+    width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 10px; align-items: stretch;
+    background: linear-gradient(180deg, rgba(25, 10, 18, 0.95), rgba(8, 6, 14, 0.96));
+    border: 1.5px solid rgba(255, 80, 60, 0.55); border-radius: 16px; padding: 16px 14px;
+    box-shadow: 0 0 28px rgba(255, 50, 40, 0.25), inset 0 0 22px rgba(255, 60, 40, 0.06);
+}
+.train-kicker { font-family: 'Orbitron', monospace; font-size: 11px; letter-spacing: 3px; color: #fca5a5; text-align: center; }
+.train-title {
+    margin: 0; text-align: center; font-family: 'Orbitron', monospace; font-weight: 900; font-size: 34px; letter-spacing: 3px;
+    color: #fff; text-shadow: 0 0 14px #ff3b3b, 0 0 32px rgba(255, 60, 40, 0.6);
+}
+.train-title.small { font-size: 22px; }
+.train-title.win { color: #fff7d6; text-shadow: 0 0 14px #ffb703, 0 0 32px rgba(255, 200, 40, 0.6); }
+.train-title.lose { color: #ffe1e1; }
+.train-art { width: 100%; height: auto; border-radius: 10px; display: block; }
+.train-flow { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; align-items: center; font-family: 'Orbitron', monospace; font-size: 9.5px; }
+.train-flow span { background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 6px; padding: 3px 6px; }
+.train-flow i { color: #ff6b5b; font-style: normal; }
+.train-tips { margin: 0; padding-left: 18px; font-size: 14px; line-height: 1.35; color: #e2e8f0; }
+.train-tips b { color: #ffd166; }
+.train-modes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.train-mode-btn {
+    display: flex; flex-direction: column; gap: 2px; align-items: center; padding: 10px 6px; border-radius: 12px; cursor: pointer;
+    background: rgba(255, 255, 255, 0.05); border: 1.5px solid rgba(255, 255, 255, 0.15); color: #e2e8f0; font-family: inherit;
+}
+.train-mode-btn b { font-family: 'Orbitron', monospace; font-size: 13px; }
+.train-mode-btn small { font-size: 12px; opacity: 0.75; }
+.train-mode-btn.active { border-color: #ff5a3c; background: linear-gradient(180deg, rgba(255, 70, 40, 0.25), rgba(255, 70, 40, 0.08)); box-shadow: 0 0 14px rgba(255, 80, 50, 0.4); }
+.train-record { text-align: center; font-size: 13px; color: #fbbf24; }
+.train-start { font-size: 16px !important; }
+
+/* ---- Thẻ Ký Ức ---- */
+.train-memory { justify-content: flex-start; gap: 8px; background: radial-gradient(ellipse at 50% 20%, rgba(70, 10, 14, 0.98), rgba(4, 3, 10, 0.99) 70%); }
+.train-memory-head { max-width: 640px; text-align: center; }
+.train-memory-sub { font-size: 12.5px; color: #cbd5e1; margin-top: 2px; line-height: 1.25; }
+.train-memory-sub b { color: #ffd166; }
+.train-cards { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 420px; }
+@media (min-width: 720px) { .train-cards { flex-direction: row; max-width: 820px; } .train-card { flex: 1; } }
+.train-card {
+    --tc: #38e8ff;
+    position: relative; cursor: pointer; border-radius: 14px; padding: 8px 9px 9px;
+    background: linear-gradient(165deg, rgba(20, 22, 36, 0.97), rgba(8, 8, 16, 0.98));
+    border: 2px solid var(--tc);
+    box-shadow: 0 0 14px color-mix(in srgb, var(--tc) 45%, transparent), inset 0 0 18px color-mix(in srgb, var(--tc) 12%, transparent);
+    display: grid; grid-template-columns: 1fr; gap: 5px;
+    animation: trainCardIn 0.45s cubic-bezier(.2, 1.4, .4, 1) both;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.train-card::before {
+    content: ''; position: absolute; inset: 3px; border-radius: 11px; pointer-events: none;
+    border: 1px solid color-mix(in srgb, var(--tc) 35%, transparent);
+}
+.train-card.star-3 { background: linear-gradient(165deg, rgba(40, 10, 14, 0.97), rgba(10, 4, 8, 0.98)); }
+.train-card.star-2 { background: linear-gradient(165deg, rgba(28, 12, 40, 0.97), rgba(8, 4, 14, 0.98)); }
+.train-card.picked { transform: scale(1.02); box-shadow: 0 0 26px var(--tc), inset 0 0 24px color-mix(in srgb, var(--tc) 25%, transparent); }
+.train-card.picked::after {
+    content: '✔ ĐÃ CHỌN'; position: absolute; top: -9px; right: 12px; font-family: 'Orbitron', monospace; font-size: 10px;
+    background: var(--tc); color: #050510; padding: 2px 7px; border-radius: 6px; font-weight: 900;
+}
+.tc-top { display: grid; grid-template-columns: 46% 1fr; gap: 9px; align-items: center; }
+.tc-head { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.tc-stars { font-size: 17px; color: var(--tc); text-shadow: 0 0 8px var(--tc); letter-spacing: 2px; line-height: 1; }
+.tc-stars span { color: rgba(255, 255, 255, 0.15); text-shadow: none; }
+.tc-code { font-family: 'Orbitron', monospace; font-size: 9.5px; color: #cbd5e1; letter-spacing: 1.5px; }
+.tc-code em { font-style: normal; color: #fde68a; letter-spacing: 0; }
+.train-card .train-art { border: 1px solid color-mix(in srgb, var(--tc) 50%, transparent); }
+.tc-name { font-family: 'Orbitron', monospace; font-weight: 900; font-size: 14.5px; color: #fff; letter-spacing: 0.5px; line-height: 1.15; text-shadow: 0 0 10px color-mix(in srgb, var(--tc) 60%, transparent); }
+.tc-desc { font-size: 12.5px; color: #94a3b8; line-height: 1.2; }
+.tc-row { display: grid; grid-template-columns: 1.25fr 1fr; gap: 6px; }
+.tc-sec { border-radius: 9px; padding: 4px 7px; display: flex; flex-direction: column; gap: 1px; }
+.tc-sec b { font-size: 13px; line-height: 1.15; }
+.tc-sec small { font-size: 12px; line-height: 1.2; color: #e2e8f0; }
+.tc-me { background: rgba(56, 232, 140, 0.1); border: 1px solid rgba(56, 232, 140, 0.35); }
+.tc-me b { color: #86efac; }
+.tc-boss { background: rgba(255, 70, 70, 0.1); border: 1px solid rgba(255, 70, 70, 0.35); }
+.tc-boss b { color: #fca5a5; }
+@keyframes trainCardIn { from { opacity: 0; transform: translateY(26px) scale(0.92) rotateX(25deg); } to { opacity: 1; transform: none; } }
+#trainMemoryOk { width: 100%; max-width: 420px; }
+#trainMemoryOk:disabled { opacity: 0.45; }
+
+/* ---- Kết quả ---- */
+.train-result-body { text-align: center; font-size: 15px; }
+.train-result-body b { color: #ffd166; }
+.train-result-btns { display: flex; flex-direction: column; gap: 8px; }
+.train-trophy { font-size: 54px; filter: drop-shadow(0 0 14px rgba(255, 200, 40, 0.7)); animation: trainPulse 1.4s ease-in-out infinite; }
+@keyframes trainPulse { 50% { transform: scale(1.08); } }
+.train-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 6px 0; }
+.train-stats div { background: rgba(255, 255, 255, 0.06); border-radius: 10px; padding: 6px 2px; display: flex; flex-direction: column; }
+.train-stats b { font-family: 'Orbitron', monospace; font-size: 20px; color: #fff; }
+.train-stats small { font-size: 12px; color: #94a3b8; }
+.train-hist, .train-chips { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; margin-top: 6px; font-size: 12px; }
+.train-hist span, .train-chips span { background: rgba(255, 255, 255, 0.08); border-radius: 6px; padding: 2px 7px; }
+.train-hist i { color: #ff6b5b; font-style: normal; }
+
+/* ---- Cửa hàng & thông báo ---- */
+.train-shop-strip {
+    display: flex; flex-wrap: wrap; gap: 5px; align-items: center; justify-content: center;
+    font-size: 12px; padding: 4px 8px; margin: 0 0 4px; border-radius: 10px;
+    background: linear-gradient(90deg, rgba(120, 15, 15, 0.5), rgba(40, 8, 30, 0.5)); border: 1px solid rgba(255, 90, 60, 0.45);
+}
+.train-shop-strip b { font-family: 'Orbitron', monospace; font-size: 11px; color: #fca5a5; margin-right: 4px; }
+.train-shop-strip span { background: rgba(255, 255, 255, 0.08); border-radius: 6px; padding: 1px 6px; }
+.train-shop-strip .dim { opacity: 0.6; }
+body:not(.train-mode) .train-shop-strip { display: none !important; }
+body.train-solo #p2-upgrades, body.train-solo #p2-ready-status { display: none !important; }
+.train-toast {
+    position: absolute; left: 50%; top: 38%; transform: translate(-50%, -50%) scale(0.8); z-index: 720; pointer-events: none;
+    font-family: 'Orbitron', monospace; font-weight: 900; font-size: 18px; color: #fff7d6; text-align: center;
+    background: rgba(20, 8, 10, 0.85); border: 1.5px solid #ffb703; border-radius: 12px; padding: 10px 16px;
+    text-shadow: 0 0 10px #ffb703; opacity: 0; transition: opacity 0.25s, transform 0.25s;
+}
+.train-toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+body.low-quality .train-card { box-shadow: none; }
+
+/* ---- HUD trong trận: dời khỏi đường ray giữa sân ---- */
+body.train-mode #hud-left-group { top: 29%; transform: translateY(-50%) scale(0.9); }
+body.train-mode #score-board { top: 29%; transform: translateY(-50%); }
+body.train-mode #score-board .score-row,
+body.train-mode #score-board .score-vs { display: none; }
+body.train-solo #score-board .p2-side { display: none; }
