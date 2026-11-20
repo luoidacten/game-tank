@@ -384,3 +384,21 @@ window.addEventListener('load', () => {
         return r;
     };
 });
+
+// Nhận diện MAIN trên nút Skill / băng tên Tuyệt Kỹ dùng chung (js/render/evo-fx.js nạp sau file này)
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof EvoFx === 'undefined') return;
+    EvoFx.theme('basic', {
+        c1: '#ff7a00', c2: '#ffd56a', dark: '#2a0a04', slogan: 'Chiến đấu đến khi lửa tàn!!',
+        sfx: [[0, 55, 'sawtooth', 0.9, 0.2], [120, 660, 'triangle', 0.25, 0.08], [260, 990, 'sine', 0.3, 0.06]],
+        icon(g, mode) {
+            if (mode === 'ult') { // ngọn lửa
+                g.beginPath(); g.moveTo(0, -13); g.quadraticCurveTo(10, -2, 7, 6); g.quadraticCurveTo(4, 12, 0, 12);
+                g.quadraticCurveTo(-4, 12, -7, 6); g.quadraticCurveTo(-10, -2, 0, -13); g.fill();
+            } else { // viên Hợp Nhất
+                g.beginPath(); g.arc(0, 0, 7, 0, Math.PI * 2); g.fill();
+                g.lineWidth = 2; g.beginPath(); g.arc(0, 0, 11, -0.6, 0.6); g.stroke(); g.beginPath(); g.arc(0, 0, 11, Math.PI - 0.6, Math.PI + 0.6); g.stroke();
+            }
+        },
+    });
+});
