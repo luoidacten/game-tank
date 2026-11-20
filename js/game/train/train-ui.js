@@ -121,7 +121,7 @@ const TrainUI = {
         this.picked = -1;
         this.el('trainMemoryTitle').textContent = `TRƯỚC PHASE ${TrainMode.phase}`;
         const box = this.el('trainCards');
-        box.innerHTML = '';
+        box.innerHTML = ''; box.classList.remove('has-pick');
         this.cards.forEach((c, i) => {
             const v = TRAIN_VARIANTS[c.variant];
             const pb = TRAIN_PLAYER_BUFFS[c.playerBuff];
@@ -155,6 +155,7 @@ const TrainUI = {
     },
     selectCard(i) {
         this.picked = i;
+        this.el('trainCards').classList.add('has-pick');
         [...this.el('trainCards').children].forEach((d, j) => d.classList.toggle('picked', j === i));
         const ok = this.el('trainMemoryOk');
         ok.disabled = false;

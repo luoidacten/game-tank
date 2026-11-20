@@ -761,8 +761,8 @@ function trainDrawHUD(B) {
     g.save();
     // Vị trí: 1 người -> mép trên; co-op -> ngay trên đường ray (không che xe P2)
     const G = trainGeom();
-    const pw = Math.min(W - 16, 380), px = (W - pw) / 2;
-    const py = TM.coop ? Math.max(70, G.bandY0 - 64) : 8;
+    const pw = TM.coop ? Math.min(W - 120, 330) : Math.min(W - 16, 380), px = (W - pw) / 2;
+    const py = TM.coop ? Math.max(70, G.bandY0 - 80) : 8;
     const ph = 40;
     // khung kính
     g.fillStyle = 'rgba(10,8,18,0.78)'; trainRR(g, px, py, pw, ph, 8); g.fill();
@@ -774,7 +774,9 @@ function trainDrawHUD(B) {
     g.save(); g.shadowColor = '#ff3b3b'; g.shadowBlur = 8 * glow;
     g.fillText('THE TRAIN', px + 10, py + 11); g.restore();
     g.font = "bold 9px Orbitron, Arial"; g.fillStyle = '#fca5a5';
-    const ptxt = `PHASE ${TM.phase}${v.phase > 1 ? ' · ' + v.code + ' ' + v.name : ''}${v.fallback ? ' (DỰ PHÒNG)' : ''}`;
+    let ptxt = `PHASE ${TM.phase}${v.phase > 1 ? ' · ' + v.code + ' ' + v.name : ''}`;
+    const room = pw - 92 - 70;
+    if (g.measureText(ptxt).width > room) ptxt = `PHASE ${TM.phase}${v.phase > 1 ? ' · ' + v.code : ''}`;
     g.fillText(ptxt, px + 92, py + 11.5);
     // số máu
     const tot = B.totalHp(), max = B.totalMax();

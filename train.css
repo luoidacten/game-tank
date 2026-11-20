@@ -132,3 +132,6 @@ body.train-mode #score-board { top: 29%; transform: translateY(-50%); }
 body.train-mode #score-board .score-row,
 body.train-mode #score-board .score-vs { display: none; }
 body.train-solo #score-board .p2-side { display: none; }
+body.train-mode:not(.train-solo) #hud-left-group,
+body.train-mode:not(.train-solo) #score-board { top: 23%; }
+.train-cards.has-pick .train-card:not(.picked) { opacity: 0.55; }
