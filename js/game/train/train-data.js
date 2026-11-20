@@ -22,9 +22,10 @@ const TRAIN_CAR_TYPES = {
     summon: { name: 'TOA GỌI QUÂN',  short: 'QUÂN',  color: '#5dff7a', icon: '🪖', skill: 'Mở Cửa Toa',          cd: 300 },
 };
 
-// Máu gốc Phase 1 (tổng 40): Đầu Tàu 8, SMG 5+5, Pháo 5+5, Lazer 4, Gọi Quân 4+4.
-// Cân theo mô phỏng 91 body (body gốc, chưa Evo, AI bắn đơn giản, 120s): DPS trung bình ~0.42/s,
-// với 50 máu chỉ 43/91 body qua Phase 1 trong 120s (trung vị 84s) -> hạ còn 40 (TRAIN_HP_SCALE nhân toàn bộ).
+// Máu gốc Phase 1 (tổng 36): Đầu Tàu 7, SMG 4.5+4.5, Pháo 4.5+4.5, Lazer 4, Gọi Quân 3.5+3.5.
+// Cân theo mô phỏng 91 body (body gốc, chưa Evo, AI đơn giản bất tử, tối đa 120s): DPS trung bình ~0.39/s.
+//   50 máu: 43/91 body qua Phase 1 (trung vị 84s) · 40 máu: 51/91 (trung vị 79s) · 36 máu: xem báo cáo.
+// TRAIN_HP_SCALE nhân toàn bộ (co-op ×1.6).
 const TRAIN_HP_SCALE = 1;
 const TRAIN_COOP_HP_MULT = 1.6;
 
@@ -34,7 +35,7 @@ const TRAIN_DMG = {
 };
 
 const TRAIN_BASE_CARS = ['loco', 'smg', 'mortar', 'summon', 'laser', 'smg', 'mortar', 'summon'];
-const TRAIN_BASE_HP = { loco: 8, smg: 5, mortar: 5, laser: 4, summon: 4 };
+const TRAIN_BASE_HP = { loco: 7, smg: 4.5, mortar: 4.5, laser: 4, summon: 3.5 };
 
 const TRAIN_VARIANTS = {
     p1: {

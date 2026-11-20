@@ -470,7 +470,13 @@ function trainDrawWreck(g, type, x, y, w, h, o) {
     const wg = g.createLinearGradient(0, y, 0, y + h);
     wg.addColorStop(0, '#2c2725'); wg.addColorStop(0.5, '#1a1615'); wg.addColorStop(1, '#0c0a0a');
     g.fillStyle = wg; g.fill();
-    g.strokeStyle = '#3e2a20'; g.lineWidth = 1.5; g.stroke();
+    // viền kim loại nóng đỏ (nguội dần)
+    const heat = Math.max(0.25, 1 - (o.deathT || 0) / 600);
+    g.save();
+    g.strokeStyle = `rgba(255,${110 + 60 * heat | 0},40,${0.35 + 0.45 * heat})`; g.lineWidth = 2;
+    g.shadowColor = '#ff6a1a'; g.shadowBlur = 10 * heat * trainGlow();
+    g.stroke();
+    g.restore();
     // khung sườn trơ ra
     g.strokeStyle = '#4b3a30'; g.lineWidth = 2;
     for (let i = 1; i < 6; i++) { g.beginPath(); g.moveTo(bx + bw * i / 6, y + 6); g.lineTo(bx + bw * i / 6 + 3, y + h - 6); g.stroke(); }
@@ -896,7 +902,7 @@ function trainDrawPreview(cv, variantId, t) {
     for (let x = (t * 0.6) % 20; x < W; x += 20) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, H); g.stroke(); }
     for (let y = 0; y < H; y += 20) { g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke(); }
     const tracks = v.theme === 'speed' ? [H * 0.33, H * 0.7] : [H * 0.52];
-    const ch = Math.min(40, H * 0.36), cw = W * 0.4;
+    const ch = v.theme === 'speed' ? H * 0.32 : Math.min(H * 0.46, W * 0.17), cw = W * 0.42;
     tracks.forEach((ty, ti) => {
         g.fillStyle = '#1b1d26'; g.fillRect(0, ty - ch / 2 - 7, W, ch + 14);
         for (let x = 0; x < W; x += 14) { g.fillStyle = '#3a2f2a'; g.fillRect(x, ty - ch / 2 - 5, 6, ch + 10); }

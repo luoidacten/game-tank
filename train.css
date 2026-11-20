@@ -7,7 +7,7 @@
 
 .train-overlay {
     position: absolute; inset: 0; z-index: 700;
-    display: flex; align-items: center; justify-content: center; flex-direction: column;
+    display: flex; align-items: center; justify-content: safe center; flex-direction: column;
     background: radial-gradient(ellipse at 50% 30%, rgba(70, 10, 14, 0.92), rgba(4, 3, 10, 0.97) 70%);
     padding: 14px 12px; box-sizing: border-box; overflow-y: auto;
     font-family: 'Rajdhani', 'Be Vietnam Pro', sans-serif; color: #f1f5f9;
