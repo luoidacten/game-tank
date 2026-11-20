@@ -125,14 +125,17 @@ CharHooks.register('big_bullet', {
     skill(p) {
         const enemy = p.id === 1 ? p2 : p1;
         let count = 0;
+        const arcs = [];
         for (const b of p.bullets) {
             if (b.hook !== 'big_bullet') continue;
             const v = aimVelocity(b.x + b.w / 2, b.y + b.h / 2, enemy, Math.max(3, Math.hypot(b.vx, b.vy)), false);
             b.vx = v.vx; b.vy = v.vy; b.bigExtraBounce = (b.bigExtraBounce || 0) + 1;
             b.bigFinal = false; count++;
+            if (arcs.length < 6) arcs.push([Math.round(b.x + b.w / 2), Math.round(b.y + b.h / 2), Math.round(b.w / 2)]);
         }
         if (!count) return false;
         spawnSparkParticles(p.x + p.w / 2, p.y + p.h / 2, '#facc15', 16);
+        EvoBodyKit.fx(p, 'bbCurve', 30, { balls: arcs, tx: enemy.x + enemy.w / 2, ty: enemy.y + enemy.h / 2 });
     },
     ultimate(p) { bodyEffects.push(new BigPlanet(p)); triggerScreenShake(10, 30); },
     draw() { if (this.bigHeld) bigDrawHeld(this); },
@@ -230,10 +233,31 @@ function bigHoldUpdate(p) {
     }
 }
 function bigDrawHeld(p) {
-    const c = bigHeldCenter(p), r = p.bigHeld.r;
-    ctx.save(); ctx.shadowColor = p.color; ctx.shadowBlur = 18; ctx.fillStyle = p.color;
-    ctx.globalAlpha = 0.7; ctx.beginPath(); ctx.arc(c.x, c.y, r, 0, Math.PI * 2); ctx.fill();
-    ctx.globalAlpha = 1; ctx.strokeStyle = '#e0f2fe'; ctx.lineWidth = 3; ctx.stroke(); ctx.restore();
+    // quả cầu ôm: khối cầu năng lượng màu đội, lõi xoáy, vòng quỹ đạo, chấm đếm đạn đã nuốt
+    const c = bigHeldCenter(p), r = p.bigHeld.r, t = Date.now() / 1000, team = p.id === 1 ? '#38bdf8' : '#fb7185';
+    ctx.save();
+    ctx.translate(c.x, c.y);
+    ctx.shadowColor = team; ctx.shadowBlur = 20;
+    const g = ctx.createRadialGradient(-r * 0.35, -r * 0.35, r * 0.1, 0, 0, r);
+    g.addColorStop(0, '#ffffff'); g.addColorStop(0.35, team); g.addColorStop(1, p.id === 1 ? '#0c4a6e' : '#881337');
+    ctx.globalAlpha = 0.85; ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+    ctx.save(); ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.clip();
+    ctx.rotate(t * 2); ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = Math.max(1.5, r * 0.08);
+    for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.arc(0, 0, r * (0.3 + i * 0.22), i * 2, i * 2 + 2.2); ctx.stroke(); }
+    ctx.restore();
+    ctx.strokeStyle = '#e0f2fe'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.stroke();
+    ctx.save(); ctx.rotate(-0.4); ctx.strokeStyle = '#facc15'; ctx.lineWidth = 1.5; ctx.setLineDash([5, 4]); ctx.lineDashOffset = -t * 30;
+    ctx.beginPath(); ctx.ellipse(0, 0, r + 9, (r + 9) * 0.35, 0, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+    const n = Math.min(12, p.bigHeld.eaten);
+    ctx.fillStyle = '#fde047';
+    for (let i = 0; i < n; i++) { const a = -Math.PI / 2 + i * Math.PI * 2 / 12 + t; ctx.beginPath(); ctx.arc(Math.cos(a) * (r + 5), Math.sin(a) * (r + 5), 2.2, 0, Math.PI * 2); ctx.fill(); }
+    // hạt bị hút vào
+    ctx.fillStyle = '#bae6fd';
+    for (let i = 0; i < 6; i++) { const q = (t * 1.4 + i / 6) % 1, a = i * 1.05 + t * 0.5, d = r + 26 - q * 24; ctx.globalAlpha = q; ctx.fillRect(Math.cos(a) * d - 1, Math.sin(a) * d - 1, 2.5, 2.5); }
+    ctx.restore();
 }
 
 // Tuyệt Kỹ: đi ngang làn địch, hút nhẹ, ăn đạn; tổng sát thương trực tiếp/mảnh có ngân sách.
@@ -272,12 +296,57 @@ class BigPlanet {
         explosions.push(new Explosion(this.x, this.y, this.r, 'rgba(251,146,60,', 0, owner));
     }
     draw() {
+        const t = Date.now() / 1000, r = this.r, x = this.x, y = this.y, dir = Math.sign(this.vx) || 1;
+        const team = this.side === 1 ? '#38bdf8' : '#fb7185', deep = this.side === 1 ? '#1e3a8a' : '#7f1d1d';
         ctx.save();
-        ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(this.x, this.y + 20, this.r * 1.2, this.r * 0.5, 0, 0, Math.PI * 2); ctx.fill();
-        const g = ctx.createRadialGradient(this.x - this.r / 3, this.y - this.r / 3, 2, this.x, this.y, this.r);
-        g.addColorStop(0, '#fff7d6'); g.addColorStop(.5, this.side === 1 ? '#38bdf8' : '#fb7185'); g.addColorStop(1, '#312e81');
-        ctx.shadowBlur = 25; ctx.shadowColor = '#fb923c'; ctx.fillStyle = g;
-        ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = '#facc15'; ctx.lineWidth = 3; ctx.stroke(); ctx.restore();
+        // bóng đổ khổng lồ phủ làn địch phía trước cầu
+        const sh = ctx.createRadialGradient(x + dir * r * 1.2, y + r * 0.25, r * 0.2, x + dir * r * 1.2, y + r * 0.25, r * 2.2);
+        sh.addColorStop(0, 'rgba(0,0,0,.45)'); sh.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = sh; ctx.beginPath(); ctx.ellipse(x + dir * r * 1.2, y + r * 0.25, r * 2.2, r * 0.8, 0, 0, Math.PI * 2); ctx.fill();
+        // vệt lửa phía sau
+        const tr = ctx.createLinearGradient(x, 0, x - dir * r * 2.4, 0);
+        tr.addColorStop(0, 'rgba(251,146,60,.55)'); tr.addColorStop(1, 'rgba(251,146,60,0)');
+        ctx.fillStyle = tr; ctx.beginPath(); ctx.moveTo(x, y - r * 0.9); ctx.quadraticCurveTo(x - dir * r * 2.4, y, x, y + r * 0.9); ctx.closePath(); ctx.fill();
+        // vành sau (sau hành tinh)
+        ctx.strokeStyle = 'rgba(250,204,21,.55)'; ctx.lineWidth = Math.max(3, r * 0.08);
+        ctx.beginPath(); ctx.ellipse(x, y, r * 1.55, r * 0.38, -0.25, Math.PI, Math.PI * 2); ctx.stroke();
+        // thân hành tinh
+        ctx.shadowBlur = 28; ctx.shadowColor = '#fb923c';
+        const g = ctx.createRadialGradient(x - r / 3, y - r / 3, 2, x, y, r);
+        g.addColorStop(0, '#fff7d6'); g.addColorStop(0.45, team); g.addColorStop(1, deep);
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
+        // dải mây xoay + miệng hố (theo vị trí x để trông như lăn)
+        ctx.save(); ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.clip();
+        const roll = x / r;
+        ctx.strokeStyle = 'rgba(255,255,255,.22)'; ctx.lineWidth = r * 0.12;
+        for (let i = -2; i <= 2; i++) {
+            ctx.beginPath();
+            for (let k = -r; k <= r; k += r / 8) { const yy = y + i * r * 0.36 + Math.sin(k / r * 3 + roll + i) * r * 0.06; ctx[k === -r ? 'moveTo' : 'lineTo'](x + k, yy); }
+            ctx.stroke();
+        }
+        ctx.fillStyle = 'rgba(15,23,42,.28)';
+        for (let i = 0; i < 4; i++) {
+            const cx = x + (((i * 0.37 + roll * 0.08) % 1) * 2 - 1) * r * 0.9, cy = y + (i - 1.5) * r * 0.4;
+            ctx.beginPath(); ctx.ellipse(cx, cy, r * 0.12, r * 0.09, 0, 0, Math.PI * 2); ctx.fill();
+        }
+        // bóng tối nửa sau
+        const dk = ctx.createLinearGradient(x - r, y - r, x + r, y + r);
+        dk.addColorStop(0.5, 'rgba(0,0,0,0)'); dk.addColorStop(1, 'rgba(0,0,0,.45)');
+        ctx.fillStyle = dk; ctx.fillRect(x - r, y - r, r * 2, r * 2);
+        ctx.restore();
+        // khí quyển + vành trước
+        ctx.strokeStyle = 'rgba(253,224,71,.85)'; ctx.lineWidth = 3; ctx.shadowColor = '#facc15'; ctx.shadowBlur = 14;
+        ctx.beginPath(); ctx.arc(x, y, r + 2, 0, Math.PI * 2); ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = '#fde047'; ctx.lineWidth = Math.max(3, r * 0.08);
+        ctx.beginPath(); ctx.ellipse(x, y, r * 1.55, r * 0.38, -0.25, 0, Math.PI); ctx.stroke();
+        ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.ellipse(x, y, r * 1.42, r * 0.32, -0.25, 0, Math.PI); ctx.stroke();
+        // mảnh đá bay quanh
+        ctx.fillStyle = '#fed7aa';
+        for (let i = 0; i < 6; i++) { const a = t * 1.5 + i * 1.047; ctx.beginPath(); ctx.arc(x + Math.cos(a) * r * 1.3, y + Math.sin(a) * r * 0.32, 2 + (i % 3), 0, Math.PI * 2); ctx.fill(); }
+        ctx.restore();
     }
+
 }
