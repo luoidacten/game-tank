@@ -39,7 +39,7 @@ const NET_CLASSES = {
     OpPunchFx, OpFinisher,
     ArWeb, ArSpiderling, ArFinisher,
     MapVehicle, MvShot, MvHealOrbs, MvAura, CrLaser, CrTrapFx, CrAura,
-    MainAwakenFx,
+    MainAwakenFx, MainUltFx, MainFinaleOrb, MainMemoryFx,
     GearSupportDrone, GearMine, GearBarrierWall, GearCenterPrism, GearMirage, GearPrankBox, GearStormBolt, GearFieldDevice, GearProcFx,
     BmStraight, BmCurve, BmBlast, BmCatch, BmFinisher,
     PsyWave, PsyFinisher,
