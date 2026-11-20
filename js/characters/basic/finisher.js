@@ -50,6 +50,7 @@ class MainFinisher {
 }
 function mnfFxOver() {
     if (typeof bodyEffects === 'undefined') return;
+    if (typeof mainEvoFxOver === 'function') mainEvoFxOver(); // lớp phủ Tuyệt Kỹ / Evo MAIN (main-evo.js)
     for (const e of bodyEffects) if (e instanceof MainFinisher && e.active) e.drawOver();
 }
 function mnfIsMain(p) { return !!p && p.weapon === 'basic' && !!(p.mainAwakened || p.mainEgg); }

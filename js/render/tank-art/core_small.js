@@ -169,7 +169,7 @@
     });
     registerBulletArt('basic', (b, color, o, k) => {
         if (b.isRocket || b.isExplosive || b.isIce) return false;
-        if (o.mainAwakened) { // MAIN: đạn vàng ánh kim lõi đỏ rực (Hợp Nhất: to hơn, có quầng lửa)
+        if (o.mainAwakened || b.mainUnity) { // MAIN: đạn vàng ánh kim lõi đỏ rực (Hợp Nhất: to hơn, có quầng lửa)
             const r = k.r * (b.mainUnity ? 1.05 : 1.25);
             ctx.save(); ctx.globalAlpha *= 0.55; comet(tailLen(k) * 1.6, r * 1.7, '#ff5a00', '#ff2a00', { blur: 10 }); ctx.restore();
             comet(tailLen(k) * 1.2, r, '#ffd56a', '#ff7a00', { glow: '#ffb020', core: '#fff6d0', blur: 16 });

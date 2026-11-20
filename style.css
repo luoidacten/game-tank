@@ -3237,6 +3237,22 @@ body.online-active .ns-hud-btn { display: flex !important; }
 @keyframes evo-sheen { from { left: -60px; } to { left: 110%; } }
 @media (prefers-reduced-motion: reduce) { .evo-banner-bar::after { animation: none; } }
 @media (max-width: 380px) { .evo-banner-txt b { font-size: 17px; } }
+/* Cơ Bản dạng MAIN: nút Skill vàng-lửa, băng tên chiêu điện ảnh kèm khẩu hiệu */
+.evo-skill.evo-main { border-color: #ffb020; background: conic-gradient(from 180deg, #ff5a00 var(--rage, 0deg), #2a1206 0); box-shadow: 0 0 12px #ff7a0088; }
+.evo-skill.evo-main::before { background: conic-gradient(#7c5a2a var(--cooldown, 0deg), #1a0c04 0); }
+.evo-skill.evo-main span { color: #ffe7a8; }
+.evo-skill.evo-main.evo-ultimate { border-color: #fff1b8; box-shadow: 0 0 22px #ff5a00, 0 0 6px #ffd56a inset; }
+.evo-banner.evo-main { height: 46px; padding-top: 5px; left: 0; right: 0; font: italic 900 21px Arial, sans-serif; letter-spacing: 4px; color: #fff3c4;
+    text-shadow: 0 0 10px #ff7a00, 0 2px 0 #7a2a02; border-top: 1px solid #ffb02088; border-bottom: 1px solid #ffb02088;
+    background: linear-gradient(90deg, transparent, #5a0f0ab0 18%, #b4410fc0 50%, #5a0f0ab0 82%, transparent); }
+.evo-banner.evo-main::after { content: 'Chiến đấu đến khi lửa tàn!!'; display: block; font: italic bold 10px Arial, sans-serif; letter-spacing: 1px; color: #ffd56a; text-shadow: 0 0 6px #ff5a00; }
+/* đặt ngay trên làn xe phía người tung để không che chính xe MAIN */
+.evo-banner-1.evo-main { bottom: 46px; } .evo-banner-2.evo-main { top: 46px; }
+.evo-banner.evo-main:not([hidden]) { animation: main-banner-in .22s ease-out; }
+@keyframes main-banner-in { from { clip-path: inset(0 50% 0 50%); opacity: .4; } to { clip-path: inset(0 0 0 0); opacity: 1; } }
+.evo-banner-2.evo-main { background: linear-gradient(90deg, transparent, #5a0f0ab0 18%, #b4410fc0 50%, #5a0f0ab0 82%, transparent); }
+@keyframes evo-pulse { to { filter: brightness(1.25); } }
+@media (prefers-reduced-motion: reduce) { .evo-skill.evo-ultimate { animation: none; } }
 
 .btn-group:has(.evo-skill:not([hidden])) { gap: 8px; padding-left: 10px; padding-right: 10px; }
 .btn-group:has(.evo-skill:not([hidden])) > .btn { flex: 0 0 auto; width: clamp(44px, 14vw, 64px) !important; min-width: 0; }

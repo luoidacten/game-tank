@@ -4,7 +4,7 @@
 const EVO_SKILL_KEYS = { p1: 'q', p2: '/' };
 const EvoSystem = {
     authoritative() { return !onlineManager.isOnline || onlineManager.role !== 'guest'; },
-    config(p) { return FEATURE_EVO34 && p && p.weapon !== 'basic' ? (ownedEvos(p).find(e => e.evoSlot === 4) || {}).skill : null; },
+    config(p) { return FEATURE_EVO34 && p && (p.weapon !== 'basic' || evoIsMainBasic(p)) ? (ownedEvos(p).find(e => e.evoSlot === 4) || {}).skill : null; },
     blocked(p) { return p.hp <= 0 || p.freezeTimer > 0 || p.stunTimer > 0 || p.silenceTimer > 0; },
     gain(p, kind, amount) {
         if (!this.config(p) || this.blocked(p) || p.ultActiveTicks > 0 || !this.authoritative() || gameState.phase !== 'playing') return;
@@ -59,7 +59,7 @@ const EvoSystem = {
         for (const p of [p1, p2]) {
             if (p.hasGear('gear_evo_path_p')) this.reward(p, 'evoPathRewardPaid');
             if ((p.upgrades.find(id => MODULES.BODY.some(m => m.id === id)) || p.weapon) === 'basic' && (p.mainEgg || p.mainAwakened)) {
-                // MAIN hiện tại vẫn do body quản lý. Chỉ chừa API và bồi thường, không thêm Evo 3/4 cho basic.
+                // MAIN xuất hiện (roll 8% / Phòng Tập / lõi #106): đối thủ +$200 (lõi #106 đã tự trả) và 1 lượt chọn lõi Vàng.
                 this.reward(p, 'evoMainRewardPaid', p.hasGear('gear_protagonist_p') ? 0 : 200);
             }
         }

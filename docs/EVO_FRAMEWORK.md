@@ -1,6 +1,6 @@
 # Khung Evo 3/4 — giai đoạn 1
 
-Theo issue #1 và toàn bộ comment, đặc biệt comment cập nhật luật ngày 28/10/2026. Body mẫu là **Đạn Lớn (`big_bullet`)**. Không triển khai Evo 3/4 hoặc hai Evo đặc biệt cho `basic`; `MAIN_EVO_RESERVED` chừa các ô cho giai đoạn sau. Bản MAIN hiện có vẫn nhận bồi thường khi xuất hiện.
+Theo issue #1 và toàn bộ comment, đặc biệt comment cập nhật luật ngày 28/10/2026. Body mẫu là **Đạn Lớn (`big_bullet`)**. Cơ Bản thường không có Evo 3/4; dạng MAIN có sẵn Evo 3/4 (không tốn ô, tổ hợp `1+2+3+4`) và 2 Evo MAIN đặc biệt bày bán (`mainSpecial`, không tính ô) — xem `js/characters/basic/main-evo.js`. MAIN xuất hiện thì đối thủ nhận bồi thường.
 
 ## Quy tắc đã triển khai
 

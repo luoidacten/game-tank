@@ -1190,3 +1190,26 @@ window.addEventListener('load', () => {
         return f.call(this, bot, enemy, aligned, inp);
     };
 })();
+
+// Cơ Bản dạng MAIN: Đạn Hợp Nhất chỉ khi băng còn ≥ 4 viên và thẳng hàng; lướt (Evo 3) né đạn sắp trúng
+(function () {
+    const f = SmartBot.prototype.fire;
+    SmartBot.prototype.fire = function (bot, enemy, aligned, inp) {
+        const r = f.apply(this, arguments);
+        if (bot.weapon !== 'basic' || typeof evoIsMainBasic !== 'function' || !evoIsMainBasic(bot) || typeof EvoSystem === 'undefined' || !EvoSystem.config(bot)) return r;
+        if (inp.k && (bot.rage || 0) < 100 && (Math.floor(bot.ammo || 0) < 4 || !aligned)) inp.k = false;
+        if (typeof mainHasEvo === 'function' && mainHasEvo(bot, 3) && !(bot.mainDashCd > 0) && enemy && Array.isArray(enemy.bullets)) {
+            const cx = bot.x + bot.w / 2;
+            for (const b of enemy.bullets) {
+                const dy = bot.id === 1 ? bot.y - (b.y + b.h) : b.y - (bot.y + bot.h);
+                if (dy < 0 || dy > 46 || b.x + b.w < bot.x - 2 || b.x > bot.x + bot.w + 2) continue;
+                // Lướt ra xa viên đạn; sát mép thì lướt về phía còn chỗ
+                const away = b.x + b.w / 2 < cx ? 1 : -1;
+                const room = away > 0 ? canvas.width - bot.x - bot.w : bot.x;
+                bot.mainBotDash = room > 60 ? away : -away;
+                break;
+            }
+        }
+        return r;
+    };
+})();

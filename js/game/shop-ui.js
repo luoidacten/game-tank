@@ -425,7 +425,7 @@ function renderShop(playerId, keepItems = false) {
         let availableEvos = [];
         const weaponEvos = EVOLUTIONS[player.weapon];
         if (weaponEvos) {
-            availableEvos = weaponEvos.filter(e => !player.upgrades.includes(e.id) && (e.fullEvoGate ? evoShopAvailable(player, e) : (FEATURE_EVO34 || e.evoSlot <= 2))); // thẻ FULL EVO chỉ khi đủ 2 Evo
+            availableEvos = weaponEvos.filter(e => !player.upgrades.includes(e.id) && !(typeof evoShopHidden === 'function' && evoShopHidden(player, e)) && (e.fullEvoGate ? evoShopAvailable(player, e) : (FEATURE_EVO34 || e.evoSlot <= 2))); // thẻ FULL EVO chỉ khi đủ 2 Evo
         }
 
         let shopItems = [];

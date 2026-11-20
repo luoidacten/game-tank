@@ -21,8 +21,10 @@ Object.assign(Player.prototype, {
         if (this.weapon !== 'basic') return;
         // Bản MAIN: 8% mỗi trận (Player tạo mới mỗi trận -> roll 1 lần/trận); Phòng Tập có thể chọn thẳng
         if (this.mainEgg === undefined) this.mainEgg = Math.random() < 0.08;
-        // Thiên Phú Bẩm Sinh (chỉ bản MAIN): tự sở hữu Full Evo
-        if (this.mainEgg) ['evo_basic_1', 'evo_basic_2'].forEach(id => { if (!this.hasUpgrade(id)) this.upgrades.push(id); });
+        // Thiên Phú Bẩm Sinh (chỉ bản MAIN): tự sở hữu Full Evo; khung Evo 3/4 bật -> có sẵn cả Evo 3 + Evo 4 (không tốn ô)
+        if (this.mainEgg) ['evo_basic_1', 'evo_basic_2', ...(FEATURE_EVO34 ? ['evo_basic_3', 'evo_basic_4'] : [])].forEach(id => { if (!this.hasUpgrade(id)) this.upgrades.push(id); });
+        // Bản thường: không bao giờ giữ thẻ chỉ dành cho MAIN (Phòng Tập "full", mô phỏng cấp mọi Evo...)
+        else if (this.upgrades.some(u => MAIN_ONLY_EVOS.includes(u))) this.upgrades = this.upgrades.filter(u => !MAIN_ONLY_EVOS.includes(u));
         // Nội tại: nạp đạn nhanh hơn 20% (đạn bay nhanh hơn: xem fireBullet)
         this.reloadTime *= 0.8;
         // Evo 1: Công Thủ Toàn Diện
@@ -99,6 +101,14 @@ class MainAwakenFx {
     }
 }
 
+// Biến 1 viên thường thành đạn Hợp Nhất (to x scale, xuyên vật cản, làm chậm + thiêu đốt + nổ lan)
+function mainMakeUnity(b, scale) {
+    const cx = b.x + b.w / 2, cy = b.y + b.h / 2;
+    b.w *= scale; b.h *= scale; b.x = cx - b.w / 2; b.y = cy - b.h / 2;
+    b.isPiercing = true; b.hitIds = b.hitIds || [];
+    b.hook = 'main_unity'; b.mainUnity = true;
+}
+
 // Đạn "Sức Mạnh Hợp Nhất": làm chậm + thiêu đốt + nổ lan
 BulletHooks.register('main_unity', {
     hit(b, attacker, victim) {
@@ -119,6 +129,7 @@ CharHooks.register('basic', {
         this.mainTapL = -99; this.mainTapR = -99; this.mainPrevL = false; this.mainPrevR = false;
         this.mainTick = 0;
         this.mainIntro = 90;
+        if (typeof mainEvoSetup === 'function') mainEvoSetup(this);
         if (!this.mainAwakened) return;
         mainApplyForm(this);
         if (mainIsFinalRound(this)) {
@@ -139,29 +150,33 @@ CharHooks.register('basic', {
             }
             if (gameState.phase === 'playing') this.mainIntro--;
         }
-        // Đánh dấu đạn mới: màu vàng kim (MAIN) / Sức Mạnh Hợp Nhất (Cơ Hội Cuối)
-        if (this.mainAwakened) {
+        // Đánh dấu đạn mới: Sức Mạnh Hợp Nhất (Cơ Hội Cuối / Lửa Chưa Tàn / Hào Quang đầy), buff Hào Quang
+        if (this.mainAwakened || this.mainEgg) {
+            const unity = this.mainFinal || this.mainUltT > 0;
             for (const b of this.bullets) {
                 if (b.mainTag) continue;
                 b.mainTag = true;
-                if (this.mainFinal && !b.hook) {
-                    const cx = b.x + b.w / 2, cy = b.y + b.h / 2;
-                    b.w *= 2; b.h *= 2; b.x = cx - b.w / 2; b.y = cy - b.h / 2;
-                    b.isPiercing = true; b.hitIds = b.hitIds || [];
-                    b.hook = 'main_unity'; b.mainUnity = true;
-                }
+                if (b.mainFusion) continue; // viên Hợp Nhất của Skill tự lo
+                if (typeof mainEvoTagBullet === 'function' && mainEvoTagBullet(this, b)) continue;
+                if (unity && !b.hook) mainMakeUnity(b, 2);
             }
         }
-        // Lướt Tốc Biến (chạm đúp trái/phải) — chỉ khi Cơ Hội Cuối
+        // Lướt Tốc Biến (chạm đúp trái/phải) — Cơ Hội Cuối, hoặc mọi hiệp với Evo 3 "Bước Chân Chính Diện" (MAIN)
         if (this.mainDashCd > 0) this.mainDashCd--;
-        if (this.mainFinal && eff) {
+        const evo3 = typeof mainHasEvo === 'function' && mainHasEvo(this, 3);
+        if ((this.mainFinal || evo3) && eff) {
             const l = !!eff.l, r = !!eff.r, t = this.mainTick;
             if (l && !this.mainPrevL) { if (t - this.mainTapL < 14 && this.mainDashCd <= 0) this.mainDashDir = -1; this.mainTapL = t; }
             if (r && !this.mainPrevR) { if (t - this.mainTapR < 14 && this.mainDashCd <= 0) this.mainDashDir = 1; this.mainTapR = t; }
             this.mainPrevL = l; this.mainPrevR = r;
-            if (this.mainDashDir && this.mainDashT <= 0 && this.mainDashCd <= 0) {
-                this.mainDashT = 8; this.mainDashCd = 180;
-                this.invincibleTimer = Math.max(this.invincibleTimer || 0, 15);
+            // Bot: yêu cầu lướt trực tiếp (chỉ máy chủ mô phỏng bot đặt trường này)
+            if (this.mainBotDash) { if (this.mainDashCd <= 0 && !this.mainDashDir) this.mainDashDir = this.mainBotDash; this.mainBotDash = 0; }
+            if (this.mainDashDir && this.mainDashT <= 0 && this.mainDashCd <= 0 && !(typeof isGrounded === 'function' && isGrounded(this))) {
+                this.mainDashT = 8;
+                // Evo 3: hồi 2.5s (Lửa Chưa Tàn: 1.5s); Cơ Hội Cuối: 3s. 0.15s đầu xuyên đạn (Cơ Hội Cuối 0.25s)
+                this.mainDashCd = this.mainUltT > 0 ? 90 : (evo3 ? 150 : 180);
+                this.invincibleTimer = Math.max(this.invincibleTimer || 0, this.mainFinal ? 15 : 9);
+                this.mainDashFx = 16; this.mainDashFxDir = this.mainDashDir;
                 spawnSparkParticles(this.x + this.w / 2, this.y + this.h / 2, '#ffb020', 10);
                 if (soundSystem && !soundSystem.muted && soundSystem.playDash) soundSystem.playDash();
             }
@@ -171,9 +186,13 @@ CharHooks.register('basic', {
                 if (this.mainDashT <= 0) this.mainDashDir = 0;
             } else this.mainDashDir = 0;
         }
+        if (this.mainDashFx > 0) this.mainDashFx--;
+        if (typeof mainEvoUpdate === 'function') mainEvoUpdate(this, eff);
     },
     // HỒI ỨC: lần đầu trong trận bị đối thủ hạ gục -> Thức Tỉnh dạng MAIN
     beforeLethal(dmg, attacker) {
+        // Evo MAIN "Ký Ức Thứ Hai": Hồi Ức đã nạp lại -> hồi sinh 50% máu (không thức tỉnh thêm)
+        if (this.mainAwakened && typeof mainMemoryRevive === 'function' && mainMemoryRevive(this, attacker)) return true;
         if (this.mainAwakened || !this.mainEgg || !this.hasUpgrade('evo_basic_2')) return false;
         if (!attacker || attacker === this || gameState.phase !== 'playing') return false;
         this.mainAwakened = true;
