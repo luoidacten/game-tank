@@ -7,10 +7,12 @@
 const BODY_GUIDES = {
     basic: {
         tag: 'Xe chuẩn mực, dễ chơi nhất', diff: 1,
-        controls: [{ input: 'TAP', name: 'Bắn thường', what: 'Đạn bay nhanh, nạp nhanh hơn 20%' }],
-        passive: ['Máu trâu (9 HP), chạy nhanh +10%', 'Bản MAIN: hồi sinh 1 lần/trận, mạnh gấp đôi'],
-        evo: { e1: '+2 HP, Dame x1.25', e2: '+2 đạn, nạp nhanh hơn 15%', full: 'Xe toàn diện, máu dày đạn nhiều' },
-        tips: ['Né đạn trước, bắn sau — xe bền nên cứ đấu tay đôi']
+        controls: [{ input: 'TAP', name: 'Bắn thường', what: 'Đạn bay nhanh, nạp nhanh hơn 20%' },
+            { input: '←/→ x2', name: 'Lướt (MAIN)', what: 'Chạm đúp trái/phải: lướt, 0.15s đầu xuyên đạn (hồi 2.5s)' },
+            { input: 'SKILL', name: 'Đạn Hợp Nhất (MAIN)', what: 'Dồn cả băng thành 1 viên khổng lồ xuyên thấu (CD 10s); Nộ đầy: LỬA CHƯA TÀN' }],
+        passive: ['Máu trâu (9 HP), chạy nhanh +10%', 'Bản MAIN: hồi sinh 1 lần/trận, mạnh gấp đôi', 'MAIN: né sát (đạn lướt qua ≤20px) nạp Nộ'],
+        evo: { e1: '+2 HP, Dame x1.25', e2: '+2 đạn, nạp nhanh hơn 15%', e3: 'Chỉ MAIN (có sẵn): Bước Chân Chính Diện — lướt ở mọi hiệp', e4: 'Chỉ MAIN (có sẵn): Đạn Hợp Nhất; Tuyệt Kỹ LỬA CHƯA TÀN 8s, kết bằng Hợp Nhất nửa sân (kết liễu ≤25%)', full: 'Xe toàn diện, máu dày đạn nhiều. MAIN: tổ hợp 1+2+3+4 + 2 Evo MAIN trong shop (Hào Quang Nhân Vật Chính, Ký Ức Thứ Hai)' },
+        tips: ['Né đạn trước, bắn sau — xe bền nên cứ đấu tay đôi', 'MAIN: cố né sát để nạp Nộ và Hào Quang; giữ băng đầy trước khi bấm Skill']
     },
     money_tank: {
         tag: 'Farm tiền, càng giàu càng mạnh', diff: 2,
