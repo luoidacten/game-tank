@@ -94,6 +94,8 @@ function renderFrame() {
 
     // NỀN SÀN ĐẤU (vẽ trong world-space để rung màn hình đồng bộ)
     ctx.drawImage(getArenaFloor(), 0, 0, canvas.width, canvas.height);
+    // Mảnh Ký Ức: đường ray + đoàn tàu nằm ngay trên nền sân (js/render/train-art.js)
+    if (typeof trainDrawUnder === 'function') trainDrawUnder();
 
     // VẼ TRỜI MƯA NẾU CÓ STORM FULL EVO
     if (isRaining) drawRain();

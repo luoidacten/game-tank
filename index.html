@@ -12,6 +12,7 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="tournament.css">
+    <link rel="stylesheet" href="train.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@600;700&family=Be+Vietnam+Pro:wght@700;800&display=swap" rel="stylesheet">
@@ -524,9 +525,9 @@
                             <span class="mode-card-icon">🏆</span>
                             <span class="mode-card-text"><b>GIẢI ĐẤU</b><small id="tourneyMenuSub">3–12 người · vòng tròn tính điểm · 1 máy làm chủ</small></span>
                         </button>
-                        <button class="glow-btn mode-card locked" disabled>
-                            <span class="mode-card-icon">🔒</span>
-                            <span class="mode-card-text"><b>CHẾ ĐỘ MỚI</b><small>Sắp ra mắt</small></span>
+                        <button id="openTrainBtn" class="glow-btn mode-card mode-card-train">
+                            <span class="mode-card-icon">🚂</span>
+                            <span class="mode-card-text"><b>MẢNH KÝ ỨC</b><small>Đánh boss THE TRAIN · 1 người / Co-op 2 người</small></span>
                         </button>
                         <button class="glow-btn btn-dark menu-nav menu-back" data-go="home">&#8592; QUAY LẠI</button>
                     </div>
@@ -891,6 +892,11 @@
     <script src="js/game/tourney-bots.js" charset="utf-8"></script>
     <script src="js/game/evo-body-kit.js" charset="utf-8"></script>
     <script src="js/render/evo-fx.js" charset="utf-8"></script>
+    <script src="js/game/train/train-data.js" charset="utf-8"></script>
+    <script src="js/game/train/train-boss.js" charset="utf-8"></script>
+    <script src="js/game/train/train-mode.js" charset="utf-8"></script>
+    <script src="js/game/train/train-ui.js" charset="utf-8"></script>
+    <script src="js/render/train-art.js" charset="utf-8"></script>
     <script src="js/online/netstate.js" charset="utf-8"></script>
     <script src="js/online/lobby.js" charset="utf-8"></script>
     <script src="js/online/relay.js" charset="utf-8"></script>
